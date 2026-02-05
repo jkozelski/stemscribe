@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Eagles - Hotel California",
+    "artist": "Eagles",
+    "title": "Hotel California",
+    "lead_guitar": "dataset/training/Eagles - Hotel California/lead_guitar.wav",
+    "rhythm_guitar": "dataset/training/Eagles - Hotel California/rhythm_guitar.wav",
+    "stereo_analysis": {
+      "stereo": true,
+      "correlation": 0.3938989474293089,
+      "side_ratio": 0.3180806040763855,
+      "width": 0.6061010525706911,
+      "splittable": 

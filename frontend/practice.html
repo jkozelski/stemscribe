@@ -1,0 +1,3394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemScribe - Practice Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- OpenSheetMusicDisplay for MusicXML rendering (primary) -->
+    <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js"></script>
+
+    <!-- AlphaTab for Guitar Pro files (TAB rendering) - v1.3.1 -->
+    <script src="https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.3.1/dist/alphaTab.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-dark: #13131a;
+            --bg-card: #1a1a24;
+            --psych-orange: #ff7b54;
+            --psych-pink: #ff6b9d;
+            --psych-purple: #c678dd;
+            --psych-blue: #61afef;
+            --psych-teal: #56b6c2;
+            --psych-yellow: #e5c07b;
+            --psych-green: #98c379;
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: #2a2a35;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-text {
+            font-family: 'Righteous', cursive;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .song-info {
+            text-align: center;
+        }
+
+        .song-title {
+            font-family: 'Righteous', cursive;
+            font-size: 1.2rem;
+        }
+
+        .song-artist {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .back-btn {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            border-color: var(--psych-orange);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* Stem Mixer Sidebar */
+        .mixer-sidebar {
+            width: 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mixer-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mixer-header h3 {
+            font-family: 'Righteous', cursive;
+            font-size: 1rem;
+            color: var(--psych-teal);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Master Transport */
+        .master-transport {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transport-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .time-display {
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        .timeline {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--psych-orange), var(--psych-pink));
+            border-radius: 3px;
+            width: 0%;
+        }
+
+        /* Tempo Control */
+        .tempo-control {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tempo-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tempo-value {
+            color: var(--psych-yellow);
+            font-weight: 600;
+        }
+
+        .tempo-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .tempo-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--psych-yellow);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .tempo-presets {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tempo-preset {
+            flex: 1;
+            padding: 0.4rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .tempo-preset:hover, .tempo-preset.active {
+            border-color: var(--psych-yellow);
+            color: var(--psych-yellow);
+        }
+
+        /* Stem Channels */
+        .stem-channels {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .stem-channel {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stem-channel.muted {
+            opacity: 0.4;
+        }
+
+        .stem-icon {
+            font-size: 1.5rem;
+        }
+
+        .stem-info {
+            flex: 1;
+        }
+
+        .stem-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: capitalize;
+        }
+
+        .stem-controls {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .stem-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .mute-btn {
+            background: var(--bg-card);
+            color: var(--text-dim);
+        }
+
+        .mute-btn.active {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .solo-btn {
+            background: var(--bg-card);
+            color: var(--text-dim);
+        }
+
+        .solo-btn.active {
+            background: var(--psych-yellow);
+            color: var(--bg-dark);
+        }
+
+        .stem-volume {
+            width: 60px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .stem-volume::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: var(--psych-teal);
+            border-radius: 50%;
+        }
+
+        /* Notation Area */
+        .notation-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .notation-tabs {
+            display: flex;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
+        }
+
+        .notation-tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .notation-tab:hover {
+            color: var(--text);
+        }
+
+        .notation-tab.active {
+            color: var(--psych-orange);
+            border-bottom-color: var(--psych-orange);
+        }
+
+        .notation-container {
+            flex: 1;
+            overflow: auto;
+            background: var(--bg-dark);
+            position: relative;
+        }
+
+        /* Chord overlay above notation */
+        .chord-overlay {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(30,30,40,0.95) 0%, rgba(30,30,40,0.8) 80%, transparent 100%);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-height: 50px;
+        }
+
+        .chord-marker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chord-marker .chord-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--psych-orange);
+            text-shadow: 0 2px 10px rgba(255,165,0,0.5);
+        }
+
+        .chord-marker.current .chord-name {
+            animation: pulse-glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from { text-shadow: 0 2px 10px rgba(255,165,0,0.3); }
+            to { text-shadow: 0 2px 20px rgba(255,165,0,0.8); }
+        }
+
+        .chord-marker .chord-beat {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .upcoming-chords {
+            display: flex;
+            gap: 15px;
+            margin-left: auto;
+            opacity: 0.6;
+        }
+
+        .upcoming-chords .chord-name {
+            font-size: 1.1rem;
+            color: #aaa;
+        }
+
+        #alphaTab {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        /* AlphaTab text color overrides for dark theme */
+        #alphaTab .at-surface text,
+        #alphaTab svg text {
+            fill: #e8e4df !important;
+        }
+
+        /* Title and artist in AlphaTab */
+        #alphaTab .at-surface .at-score-title,
+        #alphaTab .at-surface .at-score-artist {
+            fill: #e8e4df !important;
+        }
+
+        /* Force OSMD container to have white background */
+        #osmd-container {
+            background: #ffffff !important;
+        }
+
+        #osmd-container svg {
+            background: #ffffff !important;
+        }
+
+        /* Custom playback cursor - bright red/orange for visibility */
+        #osmd-custom-cursor {
+            position: absolute !important;
+            width: 6px !important;
+            background: linear-gradient(180deg, #ff0000, #ff6600) !important;
+            border-radius: 3px !important;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 100, 0, 0.8) !important;
+            z-index: 9999 !important;
+            pointer-events: none !important;
+        }
+
+        /* OSMD Cursor Styling - Multiple selectors for compatibility */
+        #osmd-container .cursor-main,
+        #osmd-container rect[class*="cursor"],
+        #osmd-container .vf-cursor rect {
+            fill: rgba(255, 0, 0, 0.8) !important;
+            stroke: rgba(255, 100, 0, 1) !important;
+            stroke-width: 3px !important;
+        }
+
+        /* OSMD cursor element (div overlay) */
+        #osmd-container > div[style*="position"]:not(#osmd-custom-cursor) {
+            background: linear-gradient(180deg, rgba(255, 0, 0, 0.7), rgba(255, 100, 0, 0.5)) !important;
+            border: 3px solid #ff0000 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.9) !important;
+            z-index: 100 !important;
+        }
+
+        #osmd-container .vf-cursor {
+            background: linear-gradient(180deg, rgba(255, 0, 0, 0.6), rgba(255, 100, 0, 0.4)) !important;
+            border: 3px solid rgba(255, 0, 0, 0.9) !important;
+            border-radius: 4px !important;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.7) !important;
+            transition: left 0.1s ease-out, top 0.1s ease-out !important;
+        }
+
+        /* Highlight current notes */
+        #osmd-container .cursorSelected g.vf-stavenote {
+            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 1)) brightness(1.3);
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--psych-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* No Job State */
+        .no-job {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .no-job h2 {
+            font-family: 'Righteous', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-job p {
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Righteous', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .cta-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* File Upload Alternative */
+        .or-divider {
+            margin: 1.5rem 0;
+            color: var(--text-dim);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem 3rem;
+            transition: all 0.2s;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--psych-purple);
+        }
+
+        /* AlphaTab - Ultimate Guitar Style TAB */
+        .at-cursor-bar {
+            background: rgba(255, 123, 84, 0.3) !important;
+        }
+
+        .at-cursor-beat {
+            background: rgba(255, 107, 157, 0.5) !important;
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+        }
+
+        .at-highlight * {
+            fill: var(--psych-orange) !important;
+        }
+
+        /* Tighter TAB display - Ultimate Guitar feel */
+        .at-surface {
+            padding: 10px !important;
+        }
+
+        .at-surface-svg {
+            margin: 0 auto !important;
+        }
+
+        /* Make chord diagrams visible and styled */
+        .at-chord-diagram {
+            margin: 5px 10px !important;
+            padding: 5px !important;
+            background: rgba(30, 30, 40, 0.8) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+        }
+
+        .at-chord-diagram-name {
+            fill: var(--psych-orange) !important;
+            font-weight: bold !important;
+            font-size: 14px !important;
+        }
+
+        .at-chord-diagram-string {
+            stroke: var(--text-dim) !important;
+        }
+
+        .at-chord-diagram-fret {
+            stroke: var(--text-dim) !important;
+        }
+
+        .at-chord-diagram-finger {
+            fill: var(--psych-purple) !important;
+        }
+
+        .at-chord-diagram-barre {
+            fill: var(--psych-purple) !important;
+        }
+
+        /* Tuning display */
+        .at-tuning {
+            fill: var(--text-dim) !important;
+            font-size: 10px !important;
+        }
+
+        /* Tab numbers styling */
+        .at-tab-number {
+            fill: var(--text) !important;
+            font-weight: 600 !important;
+        }
+
+        /* Hide standard notation staff for TAB-only view */
+        .at-score-info {
+            padding: 5px 0 !important;
+        }
+
+        /* Sync indicator */
+        .sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(152, 195, 121, 0.2);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--psych-green);
+        }
+
+        .sync-indicator.inactive {
+            background: rgba(255, 123, 84, 0.2);
+            color: var(--psych-orange);
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--psych-green);
+            animation: pulse 1s infinite;
+        }
+
+        .sync-indicator.inactive .sync-dot {
+            background: var(--psych-orange);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Chord Chart Styles */
+        .chord-panel {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 2rem;
+            display: none;
+        }
+
+        .chord-panel.active {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .key-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .key-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .key-value {
+            font-family: 'Righteous', cursive;
+            font-size: 1.2rem;
+            color: var(--psych-purple);
+        }
+
+        .chord-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .chord-current {
+            text-align: center;
+        }
+
+        .chord-current-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .chord-current-value {
+            font-family: 'Righteous', cursive;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            min-width: 100px;
+        }
+
+        .chord-timeline {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            max-width: 400px;
+            padding: 0.25rem;
+        }
+
+        .chord-upcoming {
+            padding: 0.4rem 0.8rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Righteous', cursive;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .chord-upcoming.next {
+            border-color: var(--psych-teal);
+            color: var(--psych-teal);
+        }
+
+        .chord-toggle {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chord-toggle:hover {
+            border-color: var(--psych-purple);
+            color: var(--psych-purple);
+        }
+
+        .chord-toggle.active {
+            border-color: var(--psych-purple);
+            background: rgba(198, 120, 221, 0.1);
+            color: var(--psych-purple);
+        }
+
+        /* Transpose & Notation Controls */
+        .chord-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .transpose-control {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            padding: 0.25rem;
+        }
+
+        .transpose-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .transpose-btn:hover {
+            background: var(--psych-purple);
+            color: white;
+        }
+
+        .transpose-value {
+            min-width: 28px;
+            text-align: center;
+            font-family: 'Righteous', cursive;
+            font-size: 0.9rem;
+            color: var(--psych-teal);
+        }
+
+        .notation-toggle {
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--bg-dark);
+            color: var(--text-dim);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.15s;
+        }
+
+        .notation-toggle:hover {
+            border-color: var(--psych-orange);
+            color: var(--psych-orange);
+        }
+
+        .notation-toggle.flats {
+            border-color: var(--psych-teal);
+            background: rgba(86, 182, 194, 0.1);
+            color: var(--psych-teal);
+        }
+
+        /* Chord diagram (guitar fingering) - ALWAYS VISIBLE */
+        .chord-diagram {
+            display: block;  /* Show by default for Ultimate Guitar feel */
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, var(--bg-dark), rgba(30, 30, 45, 0.9));
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .chord-diagram.active {
+            display: block;
+            border-color: var(--psych-purple);
+            box-shadow: 0 4px 16px rgba(198, 120, 221, 0.3);
+        }
+
+        .chord-diagram svg {
+            width: 70px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        .chord-diagram .fret-line {
+            stroke: #4a4a55;
+            stroke-width: 1.5;
+        }
+
+        .chord-diagram .string-line {
+            stroke: var(--text-dim);
+            stroke-width: 1.2;
+        }
+
+        .chord-diagram .finger-dot {
+            fill: var(--psych-orange);
+            filter: drop-shadow(0 1px 2px rgba(255, 123, 84, 0.5));
+        }
+
+        .chord-diagram .muted-x {
+            stroke: #666;
+            stroke-width: 2;
+        }
+
+        .chord-diagram .open-o {
+            stroke: var(--psych-green);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .chord-diagram .chord-name-label {
+            font-family: 'Righteous', cursive;
+            font-size: 0.85rem;
+            color: var(--psych-orange);
+            margin-top: 0.25rem;
+        }
+
+        /* External Tab Links (Songsterr, Ultimate Guitar) */
+        .external-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .external-tab-btn:hover {
+            border-color: var(--psych-teal);
+            background: rgba(86, 182, 194, 0.1);
+            color: var(--psych-teal);
+            transform: translateY(-1px);
+        }
+
+        .external-tab-btn:active {
+            transform: translateY(0);
+        }
+
+        #songsterrLink:hover {
+            border-color: var(--psych-orange);
+            background: rgba(255, 123, 84, 0.1);
+            color: var(--psych-orange);
+        }
+
+        #ultimateGuitarLink:hover {
+            border-color: var(--psych-yellow);
+            background: rgba(229, 192, 123, 0.1);
+            color: var(--psych-yellow);
+        }
+
+        /* Stereo Split Button */
+        .split-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+        }
+
+        .split-btn:hover {
+            border-color: var(--psych-purple);
+            color: var(--psych-purple);
+            background: rgba(198, 120, 221, 0.1);
+        }
+
+        .split-btn.analyzing {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        .split-btn.splittable {
+            border-color: var(--psych-green);
+            color: var(--psych-green);
+        }
+
+        .split-btn.not-splittable {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Split stem indicator */
+        .stem-channel.split-stem {
+            margin-left: 1.5rem;
+            border-left: 2px solid var(--psych-purple);
+            padding-left: 0.5rem;
+        }
+
+        .stem-channel.split-stem .stem-name::before {
+            content: '↳ ';
+            color: var(--psych-purple);
+        }
+
+        /* Vocal Split Button (AI-powered lead/backing split) */
+        .vocal-split-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            border: 1px solid var(--psych-pink);
+            background: rgba(255, 107, 157, 0.1);
+            color: var(--psych-pink);
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 4px;
+        }
+
+        .vocal-split-btn:hover {
+            border-color: var(--psych-pink);
+            background: rgba(255, 107, 157, 0.25);
+            transform: scale(1.1);
+        }
+
+        .vocal-split-btn.processing {
+            opacity: 0.5;
+            cursor: wait;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <span style="font-size: 1.5rem;">✦</span>
+            <span class="logo-text">StemScribe</span>
+        </div>
+
+        <div class="song-info">
+            <div class="song-title" id="songTitle">Practice Mode</div>
+            <div class="song-artist" id="songArtist">Load a track to begin</div>
+        </div>
+
+        <!-- External Tab Links (Songsterr, Ultimate Guitar) -->
+        <div class="external-tabs-header" id="externalTabsHeader" style="display: flex; gap: 8px; align-items: center;">
+            <a href="#" id="songsterrLinkHeader" target="_blank" class="external-tab-btn" style="display: none;">
+                🎸 Songsterr
+            </a>
+            <a href="#" id="ultimateGuitarLinkHeader" target="_blank" class="external-tab-btn" style="display: none;">
+                🎵 Ultimate Guitar
+            </a>
+        </div>
+
+        <a href="index.html" class="back-btn">← Back to Mixer</a>
+    </header>
+
+    <!-- Chord Chart Panel -->
+    <div class="chord-panel" id="chordPanel">
+        <div class="key-indicator">
+            <span class="key-label">Key</span>
+            <span class="key-value" id="detectedKey">—</span>
+        </div>
+
+        <!-- Transpose & Notation Controls -->
+        <div class="chord-controls">
+            <div class="transpose-control">
+                <button class="transpose-btn" id="transposeDown" title="Transpose down">−</button>
+                <span class="transpose-value" id="transposeValue">0</span>
+                <button class="transpose-btn" id="transposeUp" title="Transpose up">+</button>
+            </div>
+            <button class="notation-toggle" id="sharpFlatToggle" title="Toggle sharps/flats">
+                ♯ → ♭
+            </button>
+        </div>
+
+        <div class="chord-display">
+            <div class="chord-current">
+                <div class="chord-current-label">Now Playing</div>
+                <div class="chord-current-value" id="currentChord">—</div>
+            </div>
+
+            <div class="chord-timeline" id="chordTimeline">
+                <!-- Upcoming chords populated by JS -->
+            </div>
+        </div>
+
+        <div class="chord-diagram" id="chordDiagram">
+            <!-- SVG chord diagram populated by JS -->
+        </div>
+
+        <button class="chord-toggle" id="chordDiagramToggle" title="Show guitar fingering">
+            🎸 Fingering
+        </button>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Mixer Sidebar -->
+        <aside class="mixer-sidebar">
+            <div class="mixer-header">
+                <h3>🎛️ Stem Mixer</h3>
+                <p style="font-size: 0.8rem; color: var(--text-dim);">Mute/solo stems while practicing</p>
+            </div>
+
+            <!-- Master Transport -->
+            <div class="master-transport">
+                <div class="transport-row">
+                    <button class="play-btn" id="playBtn" title="Play isolated stem audio">▶</button>
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+                    </div>
+                    <div class="sync-indicator inactive" id="syncIndicator" title="Notation sync status">
+                        <span class="sync-dot"></span>
+                        <span id="syncText">No sync</span>
+                    </div>
+                </div>
+                <div class="timeline" id="timeline">
+                    <div class="timeline-progress" id="timelineProgress"></div>
+                </div>
+            </div>
+
+            <!-- Tempo Control -->
+            <div class="tempo-control">
+                <div class="tempo-label">
+                    <span>Tempo (Pitch Preserved)</span>
+                    <span class="tempo-value" id="tempoValue">100%</span>
+                </div>
+                <input type="range" class="tempo-slider" id="tempoSlider" min="25" max="150" value="100">
+                <div class="tempo-presets">
+                    <button class="tempo-preset" data-tempo="50">50%</button>
+                    <button class="tempo-preset" data-tempo="75">75%</button>
+                    <button class="tempo-preset active" data-tempo="100">100%</button>
+                </div>
+            </div>
+
+            <!-- Keyboard Shortcuts -->
+            <details class="shortcuts-panel" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);">
+                <summary style="cursor: pointer; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">
+                    ⌨️ Keyboard Shortcuts
+                </summary>
+                <div style="margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-dim); line-height: 1.6;">
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">Space</kbd> Play/Pause</div>
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">← →</kbd> Seek ±5s</div>
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">↑ ↓</kbd> Tempo ±5%</div>
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">[</kbd><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">]</kbd> Set loop A/B</div>
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">L</kbd> Toggle loop</div>
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">R</kbd> Reset to start</div>
+                    <div><kbd style="background: var(--bg-dark); padding: 2px 6px; border-radius: 3px; margin-right: 4px;">M</kbd> Mute all</div>
+                </div>
+            </details>
+
+            <!-- Stem Channels -->
+            <div class="stem-channels" id="stemChannels">
+                <!-- Populated by JS -->
+            </div>
+        </aside>
+
+        <!-- Notation Area -->
+        <div class="notation-area">
+            <div class="notation-tabs">
+                <button class="notation-tab active" data-view="tab">🎸 Guitar TAB</button>
+                <button class="notation-tab" data-view="piano">🎹 Piano</button>
+                <button class="notation-tab" data-view="bass">🎸 Bass</button>
+                <div class="external-tabs" id="externalTabs" style="margin-left: auto; display: flex; gap: 8px;">
+                    <a href="#" id="songsterrLink" target="_blank" class="external-tab-btn" style="display: none;">
+                        🎸 Songsterr
+                    </a>
+                    <a href="#" id="ultimateGuitarLink" target="_blank" class="external-tab-btn" style="display: none;">
+                        🎵 Ultimate Guitar
+                    </a>
+                </div>
+            </div>
+
+            <div class="notation-container">
+                <div class="loading-overlay hidden" id="loadingOverlay">
+                    <div class="spinner"></div>
+                    <div>Loading notation...</div>
+                </div>
+
+                <!-- Chord Overlay - shows chord symbols synced with playback -->
+                <div id="chordOverlay" class="chord-overlay">
+                    <span style="color:#888;font-size:0.8rem;">NOW:</span>
+                    <div class="chord-marker current" id="currentChordMarker">
+                        <span class="chord-name">—</span>
+                    </div>
+                    <span style="color:#666;font-size:0.8rem;margin-left:20px;">NEXT:</span>
+                    <div class="upcoming-chords" id="notationUpcomingChords">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <div id="alphaTab">
+                    <!-- Notation rendered here by AlphaTab -->
+                    <div class="no-job" id="noJobState">
+                        <h2>🎵 Ready to Practice?</h2>
+                        <p>Process a song first to get stems and notation, or load a Guitar Pro file directly.</p>
+                        <a href="index.html" class="cta-btn">✦ Separate a Track</a>
+
+                        <div class="or-divider">— or —</div>
+
+                        <div class="file-input-wrapper">
+                            <input type="file" id="fileInput" accept=".gp,.gp3,.gp4,.gp5,.gpx,.xml,.musicxml,.mid,.midi">
+                            <div class="drop-zone">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📁</div>
+                                <div>Load Guitar Pro / MIDI / MusicXML</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5555/api';
+
+        // State
+        let currentJob = null;
+        let stemAudios = {};
+        let isPlaying = false;
+        let duration = 0;
+        let soloedStems = new Set();
+        let alphaTabApi = null;
+        let osmd = null;  // OpenSheetMusicDisplay instance
+        let osmdCursor = null;  // OSMD cursor for playback sync
+        let osmdMeasureTimes = []; // Start time of each measure in seconds
+        let osmdTempo = 120; // Default tempo from MusicXML
+        let audioContext = null;
+        let playbackRate = 1.0;
+        let notationDuration = 0; // Duration from notation in ms
+        let isSyncing = false; // Prevent infinite sync loops
+        let currentRenderer = null; // 'osmd' or 'alphatab'
+
+        const stemConfig = {
+            vocals: { icon: '🎙️', color: '#ff6b9d' },
+            drums: { icon: '🥁', color: '#e5c07b' },
+            bass: { icon: '🔊', color: '#ff7b54' },
+            guitar: { icon: '🎸', color: '#61afef' },
+            piano: { icon: '🎹', color: '#98c379' },
+            other: { icon: '🎻', color: '#c678dd' }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check for job_id and stem in URL
+            const params = new URLSearchParams(window.location.search);
+            const jobId = params.get('job');
+            const stemParam = params.get('stem'); // e.g. ?stem=guitar
+
+            if (jobId) {
+                await loadJob(jobId, stemParam);
+            }
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        // Loop state for practice sections
+        let loopStart = 0;
+        let loopEnd = 0;
+        let loopEnabled = false;
+
+        function setupEventListeners() {
+            // Play button (stem audio)
+            document.getElementById('playBtn').addEventListener('click', togglePlayback);
+
+            // Timeline click
+            document.getElementById('timeline').addEventListener('click', seekTo);
+
+            // Tempo slider
+            document.getElementById('tempoSlider').addEventListener('input', (e) => {
+                const value = e.target.value;
+                document.getElementById('tempoValue').textContent = value + '%';
+                playbackRate = value / 100;
+                updatePlaybackRate();
+
+                // Update preset buttons
+                document.querySelectorAll('.tempo-preset').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.tempo == value);
+                });
+            });
+
+            // Tempo presets
+            document.querySelectorAll('.tempo-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tempo = btn.dataset.tempo;
+                    document.getElementById('tempoSlider').value = tempo;
+                    document.getElementById('tempoValue').textContent = tempo + '%';
+                    playbackRate = tempo / 100;
+                    updatePlaybackRate();
+
+                    document.querySelectorAll('.tempo-preset').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+
+            // File input
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // Notation tabs
+            document.querySelectorAll('.notation-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.notation-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const view = tab.dataset.view;
+                    loadNotationForStem(view);
+                });
+            });
+
+            // Keyboard shortcuts for playback control
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+
+            // Update timeline periodically
+            setInterval(updateTimeline, 100);
+        }
+
+        // Keyboard shortcuts handler
+        function handleKeyboardShortcuts(e) {
+            // Don't handle if user is typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    togglePlayback();
+                    break;
+
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    seekRelative(-5); // Back 5 seconds
+                    break;
+
+                case 'ArrowRight':
+                    e.preventDefault();
+                    seekRelative(5); // Forward 5 seconds
+                    break;
+
+                case 'ArrowUp':
+                    e.preventDefault();
+                    adjustTempo(5); // Increase tempo 5%
+                    break;
+
+                case 'ArrowDown':
+                    e.preventDefault();
+                    adjustTempo(-5); // Decrease tempo 5%
+                    break;
+
+                case 'BracketLeft': // [ key - set loop start
+                    e.preventDefault();
+                    setLoopStart();
+                    break;
+
+                case 'BracketRight': // ] key - set loop end
+                    e.preventDefault();
+                    setLoopEnd();
+                    break;
+
+                case 'KeyL': // L - toggle loop
+                    e.preventDefault();
+                    toggleLoop();
+                    break;
+
+                case 'KeyR': // R - reset to beginning
+                    e.preventDefault();
+                    seekToTime(0);
+                    break;
+
+                case 'KeyM': // M - mute/unmute all stems (solo mode toggle)
+                    e.preventDefault();
+                    toggleMasterMute();
+                    break;
+            }
+        }
+
+        // Seek relative to current position
+        function seekRelative(seconds) {
+            const firstAudio = Object.values(stemAudios)[0];
+            if (!firstAudio) return;
+
+            const newTime = Math.max(0, Math.min(duration, firstAudio.audio.currentTime + seconds));
+            seekToTime(newTime);
+        }
+
+        // Seek to specific time
+        function seekToTime(time) {
+            Object.values(stemAudios).forEach(s => s.audio.currentTime = time);
+            lastCursorIndex = -1; // Reset cursor tracking
+            syncNotationCursor(time);
+        }
+
+        // Adjust tempo by delta percentage
+        function adjustTempo(delta) {
+            const slider = document.getElementById('tempoSlider');
+            const newValue = Math.max(25, Math.min(150, parseInt(slider.value) + delta));
+            slider.value = newValue;
+            document.getElementById('tempoValue').textContent = newValue + '%';
+            playbackRate = newValue / 100;
+            updatePlaybackRate();
+
+            // Update preset buttons
+            document.querySelectorAll('.tempo-preset').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tempo == newValue);
+            });
+
+            showToast(`Tempo: ${newValue}%`);
+        }
+
+        // Set loop start point
+        function setLoopStart() {
+            const firstAudio = Object.values(stemAudios)[0];
+            if (!firstAudio) return;
+
+            loopStart = firstAudio.audio.currentTime;
+            updateLoopMarkers();
+            showToast(`Loop start: ${formatTime(loopStart)}`);
+        }
+
+        // Set loop end point
+        function setLoopEnd() {
+            const firstAudio = Object.values(stemAudios)[0];
+            if (!firstAudio) return;
+
+            loopEnd = firstAudio.audio.currentTime;
+            if (loopEnd > loopStart) {
+                loopEnabled = true;
+            }
+            updateLoopMarkers();
+            showToast(`Loop end: ${formatTime(loopEnd)} ${loopEnabled ? '(loop ON)' : ''}`);
+        }
+
+        // Toggle loop on/off
+        function toggleLoop() {
+            if (loopStart < loopEnd) {
+                loopEnabled = !loopEnabled;
+                updateLoopMarkers();
+                showToast(loopEnabled ? `Loop: ${formatTime(loopStart)} - ${formatTime(loopEnd)}` : 'Loop OFF');
+            } else {
+                showToast('Set loop points with [ and ] keys');
+            }
+        }
+
+        // Update loop region display on timeline
+        function updateLoopMarkers() {
+            const timeline = document.getElementById('timeline');
+            let loopRegion = timeline.querySelector('.loop-region');
+
+            if (!loopRegion) {
+                loopRegion = document.createElement('div');
+                loopRegion.className = 'loop-region';
+                loopRegion.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    height: 100%;
+                    background: rgba(152, 195, 121, 0.3);
+                    border-left: 2px solid var(--psych-green);
+                    border-right: 2px solid var(--psych-green);
+                    pointer-events: none;
+                    display: none;
+                `;
+                timeline.style.position = 'relative';
+                timeline.appendChild(loopRegion);
+            }
+
+            if (loopEnabled && loopStart < loopEnd && duration > 0) {
+                const startPercent = (loopStart / duration) * 100;
+                const endPercent = (loopEnd / duration) * 100;
+                loopRegion.style.left = startPercent + '%';
+                loopRegion.style.width = (endPercent - startPercent) + '%';
+                loopRegion.style.display = 'block';
+            } else {
+                loopRegion.style.display = 'none';
+            }
+        }
+
+        // Toggle master mute
+        function toggleMasterMute() {
+            const allMuted = Object.values(stemAudios).every(s => s.muted);
+            Object.entries(stemAudios).forEach(([name, data]) => {
+                data.muted = !allMuted;
+                const btn = document.querySelector(`.mute-btn[data-stem="${name}"]`);
+                if (btn) btn.classList.toggle('active', data.muted);
+                document.getElementById(`channel-${name}`)?.classList.toggle('muted', data.muted);
+            });
+            updateStemVolumes();
+            showToast(allMuted ? 'All stems unmuted' : 'All stems muted');
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            let toast = document.getElementById('keyboard-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'keyboard-toast';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: var(--bg-card);
+                    color: var(--text);
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    border: 1px solid var(--psych-orange);
+                    font-size: 0.9rem;
+                    z-index: 1000;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                `;
+                document.body.appendChild(toast);
+            }
+
+            toast.textContent = message;
+            toast.style.opacity = '1';
+
+            clearTimeout(toast.hideTimeout);
+            toast.hideTimeout = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 1500);
+        }
+
+        // ==================== CHORD CHART FUNCTIONS ====================
+
+        let chordProgression = [];
+        let showChordDiagram = true;  // Show chord diagrams by default - Ultimate Guitar style!
+        let transposeAmount = 0;      // Semitones to transpose (-12 to +12)
+        let useFlats = false;         // false = sharps (A#), true = flats (Bb)
+
+        // Note names for transposition
+        const SHARP_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const FLAT_NOTES = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+        // Map sharps to flats and vice versa
+        const SHARP_TO_FLAT = {
+            'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb',
+            'C': 'C', 'D': 'D', 'E': 'E', 'F': 'F', 'G': 'G', 'A': 'A', 'B': 'B'
+        };
+        const FLAT_TO_SHARP = {
+            'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#',
+            'C': 'C', 'D': 'D', 'E': 'E', 'F': 'F', 'G': 'G', 'A': 'A', 'B': 'B'
+        };
+
+        // Convert chord to use flats or sharps
+        function convertChordNotation(chord, toFlats) {
+            if (!chord || chord === '—' || chord === 'N') return chord;
+
+            // Extract root note (handle both single and double-char roots like C#, Bb)
+            let root = chord[0];
+            let rest = chord.slice(1);
+
+            if (rest.startsWith('#') || rest.startsWith('b')) {
+                root = chord.slice(0, 2);
+                rest = chord.slice(2);
+            }
+
+            // Convert root
+            let newRoot;
+            if (toFlats) {
+                newRoot = SHARP_TO_FLAT[root] || root;
+            } else {
+                newRoot = FLAT_TO_SHARP[root] || root;
+            }
+
+            return newRoot + rest;
+        }
+
+        // Transpose a chord by semitones
+        function transposeChord(chord, semitones) {
+            if (!chord || chord === '—' || chord === 'N' || semitones === 0) return chord;
+
+            // Extract root note
+            let root = chord[0];
+            let rest = chord.slice(1);
+
+            if (rest.startsWith('#') || rest.startsWith('b')) {
+                root = chord.slice(0, 2);
+                rest = chord.slice(2);
+            }
+
+            // Find root index (normalize to sharps first)
+            const normalizedRoot = FLAT_TO_SHARP[root] || root;
+            let rootIndex = SHARP_NOTES.indexOf(normalizedRoot);
+            if (rootIndex === -1) return chord; // Unknown root
+
+            // Transpose
+            rootIndex = (rootIndex + semitones + 12) % 12;
+
+            // Get new root in preferred notation
+            const newRoot = useFlats ? FLAT_NOTES[rootIndex] : SHARP_NOTES[rootIndex];
+
+            return newRoot + rest;
+        }
+
+        // Get display chord (with transpose and notation preference applied)
+        function getDisplayChord(originalChord) {
+            let chord = originalChord;
+            if (transposeAmount !== 0) {
+                chord = transposeChord(chord, transposeAmount);
+            }
+            return convertChordNotation(chord, useFlats);
+        }
+
+        // Comprehensive guitar chord diagrams (frets: -1 = muted, 0 = open, 1+ = fret)
+        const CHORD_DIAGRAMS = {
+            // Major chords
+            'C': { frets: [-1, 3, 2, 0, 1, 0], name: 'C' },
+            'D': { frets: [-1, -1, 0, 2, 3, 2], name: 'D' },
+            'E': { frets: [0, 2, 2, 1, 0, 0], name: 'E' },
+            'F': { frets: [1, 3, 3, 2, 1, 1], barre: 1, name: 'F' },
+            'G': { frets: [3, 2, 0, 0, 0, 3], name: 'G' },
+            'A': { frets: [-1, 0, 2, 2, 2, 0], name: 'A' },
+            'B': { frets: [-1, 2, 4, 4, 4, 2], barre: 2, name: 'B' },
+            // Minor chords
+            'Cm': { frets: [-1, 3, 5, 5, 4, 3], barre: 3, name: 'Cm' },
+            'Dm': { frets: [-1, -1, 0, 2, 3, 1], name: 'Dm' },
+            'Em': { frets: [0, 2, 2, 0, 0, 0], name: 'Em' },
+            'Fm': { frets: [1, 3, 3, 1, 1, 1], barre: 1, name: 'Fm' },
+            'Gm': { frets: [3, 5, 5, 3, 3, 3], barre: 3, name: 'Gm' },
+            'Am': { frets: [-1, 0, 2, 2, 1, 0], name: 'Am' },
+            'Bm': { frets: [-1, 2, 4, 4, 3, 2], barre: 2, name: 'Bm' },
+            // Dominant 7th chords
+            'C7': { frets: [-1, 3, 2, 3, 1, 0], name: 'C7' },
+            'D7': { frets: [-1, -1, 0, 2, 1, 2], name: 'D7' },
+            'E7': { frets: [0, 2, 0, 1, 0, 0], name: 'E7' },
+            'F7': { frets: [1, 3, 1, 2, 1, 1], barre: 1, name: 'F7' },
+            'G7': { frets: [3, 2, 0, 0, 0, 1], name: 'G7' },
+            'A7': { frets: [-1, 0, 2, 0, 2, 0], name: 'A7' },
+            'B7': { frets: [-1, 2, 1, 2, 0, 2], name: 'B7' },
+            // Minor 7th chords
+            'Cm7': { frets: [-1, 3, 5, 3, 4, 3], barre: 3, name: 'Cm7' },
+            'Dm7': { frets: [-1, -1, 0, 2, 1, 1], name: 'Dm7' },
+            'Em7': { frets: [0, 2, 0, 0, 0, 0], name: 'Em7' },
+            'Fm7': { frets: [1, 3, 1, 1, 1, 1], barre: 1, name: 'Fm7' },
+            'Gm7': { frets: [3, 5, 3, 3, 3, 3], barre: 3, name: 'Gm7' },
+            'Am7': { frets: [-1, 0, 2, 0, 1, 0], name: 'Am7' },
+            'Bm7': { frets: [-1, 2, 0, 2, 0, 2], name: 'Bm7' },
+            // Major 7th chords
+            'Cmaj7': { frets: [-1, 3, 2, 0, 0, 0], name: 'Cmaj7' },
+            'Dmaj7': { frets: [-1, -1, 0, 2, 2, 2], name: 'Dmaj7' },
+            'Emaj7': { frets: [0, 2, 1, 1, 0, 0], name: 'Emaj7' },
+            'Fmaj7': { frets: [1, -1, 2, 2, 1, -1], name: 'Fmaj7' },
+            'Gmaj7': { frets: [3, 2, 0, 0, 0, 2], name: 'Gmaj7' },
+            'Amaj7': { frets: [-1, 0, 2, 1, 2, 0], name: 'Amaj7' },
+            'Bmaj7': { frets: [-1, 2, 4, 3, 4, 2], barre: 2, name: 'Bmaj7' },
+            // Power chords (5)
+            'C5': { frets: [-1, 3, 5, 5, -1, -1], name: 'C5' },
+            'D5': { frets: [-1, -1, 0, 2, 3, -1], name: 'D5' },
+            'E5': { frets: [0, 2, 2, -1, -1, -1], name: 'E5' },
+            'F5': { frets: [1, 3, 3, -1, -1, -1], name: 'F5' },
+            'G5': { frets: [3, 5, 5, -1, -1, -1], name: 'G5' },
+            'A5': { frets: [-1, 0, 2, 2, -1, -1], name: 'A5' },
+            'B5': { frets: [-1, 2, 4, 4, -1, -1], name: 'B5' },
+            // Sus chords
+            'Csus4': { frets: [-1, 3, 3, 0, 1, 1], name: 'Csus4' },
+            'Dsus4': { frets: [-1, -1, 0, 2, 3, 3], name: 'Dsus4' },
+            'Dsus2': { frets: [-1, -1, 0, 2, 3, 0], name: 'Dsus2' },
+            'Esus4': { frets: [0, 2, 2, 2, 0, 0], name: 'Esus4' },
+            'Gsus4': { frets: [3, 3, 0, 0, 1, 3], name: 'Gsus4' },
+            'Asus4': { frets: [-1, 0, 2, 2, 3, 0], name: 'Asus4' },
+            'Asus2': { frets: [-1, 0, 2, 2, 0, 0], name: 'Asus2' },
+            // 9th chords (simplified voicings)
+            'C9': { frets: [-1, 3, 2, 3, 3, 3], barre: 3, name: 'C9' },
+            'D9': { frets: [-1, -1, 0, 2, 1, 0], name: 'D9' },
+            'E9': { frets: [0, 2, 0, 1, 0, 2], name: 'E9' },
+            'G9': { frets: [3, 2, 0, 2, 0, 1], name: 'G9' },
+            'A9': { frets: [-1, 0, 2, 4, 2, 3], name: 'A9' },
+            // Maj9 chords
+            'Cmaj9': { frets: [-1, 3, 2, 0, 0, 0], name: 'Cmaj9' },  // Same as Cmaj7 (simplified)
+            'Dmaj9': { frets: [-1, -1, 0, 2, 2, 0], name: 'Dmaj9' },
+            'Emaj9': { frets: [0, 2, 1, 1, 0, 2], name: 'Emaj9' },
+            'Amaj9': { frets: [-1, 0, 2, 1, 0, 0], name: 'Amaj9' },
+            // Min9 chords
+            'Cm9': { frets: [-1, 3, 1, 3, 3, 3], barre: 3, name: 'Cm9' },
+            'Dm9': { frets: [-1, -1, 0, 2, 1, 0], name: 'Dm9' },
+            'Em9': { frets: [0, 2, 0, 0, 0, 2], name: 'Em9' },
+            'Am9': { frets: [-1, 0, 2, 0, 1, 2], name: 'Am9' },
+            // Sharps and flats (common)
+            'C#': { frets: [-1, 4, 6, 6, 6, 4], barre: 4, name: 'C#' },
+            'C#m': { frets: [-1, 4, 6, 6, 5, 4], barre: 4, name: 'C#m' },
+            'D#': { frets: [-1, 6, 8, 8, 8, 6], barre: 6, name: 'D#' },
+            'D#m': { frets: [-1, 6, 8, 8, 7, 6], barre: 6, name: 'D#m' },
+            'F#': { frets: [2, 4, 4, 3, 2, 2], barre: 2, name: 'F#' },
+            'F#m': { frets: [2, 4, 4, 2, 2, 2], barre: 2, name: 'F#m' },
+            'G#': { frets: [4, 6, 6, 5, 4, 4], barre: 4, name: 'G#' },
+            'G#m': { frets: [4, 6, 6, 4, 4, 4], barre: 4, name: 'G#m' },
+            'A#': { frets: [-1, 1, 3, 3, 3, 1], barre: 1, name: 'A#' },
+            'A#m': { frets: [-1, 1, 3, 3, 2, 1], barre: 1, name: 'A#m' },
+            // Alternate names (Bb = A#, etc.)
+            'Bb': { frets: [-1, 1, 3, 3, 3, 1], barre: 1, name: 'Bb' },
+            'Bbm': { frets: [-1, 1, 3, 3, 2, 1], barre: 1, name: 'Bbm' },
+            'Eb': { frets: [-1, 6, 8, 8, 8, 6], barre: 6, name: 'Eb' },
+            'Ebm': { frets: [-1, 6, 8, 8, 7, 6], barre: 6, name: 'Ebm' },
+            'Ab': { frets: [4, 6, 6, 5, 4, 4], barre: 4, name: 'Ab' },
+            'Abm': { frets: [4, 6, 6, 4, 4, 4], barre: 4, name: 'Abm' },
+            'Db': { frets: [-1, 4, 6, 6, 6, 4], barre: 4, name: 'Db' },
+            'Dbm': { frets: [-1, 4, 6, 6, 5, 4], barre: 4, name: 'Dbm' },
+            'Gb': { frets: [2, 4, 4, 3, 2, 2], barre: 2, name: 'Gb' },
+            'Gbm': { frets: [2, 4, 4, 2, 2, 2], barre: 2, name: 'Gbm' },
+        };
+
+        function initializeChordChart(job) {
+            chordProgression = job.chord_progression || [];
+            const detectedKey = job.detected_key || '—';
+
+            // Show the chord panel
+            const panel = document.getElementById('chordPanel');
+            panel.classList.add('active');
+
+            // Set detected key (apply notation preference)
+            updateKeyDisplay(detectedKey);
+
+            // Setup chord diagram toggle
+            const toggleBtn = document.getElementById('chordDiagramToggle');
+            const chordDiagramEl = document.getElementById('chordDiagram');
+
+            // Show chord diagram by default - Ultimate Guitar style!
+            toggleBtn.classList.add('active');
+            chordDiagramEl.classList.add('active');
+
+            toggleBtn.addEventListener('click', () => {
+                showChordDiagram = !showChordDiagram;
+                toggleBtn.classList.toggle('active', showChordDiagram);
+                chordDiagramEl.classList.toggle('active', showChordDiagram);
+            });
+
+            // Setup transpose controls
+            const transposeUpBtn = document.getElementById('transposeUp');
+            const transposeDownBtn = document.getElementById('transposeDown');
+            const transposeValueEl = document.getElementById('transposeValue');
+
+            transposeUpBtn.addEventListener('click', () => {
+                if (transposeAmount < 12) {
+                    transposeAmount++;
+                    transposeValueEl.textContent = transposeAmount > 0 ? `+${transposeAmount}` : transposeAmount;
+                    refreshChordDisplay();
+                }
+            });
+
+            transposeDownBtn.addEventListener('click', () => {
+                if (transposeAmount > -12) {
+                    transposeAmount--;
+                    transposeValueEl.textContent = transposeAmount > 0 ? `+${transposeAmount}` : transposeAmount;
+                    refreshChordDisplay();
+                }
+            });
+
+            // Setup sharp/flat toggle
+            const sharpFlatToggle = document.getElementById('sharpFlatToggle');
+            sharpFlatToggle.addEventListener('click', () => {
+                useFlats = !useFlats;
+                sharpFlatToggle.classList.toggle('flats', useFlats);
+                sharpFlatToggle.textContent = useFlats ? '♭ → ♯' : '♯ → ♭';
+                refreshChordDisplay();
+                // Also update the key display
+                updateKeyDisplay(detectedKey);
+            });
+
+            // Initial display with first chord
+            updateChordDisplay(0);
+
+            // Render first chord diagram immediately
+            if (chordProgression.length > 0) {
+                const displayChord = getDisplayChord(chordProgression[0].chord);
+                renderChordDiagram(displayChord);
+            }
+
+            console.log(`🎸 Chord chart initialized: ${chordProgression.length} chords, key: ${detectedKey}`);
+        }
+
+        // Update the key display with current notation preference
+        function updateKeyDisplay(key) {
+            const displayKey = getDisplayChord(key);
+            document.getElementById('detectedKey').textContent = displayKey;
+        }
+
+        // Refresh all chord displays after transpose/notation change
+        function refreshChordDisplay() {
+            // Get current playback time and update display
+            const audioTime = masterAudio ? masterAudio.currentTime : 0;
+            updateChordDisplay(audioTime);
+        }
+
+        function updateChordDisplay(currentTime) {
+            if (!chordProgression || chordProgression.length === 0) return;
+
+            // Find current chord
+            let currentChordData = null;
+            let currentIndex = -1;
+
+            for (let i = 0; i < chordProgression.length; i++) {
+                const chord = chordProgression[i];
+                const chordEnd = chord.time + chord.duration;
+                if (currentTime >= chord.time && currentTime < chordEnd) {
+                    currentChordData = chord;
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            // If no chord found (between chords or before first), find the next one
+            if (!currentChordData) {
+                for (let i = 0; i < chordProgression.length; i++) {
+                    if (chordProgression[i].time > currentTime) {
+                        currentIndex = Math.max(0, i - 1);
+                        currentChordData = chordProgression[currentIndex];
+                        break;
+                    }
+                }
+                // Still not found? Use last chord
+                if (!currentChordData && chordProgression.length > 0) {
+                    currentChordData = chordProgression[chordProgression.length - 1];
+                    currentIndex = chordProgression.length - 1;
+                }
+            }
+
+            // Update current chord display (with transpose/notation applied)
+            const currentChordEl = document.getElementById('currentChord');
+            const notationChordMarker = document.getElementById('currentChordMarker');
+
+            if (currentChordData) {
+                const displayChord = getDisplayChord(currentChordData.chord);
+                currentChordEl.textContent = displayChord;
+
+                // Update notation overlay chord marker
+                if (notationChordMarker) {
+                    const chordNameEl = notationChordMarker.querySelector('.chord-name');
+                    if (chordNameEl) {
+                        chordNameEl.textContent = displayChord;
+                    }
+                }
+
+                // Update chord diagram if visible
+                if (showChordDiagram) {
+                    renderChordDiagram(displayChord);
+                }
+            } else {
+                currentChordEl.textContent = '—';
+                if (notationChordMarker) {
+                    const chordNameEl = notationChordMarker.querySelector('.chord-name');
+                    if (chordNameEl) chordNameEl.textContent = '—';
+                }
+            }
+
+            // Update upcoming chords timeline
+            const timeline = document.getElementById('chordTimeline');
+            timeline.innerHTML = '';
+
+            // Show next 4 unique chords (using original for comparison, display for rendering)
+            const upcomingChords = [];
+            let lastChord = currentChordData ? currentChordData.chord : '';
+
+            for (let i = currentIndex + 1; i < chordProgression.length && upcomingChords.length < 4; i++) {
+                const chord = chordProgression[i];
+                if (chord.chord !== lastChord) {
+                    upcomingChords.push(chord);
+                    lastChord = chord.chord;
+                }
+            }
+
+            upcomingChords.forEach((chord, idx) => {
+                const el = document.createElement('div');
+                el.className = 'chord-upcoming' + (idx === 0 ? ' next' : '');
+                el.textContent = getDisplayChord(chord.chord);  // Apply transpose/notation
+                el.title = `at ${formatTime(chord.time)}`;
+                timeline.appendChild(el);
+            });
+
+            // Also update notation overlay upcoming chords
+            const notationUpcoming = document.getElementById('notationUpcomingChords');
+            if (notationUpcoming) {
+                notationUpcoming.innerHTML = '';
+                upcomingChords.slice(0, 3).forEach((chord, idx) => {
+                    const el = document.createElement('span');
+                    el.className = 'chord-name';
+                    el.textContent = getDisplayChord(chord.chord);
+                    el.style.opacity = 1 - (idx * 0.25);  // Fade out further chords
+                    notationUpcoming.appendChild(el);
+                });
+            }
+        }
+
+        function renderChordDiagram(chordName) {
+            const container = document.getElementById('chordDiagram');
+
+            // Try to find diagram - check both sharp and flat versions
+            let diagram = CHORD_DIAGRAMS[chordName];
+            let displayName = chordName;
+
+            // If not found, try the enharmonic equivalent
+            if (!diagram) {
+                const altChord = useFlats
+                    ? convertChordNotation(chordName, false)  // Try sharp version
+                    : convertChordNotation(chordName, true);  // Try flat version
+                diagram = CHORD_DIAGRAMS[altChord];
+            }
+
+            if (!diagram) {
+                container.innerHTML = `<div style="font-size: 0.75rem; color: var(--text-dim); padding: 0.5rem;">No diagram for ${chordName}</div>`;
+                return;
+            }
+
+            // Create SVG chord diagram
+            const frets = diagram.frets;
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 60 70');
+            svg.setAttribute('width', '60');
+            svg.setAttribute('height', '70');
+
+            // Draw fret lines
+            for (let i = 0; i <= 4; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '8');
+                line.setAttribute('y1', 15 + i * 12);
+                line.setAttribute('x2', '52');
+                line.setAttribute('y2', 15 + i * 12);
+                line.setAttribute('class', 'fret-line');
+                line.setAttribute('stroke', '#3a3a45');
+                svg.appendChild(line);
+            }
+
+            // Draw string lines
+            for (let i = 0; i < 6; i++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', 8 + i * 8.8);
+                line.setAttribute('y1', '15');
+                line.setAttribute('x2', 8 + i * 8.8);
+                line.setAttribute('y2', '63');
+                line.setAttribute('class', 'string-line');
+                line.setAttribute('stroke', '#7a7a85');
+                svg.appendChild(line);
+            }
+
+            // Draw finger positions
+            frets.forEach((fret, stringIdx) => {
+                const x = 8 + stringIdx * 8.8;
+
+                if (fret === -1) {
+                    // Muted string (X)
+                    const x1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    x1.setAttribute('x1', x - 3);
+                    x1.setAttribute('y1', '5');
+                    x1.setAttribute('x2', x + 3);
+                    x1.setAttribute('y2', '11');
+                    x1.setAttribute('stroke', '#7a7a85');
+                    x1.setAttribute('stroke-width', '1.5');
+                    svg.appendChild(x1);
+
+                    const x2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    x2.setAttribute('x1', x + 3);
+                    x2.setAttribute('y1', '5');
+                    x2.setAttribute('x2', x - 3);
+                    x2.setAttribute('y2', '11');
+                    x2.setAttribute('stroke', '#7a7a85');
+                    x2.setAttribute('stroke-width', '1.5');
+                    svg.appendChild(x2);
+                } else if (fret === 0) {
+                    // Open string (O)
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', '8');
+                    circle.setAttribute('r', '3');
+                    circle.setAttribute('fill', 'none');
+                    circle.setAttribute('stroke', '#98c379');
+                    circle.setAttribute('stroke-width', '1.5');
+                    svg.appendChild(circle);
+                } else {
+                    // Fretted note (dot)
+                    const y = 15 + (fret - 0.5) * 12;
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', Math.min(y, 57)); // Cap at 4th fret visually
+                    circle.setAttribute('r', '4');
+                    circle.setAttribute('fill', '#ff7b54');
+                    svg.appendChild(circle);
+                }
+            });
+
+            container.innerHTML = '';
+            container.appendChild(svg);
+        }
+
+        // ==================== END CHORD CHART FUNCTIONS ====================
+
+        async function loadJob(jobId, requestedStem = null) {
+            try {
+                const response = await fetch(`${API_BASE}/status/${jobId}`);
+                const job = await response.json();
+
+                if (job.error) {
+                    alert('Job not found');
+                    return;
+                }
+
+                currentJob = job;
+                document.getElementById('noJobState').style.display = 'none';
+
+                // Update song info
+                document.getElementById('songTitle').textContent = job.metadata?.title || 'Unknown Track';
+                document.getElementById('songArtist').textContent = job.metadata?.artist || 'Unknown Artist';
+
+                // Load stem audio
+                loadStemAudio(job);
+
+                // Load notation if available
+                if (job.musicxml_files && Object.keys(job.musicxml_files).length > 0) {
+                    // Use requested stem if provided, otherwise default to guitar
+                    const stemToLoad = requestedStem && job.musicxml_files[requestedStem] ? requestedStem : 'guitar';
+                    loadNotationForStem(stemToLoad);
+
+                    // Update tab button to match
+                    document.querySelectorAll('.notation-tab').forEach(tab => {
+                        tab.classList.toggle('active', tab.dataset.view === stemToLoad);
+                    });
+                }
+
+                // Initialize chord chart if chord data is available
+                if (job.chord_progression && job.chord_progression.length > 0) {
+                    initializeChordChart(job);
+                }
+
+                // Fetch and display external tab links (Songsterr, Ultimate Guitar)
+                fetchExternalTabs(jobId);
+
+            } catch (error) {
+                console.error('Failed to load job:', error);
+            }
+        }
+
+        async function fetchExternalTabs(jobId) {
+            try {
+                const response = await fetch(`${API_BASE}/find-tabs/${jobId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.warn('Tab search failed:', data.error);
+                    return;
+                }
+
+                const tabs = data.tabs || {};
+
+                // Show Songsterr links (both header and notation bar)
+                const songsterrLinks = [
+                    document.getElementById('songsterrLink'),
+                    document.getElementById('songsterrLinkHeader')
+                ].filter(el => el);
+
+                if (tabs.songsterr?.search_url) {
+                    const url = tabs.songsterr_direct?.url || tabs.songsterr.search_url;
+                    const title = tabs.songsterr_direct
+                        ? `View "${tabs.songsterr_direct.title}" by ${tabs.songsterr_direct.artist} on Songsterr`
+                        : 'Search Songsterr for tabs';
+
+                    songsterrLinks.forEach(link => {
+                        link.href = url;
+                        link.style.display = 'inline-flex';
+                        link.title = title;
+                    });
+                }
+
+                // Show Ultimate Guitar links (both header and notation bar)
+                const ugLinks = [
+                    document.getElementById('ultimateGuitarLink'),
+                    document.getElementById('ultimateGuitarLinkHeader')
+                ].filter(el => el);
+
+                if (tabs.ultimate_guitar?.search_url) {
+                    ugLinks.forEach(link => {
+                        link.href = tabs.ultimate_guitar.search_url;
+                        link.style.display = 'inline-flex';
+                        link.title = 'Search Ultimate Guitar for tabs';
+                    });
+                }
+
+                console.log('External tab links loaded:', data);
+            } catch (error) {
+                console.error('Failed to fetch external tabs:', error);
+            }
+        }
+
+        function loadStemAudio(job) {
+            const container = document.getElementById('stemChannels');
+            container.innerHTML = '';
+
+            const stemOrder = ['vocals', 'guitar', 'bass', 'drums', 'piano', 'other'];
+            const sortedStems = Object.entries(job.stems).sort((a, b) => {
+                return stemOrder.indexOf(a[0]) - stemOrder.indexOf(b[0]);
+            });
+
+            sortedStems.forEach(([name, path]) => {
+                // Clean up stem name: remove "Other_" prefix and capitalize
+                const cleanName = name.replace(/^Other_/i, '').toLowerCase();
+                const displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+                const cfg = stemConfig[cleanName] || { icon: '🎵', color: '#888' };
+
+                // Check if this is a split stem (has _left, _right, _center, _lead, _backing suffix)
+                const isSplitStem = /_left$|_right$|_center$|_sides$|_lead$|_backing$/.test(cleanName);
+                const baseStemName = cleanName.replace(/_left$|_right$|_center$|_sides$|_lead$|_backing$/, '');
+
+                // Check if this is a vocals stem (for special AI split button)
+                const isVocalsStem = cleanName === 'vocals' && !isSplitStem;
+
+                const channel = document.createElement('div');
+                channel.className = 'stem-channel' + (isSplitStem ? ' split-stem' : '');
+                channel.id = `channel-${cleanName}`;
+                channel.innerHTML = `
+                    <span class="stem-icon">${cfg.icon}</span>
+                    <div class="stem-info">
+                        <div class="stem-name">${displayName}</div>
+                    </div>
+                    <input type="range" class="stem-volume" data-stem="${cleanName}" min="0" max="100" value="80">
+                    <div class="stem-controls">
+                        <button class="stem-btn mute-btn" data-stem="${cleanName}">M</button>
+                        <button class="stem-btn solo-btn" data-stem="${cleanName}">S</button>
+                        ${!isSplitStem ? `<button class="split-btn" data-stem="${name}" title="Split stereo (L/R separation)">⇆</button>` : ''}
+                        ${isVocalsStem ? `<button class="vocal-split-btn" data-stem="${name}" title="AI Split: Lead vs Backing vocals">🎤</button>` : ''}
+                    </div>
+                    <audio id="audio-${cleanName}" src="${API_BASE}/download/${job.job_id}/stem/${name}" preload="auto"></audio>
+                `;
+                container.appendChild(channel);
+
+                // Store audio reference (use cleanName for internal tracking)
+                const audio = channel.querySelector(`#audio-${cleanName}`);
+                stemAudios[cleanName] = { audio, muted: false, volume: 0.8 };
+                audio.volume = 0.8;
+
+                // Get duration
+                audio.addEventListener('loadedmetadata', () => {
+                    if (duration === 0) {
+                        duration = audio.duration;
+                        document.getElementById('totalTime').textContent = formatTime(duration);
+                    }
+                });
+            });
+
+            // Setup mixer controls
+            setupMixerControls();
+        }
+
+        function setupMixerControls() {
+            // Mute buttons
+            document.querySelectorAll('.mute-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const stem = btn.dataset.stem;
+                    stemAudios[stem].muted = !stemAudios[stem].muted;
+                    btn.classList.toggle('active', stemAudios[stem].muted);
+                    document.getElementById(`channel-${stem}`).classList.toggle('muted', stemAudios[stem].muted);
+                    updateStemVolumes();
+                });
+            });
+
+            // Solo buttons
+            document.querySelectorAll('.solo-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const stem = btn.dataset.stem;
+                    if (soloedStems.has(stem)) {
+                        soloedStems.delete(stem);
+                        btn.classList.remove('active');
+                    } else {
+                        soloedStems.add(stem);
+                        btn.classList.add('active');
+                    }
+                    updateStemVolumes();
+                });
+            });
+
+            // Volume sliders
+            document.querySelectorAll('.stem-volume').forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const stem = slider.dataset.stem;
+                    stemAudios[stem].volume = e.target.value / 100;
+                    updateStemVolumes();
+                });
+            });
+
+            // Stereo split buttons
+            document.querySelectorAll('.split-btn').forEach(btn => {
+                btn.addEventListener('click', () => splitStem(btn));
+            });
+
+            // Vocal split buttons (AI-powered lead/backing)
+            document.querySelectorAll('.vocal-split-btn').forEach(btn => {
+                btn.addEventListener('click', () => splitVocals(btn));
+            });
+        }
+
+        async function splitVocals(btn) {
+            if (!currentJob) return;
+
+            // Don't split if already processing
+            if (btn.classList.contains('processing')) return;
+
+            const proceed = confirm(
+                '🎤 AI Vocal Split\n\n' +
+                'This will use AI to separate your vocals into:\n' +
+                '• Lead vocals (main singer)\n' +
+                '• Backing vocals (harmonies, background)\n\n' +
+                'This may take 30-60 seconds. Continue?'
+            );
+
+            if (!proceed) return;
+
+            btn.classList.add('processing');
+            btn.textContent = '⏳';
+            btn.title = 'Splitting vocals with AI...';
+
+            try {
+                const response = await fetch(`${API_BASE}/split-vocals/${currentJob.job_id}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.error) {
+                    alert(`Vocal split failed: ${result.error}`);
+                    btn.classList.remove('processing');
+                    btn.textContent = '🎤';
+                    return;
+                }
+
+                // Success!
+                alert(
+                    '✅ Vocal Split Complete!\n\n' +
+                    '• Lead vocals: Ready\n' +
+                    '• Backing vocals: Ready\n\n' +
+                    'Reloading to show new tracks...'
+                );
+
+                // Reload the job to show new stems
+                await loadJob(currentJob.job_id);
+
+            } catch (error) {
+                console.error('Vocal split failed:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                btn.classList.remove('processing');
+                btn.textContent = '🎤';
+                btn.title = 'AI Split: Lead vs Backing vocals';
+            }
+        }
+
+        async function splitStem(btn) {
+            const stemName = btn.dataset.stem;
+            if (!currentJob) return;
+
+            // Don't split if already processing
+            if (btn.classList.contains('analyzing')) return;
+
+            btn.classList.add('analyzing');
+            btn.textContent = '⏳';
+            btn.title = 'Analyzing stereo field...';
+
+            try {
+                // First analyze to see if it's worth splitting
+                const analyzeResp = await fetch(`${API_BASE}/analyze-stereo/${currentJob.job_id}/${stemName}`);
+                const analysis = await analyzeResp.json();
+
+                if (analysis.error) {
+                    alert(`Analysis failed: ${analysis.error}`);
+                    btn.classList.remove('analyzing');
+                    btn.textContent = '⇆';
+                    return;
+                }
+
+                const stereoInfo = analysis.analysis;
+                const width = (stereoInfo.width * 100).toFixed(0);
+                const sideRatio = (stereoInfo.side_ratio * 100).toFixed(0);
+
+                // Ask user if they want to proceed
+                const proceed = confirm(
+                    `Stereo Analysis for ${stemName}:\n\n` +
+                    `• Stereo width: ${width}%\n` +
+                    `• Side content: ${sideRatio}%\n` +
+                    `• Recommendation: ${stereoInfo.splittable ? '✅ Splittable' : '⚠️ Mostly mono'}\n\n` +
+                    `Split into left/right/center components?`
+                );
+
+                if (!proceed) {
+                    btn.classList.remove('analyzing');
+                    btn.textContent = '⇆';
+                    btn.title = stereoInfo.splittable ? 'Split stereo (splittable)' : 'Split stereo (mostly mono)';
+                    btn.classList.toggle('splittable', stereoInfo.splittable);
+                    btn.classList.toggle('not-splittable', !stereoInfo.splittable);
+                    return;
+                }
+
+                // Do the split
+                btn.title = 'Splitting...';
+                const splitResp = await fetch(`${API_BASE}/split-stem/${currentJob.job_id}/${stemName}`, {
+                    method: 'POST'
+                });
+                const result = await splitResp.json();
+
+                if (result.error) {
+                    alert(`Split failed: ${result.error}`);
+                    btn.classList.remove('analyzing');
+                    btn.textContent = '⇆';
+                    return;
+                }
+
+                // Success! Reload the job to show new stems
+                alert(
+                    `✅ ${result.message}\n\n` +
+                    `New stems: ${Object.keys(result.split_stems).join(', ')}\n\n` +
+                    `Reloading to show new tracks...`
+                );
+
+                // Reload the job to show new stems
+                await loadJob(currentJob.job_id);
+
+            } catch (error) {
+                console.error('Split failed:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                btn.classList.remove('analyzing');
+                btn.textContent = '⇆';
+            }
+        }
+
+        function updateStemVolumes() {
+            const hasSolo = soloedStems.size > 0;
+
+            Object.entries(stemAudios).forEach(([name, data]) => {
+                let vol = data.volume;
+
+                if (hasSolo && !soloedStems.has(name)) vol = 0;
+                if (data.muted) vol = 0;
+
+                data.audio.volume = vol;
+            });
+        }
+
+        function updatePlaybackRate() {
+            Object.values(stemAudios).forEach(s => {
+                s.audio.playbackRate = playbackRate;
+            });
+        }
+
+        function togglePlayback() {
+            const btn = document.getElementById('playBtn');
+            if (isPlaying) {
+                Object.values(stemAudios).forEach(s => s.audio.pause());
+                btn.textContent = '▶';
+                isPlaying = false;
+            } else {
+                const currentTime = Object.values(stemAudios)[0]?.audio.currentTime || 0;
+                Object.values(stemAudios).forEach(s => {
+                    s.audio.currentTime = currentTime;
+                    s.audio.playbackRate = playbackRate;
+                    s.audio.play();
+                });
+                btn.textContent = '⏸';
+                isPlaying = true;
+            }
+        }
+
+        // Toggle AlphaTab's built-in MIDI synthesizer playback
+        function toggleTabPlayback() {
+            if (!alphaTabApi) {
+                console.warn('AlphaTab not initialized');
+                return;
+            }
+
+            const btn = document.getElementById('tabPlayBtn');
+
+            // Check if player is ready
+            if (!alphaTabApi.isReadyForPlayback) {
+                console.log('AlphaTab player not ready yet - SoundFont may still be loading');
+                btn.title = 'SoundFont still loading...';
+                return;
+            }
+
+            try {
+                // Log current state before toggle
+                const currentState = alphaTabApi.playerState;
+                console.log('[AlphaTab] Current player state:', currentState);
+                console.log('[AlphaTab] Score info:', {
+                    hasScore: !!alphaTabApi.score,
+                    masterBars: alphaTabApi.score?.masterBars?.length,
+                    tracks: alphaTabApi.score?.tracks?.length
+                });
+
+                // If stopped/paused, ensure we're at a valid position
+                if (currentState === 0) {  // Paused
+                    // Reset to start if at end or position is undefined
+                    if (alphaTabApi.timePosition === undefined ||
+                        (alphaTabApi.timePosition >= (alphaTabApi.score?.masterBars?.length || 1) * 2000)) {
+                        alphaTabApi.timePosition = 0;
+                    }
+                }
+
+                // Toggle playback
+                alphaTabApi.playPause();
+                console.log('[AlphaTab] Toggled playback, new state:', alphaTabApi.playerState);
+            } catch (e) {
+                console.error('[AlphaTab] Playback error:', e);
+                btn.title = 'Playback error: ' + e.message;
+            }
+        }
+
+        function seekTo(e) {
+            const timeline = document.getElementById('timeline');
+            const rect = timeline.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const seekTime = percent * duration;
+            Object.values(stemAudios).forEach(s => s.audio.currentTime = seekTime);
+
+            // Reset cursor tracking for seeking backwards
+            lastCursorIndex = -1;
+
+            // Immediately sync notation cursor to new position
+            syncNotationCursor(seekTime);
+        }
+
+        function updateTimeline() {
+            if (Object.keys(stemAudios).length === 0) return;
+            const audio = Object.values(stemAudios)[0].audio;
+            const percent = (audio.currentTime / duration) * 100 || 0;
+            document.getElementById('timelineProgress').style.width = `${percent}%`;
+            document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
+
+            // Update chord display
+            updateChordDisplay(audio.currentTime);
+
+            // Sync notation cursor with audio position
+            syncNotationCursor(audio.currentTime);
+
+            // Handle loop playback
+            if (loopEnabled && loopStart < loopEnd && audio.currentTime >= loopEnd && isPlaying) {
+                // Jump back to loop start
+                Object.values(stemAudios).forEach(s => s.audio.currentTime = loopStart);
+                lastCursorIndex = -1; // Reset cursor
+            }
+            // Handle end of track
+            else if (audio.currentTime >= duration - 0.1 && isPlaying) {
+                Object.values(stemAudios).forEach(s => s.audio.currentTime = 0);
+            }
+        }
+
+        // Sync notation cursor with audio playback (works for both OSMD and AlphaTab)
+        function syncNotationCursor(audioTimeSeconds) {
+            const indicator = document.getElementById('syncIndicator');
+            const syncText = document.getElementById('syncText');
+
+            // Handle OSMD cursor
+            if (currentRenderer === 'osmd' && osmd) {
+                try {
+                    // Always update custom cursor for smooth visual feedback
+                    updateCustomCursor();
+
+                    // Update sync indicator with measure number
+                    const measureNum = getOSMDMeasureAtTime(audioTimeSeconds) + 1;
+                    if (indicator) {
+                        indicator.classList.remove('inactive');
+                        syncText.textContent = `M${measureNum}`;
+                    }
+
+                    // If no cursor positions calculated yet, just use time-based cursor
+                    if (!osmdCursor || osmdCursorPositions.length === 0) {
+                        return;
+                    }
+
+                    if (isSyncing) return;
+                    isSyncing = true;
+
+                    // Find which cursor position we should be at (note-level accuracy)
+                    const targetIndex = getOSMDCursorIndexAtTime(audioTimeSeconds);
+
+                    // Only move OSMD cursor if we're at a different position
+                    if (targetIndex !== lastCursorIndex) {
+                        // Move cursor to target position
+                        if (targetIndex === 0 || targetIndex < lastCursorIndex) {
+                            // Reset to beginning
+                            osmdCursor.reset();
+                            for (let i = 0; i < targetIndex && !osmdCursor.iterator?.endReached; i++) {
+                                osmdCursor.next();
+                            }
+                        } else {
+                            // Advance from current position
+                            const stepsNeeded = targetIndex - lastCursorIndex;
+                            for (let i = 0; i < stepsNeeded && !osmdCursor.iterator?.endReached; i++) {
+                                osmdCursor.next();
+                            }
+                        }
+                        osmdCursor.update();
+                        lastCursorIndex = targetIndex;
+                    }
+
+                    isSyncing = false;
+                } catch (e) {
+                    console.warn('OSMD sync error:', e);
+                    isSyncing = false;
+                    // Still try to update custom cursor on error
+                    updateCustomCursor();
+                }
+                return;
+            }
+
+            // Handle AlphaTab cursor
+            if (!alphaTabApi || !alphaTabApi.score) {
+                if (indicator) {
+                    indicator.classList.add('inactive');
+                    syncText.textContent = 'No notation';
+                }
+                return;
+            }
+
+            // Use actual audio duration if available, otherwise use notation duration
+            const effectiveDuration = duration > 0 ? duration * 1000 : notationDuration;
+
+            if (effectiveDuration === 0) {
+                if (indicator) {
+                    indicator.classList.add('inactive');
+                    syncText.textContent = 'Calculating...';
+                }
+                return;
+            }
+
+            if (isSyncing) return;
+
+            try {
+                isSyncing = true;
+                const audioTimeMs = audioTimeSeconds * 1000;
+
+                // Calculate current measure for display
+                const measureCount = alphaTabApi.score.masterBars?.length || 1;
+                const currentMeasure = Math.floor((audioTimeMs / effectiveDuration) * measureCount) + 1;
+
+                // Update sync indicator with measure number
+                if (indicator) {
+                    indicator.classList.remove('inactive');
+                    syncText.textContent = `M${Math.min(currentMeasure, measureCount)}`;
+                }
+
+                // Calculate position - AlphaTab uses time in milliseconds
+                // Scale audio time to notation time (in case they differ)
+                const scaledTimeMs = (audioTimeMs / (duration * 1000 || effectiveDuration)) * notationDuration;
+
+                // Use the player's timePosition property for cursor sync
+                if (typeof alphaTabApi.timePosition !== 'undefined') {
+                    // Only update if difference is significant (>100ms)
+                    if (Math.abs(alphaTabApi.timePosition - scaledTimeMs) > 100) {
+                        alphaTabApi.timePosition = scaledTimeMs;
+                    }
+                } else if (alphaTabApi.tickPosition !== undefined && alphaTabApi.score) {
+                    // Fallback to tick-based position
+                    const totalTicks = alphaTabApi.score.masterBars.reduce((sum, bar) =>
+                        sum + (bar.calculateDuration ? bar.calculateDuration() : 960), 0);
+                    const tickPosition = Math.floor((scaledTimeMs / notationDuration) * totalTicks);
+
+                    if (Math.abs(alphaTabApi.tickPosition - tickPosition) > 500) {
+                        alphaTabApi.tickPosition = tickPosition;
+                    }
+                }
+                isSyncing = false;
+            } catch (e) {
+                console.warn('Sync error:', e);
+                isSyncing = false;
+                if (indicator) {
+                    indicator.classList.add('inactive');
+                    syncText.textContent = 'Sync error';
+                }
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        async function loadNotationForStem(stemType) {
+            if (!currentJob) return;
+
+            // Map tab view names to actual stem names
+            const stemMapping = {
+                'tab': 'guitar',      // "Guitar TAB" tab → guitar stem
+                'guitar': 'guitar',
+                'bass': 'bass',
+                'piano': 'piano',
+                'drums': 'drums',
+                'vocals': 'vocals'
+            };
+
+            // Get the actual stem name to look for
+            const actualStem = stemMapping[stemType] || stemType;
+
+            // Debug: log available files
+            console.log('Loading notation for:', stemType, '→ mapped to:', actualStem);
+            console.log('Available GP files:', currentJob.gp_files ? Object.keys(currentJob.gp_files) : 'none');
+            console.log('Available MIDI files:', currentJob.midi_files ? Object.keys(currentJob.midi_files) : 'none');
+            console.log('Available MusicXML files:', currentJob.musicxml_files ? Object.keys(currentJob.musicxml_files) : 'none');
+
+            // Helper function to find files matching a stem type (handles suffixes like _basic_pitch, _enhanced)
+            // Prefers _enhanced versions over _basic_pitch for better transcription quality
+            function findMatchingFile(filesDict, stemType) {
+                if (!filesDict) return null;
+                // Direct match first
+                if (filesDict[stemType]) return stemType;
+                // Look for files starting with the stem type, preferring enhanced
+                const keys = Object.keys(filesDict);
+                let enhancedMatch = null;
+                let basicMatch = null;
+                for (const key of keys) {
+                    if (key.startsWith(stemType + '_') || key === stemType) {
+                        if (key.includes('enhanced')) {
+                            enhancedMatch = key;
+                        } else if (!basicMatch) {
+                            basicMatch = key;
+                        }
+                    }
+                }
+                return enhancedMatch || basicMatch || null;
+            }
+
+            // Priority: Guitar Pro (best tabs) > MIDI > MusicXML
+            const gpMatch = findMatchingFile(currentJob.gp_files, actualStem);
+            const midiMatch = findMatchingFile(currentJob.midi_files, actualStem);
+            const xmlMatch = findMatchingFile(currentJob.musicxml_files, actualStem);
+
+            const hasGP = gpMatch !== null;
+            const hasMidi = midiMatch !== null;
+            const hasXml = xmlMatch !== null;
+
+            console.log(`GP match: ${gpMatch}, MIDI match: ${midiMatch}, XML match: ${xmlMatch}`);
+
+            // Determine which file type to load
+            // For Guitar/Bass: prefer GP files (has real TAB data with fret positions)
+            // For Piano/Other: prefer MusicXML (standard notation renders better)
+            let fileType = null;
+            let targetStem = stemType;
+
+            const isTabInstrument = actualStem.includes('guitar') || actualStem.includes('bass') || stemType === 'tab';
+
+            if (isTabInstrument) {
+                // Priority for guitar/bass: GP (has TAB) > MusicXML > MIDI
+                if (hasGP) {
+                    fileType = 'gp';
+                    targetStem = gpMatch;  // Use the actual matched stem name
+                    console.log('🎸 Using Guitar Pro for TAB display:', gpMatch);
+                } else if (hasXml) {
+                    fileType = 'musicxml';
+                    targetStem = xmlMatch;
+                    console.log('⚠️ No GP available, using MusicXML (standard notation only, no TAB)');
+                } else if (hasMidi) {
+                    fileType = 'midi';
+                    targetStem = midiMatch;
+                }
+            } else {
+                // Priority for piano/vocals/other: MusicXML (best rendering) > GP > MIDI
+                if (hasXml) {
+                    fileType = 'musicxml';
+                    targetStem = xmlMatch;
+                } else if (hasGP) {
+                    fileType = 'gp';
+                    targetStem = gpMatch;
+                } else if (hasMidi) {
+                    fileType = 'midi';
+                    targetStem = midiMatch;
+                }
+            }
+
+            // Fallback to any available file if nothing matches for this stem
+            if (!fileType) {
+                if (currentJob.gp_files && Object.keys(currentJob.gp_files).length > 0) {
+                    const available = Object.keys(currentJob.gp_files);
+                    targetStem = available[0];
+                    fileType = 'gp';
+                } else if (currentJob.musicxml_files && Object.keys(currentJob.musicxml_files).length > 0) {
+                    const available = Object.keys(currentJob.musicxml_files);
+                    targetStem = available[0];
+                    fileType = 'musicxml';
+                } else if (currentJob.midi_files && Object.keys(currentJob.midi_files).length > 0) {
+                    const available = Object.keys(currentJob.midi_files);
+                    targetStem = available[0];
+                    fileType = 'midi';
+                }
+            }
+
+            if (!fileType) {
+                console.log('No notation files available for', stemType);
+                const container = document.getElementById('alphaTab');
+                const gpStems = currentJob.gp_files ? Object.keys(currentJob.gp_files).join(', ') : 'none';
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f77;">
+                        <h3>📝 No Notation Available</h3>
+                        <p style="color: #888;">No Guitar Pro/MIDI files for "${stemType}"</p>
+                        <p style="color: #666; font-size: 0.85em;">Available GP tabs: ${gpStems}</p>
+                    </div>`;
+                return;
+            }
+
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            console.log(`Loading ${fileType} for ${targetStem}...`);
+
+            try {
+                const url = `${API_BASE}/download/${currentJob.job_id}/${fileType}/${targetStem}`;
+                console.log(`Fetching notation: ${url}`);
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    // Try to get error details from response
+                    let errorDetail = response.statusText;
+                    try {
+                        const errorJson = await response.json();
+                        errorDetail = errorJson.error || errorDetail;
+                    } catch (e) {
+                        // Not JSON, use text
+                        errorDetail = await response.text() || errorDetail;
+                    }
+                    throw new Error(`Server error: ${errorDetail}`);
+                }
+
+                const data = await response.arrayBuffer();
+                console.log(`Received ${data.byteLength} bytes for ${targetStem}`);
+
+                if (data.byteLength === 0) {
+                    throw new Error('Empty file received');
+                }
+
+                // Set proper filename extension based on type
+                const ext = fileType === 'gp' ? 'gp5' : fileType === 'midi' ? 'mid' : 'musicxml';
+                const filename = `${targetStem}.${ext}`;
+
+                // Use OSMD for MusicXML (much better rendering), AlphaTab for GP files
+                if (fileType === 'musicxml') {
+                    initOSMD(new Uint8Array(data), filename);
+                } else {
+                    initAlphaTab(new Uint8Array(data), filename);
+                }
+            } catch (error) {
+                console.error('Failed to load notation:', error);
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                const container = document.getElementById('alphaTab');
+
+                // Show available files for debugging
+                const availableGP = currentJob.gp_files ? Object.keys(currentJob.gp_files).join(', ') : 'none';
+                const availableMidi = currentJob.midi_files ? Object.keys(currentJob.midi_files).join(', ') : 'none';
+
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f77;">
+                        <h3>⚠️ Failed to Load Notation</h3>
+                        <p style="color: #888;">${error.message}</p>
+                        <p style="color: #666; font-size: 0.85em; margin-top: 15px;">
+                            Available GP: ${availableGP}<br>
+                            Available MIDI: ${availableMidi}
+                        </p>
+                        <p style="color: #666; font-size: 0.8em; margin-top: 10px;">
+                            Try refreshing or loading a GP file directly.
+                        </p>
+                    </div>`;
+            }
+        }
+
+        // Helper function to update loading status
+        function updateStatus(msg) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.innerHTML = `<div class="spinner"></div><div>${msg}</div>`;
+                loadingOverlay.classList.remove('hidden');
+            }
+            console.log(`[Notation] ${msg}`);
+        }
+
+        // =========================================================
+        // OpenSheetMusicDisplay - For MusicXML rendering
+        // This is mature, proven technology (same as MuseScore, Logic, etc.)
+        // =========================================================
+        async function initOSMD(data, filename) {
+            const container = document.getElementById('alphaTab');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // Hide loading overlay function
+            function hideLoading() {
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.style.display = 'none';
+            }
+
+            // Create OSMD container with cursor overlay
+            container.innerHTML = `
+                <div id="osmd-container">
+                    <div id="osmd-custom-cursor"></div>
+                </div>
+            `;
+            const osmdContainer = document.getElementById('osmd-container');
+
+            // Style custom cursor - always visible playback indicator
+            const customCursor = document.getElementById('osmd-custom-cursor');
+            customCursor.style.cssText = `
+                position: absolute;
+                top: 280px;
+                left: 100px;
+                width: 6px;
+                height: 150px;
+                background: linear-gradient(180deg, #ff0000, #ff6600);
+                border-radius: 3px;
+                box-shadow: 0 0 30px rgba(255, 0, 0, 1), 0 0 60px rgba(255, 100, 0, 0.8);
+                z-index: 9999;
+                pointer-events: none;
+                display: block;
+                transition: left 0.08s linear, top 0.1s ease-out;
+            `;
+            console.log('[OSMD] Custom cursor created at:', customCursor.style.left, customCursor.style.top);
+
+            // Style for visibility - white background for notation
+            // IMPORTANT: position:relative needed for cursor positioning!
+            osmdContainer.style.cssText = `
+                width: 100%;
+                min-height: 500px;
+                background: #ffffff !important;
+                padding: 20px;
+                border-radius: 8px;
+                overflow-y: auto;
+                max-height: calc(100vh - 200px);
+                position: relative;
+            `;
+            // Force white background on any SVG elements too
+            osmdContainer.querySelectorAll('svg').forEach(svg => {
+                svg.style.background = '#ffffff';
+            });
+
+            currentRenderer = 'osmd';
+            lastCursorIndex = -1;  // Reset cursor tracking
+            console.log(`[OSMD] Loading ${filename}...`);
+
+            try {
+                // Convert Uint8Array to string
+                const decoder = new TextDecoder('utf-8');
+                const xmlString = decoder.decode(data);
+                console.log(`[OSMD] XML loaded: ${xmlString.length} chars`);
+
+                // Create OSMD instance with cursor enabled
+                osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(osmdContainer, {
+                    autoResize: true,
+                    backend: 'svg',
+                    drawTitle: false,  // Title already shown in header
+                    drawComposer: false, // Composer shown in header
+                    drawPartNames: true,
+                    drawMeasureNumbers: true,
+                    followCursor: true,  // Auto-scroll to cursor
+                    cursorsOptions: [{
+                        type: 0, // Standard cursor
+                        color: '#ff7b54',  // Match StemScribe orange
+                        alpha: 0.6,
+                        follow: true
+                    }]
+                });
+
+                console.log('[OSMD] Parsing...');
+                await osmd.load(xmlString);
+
+                console.log('[OSMD] Rendering...');
+                osmd.render();
+
+                // Enable and show cursor
+                osmdCursor = osmd.cursor;
+                console.log('[OSMD] Cursor object:', osmdCursor);
+
+                if (osmdCursor) {
+                    osmdCursor.show();
+                    osmdCursor.reset();
+
+                    // Debug: Check what cursor properties exist
+                    console.log('[OSMD] Cursor cursorElement:', osmdCursor.cursorElement);
+                    console.log('[OSMD] Cursor hidden:', osmdCursor.hidden);
+                    console.log('[OSMD] Cursor iterator:', osmdCursor.iterator);
+
+                    // Style the cursor element directly for visibility
+                    const cursorElement = osmdCursor.cursorElement;
+                    if (cursorElement) {
+                        cursorElement.style.cssText = `
+                            background: linear-gradient(180deg, rgba(255, 123, 84, 0.7), rgba(255, 107, 157, 0.5)) !important;
+                            border: 2px solid #ff7b54 !important;
+                            border-radius: 4px !important;
+                            box-shadow: 0 0 15px rgba(255, 123, 84, 0.8) !important;
+                            z-index: 100 !important;
+                            pointer-events: none !important;
+                            min-width: 3px !important;
+                            min-height: 50px !important;
+                            display: block !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                        `;
+                        console.log('[OSMD] Cursor element styled, dimensions:',
+                            cursorElement.offsetWidth, 'x', cursorElement.offsetHeight,
+                            'position:', cursorElement.style.left, cursorElement.style.top);
+                    } else {
+                        console.log('[OSMD] No cursorElement - using custom cursor overlay');
+                    }
+
+                    // Always show custom cursor as backup
+                    const customCursor = document.getElementById('osmd-custom-cursor');
+                    if (customCursor) {
+                        customCursor.style.display = 'block';
+                        console.log('[OSMD] Custom cursor enabled');
+                    }
+
+                    console.log('[OSMD] Cursor initialized');
+                } else {
+                    console.log('[OSMD] No cursor object available - using custom cursor');
+                    // Still show custom cursor even without OSMD cursor
+                    const customCursor = document.getElementById('osmd-custom-cursor');
+                    if (customCursor) {
+                        customCursor.style.display = 'block';
+                    }
+                }
+
+                // Calculate measure timestamps for cursor sync
+                calculateOSMDMeasureTimes();
+
+                // Initialize custom cursor position
+                updateCustomCursor();
+
+                // Log success
+                const measures = osmd.sheet?.sourceMeasures?.length || 0;
+                console.log(`[OSMD] ✅ Done! ${measures} measures`);
+
+                // CRITICAL: Hide loading overlay
+                hideLoading();
+
+            } catch (error) {
+                console.error('[OSMD] Error:', error);
+                hideLoading();
+
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f77;">
+                        <h3>⚠️ Notation Rendering Failed</h3>
+                        <p style="color: #888;">${error.message}</p>
+                        <div style="margin-top: 20px;">
+                            <p style="color: #aaa;">Try a Guitar Pro file instead:</p>
+                            <input type="file" accept=".gp,.gp3,.gp4,.gp5,.gpx"
+                                   style="margin-top: 10px;" onchange="handleFileSelect(event)">
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // Calculate timestamps for each cursor position (beat/note level) in OSMD
+        let osmdCursorPositions = []; // {time: seconds, index: cursorIndex}
+        let lastCursorIndex = -1;
+
+        function calculateOSMDMeasureTimes() {
+            osmdMeasureTimes = [];
+            osmdCursorPositions = [];
+            if (!osmd || !osmd.sheet) return;
+
+            try {
+                // Get tempo from OSMD (defaults to 120)
+                osmdTempo = osmd.sheet.defaultStartTempoInBpm || 120;
+                console.log(`[OSMD] Tempo: ${osmdTempo} BPM`);
+
+                // Calculate time for each measure
+                let currentTime = 0;
+                const sourceMeasures = osmd.sheet.sourceMeasures;
+
+                for (let i = 0; i < sourceMeasures.length; i++) {
+                    osmdMeasureTimes.push(currentTime);
+
+                    // Get measure duration in beats (quarter notes)
+                    const measure = sourceMeasures[i];
+                    const timeSignature = measure.activeTimeSignature;
+                    const beatsPerMeasure = timeSignature ?
+                        (timeSignature.numerator * (4 / timeSignature.denominator)) : 4;
+
+                    // Convert to seconds based on tempo
+                    const measureDuration = (beatsPerMeasure * 60) / osmdTempo;
+                    currentTime += measureDuration;
+                }
+
+                // Store total notation duration
+                notationDuration = currentTime * 1000; // Convert to ms
+
+                // Now calculate cursor positions by walking through the score
+                calculateCursorPositions();
+
+                console.log(`[OSMD] ${sourceMeasures.length} measures, ${osmdCursorPositions.length} cursor positions, total duration: ${currentTime.toFixed(1)}s`);
+
+            } catch (e) {
+                console.warn('[OSMD] Could not calculate measure times:', e);
+            }
+        }
+
+        // Walk through entire score and record time for each cursor position
+        function calculateCursorPositions() {
+            if (!osmdCursor) return;
+
+            osmdCursor.reset();
+            let cursorIndex = 0;
+
+            while (!osmdCursor.iterator?.endReached) {
+                const timestamp = osmdCursor.iterator?.currentTimeStamp;
+                if (timestamp) {
+                    // timestamp is in fractions (realValue is decimal)
+                    const beatPosition = timestamp.realValue || 0;
+                    const timeSeconds = (beatPosition * 60) / osmdTempo;
+                    osmdCursorPositions.push({
+                        time: timeSeconds,
+                        index: cursorIndex
+                    });
+                }
+                osmdCursor.next();
+                cursorIndex++;
+            }
+
+            // Reset cursor to beginning
+            osmdCursor.reset();
+        }
+
+        // Find the cursor position index for a given time in seconds
+        function getOSMDCursorIndexAtTime(timeSeconds) {
+            for (let i = osmdCursorPositions.length - 1; i >= 0; i--) {
+                if (timeSeconds >= osmdCursorPositions[i].time) {
+                    return osmdCursorPositions[i].index;
+                }
+            }
+            return 0;
+        }
+
+        // Find the measure index for a given time in seconds
+        function getOSMDMeasureAtTime(timeSeconds) {
+            for (let i = osmdMeasureTimes.length - 1; i >= 0; i--) {
+                if (timeSeconds >= osmdMeasureTimes[i]) {
+                    return i;
+                }
+            }
+            return 0;
+        }
+
+        // Update custom cursor position based on OSMD cursor or measure boxes
+        function updateCustomCursor() {
+            const customCursor = document.getElementById('osmd-custom-cursor');
+            const osmdContainer = document.getElementById('osmd-container');
+            if (!customCursor || !osmdContainer) return;
+
+            try {
+                // Method 1: Try to get position from OSMD cursor element (div)
+                if (osmdCursor && osmdCursor.cursorElement) {
+                    const osmdCursorEl = osmdCursor.cursorElement;
+                    const rect = osmdCursorEl.getBoundingClientRect();
+                    const containerRect = osmdContainer.getBoundingClientRect();
+
+                    if (rect.width > 0 && rect.height > 0) {
+                        customCursor.style.left = (rect.left - containerRect.left + osmdContainer.scrollLeft) + 'px';
+                        customCursor.style.top = (rect.top - containerRect.top + osmdContainer.scrollTop) + 'px';
+                        customCursor.style.height = rect.height + 'px';
+                        customCursor.style.display = 'block';
+                        return;
+                    }
+                }
+
+                // Method 2: Find OSMD's SVG cursor element
+                const svgCursor = osmdContainer.querySelector('.cursor, [class*="cursor"], rect[fill*="255"]');
+                if (svgCursor) {
+                    const rect = svgCursor.getBoundingClientRect();
+                    const containerRect = osmdContainer.getBoundingClientRect();
+                    if (rect.width > 0) {
+                        customCursor.style.left = (rect.left - containerRect.left + osmdContainer.scrollLeft) + 'px';
+                        customCursor.style.top = (rect.top - containerRect.top + osmdContainer.scrollTop) + 'px';
+                        customCursor.style.height = rect.height + 'px';
+                        customCursor.style.display = 'block';
+                        return;
+                    }
+                }
+
+                // Method 3: Use measure bounding boxes if we have the measure index
+                if (osmd && osmd.GraphicSheet) {
+                    const measureIdx = getOSMDMeasureAtTime(getCurrentAudioTime());
+                    const measureBoxes = osmd.GraphicSheet.MeasureList;
+
+                    if (measureBoxes && measureBoxes[measureIdx]) {
+                        const measure = measureBoxes[measureIdx][0]; // First staff
+                        if (measure && measure.PositionAndShape) {
+                            const pos = measure.PositionAndShape;
+                            const zoom = osmd.zoom || 1;
+                            const x = pos.AbsolutePosition.x * 10 * zoom;
+                            const y = pos.AbsolutePosition.y * 10 * zoom;
+                            const height = pos.Size.height * 10 * zoom;
+
+                            customCursor.style.left = (x + 20) + 'px';
+                            customCursor.style.top = (y + 20) + 'px';
+                            customCursor.style.height = Math.max(height, 80) + 'px';
+                            customCursor.style.display = 'block';
+                            return;
+                        }
+                    }
+                }
+
+                // Method 4: Find notes in the SVG and position near them
+                if (osmdCursor && osmdCursor.iterator) {
+                    const voiceEntry = osmdCursor.iterator.CurrentVoiceEntries?.[0];
+                    if (voiceEntry && voiceEntry.Notes?.[0]) {
+                        const note = voiceEntry.Notes[0];
+                        // Try to find this note's graphical element
+                        const noteId = note.NoteToGraphicalNoteObjectId;
+                        if (noteId) {
+                            const noteEl = osmdContainer.querySelector(`[id*="${noteId}"], g[data-note]`);
+                            if (noteEl) {
+                                const rect = noteEl.getBoundingClientRect();
+                                const containerRect = osmdContainer.getBoundingClientRect();
+                                customCursor.style.left = (rect.left - containerRect.left - 5) + 'px';
+                                customCursor.style.top = (rect.top - containerRect.top - 20) + 'px';
+                                customCursor.style.height = '80px';
+                                customCursor.style.display = 'block';
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // Method 5: Simple time-based positioning across the notation
+                // This is the most reliable fallback - just move cursor based on time
+                const audioTime = getCurrentAudioTime();
+                const audioDuration = duration || 1; // Use audio duration, not notation
+                const svgElement = osmdContainer.querySelector('svg');
+
+                if (svgElement && audioDuration > 0) {
+                    const progress = Math.min(1, audioTime / audioDuration);
+                    const svgRect = svgElement.getBoundingClientRect();
+                    const containerRect = osmdContainer.getBoundingClientRect();
+
+                    // Horizontal position based on progress
+                    const startX = 100;
+                    const endX = Math.max(svgRect.width - 50, 500);
+                    const x = startX + progress * (endX - startX);
+
+                    // Find first staff line for vertical position, or use default
+                    let staffY = 260; // Default position near first staff
+                    const staffLines = svgElement.querySelectorAll('line');
+                    if (staffLines.length > 5) {
+                        const firstStaffLine = staffLines[0];
+                        const lineRect = firstStaffLine.getBoundingClientRect();
+                        staffY = lineRect.top - containerRect.top + osmdContainer.scrollTop - 20;
+                    }
+
+                    customCursor.style.left = x + 'px';
+                    customCursor.style.top = Math.max(staffY, 100) + 'px';
+                    customCursor.style.height = '150px';
+                    customCursor.style.display = 'block';
+
+                    // Debug logging (every 2 seconds)
+                    if (Math.floor(audioTime) % 2 === 0 && Math.floor(audioTime * 10) % 10 === 0) {
+                        console.log(`[Cursor] time=${audioTime.toFixed(1)}s, progress=${(progress*100).toFixed(0)}%, x=${x.toFixed(0)}px`);
+                    }
+                }
+
+            } catch (e) {
+                console.warn('Custom cursor update error:', e);
+            }
+        }
+
+        // Helper to get current audio time
+        function getCurrentAudioTime() {
+            const firstAudio = Object.values(stemAudios)[0];
+            return firstAudio ? firstAudio.audio.currentTime : 0;
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('noJobState').style.display = 'none';
+                document.getElementById('loadingOverlay').classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const filename = file.name.toLowerCase();
+
+                    // Use OSMD for MusicXML, AlphaTab for everything else
+                    if (filename.endsWith('.musicxml') || filename.endsWith('.xml')) {
+                        initOSMD(data, file.name);
+                    } else {
+                        initAlphaTab(data, file.name);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function initAlphaTab(data, filename) {
+            const container = document.getElementById('alphaTab');
+            container.innerHTML = '';
+
+            console.log(`[AlphaTab] Initializing with ${data.byteLength} bytes for ${filename}`);
+            console.log(`[AlphaTab] First 20 bytes:`, Array.from(data.slice(0, 20)).map(b => b.toString(16).padStart(2, '0')).join(' '));
+
+            // AlphaTab 1.3.x settings - file must be at ROOT level, not in core!
+            const settings = {
+                core: {
+                    engine: 'html5',
+                    logLevel: 1  // Verbose logging
+                },
+                display: {
+                    scale: 0.9,
+                    resources: {
+                        staffLineColor: '#555',
+                        mainGlyphColor: '#fff',
+                        scoreInfoColor: '#e8e4df',
+                        secondaryGlyphColor: '#aaa',
+                        barSeparatorColor: '#666'
+                    }
+                },
+                notation: {
+                    elements: {
+                        scoreTitle: true,
+                        scoreSubTitle: true,
+                        scoreArtist: true,
+                        scoreAlbum: true,
+                        scoreWords: true,
+                        scoreMusic: true,
+                        scoreCopyright: true,
+                        guitarTuning: true,
+                        trackNames: true,
+                        chordDiagrams: true
+                    }
+                },
+                player: {
+                    enablePlayer: true,   // Enable for cursor support
+                    enableCursor: true,   // Show cursor during playback
+                    enableUserInteraction: true,  // Allow clicking to seek
+                    scrollMode: 1         // alphaTab.ScrollMode.Continuous
+                    // NOTE: SoundFont removed - was causing looping bug
+                    // Use stem audio player instead (orange play button)
+                }
+            };
+
+            console.log(`[AlphaTab] Settings:`, JSON.stringify(settings, null, 2));
+
+            // Show status on loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const updateStatus = (msg) => {
+                loadingOverlay.innerHTML = `<div class="loading-spinner"></div><span>${msg}</span>`;
+            };
+            updateStatus(`Initializing AlphaTab for ${filename}...`);
+
+            try {
+                updateStatus('Creating AlphaTab instance...');
+                alphaTabApi = new alphaTab.AlphaTabApi(container, settings);
+
+                // Set up event handlers BEFORE loading (avoid race condition)
+                alphaTabApi.scoreLoaded.on((score) => {
+                    updateStatus(`Score loaded! ${score.masterBars?.length || 0} bars. Rendering...`);
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    if (!currentJob) {
+                        document.getElementById('songTitle').textContent = score.title || filename;
+                        document.getElementById('songArtist').textContent = score.artist || '';
+                    }
+
+                    // Calculate notation duration in milliseconds
+                    if (score && score.masterBars) {
+                        try {
+                            // Get tempo and calculate duration
+                            const tempo = score.tempo || 120;
+                            const ticksPerBeat = 960; // Standard MIDI ticks per beat
+                            let totalTicks = 0;
+                            score.masterBars.forEach(bar => {
+                                const timeSignature = bar.timeSignature;
+                                const beatsPerBar = timeSignature ? (timeSignature.numerator * 4 / timeSignature.denominator.value) : 4;
+                                totalTicks += beatsPerBar * ticksPerBeat;
+                            });
+                            notationDuration = (totalTicks / ticksPerBeat) * (60000 / tempo);
+                            console.log(`Notation duration: ${notationDuration}ms (${score.masterBars.length} bars @ ${tempo} BPM)`);
+                        } catch (e) {
+                            console.warn('Could not calculate notation duration:', e);
+                        }
+                    }
+                });
+
+                alphaTabApi.renderStarted.on(() => {
+                    updateStatus('Rendering notation...');
+                });
+
+                alphaTabApi.renderFinished.on(() => {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    console.log('[AlphaTab] Render finished');
+                });
+
+                // Player ready event - when SoundFont is loaded and ready to play
+                alphaTabApi.playerReady.on(() => {
+                    console.log('[AlphaTab] Player ready - SoundFont loaded!');
+                    // Show the tab play button if it exists
+                    const tabPlayBtn = document.getElementById('tabPlayBtn');
+                    if (tabPlayBtn) {
+                        tabPlayBtn.disabled = false;
+                        tabPlayBtn.title = 'Play synthesized guitar from TAB (click to play)';
+                    }
+
+                    // Set master volume to ensure audio is audible
+                    try {
+                        alphaTabApi.masterVolume = 1.0;
+                        // Set track volume
+                        if (alphaTabApi.score && alphaTabApi.score.tracks.length > 0) {
+                            alphaTabApi.changeTrackVolume([alphaTabApi.score.tracks[0]], 1.0);
+                        }
+                        console.log('[AlphaTab] Volume set to 1.0');
+                    } catch (e) {
+                        console.warn('[AlphaTab] Could not set volume:', e);
+                    }
+                });
+
+                // Player state changed event
+                alphaTabApi.playerStateChanged.on((e) => {
+                    console.log('[AlphaTab] Player state changed:', e.state);
+                    const tabPlayBtn = document.getElementById('tabPlayBtn');
+                    if (tabPlayBtn) {
+                        // 0 = Paused, 1 = Playing
+                        tabPlayBtn.textContent = e.state === 1 ? '⏸️ Tab' : '▶️ Tab';
+                    }
+                });
+
+                // Position changed event for cursor sync
+                alphaTabApi.playerPositionChanged.on((e) => {
+                    // Update sync indicator with position
+                    const syncText = document.getElementById('syncText');
+                    if (syncText && alphaTabApi.isReadyForPlayback) {
+                        syncText.textContent = `${formatTime(e.currentTime / 1000)} / ${formatTime(e.endTime / 1000)}`;
+                    }
+                });
+
+                // Error handling for load failures
+                alphaTabApi.error.on((e) => {
+                    console.error('AlphaTab error:', e);
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #f77;">
+                            <h3>⚠️ Notation Load Failed</h3>
+                            <p style="color: #888;">${e.message || 'Could not render notation for this stem'}</p>
+                            <p style="color: #666; font-size: 0.85em;">Try a different stem or load a Guitar Pro file directly.</p>
+                        </div>`;
+                });
+
+                // NOW load the file (after all handlers are attached)
+                updateStatus('Loading GP file data...');
+                alphaTabApi.load(data);
+
+                // Timeout failsafe - hide loading after 15 seconds
+                setTimeout(() => {
+                    const overlay = document.getElementById('loadingOverlay');
+                    if (!overlay.classList.contains('hidden')) {
+                        overlay.classList.add('hidden');
+                        if (!container.querySelector('.at-main')) {
+                            // Show helpful message with options
+                            const hasMusicXml = currentJob?.musicxml_files && Object.keys(currentJob.musicxml_files).length > 0;
+                            container.innerHTML = `
+                                <div style="text-align: center; padding: 40px; color: #f77;">
+                                    <h3>📝 Notation Preview</h3>
+                                    <p style="color: #888; margin: 15px 0;">Auto-generated MIDI visualization isn't available yet.</p>
+                                    <p style="color: #aaa; font-size: 0.9em; margin-bottom: 20px;">
+                                        For now, use the stem audio player on the left to practice.
+                                    </p>
+                                    <div style="margin-top: 20px;">
+                                        <label style="display: inline-block; padding: 10px 20px; background: var(--psych-purple); border-radius: 8px; cursor: pointer;">
+                                            📂 Load Guitar Pro File
+                                            <input type="file" id="gpFileInput" accept=".gp,.gp3,.gp4,.gp5,.gpx" style="display: none;"
+                                                onchange="handleFileSelect(event)">
+                                        </label>
+                                    </div>
+                                    <p style="color: #666; font-size: 0.8em; margin-top: 15px;">
+                                        Tip: Download tabs from Ultimate Guitar or Songsterr
+                                    </p>
+                                </div>`;
+                        }
+                    }
+                }, 15000);  // 15 second timeout
+            } catch (err) {
+                console.error('AlphaTab initialization failed:', err);
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f77;">
+                        <h3>⚠️ Notation Error</h3>
+                        <p style="color: #888;">${err.message || 'Failed to initialize notation viewer'}</p>
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

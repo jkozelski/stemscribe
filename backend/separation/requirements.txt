@@ -1,0 +1,22 @@
+# StemScribe Ensemble Separation System
+# Moises.ai-quality audio separation using open-source models
+
+# Core ML frameworks
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# Demucs v4 - primary separation models
+demucs>=4.0.0
+
+# Audio processing
+soundfile>=0.12.0
+librosa>=0.10.0
+scipy>=1.10.0
+numpy>=1.24.0
+
+# Post-processing
+noisereduce>=3.0.0
+pyloudnorm>=0.1.0
+
+# System monitoring
+psutil>=5.9.0

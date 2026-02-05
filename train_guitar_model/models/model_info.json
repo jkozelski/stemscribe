@@ -1,0 +1,2009 @@
+{
+  "timestamp": "2026-02-05T09:41:28.924299",
+  "model_class": "MelBandRoformer",
+  "model_module": "models.bs_roformer.mel_band_roformer",
+  "parameters": {
+    "total": 15769956,
+    "trainable": 15769892,
+    "non_trainable": 64,
+    "total_millions": 15.77,
+    "trainable_millions": 15.77
+  },
+  "memory": {
+    "parameters_mb": 60.16,
+    "buffers_mb": 0.1,
+    "total_mb": 60.25
+  },
+  "layers": [
+    {
+      "name": "layers.0.0.layers.0.0.rotary_embed",
+      "type": "RotaryEmbedding",
+      "parameters": 32
+    },
+    {
+      "name": "layers.0.0.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.0.0.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.0.0.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.0.0.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.0.0.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.0.0.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.0.0.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.0.1.layers.0.0.rotary_embed",
+      "type": "RotaryEmbedding",
+      "parameters": 32
+    },
+    {
+      "name": "layers.0.1.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.0.1.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.0.1.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.0.1.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.0.1.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.0.1.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.0.1.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.0.1.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.1.0.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.1.0.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.1.0.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.1.0.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.1.0.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.1.0.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.1.0.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.1.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.1.1.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.1.1.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.1.1.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.1.1.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.1.1.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.1.1.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.1.1.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.1.1.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.2.0.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.2.0.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.2.0.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.2.0.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.2.0.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.2.0.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.2.0.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.2.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.2.1.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.2.1.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.2.1.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.2.1.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.2.1.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.2.1.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.2.1.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.2.1.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.3.0.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.3.0.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.3.0.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.3.0.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.3.0.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.3.0.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.3.0.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.3.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.3.1.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.3.1.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.3.1.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.3.1.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.3.1.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.3.1.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.3.1.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.3.1.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.4.0.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.4.0.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.4.0.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.4.0.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.4.0.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.4.0.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.4.0.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.4.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.4.1.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.4.1.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.4.1.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.4.1.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.4.1.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.4.1.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.4.1.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.4.1.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.5.0.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.5.0.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.5.0.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.5.0.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.5.0.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.5.0.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.5.0.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.5.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.5.1.layers.0.0.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.5.1.layers.0.0.to_qkv",
+      "type": "Linear",
+      "parameters": 196608
+    },
+    {
+      "name": "layers.5.1.layers.0.0.to_gates",
+      "type": "Linear",
+      "parameters": 1032
+    },
+    {
+      "name": "layers.5.1.layers.0.0.to_out.0",
+      "type": "Linear",
+      "parameters": 65536
+    },
+    {
+      "name": "layers.5.1.layers.0.1.net.0",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "layers.5.1.layers.0.1.net.1",
+      "type": "Linear",
+      "parameters": 66048
+    },
+    {
+      "name": "layers.5.1.layers.0.1.net.4",
+      "type": "Linear",
+      "parameters": 65664
+    },
+    {
+      "name": "layers.5.1.norm",
+      "type": "RMSNorm",
+      "parameters": 128
+    },
+    {
+      "name": "band_split.to_features.0.0",
+      "type": "RMSNorm",
+      "parameters": 28
+    },
+    {
+      "name": "band_split.to_features.0.1",
+      "type": "Linear",
+      "parameters": 3712
+    },
+    {
+      "name": "band_split.to_features.1.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.1.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.2.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.2.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.3.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.3.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.4.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.4.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.5.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.5.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.6.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.6.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.7.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.7.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.8.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.8.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.9.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.9.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.10.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.10.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.11.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.11.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.12.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.12.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.13.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.13.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.14.0",
+      "type": "RMSNorm",
+      "parameters": 24
+    },
+    {
+      "name": "band_split.to_features.14.1",
+      "type": "Linear",
+      "parameters": 3200
+    },
+    {
+      "name": "band_split.to_features.15.0",
+      "type": "RMSNorm",
+      "parameters": 28
+    },
+    {
+      "name": "band_split.to_features.15.1",
+      "type": "Linear",
+      "parameters": 3712
+    },
+    {
+      "name": "band_split.to_features.16.0",
+      "type": "RMSNorm",
+      "parameters": 28
+    },
+    {
+      "name": "band_split.to_features.16.1",
+      "type": "Linear",
+      "parameters": 3712
+    },
+    {
+      "name": "band_split.to_features.17.0",
+      "type": "RMSNorm",
+      "parameters": 28
+    },
+    {
+      "name": "band_split.to_features.17.1",
+      "type": "Linear",
+      "parameters": 3712
+    },
+    {
+      "name": "band_split.to_features.18.0",
+      "type": "RMSNorm",
+      "parameters": 36
+    },
+    {
+      "name": "band_split.to_features.18.1",
+      "type": "Linear",
+      "parameters": 4736
+    },
+    {
+      "name": "band_split.to_features.19.0",
+      "type": "RMSNorm",
+      "parameters": 36
+    },
+    {
+      "name": "band_split.to_features.19.1",
+      "type": "Linear",
+      "parameters": 4736
+    },
+    {
+      "name": "band_split.to_features.20.0",
+      "type": "RMSNorm",
+      "parameters": 36
+    },
+    {
+      "name": "band_split.to_features.20.1",
+      "type": "Linear",
+      "parameters": 4736
+    },
+    {
+      "name": "band_split.to_features.21.0",
+      "type": "RMSNorm",
+      "parameters": 40
+    },
+    {
+      "name": "band_split.to_features.21.1",
+      "type": "Linear",
+      "parameters": 5248
+    },
+    {
+      "name": "band_split.to_features.22.0",
+      "type": "RMSNorm",
+      "parameters": 40
+    },
+    {
+      "name": "band_split.to_features.22.1",
+      "type": "Linear",
+      "parameters": 5248
+    },
+    {
+      "name": "band_split.to_features.23.0",
+      "type": "RMSNorm",
+      "parameters": 44
+    },
+    {
+      "name": "band_split.to_features.23.1",
+      "type": "Linear",
+      "parameters": 5760
+    },
+    {
+      "name": "band_split.to_features.24.0",
+      "type": "RMSNorm",
+      "parameters": 52
+    },
+    {
+      "name": "band_split.to_features.24.1",
+      "type": "Linear",
+      "parameters": 6784
+    },
+    {
+      "name": "band_split.to_features.25.0",
+      "type": "RMSNorm",
+      "parameters": 52
+    },
+    {
+      "name": "band_split.to_features.25.1",
+      "type": "Linear",
+      "parameters": 6784
+    },
+    {
+      "name": "band_split.to_features.26.0",
+      "type": "RMSNorm",
+      "parameters": 52
+    },
+    {
+      "name": "band_split.to_features.26.1",
+      "type": "Linear",
+      "parameters": 6784
+    },
+    {
+      "name": "band_split.to_features.27.0",
+      "type": "RMSNorm",
+      "parameters": 60
+    },
+    {
+      "name": "band_split.to_features.27.1",
+      "type": "Linear",
+      "parameters": 7808
+    },
+    {
+      "name": "band_split.to_features.28.0",
+      "type": "RMSNorm",
+      "parameters": 64
+    },
+    {
+      "name": "band_split.to_features.28.1",
+      "type": "Linear",
+      "parameters": 8320
+    },
+    {
+      "name": "band_split.to_features.29.0",
+      "type": "RMSNorm",
+      "parameters": 68
+    },
+    {
+      "name": "band_split.to_features.29.1",
+      "type": "Linear",
+      "parameters": 8832
+    },
+    {
+      "name": "band_split.to_features.30.0",
+      "type": "RMSNorm",
+      "parameters": 76
+    },
+    {
+      "name": "band_split.to_features.30.1",
+      "type": "Linear",
+      "parameters": 9856
+    },
+    {
+      "name": "band_split.to_features.31.0",
+      "type": "RMSNorm",
+      "parameters": 80
+    },
+    {
+      "name": "band_split.to_features.31.1",
+      "type": "Linear",
+      "parameters": 10368
+    },
+    {
+      "name": "band_split.to_features.32.0",
+      "type": "RMSNorm",
+      "parameters": 80
+    },
+    {
+      "name": "band_split.to_features.32.1",
+      "type": "Linear",
+      "parameters": 10368
+    },
+    {
+      "name": "band_split.to_features.33.0",
+      "type": "RMSNorm",
+      "parameters": 88
+    },
+    {
+      "name": "band_split.to_features.33.1",
+      "type": "Linear",
+      "parameters": 11392
+    },
+    {
+      "name": "band_split.to_features.34.0",
+      "type": "RMSNorm",
+      "parameters": 96
+    },
+    {
+      "name": "band_split.to_features.34.1",
+      "type": "Linear",
+      "parameters": 12416
+    },
+    {
+      "name": "band_split.to_features.35.0",
+      "type": "RMSNorm",
+      "parameters": 104
+    },
+    {
+      "name": "band_split.to_features.35.1",
+      "type": "Linear",
+      "parameters": 13440
+    },
+    {
+      "name": "band_split.to_features.36.0",
+      "type": "RMSNorm",
+      "parameters": 112
+    },
+    {
+      "name": "band_split.to_features.36.1",
+      "type": "Linear",
+      "parameters": 14464
+    },
+    {
+      "name": "band_split.to_features.37.0",
+      "type": "RMSNorm",
+      "parameters": 116
+    },
+    {
+      "name": "band_split.to_features.37.1",
+      "type": "Linear",
+      "parameters": 14976
+    },
+    {
+      "name": "band_split.to_features.38.0",
+      "type": "RMSNorm",
+      "parameters": 124
+    },
+    {
+      "name": "band_split.to_features.38.1",
+      "type": "Linear",
+      "parameters": 16000
+    },
+    {
+      "name": "band_split.to_features.39.0",
+      "type": "RMSNorm",
+      "parameters": 132
+    },
+    {
+      "name": "band_split.to_features.39.1",
+      "type": "Linear",
+      "parameters": 17024
+    },
+    {
+      "name": "band_split.to_features.40.0",
+      "type": "RMSNorm",
+      "parameters": 144
+    },
+    {
+      "name": "band_split.to_features.40.1",
+      "type": "Linear",
+      "parameters": 18560
+    },
+    {
+      "name": "band_split.to_features.41.0",
+      "type": "RMSNorm",
+      "parameters": 156
+    },
+    {
+      "name": "band_split.to_features.41.1",
+      "type": "Linear",
+      "parameters": 20096
+    },
+    {
+      "name": "band_split.to_features.42.0",
+      "type": "RMSNorm",
+      "parameters": 164
+    },
+    {
+      "name": "band_split.to_features.42.1",
+      "type": "Linear",
+      "parameters": 21120
+    },
+    {
+      "name": "band_split.to_features.43.0",
+      "type": "RMSNorm",
+      "parameters": 176
+    },
+    {
+      "name": "band_split.to_features.43.1",
+      "type": "Linear",
+      "parameters": 22656
+    },
+    {
+      "name": "band_split.to_features.44.0",
+      "type": "RMSNorm",
+      "parameters": 188
+    },
+    {
+      "name": "band_split.to_features.44.1",
+      "type": "Linear",
+      "parameters": 24192
+    },
+    {
+      "name": "band_split.to_features.45.0",
+      "type": "RMSNorm",
+      "parameters": 200
+    },
+    {
+      "name": "band_split.to_features.45.1",
+      "type": "Linear",
+      "parameters": 25728
+    },
+    {
+      "name": "band_split.to_features.46.0",
+      "type": "RMSNorm",
+      "parameters": 216
+    },
+    {
+      "name": "band_split.to_features.46.1",
+      "type": "Linear",
+      "parameters": 27776
+    },
+    {
+      "name": "band_split.to_features.47.0",
+      "type": "RMSNorm",
+      "parameters": 228
+    },
+    {
+      "name": "band_split.to_features.47.1",
+      "type": "Linear",
+      "parameters": 29312
+    },
+    {
+      "name": "band_split.to_features.48.0",
+      "type": "RMSNorm",
+      "parameters": 244
+    },
+    {
+      "name": "band_split.to_features.48.1",
+      "type": "Linear",
+      "parameters": 31360
+    },
+    {
+      "name": "band_split.to_features.49.0",
+      "type": "RMSNorm",
+      "parameters": 264
+    },
+    {
+      "name": "band_split.to_features.49.1",
+      "type": "Linear",
+      "parameters": 33920
+    },
+    {
+      "name": "band_split.to_features.50.0",
+      "type": "RMSNorm",
+      "parameters": 284
+    },
+    {
+      "name": "band_split.to_features.50.1",
+      "type": "Linear",
+      "parameters": 36480
+    },
+    {
+      "name": "band_split.to_features.51.0",
+      "type": "RMSNorm",
+      "parameters": 304
+    },
+    {
+      "name": "band_split.to_features.51.1",
+      "type": "Linear",
+      "parameters": 39040
+    },
+    {
+      "name": "band_split.to_features.52.0",
+      "type": "RMSNorm",
+      "parameters": 320
+    },
+    {
+      "name": "band_split.to_features.52.1",
+      "type": "Linear",
+      "parameters": 41088
+    },
+    {
+      "name": "band_split.to_features.53.0",
+      "type": "RMSNorm",
+      "parameters": 344
+    },
+    {
+      "name": "band_split.to_features.53.1",
+      "type": "Linear",
+      "parameters": 44160
+    },
+    {
+      "name": "band_split.to_features.54.0",
+      "type": "RMSNorm",
+      "parameters": 372
+    },
+    {
+      "name": "band_split.to_features.54.1",
+      "type": "Linear",
+      "parameters": 47744
+    },
+    {
+      "name": "band_split.to_features.55.0",
+      "type": "RMSNorm",
+      "parameters": 396
+    },
+    {
+      "name": "band_split.to_features.55.1",
+      "type": "Linear",
+      "parameters": 50816
+    },
+    {
+      "name": "band_split.to_features.56.0",
+      "type": "RMSNorm",
+      "parameters": 420
+    },
+    {
+      "name": "band_split.to_features.56.1",
+      "type": "Linear",
+      "parameters": 53888
+    },
+    {
+      "name": "band_split.to_features.57.0",
+      "type": "RMSNorm",
+      "parameters": 452
+    },
+    {
+      "name": "band_split.to_features.57.1",
+      "type": "Linear",
+      "parameters": 57984
+    },
+    {
+      "name": "band_split.to_features.58.0",
+      "type": "RMSNorm",
+      "parameters": 488
+    },
+    {
+      "name": "band_split.to_features.58.1",
+      "type": "Linear",
+      "parameters": 62592
+    },
+    {
+      "name": "band_split.to_features.59.0",
+      "type": "RMSNorm",
+      "parameters": 520
+    },
+    {
+      "name": "band_split.to_features.59.1",
+      "type": "Linear",
+      "parameters": 66688
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.0.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.0.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.0.0.4",
+      "type": "Linear",
+      "parameters": 14392
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.1.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.1.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.1.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.2.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.2.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.2.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.3.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.3.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.3.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.4.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.4.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.4.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.5.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.5.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.5.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.6.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.6.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.6.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.7.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.7.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.7.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.8.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.8.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.8.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.9.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.9.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.9.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.10.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.10.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.10.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.11.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.11.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.11.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.12.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.12.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.12.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.13.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.13.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.13.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.14.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.14.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.14.0.4",
+      "type": "Linear",
+      "parameters": 12336
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.15.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.15.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.15.0.4",
+      "type": "Linear",
+      "parameters": 14392
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.16.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.16.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.16.0.4",
+      "type": "Linear",
+      "parameters": 14392
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.17.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.17.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.17.0.4",
+      "type": "Linear",
+      "parameters": 14392
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.18.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.18.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.18.0.4",
+      "type": "Linear",
+      "parameters": 18504
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.19.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.19.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.19.0.4",
+      "type": "Linear",
+      "parameters": 18504
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.20.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.20.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.20.0.4",
+      "type": "Linear",
+      "parameters": 18504
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.21.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.21.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.21.0.4",
+      "type": "Linear",
+      "parameters": 20560
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.22.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.22.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.22.0.4",
+      "type": "Linear",
+      "parameters": 20560
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.23.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.23.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.23.0.4",
+      "type": "Linear",
+      "parameters": 22616
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.24.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.24.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.24.0.4",
+      "type": "Linear",
+      "parameters": 26728
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.25.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.25.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.25.0.4",
+      "type": "Linear",
+      "parameters": 26728
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.26.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.26.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.26.0.4",
+      "type": "Linear",
+      "parameters": 26728
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.27.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.27.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.27.0.4",
+      "type": "Linear",
+      "parameters": 30840
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.28.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.28.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.28.0.4",
+      "type": "Linear",
+      "parameters": 32896
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.29.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.29.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.29.0.4",
+      "type": "Linear",
+      "parameters": 34952
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.30.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.30.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.30.0.4",
+      "type": "Linear",
+      "parameters": 39064
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.31.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.31.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.31.0.4",
+      "type": "Linear",
+      "parameters": 41120
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.32.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.32.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.32.0.4",
+      "type": "Linear",
+      "parameters": 41120
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.33.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.33.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.33.0.4",
+      "type": "Linear",
+      "parameters": 45232
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.34.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.34.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.34.0.4",
+      "type": "Linear",
+      "parameters": 49344
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.35.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.35.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.35.0.4",
+      "type": "Linear",
+      "parameters": 53456
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.36.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.36.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.36.0.4",
+      "type": "Linear",
+      "parameters": 57568
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.37.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.37.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.37.0.4",
+      "type": "Linear",
+      "parameters": 59624
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.38.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.38.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.38.0.4",
+      "type": "Linear",
+      "parameters": 63736
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.39.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.39.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.39.0.4",
+      "type": "Linear",
+      "parameters": 67848
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.40.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.40.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.40.0.4",
+      "type": "Linear",
+      "parameters": 74016
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.41.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.41.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.41.0.4",
+      "type": "Linear",
+      "parameters": 80184
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.42.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.42.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.42.0.4",
+      "type": "Linear",
+      "parameters": 84296
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.43.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.43.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.43.0.4",
+      "type": "Linear",
+      "parameters": 90464
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.44.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.44.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.44.0.4",
+      "type": "Linear",
+      "parameters": 96632
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.45.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.45.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.45.0.4",
+      "type": "Linear",
+      "parameters": 102800
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.46.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.46.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.46.0.4",
+      "type": "Linear",
+      "parameters": 111024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.47.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.47.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.47.0.4",
+      "type": "Linear",
+      "parameters": 117192
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.48.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.48.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.48.0.4",
+      "type": "Linear",
+      "parameters": 125416
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.49.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.49.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.49.0.4",
+      "type": "Linear",
+      "parameters": 135696
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.50.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.50.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.50.0.4",
+      "type": "Linear",
+      "parameters": 145976
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.51.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.51.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.51.0.4",
+      "type": "Linear",
+      "parameters": 156256
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.52.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.52.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.52.0.4",
+      "type": "Linear",
+      "parameters": 164480
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.53.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.53.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.53.0.4",
+      "type": "Linear",
+      "parameters": 176816
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.54.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.54.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.54.0.4",
+      "type": "Linear",
+      "parameters": 191208
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.55.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.55.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.55.0.4",
+      "type": "Linear",
+      "parameters": 203544
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.56.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.56.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.56.0.4",
+      "type": "Linear",
+      "parameters": 215880
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.57.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.57.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.57.0.4",
+      "type": "Linear",
+      "parameters": 232328
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.58.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.58.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.58.0.4",
+      "type": "Linear",
+      "parameters": 250832
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.59.0.0",
+      "type": "Linear",
+      "parameters": 33024
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.59.0.2",
+      "type": "Linear",
+      "parameters": 65792
+    },
+    {
+      "name": "mask_estimators.0.to_freqs.59.0.4",
+      "type": "Linear",
+      "parameters": 267280
+    }
+  ]
+}

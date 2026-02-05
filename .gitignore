@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Credentials and secrets
+credentials.json
+token.json
+*.pem
+*.key
+.env
+.env.local
+.env.*.local
+
+# Large files and outputs
+outputs/
+uploads/
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+*.mid
+*.midi
+*.gp
+*.gp5
+*.gpx
+*.musicxml
+*.ckpt
+*.pth
+*.pt
+*.h5
+*.hdf5
+
+# Model cache
+.stemscribe/
+/tmp/audio-separator-models/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Training data (too large)
+train_*/data/
+train_*/datasets/
+train_*/*.zip
+
+# Node modules (frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+frontend/build/
+frontend/dist/
+
+# Log files
+*.log
+
+# Symlinks to outputs
+backend/outputs

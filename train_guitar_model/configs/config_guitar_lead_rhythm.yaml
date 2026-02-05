@@ -1,0 +1,74 @@
+audio:
+  chunk_size: 131584
+  dim_f: 1024
+  dim_t: 256
+  hop_length: 512
+  n_fft: 2048
+  num_channels: 2
+  sample_rate: 44100
+  min_mean_abs: 0.001
+
+model:
+  dim: 128  # Reduced for faster training on smaller dataset
+  depth: 6  # Reduced depth
+  stereo: true
+  num_stems: 1  # We predict one stem, other is computed as residual
+  time_transformer_depth: 1
+  freq_transformer_depth: 1
+  linear_transformer_depth: 0
+  num_bands: 60
+  dim_head: 64
+  heads: 8
+  attn_dropout: 0.1
+  ff_dropout: 0.1
+  flash_attn: True
+  dim_freqs_in: 1025
+  sample_rate: 44100
+  stft_n_fft: 2048
+  stft_hop_length: 512
+  stft_win_length: 2048
+  stft_normalized: False
+  mask_estimator_depth: 2
+  multi_stft_resolution_loss_weight: 1.0
+  multi_stft_resolutions_window_sizes: !!python/tuple
+    - 4096
+    - 2048
+    - 1024
+    - 512
+    - 256
+  multi_stft_hop_size: 147
+  multi_stft_normalized: False
+  mlp_expansion_factor: 2  # Reduced for memory
+  use_torch_checkpoint: False
+  skip_connection: True  # Enable for better gradients
+
+training:
+  batch_size: 4  # Smaller batch for M3 Max
+  gradient_accumulation_steps: 2
+  grad_clip: 0
+  instruments:
+    - lead_guitar
+    - rhythm_guitar
+  lr: 1.0e-04  # Slightly higher LR for smaller dataset
+  patience: 3
+  reduce_factor: 0.9
+  target_instrument: lead_guitar
+  num_epochs: 10
+  num_steps: 100
+  q: 0.95
+  coarse_loss_clip: true
+  ema_momentum: 0  # Disabled due to PyTorch compatibility issue
+  optimizer: adamw
+  other_fix: false
+  use_amp: false  # Disabled for MPS compatibility
+
+augmentations:
+  enable: true
+  loudness: true
+  loudness_min: 0.6
+  loudness_max: 1.4
+
+inference:
+  batch_size: 1
+  dim_t: 256
+  num_overlap: 4

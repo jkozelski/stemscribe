@@ -1,0 +1,21 @@
+# StemScribe Dependencies
+
+# Web Framework
+flask
+flask-cors
+
+# Audio Processing
+demucs
+basic-pitch
+music21
+
+# YouTube/URL Downloads
+yt-dlp
+
+# Google Drive Integration
+google-auth-oauthlib
+google-api-python-client
+
+# Utilities
+torch
+torchaudio
