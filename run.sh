@@ -25,7 +25,14 @@ echo ""
 
 # Add local Python packages to path
 export PATH="$PATH:$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin"
-export PYTHONPATH="$HOME/.local/lib/python3.10/site-packages:$PYTHONPATH"
+
+# Activate virtual environment if it exists
+if [ -d "$SCRIPT_DIR/venv" ]; then
+    echo -e "${GREEN}✓${NC} Using Python venv"
+    source "$SCRIPT_DIR/venv/bin/activate"
+else
+    export PYTHONPATH="$HOME/.local/lib/python3.10/site-packages:$PYTHONPATH"
+fi
 
 # Check for yt-dlp
 if command -v yt-dlp &> /dev/null; then
@@ -37,7 +44,7 @@ fi
 
 # Check for Python dependencies
 echo -e "${BLUE}→${NC} Checking Python dependencies..."
-python3 -c "import demucs; import basic_pitch; print('  Dependencies OK')" 2>/dev/null || {
+python -c "import librosa; import flask; print('  Dependencies OK')" 2>/dev/null || {
     echo -e "${RED}✗${NC} Missing Python dependencies"
     echo -e "  Run: ${CYAN}./setup.sh${NC}"
     exit 1
@@ -57,7 +64,7 @@ CAFFEINATE_PID=$!
 # Start backend API
 echo -e "${BLUE}→${NC} Starting backend API on ${CYAN}http://localhost:5000${NC}..."
 cd backend
-python3 app.py 2>&1 | while read line; do
+python app.py 2>&1 | while read line; do
     echo -e "  ${PURPLE}[API]${NC} $line"
 done &
 BACKEND_PID=$!
@@ -68,7 +75,7 @@ sleep 2
 # Start frontend server
 echo -e "${BLUE}→${NC} Starting frontend on ${CYAN}http://localhost:3000${NC}..."
 cd frontend
-python3 -m http.server 3000 2>&1 | while read line; do
+python -m http.server 3000 2>&1 | while read line; do
     echo -e "  ${CYAN}[WEB]${NC} $line"
 done &
 FRONTEND_PID=$!
