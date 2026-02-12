@@ -83,8 +83,12 @@ def demix(
     batch_size = config.inference.batch_size
 
     use_amp = getattr(config.training, 'use_amp', True)
+    # Disable AMP on MPS (not fully supported)
+    amp_device_type = 'cuda' if (hasattr(device, 'type') and device.type == 'cuda') else 'cpu'
+    if hasattr(device, 'type') and device.type == 'mps':
+        use_amp = False
 
-    with torch.cuda.amp.autocast(enabled=use_amp):
+    with torch.amp.autocast(device_type=amp_device_type, enabled=use_amp):
         with torch.inference_mode():
             # Initialize result and counter tensors
             req_shape = (num_instruments,) + mix.shape
@@ -195,11 +199,11 @@ def initialize_model_and_device(model: torch.nn.Module, device_ids: List[int]) -
         else:
             device = torch.device(f'cuda:{device_ids[0]}')
             model = nn.DataParallel(model, device_ids=device_ids).to(device)
-    # MPS disabled for mel_band_roformer due to complex tensor operation issues
-    # elif torch.backends.mps.is_available():
-    #     device = torch.device('mps')
-    #     model = model.to(device)
-    #     print("Using MPS (Apple Silicon GPU) for acceleration.")
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        device = torch.device('mps')
+        model = model.to(device)
+        print("🍎 Using MPS (Apple Silicon GPU) for acceleration.")
+        print("   Note: Some operations may fall back to CPU. AMP is disabled for MPS.")
     else:
         device = 'cpu'
         model = model.to(device)

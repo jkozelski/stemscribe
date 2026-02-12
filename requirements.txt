@@ -1,21 +1,66 @@
 # StemScribe Dependencies
+# Install with: pip install -r requirements.txt
 
-# Web Framework
+# =============================================================================
+# Core Web Framework
+# =============================================================================
 flask
 flask-cors
 
-# Audio Processing
-demucs
-basic-pitch
-music21
+# =============================================================================
+# Audio Separation & Processing
+# =============================================================================
+demucs                      # Stem separation (htdemucs_6s model)
+librosa                     # Audio analysis, chroma features, beat detection
+soundfile                   # Audio I/O
+numpy
+scipy
+pydub                       # Audio format conversion
 
-# YouTube/URL Downloads
-yt-dlp
+# =============================================================================
+# ML / Deep Learning
+# =============================================================================
+torch                       # Neural networks (chord detection, transcription)
+torchaudio                  # Audio transforms
+onnxruntime                 # ONNX model inference
 
+# =============================================================================
+# Music Transcription & Notation
+# =============================================================================
+basic-pitch                 # MIDI transcription (Spotify)
+music21                     # MusicXML generation, key detection, notation
+mido                        # MIDI file handling
+pretty-midi                 # MIDI analysis
+pyguitarpro                 # Guitar Pro (.gp5) export
+
+# =============================================================================
+# YouTube / URL Downloads
+# =============================================================================
+yt-dlp                      # YouTube, Spotify, SoundCloud, Bandcamp
+
+# =============================================================================
 # Google Drive Integration
+# =============================================================================
 google-auth-oauthlib
 google-api-python-client
+google-auth-httplib2
 
-# Utilities
-torch
-torchaudio
+# =============================================================================
+# PDF / OMR Processing
+# =============================================================================
+PyMuPDF                     # PDF parsing (fitz)
+
+# =============================================================================
+# Optional - Enhanced Features (graceful fallback if missing)
+# =============================================================================
+# pedalboard                # Stem audio enhancement (Spotify)
+# noisereduce               # Noise reduction for stems
+# pyloudnorm                # LUFS loudness normalization
+# audio-separator           # BS-Roformer vocal separation
+# psutil                    # System memory monitoring for GPU manager
+# oemer                     # Deep learning OMR (sheet music recognition)
+
+# =============================================================================
+# HTTP & API
+# =============================================================================
+requests                    # MusicBrainz, Wikipedia API calls

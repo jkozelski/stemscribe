@@ -732,7 +732,8 @@ class BSMamba2Model(Module):
 
 if __name__ == "__main__":
     batch_size, n_channels, freq, time = 1, 2, 1025, 800
-    in_features = torch.rand(batch_size, n_channels, freq, time, dtype=torch.cfloat).cuda()
+    _dev = 'cuda' if torch.cuda.is_available() else ('mps' if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available() else 'cpu')
+    in_features = torch.rand(batch_size, n_channels, freq, time, dtype=torch.cfloat).to(_dev)
     cfg = {
         "depth": 2,
         "dim": 256,
@@ -744,10 +745,16 @@ if __name__ == "__main__":
         "dim_head": 48,
         "num_stems": 3,
     }
-    model = BSModel(**cfg).cuda()
+    if torch.cuda.is_available():
+        model = BSModel(**cfg).cuda()
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        model = BSModel(**cfg).to('mps')
+    else:
+        model = BSModel(**cfg)
     print(f"Total number of parameters: {sum([p.numel() for p in model.mask_estimators.parameters()])}")
 
-    with torch.cuda.amp.autocast():
+    device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
+    with torch.amp.autocast(device_type=device_type):
         out_features = model(in_features)
 
     print(f"In shape: {in_features.shape}\nOut shape: {out_features.shape}")

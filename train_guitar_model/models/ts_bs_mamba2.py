@@ -313,7 +313,8 @@ class Separator(nn.Module):
 
 
 if __name__ == '__main__':
-    model = Separator().cuda()
+    _dev = 'cuda' if torch.cuda.is_available() else ('mps' if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available() else 'cpu')
+    model = Separator().to(_dev)
     arr = np.zeros((1, 2, 3*44100), dtype=np.float32)
-    x = torch.from_numpy(arr).cuda()
+    x = torch.from_numpy(arr).to(_dev)
     res = model(x)

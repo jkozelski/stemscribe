@@ -188,14 +188,40 @@ except ImportError as e:
     MODEL_MANAGER_AVAILABLE = False
     logger.warning(f"Model manager not available: {e}")
 
-# Chord detection
+# Chord detection (V8 Transformer model preferred, falls back to V7 then basic template matching)
+CHORD_DETECTOR_VERSION = None
 try:
-    from chord_detector import ChordDetector, detect_chords
+    from chord_detector_v8 import ChordDetector, detect_chords
     CHORD_DETECTOR_AVAILABLE = True
-    logger.info("Chord detector available")
+    CHORD_DETECTOR_VERSION = 'v8'
+    logger.info("✅ Chord detector V8 available (337 classes, inversions, mMaj7)")
+except ImportError:
+    try:
+        from chord_detector_v7 import ChordDetector, detect_chords
+        CHORD_DETECTOR_AVAILABLE = True
+        CHORD_DETECTOR_VERSION = 'v7'
+        logger.info("Chord detector V7 available (25 classes)")
+    except ImportError:
+        try:
+            from chord_detector import ChordDetector, detect_chords
+            CHORD_DETECTOR_AVAILABLE = True
+            CHORD_DETECTOR_VERSION = 'basic'
+            logger.info("Basic chord detector available (template matching)")
+        except ImportError as e:
+            CHORD_DETECTOR_AVAILABLE = False
+            CHORD_DETECTOR_VERSION = None
+            logger.warning(f"Chord detector not available: {e}")
+
+# Chord theory engine (scale suggestions, Beato-style chord-over-bass analysis)
+try:
+    from chord_theory import ChordTheoryEngine, get_scale_suggestion, get_progression_analysis
+    CHORD_THEORY_AVAILABLE = True
+    _chord_theory_engine = ChordTheoryEngine()
+    logger.info("✅ Chord theory engine available (scale suggestions, polychord analysis)")
 except ImportError as e:
-    CHORD_DETECTOR_AVAILABLE = False
-    logger.warning(f"Chord detector not available: {e}")
+    CHORD_THEORY_AVAILABLE = False
+    _chord_theory_engine = None
+    logger.warning(f"Chord theory engine not available: {e}")
 
 # MIDI to Guitar Pro conversion
 try:
@@ -1601,7 +1627,7 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
         return
 
     job.stage = 'Detecting chord progression'
-    logger.info("🎸 Detecting chords...")
+    logger.info(f"🎸 Detecting chords (model: {CHORD_DETECTOR_VERSION})...")
 
     try:
         detector = ChordDetector()
@@ -1625,9 +1651,10 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
 
         progression = detector.detect(analyze_path)
 
-        # Store results
-        job.chord_progression = [
-            {
+        # Store results - V8 includes bass note for inversions, older versions don't
+        job.chord_progression = []
+        for c in progression.chords:
+            chord_data = {
                 'time': c.time,
                 'duration': c.duration,
                 'chord': c.chord,
@@ -1635,11 +1662,15 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
                 'quality': c.quality,
                 'confidence': c.confidence
             }
-            for c in progression.chords
-        ]
+            # V8 adds bass note for chord inversions (e.g., C/E -> bass='E')
+            if hasattr(c, 'bass'):
+                chord_data['bass'] = c.bass
+            chord_data['detector_version'] = CHORD_DETECTOR_VERSION
+            job.chord_progression.append(chord_data)
+
         job.detected_key = progression.key
 
-        logger.info(f"✅ Detected {len(job.chord_progression)} chord changes, key: {progression.key}")
+        logger.info(f"✅ Detected {len(job.chord_progression)} chord changes, key: {progression.key} (model: {CHORD_DETECTOR_VERSION})")
 
     except Exception as e:
         logger.warning(f"Chord detection failed: {e}")
@@ -2722,14 +2753,86 @@ def get_chords(job_id):
     if not job:
         return jsonify({'error': 'Job not found'}), 404
 
-    # Include timing for each chord and key signature
+    # Include timing for each chord, key signature, and detector info
     return jsonify({
         'job_id': job_id,
         'chords': job.chord_progression,
         'key': job.detected_key,
         'available': CHORD_DETECTOR_AVAILABLE,
-        'chord_count': len(job.chord_progression)
+        'detector_version': CHORD_DETECTOR_VERSION,
+        'chord_count': len(job.chord_progression),
+        'has_inversions': CHORD_DETECTOR_VERSION == 'v8'
     })
+
+
+@app.route('/api/theory/<job_id>', methods=['GET'])
+def get_chord_theory(job_id):
+    """Get scale suggestions and theory analysis for a job's chord progression."""
+    if not CHORD_THEORY_AVAILABLE:
+        return jsonify({'error': 'Chord theory engine not available'}), 500
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+
+    if not job.chord_progression:
+        return jsonify({'error': 'No chord progression detected yet'}), 404
+
+    try:
+        key = job.detected_key
+        chord_names = [c['chord'] for c in job.chord_progression]
+
+        # Get individual chord analyses
+        analyses = _chord_theory_engine.get_scales_for_progression(chord_names, key)
+
+        # Get overall practice suggestion
+        practice_suggestion = _chord_theory_engine.suggest_practice_approach(chord_names, key)
+
+        # Build response with timing info merged
+        theory_data = []
+        for i, chord_data in enumerate(job.chord_progression):
+            analysis = analyses[i] if i < len(analyses) else {}
+            theory_data.append({
+                'chord': chord_data['chord'],
+                'time': chord_data['time'],
+                'duration': chord_data['duration'],
+                'scales': analysis.get('scales', []),
+                'secondary_scales': analysis.get('secondary_scales', []),
+                'tip': analysis.get('tip', ''),
+                'chord_type': analysis.get('chord_type', ''),
+                'function': analysis.get('function'),
+                'intervals': analysis.get('intervals', ''),
+            })
+
+        return jsonify({
+            'job_id': job_id,
+            'key': key,
+            'theory': theory_data,
+            'practice_suggestion': practice_suggestion,
+            'available': True,
+            'chord_count': len(theory_data)
+        })
+
+    except Exception as e:
+        logger.error(f"Chord theory analysis failed: {e}")
+        return jsonify({'error': f'Theory analysis failed: {str(e)}'}), 500
+
+
+@app.route('/api/theory/chord', methods=['POST'])
+def get_single_chord_theory():
+    """Get scale suggestions for a single chord (no job required)."""
+    if not CHORD_THEORY_AVAILABLE:
+        return jsonify({'error': 'Chord theory engine not available'}), 500
+
+    data = request.get_json()
+    if not data or 'chord' not in data:
+        return jsonify({'error': 'Missing chord parameter'}), 400
+
+    chord = data['chord']
+    key = data.get('key')
+
+    analysis = _chord_theory_engine.analyze(chord, key)
+    return jsonify(analysis)
 
 
 @app.route('/api/quality/<job_id>', methods=['GET'])

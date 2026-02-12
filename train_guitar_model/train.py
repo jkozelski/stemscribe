@@ -42,7 +42,7 @@ def forward_step(x, y, active_stem_ids, get_internal_loss, model, multi_loss, de
 def train_one_epoch(model: torch.nn.Module, config: ConfigDict, args: argparse.Namespace,
                     optimizer: torch.optim.Optimizer,
                     device: torch.device, device_ids: List[int], epoch: int, use_amp: bool,
-                    scaler: torch.cuda.amp.GradScaler,
+                    scaler,  # torch.amp.GradScaler (device-aware)
                     scheduler,
                     gradient_accumulation_steps: int, train_loader: torch.utils.data.DataLoader,
                     multi_loss: Callable[[torch.Tensor, torch.Tensor, torch.Tensor,], torch.Tensor], all_losses=None, world_size=None, ema_model=None, safe_mode=None) -> None:
@@ -109,15 +109,17 @@ def train_one_epoch(model: torch.nn.Module, config: ConfigDict, args: argparse.N
 
         if normalize:
             x, y = normalize_batch(x, y)
+        # Determine autocast device type for AMP (supports CUDA, MPS, CPU)
+        amp_device_type = 'cuda' if device.type == 'cuda' else ('mps' if device.type == 'mps' else 'cpu')
         if safe_mode:
             try:
-                with torch.cuda.amp.autocast(enabled=use_amp):
+                with torch.amp.autocast(device_type=amp_device_type, enabled=use_amp):
                     loss = forward_step(x, y, active_stem_ids, get_internal_loss, model, multi_loss, device_ids)
             except Exception as e:
                 print(f'Error: {e}')
                 continue
         else:
-            with torch.cuda.amp.autocast(enabled=use_amp):
+            with torch.amp.autocast(device_type=amp_device_type, enabled=use_amp):
                 loss = forward_step(x, y, active_stem_ids, get_internal_loss, model, multi_loss, device_ids)
         loss /= gradient_accumulation_steps
         scaler.scale(loss).backward()
@@ -287,7 +289,7 @@ def train_model(args: Union[argparse.Namespace, None], rank=None, world_size=Non
     from utils.model_utils import load_start_checkpoint
     from utils.model_utils import get_lora
     from utils.losses import choice_loss
-    from torch.cuda.amp.grad_scaler import GradScaler
+    from torch.amp import GradScaler
     from utils.model_utils import get_optimizer, log_model_info
 
     args = parse_args_train(args)
@@ -330,9 +332,12 @@ def train_model(args: Union[argparse.Namespace, None], rank=None, world_size=Non
         print('Frozen layers: {}'.format(len(freeze_layers)))
 
     if ddp:
-        device = torch.device(f'cuda:{rank}')
+        if torch.cuda.is_available():
+            device = torch.device(f'cuda:{rank}')
+        else:
+            device = torch.device('cpu')  # DDP on MPS not yet supported
         model.to(device)
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[rank], find_unused_parameters=True)
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[rank] if torch.cuda.is_available() else None, find_unused_parameters=True)
         model_module = model.module
     else:
         device, model = initialize_model_and_device(model, args.device_ids)
@@ -390,12 +395,23 @@ def train_model(args: Union[argparse.Namespace, None], rank=None, world_size=Non
         all_losses = {}
 
     multi_loss = choice_loss(args, config)
-    scaler = GradScaler()
+
+    # Device-aware GradScaler: CUDA uses full AMP, MPS uses limited AMP, CPU disables it
+    if torch.cuda.is_available():
+        scaler = GradScaler('cuda')
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        scaler = GradScaler('cpu')  # MPS doesn't fully support GradScaler, use CPU scaler
+        use_amp = False  # Disable AMP for MPS (partial support only)
+        print("⚠️ MPS detected: AMP disabled (not fully supported on Apple Silicon)")
+    else:
+        scaler = GradScaler('cpu')
 
     if torch.cuda.is_available():
         if args.set_per_process_memory_fraction:
             torch.cuda.set_per_process_memory_fraction(1.0)
         torch.cuda.empty_cache()
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        torch.mps.empty_cache() if hasattr(torch.mps, 'empty_cache') else None
 
     safe_mode = args.safe_mode
 

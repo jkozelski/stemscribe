@@ -925,6 +925,80 @@
             margin-top: 0.25rem;
         }
 
+        /* Scale Suggestion Display */
+        .scale-suggestion {
+            display: none;
+            padding: 0.4rem 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-width: 280px;
+        }
+
+        .scale-suggestion.active {
+            display: block;
+        }
+
+        .scale-label {
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.2rem;
+        }
+
+        .scale-names {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .scale-tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(97, 175, 239, 0.15);
+            border: 1px solid rgba(97, 175, 239, 0.3);
+            border-radius: 4px;
+            color: var(--psych-blue);
+            font-weight: 500;
+        }
+
+        .scale-tag.secondary {
+            background: rgba(122, 122, 133, 0.1);
+            border-color: rgba(122, 122, 133, 0.2);
+            color: var(--text-dim);
+        }
+
+        .scale-tip {
+            font-size: 0.65rem;
+            color: var(--psych-teal);
+            margin-top: 0.3rem;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        .scale-function {
+            font-size: 0.7rem;
+            color: var(--psych-purple);
+            font-family: 'Righteous', cursive;
+            margin-top: 0.15rem;
+        }
+
+        .practice-suggestion-bar {
+            display: none;
+            padding: 0.4rem 2rem;
+            background: rgba(86, 182, 194, 0.08);
+            border-bottom: 1px solid rgba(86, 182, 194, 0.2);
+            font-size: 0.75rem;
+            color: var(--psych-teal);
+        }
+
+        .practice-suggestion-bar.active {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         /* External Tab Links (Songsterr, Ultimate Guitar) */
         .external-tab-btn {
             display: inline-flex;
@@ -1109,9 +1183,24 @@
             <!-- SVG chord diagram populated by JS -->
         </div>
 
+        <div class="scale-suggestion" id="scaleSuggestion">
+            <div class="scale-label">🎼 Scales</div>
+            <div class="scale-names" id="scaleNames">
+                <!-- Scale tags populated by JS -->
+            </div>
+            <div class="scale-function" id="scaleFunction"></div>
+            <div class="scale-tip" id="scaleTip"></div>
+        </div>
+
         <button class="chord-toggle" id="chordDiagramToggle" title="Show guitar fingering">
             🎸 Fingering
         </button>
+    </div>
+
+    <!-- Practice Suggestion Bar (below chord panel) -->
+    <div class="practice-suggestion-bar" id="practiceSuggestionBar">
+        <span>💡</span>
+        <span id="practiceSuggestionText"></span>
     </div>
 
     <!-- Main Layout -->
@@ -1542,6 +1631,8 @@
         // ==================== CHORD CHART FUNCTIONS ====================
 
         let chordProgression = [];
+        let chordTheoryData = {};     // Cached theory data keyed by chord name
+        let practiceSuggestion = '';  // Overall practice suggestion
         let showChordDiagram = true;  // Show chord diagrams by default - Ultimate Guitar style!
         let transposeAmount = 0;      // Semitones to transpose (-12 to +12)
         let useFlats = false;         // false = sharps (A#), true = flats (Bb)
@@ -1584,9 +1675,17 @@
             return newRoot + rest;
         }
 
-        // Transpose a chord by semitones
+        // Transpose a chord by semitones (handles inversions like C/E)
         function transposeChord(chord, semitones) {
             if (!chord || chord === '—' || chord === 'N' || semitones === 0) return chord;
+
+            // Handle inversions: split on '/' and transpose both parts
+            if (chord.includes('/')) {
+                const [chordPart, bassPart] = chord.split('/');
+                const transposedChord = transposeChord(chordPart, semitones);
+                const transposedBass = transposeChord(bassPart, semitones);
+                return transposedChord + '/' + transposedBass;
+            }
 
             // Extract root note
             let root = chord[0];
@@ -1612,11 +1711,19 @@
         }
 
         // Get display chord (with transpose and notation preference applied)
+        // Handles V8 inversions like Am/C, Dm7/F
         function getDisplayChord(originalChord) {
             let chord = originalChord;
             if (transposeAmount !== 0) {
                 chord = transposeChord(chord, transposeAmount);
             }
+
+            // Handle inversions: convert notation on both parts
+            if (chord.includes('/')) {
+                const [chordPart, bassPart] = chord.split('/');
+                return convertChordNotation(chordPart, useFlats) + '/' + convertChordNotation(bassPart, useFlats);
+            }
+
             return convertChordNotation(chord, useFlats);
         }
 
@@ -1785,6 +1892,93 @@
             }
 
             console.log(`🎸 Chord chart initialized: ${chordProgression.length} chords, key: ${detectedKey}`);
+
+            // Fetch chord theory data (scale suggestions) in background
+            fetchChordTheory(job.job_id);
+        }
+
+        // Fetch scale suggestions from the chord theory engine
+        async function fetchChordTheory(jobId) {
+            try {
+                const resp = await fetch(`/api/theory/${jobId}`);
+                if (!resp.ok) {
+                    console.log('🎼 Chord theory not available (backend module missing)');
+                    return;
+                }
+                const data = await resp.json();
+                if (data.theory) {
+                    // Cache theory by chord name for quick lookup during playback
+                    data.theory.forEach(t => {
+                        chordTheoryData[t.chord] = {
+                            scales: t.scales || [],
+                            secondary_scales: t.secondary_scales || [],
+                            tip: t.tip || '',
+                            chord_type: t.chord_type || '',
+                            function: t.function || null,
+                            intervals: t.intervals || ''
+                        };
+                    });
+                    practiceSuggestion = data.practice_suggestion || '';
+
+                    // Show practice suggestion bar
+                    if (practiceSuggestion) {
+                        const bar = document.getElementById('practiceSuggestionBar');
+                        const text = document.getElementById('practiceSuggestionText');
+                        if (bar && text) {
+                            text.textContent = practiceSuggestion;
+                            bar.classList.add('active');
+                        }
+                    }
+
+                    // Show scale suggestion panel
+                    document.getElementById('scaleSuggestion').classList.add('active');
+
+                    // Update display for current chord
+                    refreshChordDisplay();
+
+                    console.log(`🎼 Chord theory loaded: ${Object.keys(chordTheoryData).length} chord analyses, suggestion: "${practiceSuggestion}"`);
+                }
+            } catch (err) {
+                console.log('🎼 Chord theory fetch failed (non-critical):', err.message);
+            }
+        }
+
+        // Update scale suggestion display for a given chord
+        function updateScaleSuggestion(chordName) {
+            const scaleNamesEl = document.getElementById('scaleNames');
+            const scaleFunctionEl = document.getElementById('scaleFunction');
+            const scaleTipEl = document.getElementById('scaleTip');
+            const suggestionEl = document.getElementById('scaleSuggestion');
+
+            if (!scaleNamesEl || !chordName || Object.keys(chordTheoryData).length === 0) {
+                return;
+            }
+
+            // Look up theory for this chord (use original chord before transpose/notation)
+            const theory = chordTheoryData[chordName];
+
+            if (!theory) {
+                scaleNamesEl.innerHTML = '<span class="scale-tag secondary">No data</span>';
+                scaleTipEl.textContent = '';
+                scaleFunctionEl.textContent = '';
+                return;
+            }
+
+            // Build scale tags
+            let tagsHtml = '';
+            (theory.scales || []).forEach(s => {
+                tagsHtml += `<span class="scale-tag">${s}</span>`;
+            });
+            (theory.secondary_scales || []).slice(0, 2).forEach(s => {
+                tagsHtml += `<span class="scale-tag secondary">${s}</span>`;
+            });
+            scaleNamesEl.innerHTML = tagsHtml || '<span class="scale-tag secondary">—</span>';
+
+            // Show function (Roman numeral) if available
+            scaleFunctionEl.textContent = theory.function ? `Function: ${theory.function}` : '';
+
+            // Show practice tip
+            scaleTipEl.textContent = theory.tip || '';
         }
 
         // Update the key display with current notation preference
@@ -1853,6 +2047,9 @@
                 if (showChordDiagram) {
                     renderChordDiagram(displayChord);
                 }
+
+                // Update scale suggestion (use original chord name for theory lookup)
+                updateScaleSuggestion(currentChordData.chord);
             } else {
                 currentChordEl.textContent = '—';
                 if (notationChordMarker) {
@@ -1902,15 +2099,25 @@
         function renderChordDiagram(chordName) {
             const container = document.getElementById('chordDiagram');
 
+            // For inversions (e.g., Am/C), use the base chord for diagram lookup
+            // but display the full name with bass note
+            let lookupName = chordName;
+            let bassNote = null;
+            if (chordName.includes('/')) {
+                const parts = chordName.split('/');
+                lookupName = parts[0];
+                bassNote = parts[1];
+            }
+
             // Try to find diagram - check both sharp and flat versions
-            let diagram = CHORD_DIAGRAMS[chordName];
+            let diagram = CHORD_DIAGRAMS[lookupName];
             let displayName = chordName;
 
             // If not found, try the enharmonic equivalent
             if (!diagram) {
                 const altChord = useFlats
-                    ? convertChordNotation(chordName, false)  // Try sharp version
-                    : convertChordNotation(chordName, true);  // Try flat version
+                    ? convertChordNotation(lookupName, false)  // Try sharp version
+                    : convertChordNotation(lookupName, true);  // Try flat version
                 diagram = CHORD_DIAGRAMS[altChord];
             }
 

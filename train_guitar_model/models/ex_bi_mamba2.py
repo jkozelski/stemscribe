@@ -294,9 +294,10 @@ if __name__ == '__main__':
         test_run,
     )
 
-    net_n = BiMamba2_1D(61, 128, 32).cuda()
+    _dev = 'cuda' if torch.cuda.is_available() else ('mps' if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available() else 'cpu')
+    net_n = BiMamba2_1D(61, 128, 32).to(_dev)
     net_n.eval()
-    x = torch.randn(1, 61, 63).cuda()
+    x = torch.randn(1, 61, 63).to(_dev)
     export_jit_script(net_n)
     export_onnx(net_n, x)
     test_run(net_n, x)
