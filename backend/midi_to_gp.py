@@ -8,8 +8,9 @@ Features:
 - Automatic instrument detection (guitar, bass, drums, piano, vocals)
 - Proper tuning assignment based on instrument type
 - Note-to-fret mapping with intelligent position selection
+- Lead mode: enhanced same-string preference, bend-aware fret selection
 - Tempo and time signature preservation
-- Articulation hints from velocity
+- Articulation effects: bends, slides, hammer-ons, vibrato (from MIDI pitch bend + CC#20)
 """
 
 import logging
@@ -130,28 +131,107 @@ class FretMapper:
     """
     Intelligent fret position mapper that maintains hand position context
     across a sequence of notes.
+
+    Lead mode: stronger same-string preference, wider position memory,
+    bend-aware fret selection (prefer frets 5-15 for bends).
     """
 
-    def __init__(self, tuning: List[int]):
+    def __init__(self, tuning: List[int], lead_mode: bool = False):
         self.tuning = tuning
         self.current_position = 0  # Current hand position (fret)
         self.prev_fret = None
         self.prev_string = None
+        self.lead_mode = lead_mode
+        self.position_history = []  # Last N fret positions for lead mode
 
-    def map_note(self, midi_note: int) -> Optional[Tuple[int, int]]:
+    def map_note(self, midi_note: int, has_bend: bool = False) -> Optional[Tuple[int, int]]:
         """Map a single note, updating position context."""
-        result = midi_note_to_fret(
-            midi_note, self.tuning,
-            prev_fret=self.prev_fret,
-            prev_string=self.prev_string
-        )
+        if self.lead_mode:
+            result = self._map_note_lead(midi_note, has_bend)
+        else:
+            result = midi_note_to_fret(
+                midi_note, self.tuning,
+                prev_fret=self.prev_fret,
+                prev_string=self.prev_string
+            )
 
         if result:
             self.prev_string, self.prev_fret = result
-            # Update approximate hand position
             self.current_position = max(0, self.prev_fret - 2)
+            if self.lead_mode:
+                self.position_history.append(self.prev_fret)
+                if len(self.position_history) > 6:
+                    self.position_history.pop(0)
 
         return result
+
+    def _map_note_lead(self, midi_note: int, has_bend: bool = False) -> Optional[Tuple[int, int]]:
+        """Lead-optimized fret mapping: same-string preference, position memory, bend-aware."""
+        candidates = []
+
+        for string_idx, open_note in enumerate(self.tuning):
+            fret = midi_note - open_note
+            if 0 <= fret <= MAX_FRET:
+                string_num = string_idx + 1
+                score = 0
+
+                # Position zone — for leads, prefer mid-fret positions (5-12)
+                if fret == 0:
+                    score += 8 if has_bend else 5  # Can't bend open strings
+                elif 1 <= fret <= 4:
+                    score += 2
+                elif 5 <= fret <= 12:
+                    score += 0  # Sweet spot for lead playing + bends
+                elif 13 <= fret <= 17:
+                    score += 4
+                else:
+                    score += 12
+
+                # Bend-aware: strongly penalize open strings and frets < 2 for bends
+                if has_bend:
+                    if fret < 2:
+                        score += 20  # Can't bend open/1st fret easily
+                    elif fret > 17:
+                        score += 10  # Hard to bend high frets
+
+                # Same string: much stronger preference for leads (runs stay on one string)
+                if self.prev_string is not None:
+                    string_jump = abs(string_num - self.prev_string)
+                    if string_jump == 0:
+                        score -= 5  # Strong same-string bonus
+                    elif string_jump == 1:
+                        score += 1
+                    else:
+                        score += string_jump * 4
+
+                # Hand position continuity with history
+                if self.position_history:
+                    avg_pos = sum(self.position_history) / len(self.position_history)
+                    pos_distance = abs(fret - avg_pos)
+                    if pos_distance <= 3:
+                        score -= 2  # Within established position
+                    elif pos_distance <= 5:
+                        score += 3
+                    else:
+                        score += pos_distance * 2
+
+                # Previous fret continuity
+                if self.prev_fret is not None:
+                    fret_jump = abs(fret - self.prev_fret)
+                    if fret_jump <= 2:
+                        score -= 1
+                    elif fret_jump <= 4:
+                        score += 3
+                    else:
+                        score += fret_jump * 2
+
+                candidates.append((string_num, fret, score))
+
+        if not candidates:
+            return None
+
+        candidates.sort(key=lambda x: x[2])
+        return (candidates[0][0], candidates[0][1])
 
     def map_chord(self, midi_notes: List[int]) -> List[Tuple[int, int]]:
         """
@@ -341,6 +421,27 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
                             'velocity': velocity
                         })
 
+        # Collect pitch bend events and articulation CC#20 markers
+        pitch_bends = []
+        articulation_markers = {}  # beat_time -> articulation type
+
+        ART_TYPES = {0: None, 1: 'bend', 2: 'slide_up', 3: 'slide_down',
+                     4: 'hammer_on', 5: 'pull_off', 6: 'vibrato'}
+
+        for track in midi.tracks:
+            current_time = 0
+            for msg in track:
+                current_time += msg.time
+                if msg.type == 'pitchwheel':
+                    beat_time = current_time / midi.ticks_per_beat
+                    pitch_bends.append({'beat': beat_time, 'value': msg.pitch})
+                elif msg.type == 'control_change' and msg.control == 20:
+                    beat_time = current_time / midi.ticks_per_beat
+                    articulation_markers[beat_time] = ART_TYPES.get(msg.value)
+
+        if articulation_markers:
+            logger.info(f"Found {len(articulation_markers)} articulation markers in MIDI")
+
         if not notes:
             logger.warning("No notes found in MIDI file")
             return False
@@ -368,8 +469,26 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
             measure = guitarpro.models.Measure(gp_track, measure_header)
             gp_track.measures.append(measure)
 
-        # Create FretMapper for intelligent position tracking
-        fret_mapper = FretMapper(tuning_notes)
+        # Create FretMapper — use lead mode if we have articulation markers
+        use_lead_mode = len(articulation_markers) > 0
+        fret_mapper = FretMapper(tuning_notes, lead_mode=use_lead_mode)
+        if use_lead_mode:
+            logger.info("Using lead-optimized fret mapping (bend-aware, position memory)")
+
+        # Helper: find articulation nearest to a beat time
+        def _find_articulation(beat_time, tolerance=0.15):
+            for art_beat, art_type in articulation_markers.items():
+                if abs(art_beat - beat_time) < tolerance:
+                    return art_type
+            return None
+
+        # Helper: find max pitch bend during a note
+        def _max_bend_in_range(start_beat, end_beat):
+            max_val = 0
+            for pb in pitch_bends:
+                if start_beat <= pb['beat'] <= end_beat:
+                    max_val = max(max_val, abs(pb['value']))
+            return max_val
 
         # Add notes to measures
         for note_data in notes:
@@ -380,13 +499,17 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
             measure = gp_track.measures[measure_idx]
             beat_in_measure = note_data['start_beat'] % beats_per_measure
 
+            # Look up articulation for this note
+            note_art = _find_articulation(note_data['start_beat'])
+            has_bend = note_art == 'bend'
+
             # Convert MIDI note to fret position with hand position awareness
             if 'drum' in instrument_type.lower():
                 # Drums: use voice for different drums
                 fret_pos = (1, note_data['midi_note'] % 6)  # Simplified drum mapping
             else:
                 # Use FretMapper for context-aware fret selection
-                fret_pos = fret_mapper.map_note(note_data['midi_note'])
+                fret_pos = fret_mapper.map_note(note_data['midi_note'], has_bend=has_bend)
 
             if fret_pos is None:
                 continue  # Note out of range
@@ -424,6 +547,43 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
                 gp_note.effect.ghostNote = True
             elif note_data['velocity'] > 110:
                 gp_note.effect.accentuatedNote = True
+
+            # Apply articulation effects from melody transcriber (CC#20 + pitch bends)
+            if note_art:
+                try:
+                    if note_art == 'bend':
+                        # Create GP bend effect
+                        max_pb = _max_bend_in_range(
+                            note_data['start_beat'],
+                            note_data['start_beat'] + note_data['duration_beats']
+                        )
+                        if max_pb > 0:
+                            bend_points = []
+                            # GP bend points: position 0-12, value in quarter tones (100 = full step)
+                            # Standard bend curve: rise to peak at position 6, sustain
+                            bend_value = min(400, int(max_pb / 8192 * 200))  # Scale from MIDI to GP units
+                            if bend_value >= 25:  # At least quarter step
+                                bend_points.append(guitarpro.models.BendPoint(position=0, value=0))
+                                bend_points.append(guitarpro.models.BendPoint(position=6, value=bend_value))
+                                bend_points.append(guitarpro.models.BendPoint(position=12, value=bend_value))
+                                gp_note.effect.bend = guitarpro.models.BendEffect(
+                                    type=guitarpro.models.BendType.bend,
+                                    value=bend_value,
+                                    points=bend_points,
+                                )
+
+                    elif note_art in ('slide_up', 'slide_down'):
+                        gp_note.effect.slides = [guitarpro.models.SlideType.shiftSlideTo]
+
+                    elif note_art == 'hammer_on':
+                        gp_note.effect.hammer = True
+
+                    elif note_art == 'vibrato':
+                        gp_note.effect.vibrato = guitarpro.models.Vibrato.slight
+
+                except Exception as e:
+                    # pyguitarpro API varies — if effect fails, note still exports fine
+                    logger.debug(f"Could not apply {note_art} effect: {e}")
 
             beat.notes.append(gp_note)
             voice.beats.append(beat)

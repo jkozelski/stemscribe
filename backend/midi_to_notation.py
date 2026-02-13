@@ -4,13 +4,14 @@ MIDI to MusicXML Converter for StemScribe
 Converts MIDI files to MusicXML using music21.
 MusicXML can then be rendered in the browser using OpenSheetMusicDisplay.
 
-This is mature, proven technology - the same approach Logic Pro,
-MuseScore, Sibelius, and Finale have used for decades.
+Supports melody mode with articulation markings (bends, slides, hammer-ons,
+vibrato) read from MIDI pitch bend events and CC#20 metadata encoded by
+the melody transcriber.
 """
 
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,8 @@ def midi_to_musicxml(midi_path: str, output_path: Optional[str] = None,
                      quantize: bool = True,
                      stem_type: str = 'guitar',
                      title: Optional[str] = None,
-                     artist: Optional[str] = None) -> Optional[str]:
+                     artist: Optional[str] = None,
+                     melody_mode: bool = False) -> Optional[str]:
     """
     Convert MIDI file to MusicXML.
 
@@ -86,7 +88,8 @@ def midi_to_musicxml(midi_path: str, output_path: Optional[str] = None,
             score = _quantize_score(score)
 
         # Clean up for better notation
-        score = _cleanup_for_notation(score, stem_type)
+        score = _cleanup_for_notation(score, stem_type, melody_mode=melody_mode,
+                                      midi_path_str=str(midi_path))
 
         # Write MusicXML
         score.write('musicxml', fp=str(output_path))
@@ -183,7 +186,9 @@ def _detect_triplets(score: 'stream.Score') -> bool:
     return False
 
 
-def _cleanup_for_notation(score: 'stream.Score', stem_type: str) -> 'stream.Score':
+def _cleanup_for_notation(score: 'stream.Score', stem_type: str,
+                          melody_mode: bool = False,
+                          midi_path_str: Optional[str] = None) -> 'stream.Score':
     """
     Clean up the score for better notation rendering.
     - Remove very short notes (likely artifacts)
@@ -191,8 +196,22 @@ def _cleanup_for_notation(score: 'stream.Score', stem_type: str) -> 'stream.Scor
     - Add time signature if missing
     - Add key signature if detected
     - Add dynamics based on velocity
+    - Melody mode: enforce monophonic, add articulation markings
     """
     from music21 import dynamics
+
+    # Melody mode: enforce monophonic output (keep highest note per beat)
+    if melody_mode:
+        _enforce_monophonic(score)
+
+        # Read and apply articulation markings from MIDI CC#20 data
+        if midi_path_str:
+            try:
+                articulations = _read_midi_articulations(midi_path_str)
+                if articulations:
+                    _apply_articulation_markings(score, articulations)
+            except Exception as e:
+                logger.debug(f"  Articulation marking skipped: {e}")
 
     # Ensure time signature exists
     has_time_sig = False
@@ -240,6 +259,167 @@ def _cleanup_for_notation(score: 'stream.Score', stem_type: str) -> 'stream.Scor
         pass
 
     return score
+
+
+def _enforce_monophonic(score: 'stream.Score'):
+    """
+    Enforce monophonic output for melody transcriptions.
+    If any beat has multiple simultaneous notes, keep only the highest.
+    Also attempts to add articulation markings from MIDI CC data.
+    """
+    for part in score.parts:
+        # Group notes by offset to find simultaneities
+        offset_notes = {}
+        for n in part.recurse().notes:
+            if isinstance(n, chord.Chord):
+                # Convert chord to highest note
+                offset = n.offset
+                if offset not in offset_notes:
+                    offset_notes[offset] = []
+                offset_notes[offset].append(n)
+            elif isinstance(n, note.Note):
+                offset = n.offset
+                if offset not in offset_notes:
+                    offset_notes[offset] = []
+                offset_notes[offset].append(n)
+
+        # Remove lower notes in simultaneities
+        for offset, notes_at in offset_notes.items():
+            if len(notes_at) > 1:
+                # Sort by pitch (highest first) and remove all but highest
+                sorted_notes = sorted(notes_at, key=lambda n: n.pitch.midi if hasattr(n, 'pitch') else 0, reverse=True)
+                for n in sorted_notes[1:]:
+                    try:
+                        part.remove(n, recurse=True)
+                    except Exception:
+                        pass
+
+    logger.debug("  Enforced monophonic output for melody mode")
+
+
+def _read_midi_articulations(midi_path: str) -> Dict[float, str]:
+    """
+    Read articulation markers from MIDI CC#20 events encoded by melody_transcriber.
+
+    CC#20 values:
+        0 = none, 1 = bend, 2 = slide_up, 3 = slide_down,
+        4 = hammer_on, 5 = pull_off, 6 = vibrato
+
+    Returns:
+        Dict mapping time (in seconds) to articulation type string
+    """
+    try:
+        import mido
+
+        ART_TYPES = {
+            0: None, 1: 'bend', 2: 'slide_up', 3: 'slide_down',
+            4: 'hammer_on', 5: 'pull_off', 6: 'vibrato'
+        }
+
+        mid = mido.MidiFile(midi_path)
+        articulations = {}
+        ticks_per_beat = mid.ticks_per_beat
+
+        for track in mid.tracks:
+            abs_time = 0
+            current_tempo = 500000  # default 120 BPM
+
+            for msg in track:
+                abs_time += msg.time
+
+                if msg.type == 'set_tempo':
+                    current_tempo = msg.tempo
+                elif msg.type == 'control_change' and msg.control == 20:
+                    art_type = ART_TYPES.get(msg.value)
+                    if art_type:
+                        # Convert ticks to quarter-note offset
+                        time_in_quarters = abs_time / ticks_per_beat
+                        articulations[time_in_quarters] = art_type
+
+        logger.debug(f"  Read {len(articulations)} articulation markers from MIDI")
+        return articulations
+
+    except Exception as e:
+        logger.debug(f"  Could not read MIDI articulations: {e}")
+        return {}
+
+
+def _apply_articulation_markings(score: 'stream.Score', articulations: Dict[float, str]):
+    """
+    Apply music21 articulation markings to notes based on MIDI CC#20 data.
+
+    Mapping:
+        bend      -> BendAfter (fall/doit notation)
+        slide_up  -> Glissando to next note
+        slide_down -> Glissando to next note
+        hammer_on -> Slur (legato) to next note
+        pull_off  -> Slur (legato) to next note
+        vibrato   -> TextExpression "~" or Trill-like marking
+    """
+    from music21 import articulations as m21_art
+    from music21 import expressions, spanner
+
+    if not articulations:
+        return
+
+    markings_added = 0
+
+    for part in score.parts:
+        all_notes = list(part.recurse().notes)
+
+        for i, n in enumerate(all_notes):
+            if not isinstance(n, note.Note):
+                continue
+
+            # Find matching articulation (within 0.25 quarter note tolerance)
+            note_offset = n.getOffsetInHierarchy(part)
+            matched_art = None
+            for art_offset, art_type in articulations.items():
+                if abs(note_offset - art_offset) < 0.25:
+                    matched_art = art_type
+                    break
+
+            if not matched_art:
+                continue
+
+            try:
+                if matched_art == 'bend':
+                    # BendAfter — shows a bend line after the note
+                    bend = m21_art.BendAfter()
+                    bend.bendHeight = 2  # quarter-tone units
+                    n.articulations.append(bend)
+                    markings_added += 1
+
+                elif matched_art in ('slide_up', 'slide_down'):
+                    # Glissando to next note
+                    if i + 1 < len(all_notes):
+                        next_note = all_notes[i + 1]
+                        if isinstance(next_note, note.Note):
+                            gliss = spanner.Glissando(n, next_note)
+                            gliss.slideType = 'continuous'
+                            part.insert(0, gliss)
+                            markings_added += 1
+
+                elif matched_art in ('hammer_on', 'pull_off'):
+                    # Slur (legato marking) to next note
+                    if i + 1 < len(all_notes):
+                        next_note = all_notes[i + 1]
+                        slur = spanner.Slur(n, next_note)
+                        part.insert(0, slur)
+                        markings_added += 1
+
+                elif matched_art == 'vibrato':
+                    # Text expression for vibrato
+                    vib = expressions.TextExpression('vibr.')
+                    vib.style.fontStyle = 'italic'
+                    vib.style.fontSize = 8
+                    n.activeSite.insert(note_offset, vib)
+                    markings_added += 1
+
+            except Exception as e:
+                logger.debug(f"  Could not add {matched_art} marking: {e}")
+
+    logger.debug(f"  Added {markings_added} articulation markings to notation")
 
 
 def _add_dynamics_from_velocity(score: 'stream.Score'):

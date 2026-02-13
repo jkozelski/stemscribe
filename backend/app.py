@@ -223,6 +223,15 @@ except ImportError as e:
     _chord_theory_engine = None
     logger.warning(f"Chord theory engine not available: {e}")
 
+# Monophonic melody/lead transcriber (clean lead lines, articulations)
+try:
+    from melody_transcriber import MelodyExtractor, transcribe_melody
+    MELODY_TRANSCRIBER_AVAILABLE = True
+    logger.info("✅ Melody transcriber available (monophonic lead extraction, vibrato, bends)")
+except ImportError as e:
+    MELODY_TRANSCRIBER_AVAILABLE = False
+    logger.warning(f"Melody transcriber not available: {e}")
+
 # Internet Archive Live Music pipeline (search/browse/batch)
 try:
     from archive_pipeline import ArchivePipeline, search_archive, get_show_info, get_pipeline as get_archive_pipeline
@@ -559,6 +568,7 @@ class ProcessingJob:
         self.articulations = {}      # Per-stem articulation counts
         self.transcription_quality = {}  # Quality scores per stem
         self.pro_tabs = {}           # Professional tabs from Songsterr/UG
+        self.transcription_mode = {}  # Per-stem: 'melody', 'enhanced', 'basic_pitch'
 
     def to_dict(self):
         """Convert job to dict with numpy types converted for JSON serialization"""
@@ -582,7 +592,8 @@ class ProcessingJob:
             'chord_progression': self.chord_progression,
             'detected_key': self.detected_key,
             'transcription_quality': self.transcription_quality,
-            'pro_tabs': self.pro_tabs  # Professional tabs from Songsterr
+            'pro_tabs': self.pro_tabs,  # Professional tabs from Songsterr
+            'transcription_mode': self.transcription_mode,
         }
         # Convert numpy types to native Python types for JSON serialization
         return convert_numpy_types(data)
@@ -1538,9 +1549,54 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                     logger.info(f"⏭️ Skipping {stem_name} (no drum transcriber available)")
                     continue
 
-            # ==== MELODIC INSTRUMENTS: Use enhanced transcriber ====
+            # ==== MELODIC INSTRUMENTS ====
             stem_type = stem_name.lower().split('_')[0]  # Handle guitar_left, bass_right, etc.
 
+            # ---- Try melody transcriber first for lead/monophonic stems ----
+            is_lead_stem = stem_name.lower() in ['guitar_lead', 'vocals', 'vocals_lead', 'bass']
+            # Also treat plain 'guitar' as lead candidate if no guitar_lead sub-stem
+            if stem_name.lower() == 'guitar' and 'guitar_lead' not in job.stems:
+                is_lead_stem = True
+
+            if is_lead_stem and MELODY_TRANSCRIBER_AVAILABLE:
+                logger.info(f"🎵 Transcribing {stem_name} with melody extractor (monophonic)...")
+                job.stage = f'Transcribing {stem_name} (melody extraction)'
+
+                try:
+                    melody_ext = MelodyExtractor(instrument=stem_type)
+                    mel_result = melody_ext.transcribe(
+                        audio_path=stem_path,
+                        output_dir=str(midi_output_dir),
+                        instrument=stem_type,
+                        tempo_hint=job.metadata.get('tempo'),
+                        ensemble=True,
+                    )
+
+                    if mel_result.midi_path and Path(mel_result.midi_path).exists() and mel_result.quality_score > 0.4:
+                        job.midi_files[stem_name] = mel_result.midi_path
+                        job.transcription_quality[stem_name] = mel_result.quality_score
+                        job.articulations[stem_name] = mel_result.articulation_count
+                        job.transcription_mode[stem_name] = 'melody'
+
+                        if mel_result.detected_key and not job.detected_key:
+                            job.detected_key = mel_result.detected_key
+
+                        logger.info(f"✓ Melody MIDI for {stem_name}: "
+                                   f"{len(mel_result.notes)} notes, "
+                                   f"{mel_result.articulation_count} articulations, "
+                                   f"quality: {mel_result.quality_score:.2f}")
+                        successful += 1
+                        job.progress = 60 + int((idx + 1) / total_stems * 35)
+                        continue
+                    else:
+                        quality = mel_result.quality_score if mel_result else 0
+                        logger.info(f"  Melody quality too low ({quality:.2f}), "
+                                   f"falling back to enhanced transcriber")
+                except Exception as e:
+                    logger.warning(f"Melody transcriber failed for {stem_name}: {e}")
+                    # Fall through to enhanced transcriber
+
+            # ---- Enhanced transcriber (polyphonic, articulations) ----
             if enhanced_transcriber and stem_type in ['guitar', 'bass', 'vocals', 'piano']:
                 logger.info(f"🎼 Transcribing {stem_name} with enhanced transcriber...")
                 job.stage = f'Transcribing {stem_name} (articulations)'
@@ -1559,6 +1615,7 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                         job.midi_files[stem_name] = result.midi_path
                         job.transcription_quality[stem_name] = result.quality_score
                         job.articulations[stem_name] = len(result.articulations)
+                        job.transcription_mode[stem_name] = 'enhanced'
 
                         # Store detected key if not already set
                         if result.detected_key and not job.detected_key:
