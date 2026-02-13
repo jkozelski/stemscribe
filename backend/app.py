@@ -223,6 +223,15 @@ except ImportError as e:
     _chord_theory_engine = None
     logger.warning(f"Chord theory engine not available: {e}")
 
+# Internet Archive Live Music pipeline (search/browse/batch)
+try:
+    from archive_pipeline import ArchivePipeline, search_archive, get_show_info, get_pipeline as get_archive_pipeline
+    ARCHIVE_PIPELINE_AVAILABLE = True
+    logger.info("✅ Archive.org Live Music pipeline available (250k+ free concert recordings)")
+except ImportError as e:
+    ARCHIVE_PIPELINE_AVAILABLE = False
+    logger.warning(f"Archive.org pipeline not available: {e}")
+
 # MIDI to Guitar Pro conversion
 try:
     from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp
@@ -411,6 +420,7 @@ URL_PATTERNS = [
     r'dailymotion\.com',
     r'mixcloud\.com',
     r'audiomack\.com',
+    r'archive\.org/(details|download)',  # Internet Archive Live Music
 ]
 
 # Streaming service patterns (need special handling)
@@ -2257,7 +2267,7 @@ def process_url_endpoint():
 
     elif not is_supported_url(url):
         return jsonify({
-            'error': 'Unsupported URL. Supported: YouTube, Spotify, Apple Music, SoundCloud, Bandcamp, Vimeo'
+            'error': 'Unsupported URL. Supported: YouTube, Spotify, Apple Music, SoundCloud, Bandcamp, Vimeo, Archive.org'
         }), 400
 
     # Get selected skills from request data
@@ -3081,6 +3091,283 @@ def drive_upload_job(job_id):
         return jsonify({'status': 'uploaded', 'result': result})
     else:
         return jsonify({'error': 'Upload failed'}), 500
+
+
+# =============================================================================
+# Archive.org Live Music API
+# =============================================================================
+
+@app.route('/api/archive/search', methods=['GET'])
+def archive_search():
+    """
+    Search the Internet Archive Live Music collection.
+
+    Query params:
+        q: Search query (band name, date, venue, etc.)
+        collection: Archive.org collection ID (e.g., "GratefulDead")
+        year: Filter by year (e.g., "1977")
+        sort: Sort order — "date", "rating", "downloads" (default: "downloads")
+        rows: Number of results (default: 25, max: 100)
+
+    Example: /api/archive/search?q=grateful+dead+1977&sort=rating
+    """
+    if not ARCHIVE_PIPELINE_AVAILABLE:
+        return jsonify({'error': 'Archive.org pipeline not available', 'available': False}), 500
+
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({'error': 'Missing search query (q parameter)'}), 400
+
+    collection = request.args.get('collection')
+    year = request.args.get('year')
+    sort = request.args.get('sort', 'downloads')
+    rows = min(int(request.args.get('rows', 25)), 100)
+
+    try:
+        results = search_archive(query, collection=collection, year=year, rows=rows)
+
+        # Sort results
+        if sort == 'rating':
+            results.sort(key=lambda x: x.get('avg_rating', 0), reverse=True)
+        elif sort == 'date':
+            results.sort(key=lambda x: x.get('date', ''))
+
+        return jsonify({
+            'query': query,
+            'collection': collection,
+            'year': year,
+            'results': results,
+            'count': len(results),
+            'available': True,
+        })
+    except Exception as e:
+        logger.error(f"Archive search failed: {e}")
+        return jsonify({'error': f'Search failed: {str(e)}'}), 500
+
+
+@app.route('/api/archive/collections', methods=['GET'])
+def archive_collections():
+    """
+    List known Archive.org live music collections (bands).
+    Returns collection IDs and friendly names for the search UI.
+    """
+    if not ARCHIVE_PIPELINE_AVAILABLE:
+        return jsonify({'error': 'Archive.org pipeline not available', 'available': False}), 500
+
+    try:
+        from archive_pipeline import COLLECTIONS
+        collections = [
+            {'id': cid, 'name': name}
+            for name, cid in COLLECTIONS.items()
+        ]
+        # Sort alphabetically by name
+        collections.sort(key=lambda x: x['name'])
+        return jsonify({
+            'collections': collections,
+            'count': len(collections),
+            'available': True,
+        })
+    except Exception as e:
+        logger.error(f"Failed to get collections: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/archive/show/<identifier>', methods=['GET'])
+def archive_show_details(identifier):
+    """
+    Get full details for an Archive.org show, including track list.
+
+    Path param:
+        identifier: Archive.org item identifier (e.g., "gd1977-05-08.sbd.hicks.4982.sbeok.shnf")
+
+    Query params:
+        format: Preferred audio format — "mp3", "flac", "ogg" (default: "mp3")
+
+    Returns show metadata, track list with download URLs, and extracted setlist.
+    """
+    if not ARCHIVE_PIPELINE_AVAILABLE:
+        return jsonify({'error': 'Archive.org pipeline not available', 'available': False}), 500
+
+    prefer_format = request.args.get('format', 'mp3')
+
+    try:
+        result = get_show_info(identifier)
+        if 'error' in result:
+            return jsonify(result), 404
+        result['available'] = True
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Archive show details failed for {identifier}: {e}")
+        return jsonify({'error': f'Failed to get show details: {str(e)}'}), 500
+
+
+@app.route('/api/archive/process', methods=['POST'])
+def archive_process_track():
+    """
+    Process an Archive.org track through StemScribe's full pipeline.
+
+    Body (JSON):
+        url: Direct download URL or archive.org page URL
+        identifier: Archive.org identifier (optional, extracted from URL if missing)
+        filename: Specific filename to process (optional)
+        skills: List of skills to enable (optional)
+
+    This feeds the track into the same pipeline as /api/url — yt-dlp handles
+    archive.org natively, so we just forward to the URL processing endpoint.
+    """
+    if not ARCHIVE_PIPELINE_AVAILABLE:
+        return jsonify({'error': 'Archive.org pipeline not available', 'available': False}), 500
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Missing request body'}), 400
+
+    url = data.get('url', '').strip()
+    identifier = data.get('identifier', '').strip()
+    filename = data.get('filename', '').strip()
+
+    # Build the URL if we have identifier + filename but no URL
+    if not url and identifier and filename:
+        url = f"https://archive.org/download/{identifier}/{filename}"
+    elif not url and identifier:
+        url = f"https://archive.org/details/{identifier}"
+
+    if not url:
+        return jsonify({'error': 'Provide url, or identifier + filename'}), 400
+
+    # Get processing options
+    skills = data.get('skills', [])
+    if isinstance(skills, str):
+        skills = [s.strip() for s in skills.split(',') if s.strip()]
+
+    hq_vocals = data.get('hq_vocals', False)
+    vocal_focus = data.get('vocal_focus', False)
+    enhance_stems = data.get('enhance_stems', False)
+    stereo_split = data.get('stereo_split', False)
+    gp_tabs = data.get('gp_tabs', True)
+    chord_detection = data.get('chord_detection', True)
+    mdx_model = data.get('mdx_model', False)
+    ensemble_mode = data.get('ensemble', False)
+
+    # Create job
+    job_id = str(uuid.uuid4())[:8]
+    display_name = filename or identifier or 'Archive.org track'
+    job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
+    jobs[job_id] = job
+
+    # Store archive metadata
+    job.metadata['source'] = 'archive.org'
+    job.metadata['archive_identifier'] = identifier
+    if filename:
+        job.metadata['archive_filename'] = filename
+
+    # Process in background thread (same pipeline as /api/url)
+    thread = threading.Thread(
+        target=process_url,
+        args=(job, url),
+        kwargs={
+            'hq_vocals': hq_vocals,
+            'vocal_focus': vocal_focus,
+            'enhance_stems': enhance_stems,
+            'stereo_split': stereo_split,
+            'gp_tabs': gp_tabs,
+            'chord_detection': chord_detection,
+            'mdx_model': mdx_model,
+            'ensemble_mode': ensemble_mode,
+        }
+    )
+    thread.daemon = True
+    thread.start()
+
+    return jsonify({
+        'job_id': job_id,
+        'message': 'Processing Archive.org track',
+        'filename': display_name,
+        'source': 'archive.org',
+        'identifier': identifier,
+        'skills': skills,
+    })
+
+
+@app.route('/api/archive/batch', methods=['POST'])
+def archive_batch_process():
+    """
+    Batch-process multiple tracks from an Archive.org show.
+
+    Body (JSON):
+        identifier: Archive.org show identifier
+        tracks: List of filenames to process (optional — processes all if omitted)
+        format: Preferred audio format (default: "mp3")
+        skills: Skills to enable for all tracks
+
+    Returns list of job IDs, one per track.
+    """
+    if not ARCHIVE_PIPELINE_AVAILABLE:
+        return jsonify({'error': 'Archive.org pipeline not available', 'available': False}), 500
+
+    data = request.get_json()
+    if not data or 'identifier' not in data:
+        return jsonify({'error': 'Missing identifier'}), 400
+
+    identifier = data['identifier']
+    requested_tracks = data.get('tracks', [])
+    prefer_format = data.get('format', 'mp3')
+    skills = data.get('skills', [])
+
+    try:
+        pipeline = get_archive_pipeline()
+        all_tracks = pipeline.get_show_tracks(identifier, prefer_format=prefer_format)
+
+        if not all_tracks:
+            return jsonify({'error': f'No audio tracks found for {identifier}'}), 404
+
+        # Filter to requested tracks if specified
+        if requested_tracks:
+            all_tracks = [t for t in all_tracks if t.filename in requested_tracks]
+            if not all_tracks:
+                return jsonify({'error': 'None of the requested tracks were found'}), 404
+
+        # Create a job for each track
+        job_ids = []
+        for track in all_tracks:
+            url = track.download_url
+            job_id = str(uuid.uuid4())[:8]
+            display_name = track.title or track.filename
+            job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
+            jobs[job_id] = job
+            job.metadata['source'] = 'archive.org'
+            job.metadata['archive_identifier'] = identifier
+            job.metadata['archive_filename'] = track.filename
+            job.metadata['archive_track_number'] = track.track_number
+
+            thread = threading.Thread(
+                target=process_url,
+                args=(job, url),
+                kwargs={
+                    'gp_tabs': data.get('gp_tabs', True),
+                    'chord_detection': data.get('chord_detection', True),
+                }
+            )
+            thread.daemon = True
+            thread.start()
+
+            job_ids.append({
+                'job_id': job_id,
+                'track': track.filename,
+                'title': display_name,
+                'track_number': track.track_number,
+            })
+
+        return jsonify({
+            'identifier': identifier,
+            'jobs': job_ids,
+            'total_tracks': len(job_ids),
+            'message': f'Processing {len(job_ids)} tracks from {identifier}',
+        })
+
+    except Exception as e:
+        logger.error(f"Archive batch process failed: {e}")
+        return jsonify({'error': f'Batch processing failed: {str(e)}'}), 500
 
 
 @app.route('/api/cleanup', methods=['POST'])
