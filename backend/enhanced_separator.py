@@ -168,14 +168,37 @@ class EnhancedSeparator:
         logger.info(f"🎚️ Separating: {audio_path.name}")
         output_files = separator.separate(str(audio_path))
 
-        # Map output files to stem names
+        # Map output files to stem names by FILENAME matching (not array order)
+        # audio-separator embeds stem names in filenames like "(Vocals)" or "(Instrumental)"
+        # The array order is NOT guaranteed to match the stems config order
         stems = {}
         model_config = MODELS[model]
+        matched_files = set()
 
-        for i, stem_name in enumerate(model_config['stems']):
-            if i < len(output_files):
-                stems[stem_name.lower()] = output_files[i]
-                logger.info(f"  ✅ {stem_name}: {Path(output_files[i]).name}")
+        # First pass: match by filename content (robust)
+        for stem_name in model_config['stems']:
+            stem_lower = stem_name.lower()
+            for f in output_files:
+                if f in matched_files:
+                    continue
+                fname = Path(f).name.lower()
+                # audio-separator puts stem names in parens: (Vocals), (Instrumental), etc.
+                if f'({stem_lower})' in fname:
+                    stems[stem_lower] = f
+                    matched_files.add(f)
+                    logger.info(f"  ✅ {stem_name}: {Path(f).name} (matched by filename)")
+                    break
+
+        # Fallback: if filename matching missed some, use array order for unmatched
+        if len(stems) < len(model_config['stems']):
+            logger.warning(f"  ⚠️ Filename matching got {len(stems)}/{len(model_config['stems'])} stems, falling back to order")
+            for i, stem_name in enumerate(model_config['stems']):
+                stem_lower = stem_name.lower()
+                if stem_lower not in stems and i < len(output_files):
+                    if output_files[i] not in matched_files:
+                        stems[stem_lower] = output_files[i]
+                        matched_files.add(output_files[i])
+                        logger.info(f"  ✅ {stem_name}: {Path(output_files[i]).name} (fallback order)")
 
         return stems
 
@@ -215,8 +238,21 @@ class EnhancedSeparator:
         output_files = separator.separate(str(vocals_path))
 
         if len(output_files) >= 2:
-            lead_vocals = output_files[0]  # "Vocals" output = lead
-            backing_vocals = output_files[1]  # "Instrumental" output = backing
+            # Match by filename — audio-separator embeds stem names like (Vocals), (Instrumental)
+            lead_vocals = None
+            backing_vocals = None
+            for f in output_files:
+                fname = Path(f).name.lower()
+                if '(vocals)' in fname:
+                    lead_vocals = f
+                elif '(instrumental)' in fname:
+                    backing_vocals = f
+
+            # Fallback to order if filename matching fails
+            if not lead_vocals:
+                lead_vocals = output_files[0]
+            if not backing_vocals:
+                backing_vocals = output_files[1] if len(output_files) > 1 else output_files[0]
 
             logger.info(f"  ✅ Lead vocals: {Path(lead_vocals).name}")
             logger.info(f"  ✅ Backing vocals: {Path(backing_vocals).name}")

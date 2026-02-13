@@ -4372,7 +4372,7 @@
 
     <div class="container">
         <section class="hero">
-            <span class="hero-label">✦ AI-Powered Audio Intelligence</span>
+            <span class="hero-label">✦ Stem Separation & Transcription</span>
             <h1>Tear The <span class="highlight">Sound</span> Apart</h1>
             <p>Drop any track and watch it split into pristine stems. Get tabs, sheet music, and practice tools. Learn from the masters.</p>
         </section>
@@ -5645,7 +5645,8 @@
             });
 
             // Check if we have deep-extracted stems (from smart_separate)
-            const primaryStems = ['vocals', 'drums', 'bass', 'guitar', 'piano', 'other'];
+            // Vocal splits (lead/backing) are primary-tier, not deep-extracted
+            const primaryStems = ['vocals', 'vocals_lead', 'vocals_backing', 'drums', 'bass', 'guitar', 'piano', 'other'];
             const hasCascadedStems = sortedStems.some(([name]) => !primaryStems.includes(name));
 
             // Wrap grid in Neve console
@@ -5763,10 +5764,9 @@
                              <a href="${API_BASE}/download/${job.job_id}/stem/${name}" class="stem-btn raw" download title="Raw stem">⬇ Raw</a>` :
                             `<a href="${API_BASE}/download/${job.job_id}/stem/${name}" class="stem-btn" download>⬇ DL</a>`
                         }
-                        ${hasMidi ? `<a href="${API_BASE}/download/${job.job_id}/midi/${name}" class="stem-btn midi" download>🎹 MIDI</a>` : ''}
-                        ${job.musicxml_files?.[name] ? `<a href="${API_BASE}/download/${job.job_id}/musicxml/${name}" class="stem-btn notation" download title="Download MusicXML">📜 XML</a>` : ''}
-                        ${job.gp_files?.[name] ? `<a href="${API_BASE}/download/${job.job_id}/gp/${name}" class="stem-btn notation" download title="Download Guitar Pro">🎸 GP</a>` : ''}
                         ${(job.musicxml_files?.[name] || job.gp_files?.[name]) ? `<button class="stem-btn notation" onclick="openNotationForStem('${name}')" title="Open in Practice Mode">▶ TAB</button>` : ''}
+                        ${job.musicxml_files?.[name] ? `<button class="stem-btn notation" onclick="exportPDFForStem('${name}')" title="Export sheet music as PDF">📄 PDF</button>` : ''}
+                        ${hasMidi ? `<a href="${API_BASE}/download/${job.job_id}/midi/${name}" class="stem-btn midi" download title="Download MIDI file">🎹</a>` : ''}
                     </div>
                     <audio id="audio-${name}" src="${job.enhanced_stems?.[name] ? API_BASE + '/download/' + job.job_id + '/enhanced/' + name : API_BASE + '/download/' + job.job_id + '/stem/' + name}" preload="auto"></audio>
                 `;
@@ -6280,6 +6280,12 @@
                 window.open(`practice.html?job=${currentJobId}&stem=${stemName}`, '_blank');
             } else {
                 window.open('practice.html', '_blank');
+            }
+        }
+
+        function exportPDFForStem(stemName) {
+            if (currentJobId) {
+                window.open(`practice.html?job=${currentJobId}&stem=${stemName}&autoExportPDF=true`, '_blank');
             }
         }
 

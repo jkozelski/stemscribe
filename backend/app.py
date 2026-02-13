@@ -529,9 +529,11 @@ def get_apple_music_track_info(url):
 def search_youtube_for_song(search_query):
     """Search YouTube for a song and return the best match URL"""
     try:
-        # Use yt-dlp to search YouTube
+        # Use yt-dlp to search YouTube (cookies + Deno bypass bot detection)
         search_cmd = [
             'yt-dlp',
+            '--cookies-from-browser', 'chrome',
+            '--remote-components', 'ejs:github',
             '--dump-json',
             '--no-download',
             '--default-search', 'ytsearch1',  # Get first result
@@ -617,8 +619,11 @@ def download_from_url(job: ProcessingJob, url: str, output_dir: Path):
 
     try:
         # First, get metadata
+        # Use browser cookies + Deno JS solver to bypass YouTube bot detection
         metadata_cmd = [
             'yt-dlp',
+            '--cookies-from-browser', 'chrome',
+            '--remote-components', 'ejs:github',
             '--dump-json',
             '--no-download',
             url
@@ -642,8 +647,11 @@ def download_from_url(job: ProcessingJob, url: str, output_dir: Path):
         output_template = str(output_dir / f"{safe_title}.%(ext)s")
 
         # Download audio
+        # Use browser cookies + Deno JS solver to bypass YouTube bot detection
         download_cmd = [
             'yt-dlp',
+            '--cookies-from-browser', 'chrome',
+            '--remote-components', 'ejs:github',
             '-x',                          # Extract audio only
             '--audio-format', 'wav',       # Best quality for processing
             '--audio-quality', '0',        # Highest quality
@@ -815,6 +823,138 @@ def separate_stems(job: ProcessingJob, audio_path: Path):
         logger.error(f"Stem separation failed: {e}")
         job.error = str(e)
         return False
+
+
+def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
+    """
+    STATE-OF-THE-ART stem separation using BS-RoFormer + Demucs ensemble.
+
+    Pipeline:
+    1. BS-RoFormer (SDR 12.9) → best-in-class vocals/instrumental split
+    2. Demucs htdemucs_6s on instrumental → drums, bass, guitar, piano, other
+    3. smart_separate() handles deep extraction of "other" later
+
+    This beats pure Demucs by ~3 dB SDR on vocals and produces cleaner
+    instrument stems by keeping vocal bleed out of the Demucs pass.
+    """
+    import gc
+
+    job.stage = '🧠 RoFormer: Separating vocals (state-of-the-art)'
+    job.progress = 10
+    logger.info(f"🧠 Starting RoFormer+Demucs ensemble separation for {audio_path}")
+
+    output_path = OUTPUT_DIR / job.job_id / 'stems'
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    try:
+        # ---- Pass 1: BS-RoFormer for vocals/instrumental ----
+        roformer_dir = output_path / 'roformer'
+        roformer_dir.mkdir(parents=True, exist_ok=True)
+
+        job.stage = '🧠 RoFormer: Extracting vocals (SDR 12.9)'
+        job.progress = 12
+
+        separator = EnhancedSeparator(output_dir=str(roformer_dir))
+        roformer_stems = separator.separate(str(audio_path), model='vocals_best')
+
+        vocals_path = roformer_stems.get('vocals')
+        instrumental_path = roformer_stems.get('instrumental')
+
+        if not vocals_path or not instrumental_path:
+            raise Exception("BS-RoFormer did not produce vocals + instrumental")
+
+        # Ensure absolute paths
+        if not os.path.isabs(vocals_path):
+            vocals_path = str(roformer_dir / Path(vocals_path).name)
+        if not os.path.isabs(instrumental_path):
+            instrumental_path = str(roformer_dir / Path(instrumental_path).name)
+
+        logger.info(f"  ✅ RoFormer vocals: {Path(vocals_path).name}")
+        logger.info(f"  ✅ RoFormer instrumental: {Path(instrumental_path).name}")
+
+        # Free RoFormer memory before loading Demucs
+        del separator
+        gc.collect()
+
+        job.progress = 22
+
+        # ---- Pass 2: Demucs on instrumental for instrument stems ----
+        job.stage = '🎸 Separating instruments from instrumental...'
+        logger.info("🎸 Running Demucs htdemucs_6s on instrumental track...")
+
+        demucs_dir = output_path / 'demucs_inst'
+        demucs_dir.mkdir(parents=True, exist_ok=True)
+
+        def progress_callback(progress: DemucsProgress):
+            # Map Demucs progress to job progress 22-40%
+            job_progress = 22 + (progress.percent * 0.18)
+            job.progress = int(job_progress)
+            if progress.eta_seconds > 0:
+                eta_min = progress.eta_seconds / 60
+                job.stage = f'🎸 Separating instruments: {progress.percent:.0f}% (ETA: {eta_min:.1f}m)'
+            else:
+                job.stage = f'🎸 Separating instruments: {progress.percent:.0f}%'
+
+        runner = DemucsRunner(model='htdemucs_6s', progress_callback=progress_callback)
+        result = runner.separate(
+            audio_path=Path(instrumental_path),
+            output_dir=demucs_dir,
+            timeout_seconds=1800
+        )
+
+        if not result.success:
+            raise Exception(f"Demucs instrument separation failed: {result.error_message}")
+
+        job.progress = 40
+        job.stage = 'Converting stems to MP3'
+
+        # ---- Collect all stems ----
+        # Convert RoFormer vocals WAV to MP3
+        vocals_mp3 = output_path / 'vocals.mp3'
+        subprocess.run([
+            'ffmpeg', '-y', '-i', vocals_path,
+            '-codec:a', 'libmp3lame', '-b:a', '320k',
+            str(vocals_mp3)
+        ], capture_output=True, timeout=120)
+
+        if vocals_mp3.exists():
+            job.stems['vocals'] = str(vocals_mp3)
+            logger.info(f"  ✅ vocals (RoFormer SDR 12.9)")
+        else:
+            # Fallback: use the WAV directly
+            job.stems['vocals'] = vocals_path
+            logger.warning("  ⚠️ MP3 conversion failed for vocals, using WAV")
+
+        # Convert Demucs instrument stems WAV to MP3
+        if result.output_dir and result.output_dir.exists():
+            demucs_mp3s = convert_wavs_to_mp3(result.output_dir)
+
+            # Take drums, bass, guitar, piano, other from Demucs
+            # Skip Demucs "vocals" — RoFormer's is better
+            for stem_name, stem_path in demucs_mp3s.items():
+                if stem_name == 'vocals':
+                    logger.info(f"  ⏭️ Skipping Demucs vocals (using RoFormer instead)")
+                    continue
+                job.stems[stem_name] = stem_path
+                logger.info(f"  ✅ {stem_name} (Demucs)")
+
+        if len(job.stems) < 2:
+            raise Exception("Ensemble separation produced too few stems")
+
+        logger.info(f"🧠✅ RoFormer+Demucs ensemble complete: {len(job.stems)} stems")
+        logger.info(f"   Vocals: BS-RoFormer (SDR 12.9) | Instruments: Demucs htdemucs_6s")
+        return True
+
+    except Exception as e:
+        logger.error(f"RoFormer ensemble separation failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+        # Fallback to pure Demucs if RoFormer fails
+        logger.info("🔄 Falling back to standard Demucs separation...")
+        job.stems = {}
+        job.error = None
+        return separate_stems(job, audio_path)
 
 
 def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar: bool = False):
@@ -1475,11 +1615,11 @@ def smart_separate(job: ProcessingJob):
         logger.info(f"   {name}: {pct:.1f}% (rms={energy:.4f})")
 
     # Step 2: Decide whether to deep-extract
-    if other_ratio < 0.05:
+    if other_ratio < 0.03:
         logger.info(f"🧠 'other' is only {other_ratio:.0%} of total — simple track, skipping deep extraction")
         return False
 
-    if other_ratio < 0.10:
+    if other_ratio < 0.05:
         logger.info(f"🧠 'other' is {other_ratio:.0%} of total — minor content, skipping deep extraction")
         return False
 
@@ -2038,30 +2178,16 @@ def process_audio(job: ProcessingJob, audio_path: Path, hq_vocals: bool = False,
     try:
         job.status = 'processing'
 
-        # Step 1: Separate stems
-        if ensemble_mode:
-            logger.info("🎯 Using ENSEMBLE mode (Moises-quality multi-model)")
-            if not separate_stems_ensemble(job, audio_path):
-                job.status = 'failed'
-                return
-        elif mdx_model:
-            logger.info("🎹 Using HYBRID model (MDX23C + dedicated piano extraction)")
-            # Pass stereo_split to enable guitar splitting for dual-guitar bands
-            if not separate_stems_mdx(job, audio_path, stereo_split_guitar=stereo_split):
-                job.status = 'failed'
-                return
-        elif vocal_focus:
-            logger.info("🎯 Using Vocal Focus mode")
-            if not separate_stems_vocal_focus(job, audio_path):
-                job.status = 'failed'
-                return
-        elif hq_vocals:
-            logger.info("🎤 Using HQ Vocals mode")
-            if not separate_stems_hq_vocals(job, audio_path):
+        # Step 1: Separate stems — RoFormer+Demucs ensemble is the default
+        # "One button, best result every time" — no user configuration needed
+        if ENHANCED_SEPARATOR_AVAILABLE:
+            logger.info("🧠 Using RoFormer+Demucs ensemble (state-of-the-art)")
+            if not separate_stems_roformer(job, audio_path):
                 job.status = 'failed'
                 return
         else:
-            # Standard 6-stem separation
+            # Fallback: pure Demucs if audio-separator not installed
+            logger.info("🎸 Falling back to standard Demucs (audio-separator not available)")
             if not separate_stems(job, audio_path):
                 job.status = 'failed'
                 return
@@ -2078,7 +2204,8 @@ def process_audio(job: ProcessingJob, audio_path: Path, hq_vocals: bool = False,
             except Exception as e:
                 logger.warning(f"Stem enhancement failed: {e}")
 
-        # Auto-split vocals into lead/backing using BS-Roformer (higher quality than Demucs)
+        # Auto-split vocals into lead/backing using Karaoke model
+        # RoFormer gives clean combined vocals → Karaoke model separates lead vs backing
         if ENHANCED_SEPARATOR_AVAILABLE and 'vocals' in job.stems:
             try:
                 job.stage = 'Splitting lead/backing vocals (BS-Roformer)'
@@ -2092,9 +2219,12 @@ def process_audio(job: ProcessingJob, audio_path: Path, hq_vocals: bool = False,
                 lead_path, backing_path = separator.split_lead_backing_vocals(job.stems['vocals'])
 
                 if lead_path and backing_path:
-                    job.stems['vocals_lead'] = lead_path
-                    job.stems['vocals_backing'] = backing_path
-                    logger.info(f"✅ Vocals split: lead + backing")
+                    # Ensure absolute paths (audio-separator may return relative)
+                    lead_abs = str(vocal_split_dir / Path(lead_path).name) if not os.path.isabs(lead_path) else lead_path
+                    backing_abs = str(vocal_split_dir / Path(backing_path).name) if not os.path.isabs(backing_path) else backing_path
+                    job.stems['vocals_lead'] = lead_abs
+                    job.stems['vocals_backing'] = backing_abs
+                    logger.info(f"✅ Vocals split: lead={Path(lead_abs).name}, backing={Path(backing_abs).name}")
                 else:
                     logger.warning("Vocal split returned empty paths")
             except Exception as e:
