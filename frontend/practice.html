@@ -12,6 +12,10 @@
     <!-- AlphaTab for Guitar Pro files (TAB rendering) - v1.3.1 -->
     <script src="https://cdn.jsdelivr.net/npm/@coderline/alphatab@1.3.1/dist/alphaTab.min.js"></script>
 
+    <!-- PDF Export dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg2pdf.js/2.2.4/svg2pdf.umd.min.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -93,6 +97,36 @@
 
         .back-btn:hover {
             border-color: var(--psych-orange);
+        }
+
+        /* Export Toolbar */
+        .export-toolbar {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .export-btn {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .export-btn:hover {
+            border-color: var(--psych-orange);
+            color: var(--psych-orange);
+        }
+
+        .export-btn:disabled {
+            opacity: 0.5;
+            cursor: wait;
         }
 
         /* Main Layout */
@@ -1121,6 +1155,47 @@
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
         }
+
+        /* Print styles — show only notation */
+        @media print {
+            .header, .mixer-sidebar, .notation-tabs, .chord-panel,
+            .chord-overlay, .loading-overlay, .export-toolbar,
+            #osmd-custom-cursor {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .main-layout {
+                display: block !important;
+                height: auto !important;
+            }
+
+            .notation-area {
+                overflow: visible !important;
+            }
+
+            .notation-container {
+                overflow: visible !important;
+                max-height: none !important;
+                background: white !important;
+            }
+
+            #osmd-container {
+                background: white !important;
+                max-height: none !important;
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+
+            #osmd-container svg, #alphaTab {
+                background: white !important;
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1144,6 +1219,13 @@
             <a href="#" id="ultimateGuitarLinkHeader" target="_blank" class="external-tab-btn" style="display: none;">
                 🎵 Ultimate Guitar
             </a>
+        </div>
+
+        <div class="export-toolbar">
+            <button class="export-btn" id="downloadMusicXML" title="Download MusicXML" style="display:none;">📜 XML</button>
+            <button class="export-btn" id="downloadGP" title="Download Guitar Pro" style="display:none;">🎸 GP</button>
+            <button class="export-btn" id="exportPDF" title="Export as PDF" style="display:none;">📄 PDF</button>
+            <button class="export-btn" id="printNotation" title="Print notation" style="display:none;">🖨 Print</button>
         </div>
 
         <a href="index.html" class="back-btn">← Back to Mixer</a>
@@ -1340,6 +1422,8 @@
         let notationDuration = 0; // Duration from notation in ms
         let isSyncing = false; // Prevent infinite sync loops
         let currentRenderer = null; // 'osmd' or 'alphatab'
+        let currentNotationStem = null; // which stem is loaded for export
+        let currentNotationFileType = null; // 'musicxml' or 'gp'
 
         const stemConfig = {
             vocals: { icon: '🎙️', color: '#ff6b9d' },
@@ -2953,6 +3037,11 @@
                 } else {
                     initAlphaTab(new Uint8Array(data), filename);
                 }
+
+                // Track loaded stem for export buttons
+                currentNotationStem = targetStem;
+                currentNotationFileType = fileType;
+                setTimeout(updateExportButtons, 500);
             } catch (error) {
                 console.error('Failed to load notation:', error);
                 document.getElementById('loadingOverlay').classList.add('hidden');
@@ -3596,6 +3685,124 @@
                     </div>`;
             }
         }
+        // =========================================================
+        // Export & Download Functions
+        // =========================================================
+
+        function updateExportButtons() {
+            const hasMusicXML = currentJob?.musicxml_files &&
+                Object.keys(currentJob.musicxml_files).length > 0;
+            const hasGP = currentJob?.gp_files &&
+                Object.keys(currentJob.gp_files).length > 0;
+            const hasOSMD = currentRenderer === 'osmd' && osmd;
+
+            const xmlBtn = document.getElementById('downloadMusicXML');
+            const gpBtn = document.getElementById('downloadGP');
+            const pdfBtn = document.getElementById('exportPDF');
+            const printBtn = document.getElementById('printNotation');
+
+            if (xmlBtn) xmlBtn.style.display = (hasMusicXML && currentNotationStem) ? 'block' : 'none';
+            if (gpBtn) gpBtn.style.display = (hasGP && currentNotationStem &&
+                currentJob.gp_files[currentNotationStem]) ? 'block' : 'none';
+            if (pdfBtn) pdfBtn.style.display = hasOSMD ? 'block' : 'none';
+            if (printBtn) printBtn.style.display = (hasOSMD || (alphaTabApi && alphaTabApi.score)) ? 'block' : 'none';
+        }
+
+        // MusicXML download
+        document.getElementById('downloadMusicXML')?.addEventListener('click', () => {
+            if (!currentJob || !currentNotationStem) return;
+            const matchKey = Object.keys(currentJob.musicxml_files || {})
+                .find(k => k === currentNotationStem || k.startsWith(currentNotationStem + '_'));
+            if (matchKey) {
+                const a = document.createElement('a');
+                a.href = `${API_BASE}/download/${currentJob.job_id}/musicxml/${matchKey}`;
+                a.download = `${matchKey}.musicxml`;
+                a.click();
+            }
+        });
+
+        // GP download
+        document.getElementById('downloadGP')?.addEventListener('click', () => {
+            if (!currentJob || !currentNotationStem) return;
+            const matchKey = Object.keys(currentJob.gp_files || {})
+                .find(k => k === currentNotationStem || k.startsWith(currentNotationStem + '_'));
+            if (matchKey) {
+                const a = document.createElement('a');
+                a.href = `${API_BASE}/download/${currentJob.job_id}/gp/${matchKey}`;
+                a.download = `${matchKey}.gp5`;
+                a.click();
+            }
+        });
+
+        // PDF Export — OSMD SVG → jsPDF
+        document.getElementById('exportPDF')?.addEventListener('click', async () => {
+            if (!osmd) return;
+
+            const btn = document.getElementById('exportPDF');
+            const origText = btn.textContent;
+            btn.textContent = '⏳...';
+            btn.disabled = true;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const container = document.getElementById('osmd-container');
+                const svgElements = container.querySelectorAll('svg');
+
+                if (svgElements.length === 0) throw new Error('No SVG notation found');
+
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
+                const pageW = pdf.internal.pageSize.getWidth();
+                const pageH = pdf.internal.pageSize.getHeight();
+                const margin = 40;
+
+                // Title
+                const title = document.getElementById('songTitle')?.textContent || 'Notation';
+                const artist = document.getElementById('songArtist')?.textContent || '';
+                pdf.setFontSize(18);
+                pdf.text(title, pageW / 2, margin, { align: 'center' });
+                if (artist) {
+                    pdf.setFontSize(12);
+                    pdf.text(artist, pageW / 2, margin + 20, { align: 'center' });
+                }
+
+                let yOff = margin + 45;
+
+                for (let i = 0; i < svgElements.length; i++) {
+                    const svg = svgElements[i];
+                    const rect = svg.getBoundingClientRect();
+                    if (rect.width === 0 || rect.height === 0) continue;
+
+                    const scale = (pageW - 2 * margin) / rect.width;
+                    const scaledH = rect.height * scale;
+
+                    if (yOff + scaledH > pageH - margin && i > 0) {
+                        pdf.addPage();
+                        yOff = margin;
+                    }
+
+                    await pdf.svg(svg, {
+                        x: margin, y: yOff,
+                        width: pageW - 2 * margin, height: scaledH
+                    });
+                    yOff += scaledH + 10;
+                }
+
+                const safeName = title.replace(/[^a-z0-9]/gi, '_');
+                pdf.save(`${safeName}_${currentNotationStem || 'notation'}.pdf`);
+
+            } catch (err) {
+                console.error('PDF export failed:', err);
+                alert('PDF export failed: ' + err.message);
+            } finally {
+                btn.textContent = origText;
+                btn.disabled = false;
+            }
+        });
+
+        // Print
+        document.getElementById('printNotation')?.addEventListener('click', () => {
+            window.print();
+        });
     </script>
 </body>
 </html>

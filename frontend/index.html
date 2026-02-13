@@ -4285,88 +4285,10 @@
         <!-- Audio Processing Settings -->
         <div class="settings-section">
             <h4>🎤 Audio Processing</h4>
-            <div class="toggle-setting">
-                <div class="toggle-label">
-                    <span class="title">HQ Vocals Mode</span>
-                    <span class="desc">Two-pass separation for cleaner vocals</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="hqVocalsToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="status-card" style="margin-top: 1rem; padding: 0.75rem;">
+            <div class="status-card" style="padding: 0.75rem;">
                 <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--psych-yellow);">Recommended for:</strong> Steely Dan, Toto, and other densely-produced tracks where vocals get muddy.<br><br>
-                    <strong style="color: var(--text-main);">How it works:</strong> First isolates vocals with a specialized 2-stem model, then separates instruments from the accompaniment. Takes ~50% longer but produces cleaner vocals.
-                </div>
-            </div>
-            <div class="toggle-setting" style="margin-top: 1rem;">
-                <div class="toggle-label">
-                    <span class="title">🎯 Vocal Focus Mode</span>
-                    <span class="desc">Maximum vocal isolation (fine-tuned model)</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="vocalFocusToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="status-card" style="margin-top: 0.5rem; padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--psych-orange);">For stubborn tracks:</strong> Uses fine-tuned model with aggressive settings when HQ Vocals isn't enough.<br><br>
-                    <strong style="color: var(--text-main);">Trade-off:</strong> Best possible vocals, but instrument stems may be slightly lower quality. ~2x longer processing.
-                </div>
-            </div>
-            <div class="toggle-setting" style="margin-top: 1rem;">
-                <div class="toggle-label">
-                    <span class="title">🎹 HYBRID Mode (Best for Piano)</span>
-                    <span class="desc">Dedicated piano extraction - fixes piano bleeding into guitar</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="mdxModelToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="status-card" style="margin-top: 0.5rem; padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--psych-green);">Recommended for:</strong> Allman Brothers, Grateful Dead, Steely Dan - any track with prominent piano/organ.<br><br>
-                    <strong style="color: var(--text-main);">How it works:</strong> Uses the best model for each instrument:<br>
-                    • MDX23C for clean vocals<br>
-                    • htdemucs for drums/bass/guitar<br>
-                    • Dedicated extraction for piano/keys<br>
-                    • Auto stereo-split for dual-guitar bands
-                </div>
-            </div>
-            <div class="toggle-setting" style="margin-top: 1rem;">
-                <div class="toggle-label">
-                    <span class="title">🎛️ Enhance Stems</span>
-                    <span class="desc">Clean up bleed & artifacts for natural sound</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="enhanceStemsToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="status-card" style="margin-top: 0.5rem; padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--neon-green);">Makes stems sound natural:</strong> Noise reduction, spectral gating, and stem-specific EQ to remove bleed from other instruments.<br><br>
-                    <strong style="color: var(--text-main);">Result:</strong> Guitar sounds like guitar (not guitar with faint piano). Enabled by default.
-                </div>
-            </div>
-            <div class="toggle-setting" style="margin-top: 1rem;">
-                <div class="toggle-label">
-                    <span class="title">🎚️ Stereo Split</span>
-                    <span class="desc">Split panned instruments (dual guitars, keys, etc.)</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="stereoSplitToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="status-card" style="margin-top: 0.5rem; padding: 0.75rem;">
-                <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--psych-purple);">For bands with dual instruments:</strong> Separates left-panned and right-panned content within stems.<br><br>
-                    <strong style="color: var(--text-main);">Perfect for:</strong> Grateful Dead (Jerry vs Bob), dual keyboards, panned backing vocals, etc.
+                    <strong style="color: var(--neon-green);">🧠 Smart Mode:</strong> StemScribe automatically detects complexity and extracts every instrument. Dense mixes get deep extraction — simple tracks finish fast.<br><br>
+                    <strong style="color: var(--text-main);">One button, best result every time.</strong> No configuration needed.
                 </div>
             </div>
 
@@ -4908,25 +4830,23 @@
             piano: { icon: '🎹', color: '#98c379', label: 'KEYS' },
             other: { icon: '🎛️', color: '#c678dd', label: 'OTHER' },
 
-            // Cascaded stems (extracted from "other" via second Demucs pass)
-            other_vocals: { icon: '🎤', color: '#ff85b3', label: 'BG VOCALS', cascade: true },
-            other_drums: { icon: '🪘', color: '#f5d08b', label: 'PERCUSSION', cascade: true },
-            other_bass: { icon: '🎵', color: '#ff9574', label: 'SUB BASS', cascade: true },
-            other_guitar: { icon: '🪕', color: '#71bfff', label: 'STRINGS', cascade: true },
-            other_piano: { icon: '🪗', color: '#a8d389', label: 'PADS', cascade: true },
-            other_other: { icon: '🎷', color: '#d688ed', label: 'BRASS/FX', cascade: true },
+            // Smart deep extraction stems (auto-named by smart_separate)
+            backing_vocals: { icon: '🎤', color: '#ff85b3', label: 'BG VOCALS', extracted: true },
+            vocals_lead: { icon: '🎙️', color: '#ff4070', label: 'LEAD VOX', extracted: true },
+            vocals_backing: { icon: '🎤', color: '#ff85b3', label: 'BG VOCALS', extracted: true },
+            guitar_2: { icon: '🎸', color: '#71bfff', label: 'GUITAR 2', extracted: true },
+            keys_2: { icon: '🎹', color: '#a8d389', label: 'KEYS 2', extracted: true },
+            bass_2: { icon: '🔊', color: '#ff9574', label: 'BASS 2', extracted: true },
+            percussion_2: { icon: '🪘', color: '#f5d08b', label: 'PERC 2', extracted: true },
+            other_deep: { icon: '🎷', color: '#d688ed', label: 'EXTRAS', extracted: true },
 
-            // Stereo split stems (separated by panning - Jerry left, Bob right, etc.)
-            guitar_left: { icon: '🎸', color: '#4a9edb', label: 'GUITAR L', stereoSplit: true },
-            guitar_right: { icon: '🎸', color: '#78c4ff', label: 'GUITAR R', stereoSplit: true },
-            guitar_center: { icon: '🎸', color: '#61afef', label: 'GUITAR C', stereoSplit: true },
-            drums_left: { icon: '🥁', color: '#d4a84b', label: 'DRUMS L', stereoSplit: true },
-            drums_right: { icon: '🥁', color: '#f6d08b', label: 'DRUMS R', stereoSplit: true },
-            drums_center: { icon: '🥁', color: '#e5c07b', label: 'DRUMS C', stereoSplit: true },
-            piano_left: { icon: '🎹', color: '#78b359', label: 'KEYS L', stereoSplit: true },
-            piano_right: { icon: '🎹', color: '#b8e399', label: 'KEYS R', stereoSplit: true },
-            bass_left: { icon: '🔊', color: '#e55b34', label: 'BASS L', stereoSplit: true },
-            bass_right: { icon: '🔊', color: '#ff9b74', label: 'BASS R', stereoSplit: true }
+            // Legacy cascaded stems (backwards compatible)
+            other_vocals: { icon: '🎤', color: '#ff85b3', label: 'BG VOCALS', extracted: true },
+            other_drums: { icon: '🪘', color: '#f5d08b', label: 'PERCUSSION', extracted: true },
+            other_bass: { icon: '🎵', color: '#ff9574', label: 'SUB BASS', extracted: true },
+            other_guitar: { icon: '🪕', color: '#71bfff', label: 'STRINGS', extracted: true },
+            other_piano: { icon: '🪗', color: '#a8d389', label: 'PADS', extracted: true },
+            other_other: { icon: '🎷', color: '#d688ed', label: 'BRASS/FX', extracted: true },
         };
 
         // Sub-stem colors for skills output
@@ -5172,7 +5092,6 @@
                         filename: filename,
                         chord_detection: true,
                         gp_tabs: true,
-                        stereo_split: localStorage.getItem('stereoSplit') === 'true',
                     })
                 });
                 const data = await resp.json();
@@ -5249,29 +5168,6 @@
 
         urlInput.addEventListener('input', updateSubmitBtn);
 
-        // Auto-enable stereo split for bands with dual guitars
-        const STEREO_SPLIT_BANDS = [
-            'grateful dead', 'jerry garcia', 'bob weir',
-            'allman brothers', 'duane allman', 'dickey betts',
-            'beatles', 'john lennon', 'george harrison',
-            'led zeppelin', 'jimmy page',
-            'pink floyd', 'david gilmour',
-            'eagles', 'steely dan', 'fleetwood mac',
-            'television', 'the who', 'cream', 'phish'
-        ];
-
-        urlInput.addEventListener('input', () => {
-            const url = urlInput.value.toLowerCase();
-            const stereoToggle = document.getElementById('stereoSplitToggle');
-            if (stereoToggle && STEREO_SPLIT_BANDS.some(band => url.includes(band.replace(/ /g, '')))) {
-                if (!stereoToggle.checked) {
-                    stereoToggle.checked = true;
-                    localStorage.setItem('stereoSplit', 'true');
-                    showToast('🎸 Stereo Split auto-enabled for dual guitar band!', 3000);
-                }
-            }
-        });
-
         function updateSubmitBtn() {
             if (currentMode === 'archive') {
                 submitBtn.style.display = 'none';
@@ -5305,23 +5201,13 @@
 
             try {
                 let response;
-                // Get processing settings
-                const hqVocals = document.getElementById('hqVocalsToggle')?.checked || false;
-                const vocalFocus = document.getElementById('vocalFocusToggle')?.checked || false;
-                const mdxModel = document.getElementById('mdxModelToggle')?.checked || false;
-                const enhanceStems = document.getElementById('enhanceStemsToggle')?.checked ?? true;
-                const stereoSplit = document.getElementById('stereoSplitToggle')?.checked || false;
+                // Get notation settings (audio processing is now fully automatic)
                 const gpTabs = document.getElementById('gpTabsToggle')?.checked ?? true;
                 const chordDetection = document.getElementById('chordDetectionToggle')?.checked ?? true;
 
                 if (currentMode === 'file') {
                     const formData = new FormData();
                     formData.append('file', selectedFile);
-                    formData.append('hq_vocals', hqVocals.toString());
-                    formData.append('vocal_focus', vocalFocus.toString());
-                    formData.append('mdx_model', mdxModel.toString());
-                    formData.append('enhance_stems', enhanceStems.toString());
-                    formData.append('stereo_split', stereoSplit.toString());
                     formData.append('gp_tabs', gpTabs.toString());
                     formData.append('chord_detection', chordDetection.toString());
                     response = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
@@ -5331,11 +5217,6 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             url: urlInput.value.trim(),
-                            hq_vocals: hqVocals,
-                            vocal_focus: vocalFocus,
-                            mdx_model: mdxModel,
-                            enhance_stems: enhanceStems,
-                            stereo_split: stereoSplit,
                             gp_tabs: gpTabs,
                             chord_detection: chordDetection
                         })
@@ -5742,15 +5623,16 @@
             const grid = document.getElementById('stemsGrid');
             grid.innerHTML = '';
 
-            // Preferred order for stems (primary first, stereo splits, then cascaded)
+            // Preferred order: primary stems first, then deep-extracted stems
             const stemOrder = [
-                'vocals',
-                'guitar', 'guitar_left', 'guitar_right', 'guitar_center',
-                'bass', 'bass_left', 'bass_right',
-                'drums', 'drums_left', 'drums_right', 'drums_center',
-                'piano', 'piano_left', 'piano_right',
+                'vocals', 'vocals_lead', 'vocals_backing', 'backing_vocals',
+                'guitar', 'guitar_2',
+                'bass', 'bass_2',
+                'drums', 'percussion_2',
+                'piano', 'keys_2',
                 'other',
-                'other_vocals', 'other_guitar', 'other_bass', 'other_drums', 'other_piano', 'other_other'
+                'other_vocals', 'other_guitar', 'other_bass', 'other_drums', 'other_piano', 'other_other',
+                'other_deep',
             ];
             const sortedStems = Object.entries(job.stems).sort((a, b) => {
                 const aIdx = stemOrder.indexOf(a[0]);
@@ -5762,8 +5644,9 @@
                 return aIdx - bIdx;
             });
 
-            // Check if we have cascaded stems
-            const hasCascadedStems = sortedStems.some(([name]) => name.startsWith('other_'));
+            // Check if we have deep-extracted stems (from smart_separate)
+            const primaryStems = ['vocals', 'drums', 'bass', 'guitar', 'piano', 'other'];
+            const hasCascadedStems = sortedStems.some(([name]) => !primaryStems.includes(name));
 
             // Wrap grid in Neve console
             const existingConsole = document.querySelector('.neve-console');
@@ -5806,19 +5689,20 @@
 
             let cascadeHeaderAdded = false;
             sortedStems.forEach(([name, path]) => {
-                // Add cascaded stems section header
-                if (hasCascadedStems && name.startsWith('other_') && !cascadeHeaderAdded) {
+                const isPrimary = primaryStems.includes(name);
+                // Add extracted stems section header
+                if (hasCascadedStems && !isPrimary && !cascadeHeaderAdded) {
                     cascadeHeaderAdded = true;
                     const cascadeHeader = document.createElement('div');
                     cascadeHeader.className = 'cascade-stems-header';
-                    cascadeHeader.innerHTML = `<span>🔄 Cascaded Separation (extracted from "Other")</span>`;
+                    cascadeHeader.innerHTML = `<span>🧠 Deep Extraction (auto-detected instruments)</span>`;
                     cascadeHeader.style.cssText = 'grid-column: 1/-1; text-align:center; padding:1rem 0 0.5rem; font-family:Righteous; color:var(--psych-purple); border-top:2px solid rgba(198,120,221,0.4); margin-top:0.5rem; font-size: 0.9rem;';
                     grid.appendChild(cascadeHeader);
                 }
 
-                const cfg = stemConfig[name] || { icon: '🎵', color: '#888', label: name.toUpperCase() };
+                const cfg = stemConfig[name] || { icon: '🎵', color: '#888', label: name.replace(/_/g, ' ').toUpperCase() };
                 const hasMidi = job.midi_files?.[name];
-                const isCascaded = cfg.cascade || name.startsWith('other_');
+                const isCascaded = cfg.extracted || !isPrimary;
 
                 const card = document.createElement('div');
                 card.className = isCascaded ? 'stem-card cascaded-stem' : 'stem-card';
@@ -5833,7 +5717,7 @@
                     : (cfg.label || name);
 
                 card.innerHTML = `
-                    ${isCascaded ? '<div class="cascade-badge">🔄</div>' : ''}
+                    ${isCascaded ? '<div class="cascade-badge">🧠</div>' : ''}
                     <div class="stem-icon">${cfg.icon}</div>
                     <div class="stem-name">${displayLabel}</div>
 
@@ -5880,7 +5764,9 @@
                             `<a href="${API_BASE}/download/${job.job_id}/stem/${name}" class="stem-btn" download>⬇ DL</a>`
                         }
                         ${hasMidi ? `<a href="${API_BASE}/download/${job.job_id}/midi/${name}" class="stem-btn midi" download>🎹 MIDI</a>` : ''}
-                        ${job.musicxml_files?.[name] ? `<button class="stem-btn notation" onclick="openNotationForStem('${name}')">📜 TAB</button>` : ''}
+                        ${job.musicxml_files?.[name] ? `<a href="${API_BASE}/download/${job.job_id}/musicxml/${name}" class="stem-btn notation" download title="Download MusicXML">📜 XML</a>` : ''}
+                        ${job.gp_files?.[name] ? `<a href="${API_BASE}/download/${job.job_id}/gp/${name}" class="stem-btn notation" download title="Download Guitar Pro">🎸 GP</a>` : ''}
+                        ${(job.musicxml_files?.[name] || job.gp_files?.[name]) ? `<button class="stem-btn notation" onclick="openNotationForStem('${name}')" title="Open in Practice Mode">▶ TAB</button>` : ''}
                     </div>
                     <audio id="audio-${name}" src="${job.enhanced_stems?.[name] ? API_BASE + '/download/' + job.job_id + '/enhanced/' + name : API_BASE + '/download/' + job.job_id + '/stem/' + name}" preload="auto"></audio>
                 `;
@@ -5938,11 +5824,6 @@
                     updateStemLabels(info.player_mapping);
                 }
 
-                // Check if stereo split was recommended but not used
-                if (info.stereo_split_recommended && !currentJob.stereo_splits) {
-                    const artistName = info.artist || currentJob.metadata?.artist || 'This artist';
-                    showToast(`💡 Tip: ${artistName} has dual guitars/drums. Enable "Stereo Split" in Settings for separate Jerry/Bob tracks!`, 8000);
-                }
             } catch (error) {
                 console.log('Could not auto-fetch player names:', error);
             }
@@ -6578,82 +6459,6 @@
         function updateLayoutOptionDisplay() {
             optionA.classList.toggle('active', !useHierarchicalLayout);
             optionB.classList.toggle('active', useHierarchicalLayout);
-        }
-
-        // ============ HQ Vocals Toggle ============
-        const hqVocalsToggle = document.getElementById('hqVocalsToggle');
-        if (hqVocalsToggle) {
-            // Load saved preference
-            hqVocalsToggle.checked = localStorage.getItem('hqVocals') === 'true';
-
-            hqVocalsToggle.addEventListener('change', () => {
-                localStorage.setItem('hqVocals', hqVocalsToggle.checked.toString());
-                showToast(hqVocalsToggle.checked
-                    ? '🎤 HQ Vocals mode enabled - cleaner vocals on complex tracks'
-                    : '✓ Standard separation mode'
-                );
-            });
-        }
-
-        // ============ MDX Model Toggle (Better Piano) ============
-        const mdxModelToggle = document.getElementById('mdxModelToggle');
-        if (mdxModelToggle) {
-            // Load saved preference
-            mdxModelToggle.checked = localStorage.getItem('mdxModel') === 'true';
-
-            mdxModelToggle.addEventListener('change', () => {
-                localStorage.setItem('mdxModel', mdxModelToggle.checked.toString());
-                showToast(mdxModelToggle.checked
-                    ? '🎹 HYBRID mode enabled - best model for each instrument'
-                    : '✓ Standard Demucs model'
-                );
-            });
-        }
-
-        // ============ Vocal Focus Toggle ============
-        const vocalFocusToggle = document.getElementById('vocalFocusToggle');
-        if (vocalFocusToggle) {
-            // Load saved preference
-            vocalFocusToggle.checked = localStorage.getItem('vocalFocus') === 'true';
-
-            vocalFocusToggle.addEventListener('change', () => {
-                localStorage.setItem('vocalFocus', vocalFocusToggle.checked.toString());
-                showToast(vocalFocusToggle.checked
-                    ? '🎯 Vocal Focus mode enabled - maximum vocal isolation'
-                    : '✓ Vocal Focus disabled'
-                );
-            });
-        }
-
-        // ============ Enhance Stems Toggle ============
-        const enhanceStemsToggle = document.getElementById('enhanceStemsToggle');
-        if (enhanceStemsToggle) {
-            // Load saved preference (default: true)
-            const savedEnhance = localStorage.getItem('enhanceStems');
-            enhanceStemsToggle.checked = savedEnhance === null ? true : savedEnhance === 'true';
-
-            enhanceStemsToggle.addEventListener('change', () => {
-                localStorage.setItem('enhanceStems', enhanceStemsToggle.checked.toString());
-                showToast(enhanceStemsToggle.checked
-                    ? '🎛️ Stem enhancement enabled - cleaner, natural sound'
-                    : '✓ Raw stems (no enhancement)'
-                );
-            });
-        }
-
-        // ============ Stereo Split Toggle ============
-        const stereoSplitToggle = document.getElementById('stereoSplitToggle');
-        if (stereoSplitToggle) {
-            // Load saved preference (default: false)
-            stereoSplitToggle.checked = localStorage.getItem('stereoSplit') === 'true';
-
-            stereoSplitToggle.addEventListener('change', () => {
-                localStorage.setItem('stereoSplit', stereoSplitToggle.checked.toString());
-                showToast(stereoSplitToggle.checked
-                    ? '🎚️ Stereo split enabled - will separate panned instruments'
-                    : '✓ Stereo split disabled'
-                );
-            });
         }
 
         // ============ Guitar Pro Tabs Toggle ============

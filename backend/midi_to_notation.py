@@ -30,7 +30,8 @@ def midi_to_musicxml(midi_path: str, output_path: Optional[str] = None,
                      stem_type: str = 'guitar',
                      title: Optional[str] = None,
                      artist: Optional[str] = None,
-                     melody_mode: bool = False) -> Optional[str]:
+                     melody_mode: bool = False,
+                     audio_path: Optional[str] = None) -> Optional[str]:
     """
     Convert MIDI file to MusicXML.
 
@@ -41,6 +42,8 @@ def midi_to_musicxml(midi_path: str, output_path: Optional[str] = None,
         stem_type: Instrument type for proper clef/transposition
         title: Song title for metadata
         artist: Artist name for metadata
+        melody_mode: If True, enforce monophonic output with articulation markings
+        audio_path: Path to source audio for librosa tempo detection fallback
 
     Returns:
         Path to MusicXML file, or None on failure
@@ -79,6 +82,15 @@ def midi_to_musicxml(midi_path: str, output_path: Optional[str] = None,
         score.metadata.title = display_title
         score.metadata.composer = artist or ""
         logger.debug(f"  Set title: {display_title}")
+
+        # Detect and set tempo
+        detected_tempo = _detect_tempo(score, audio_path)
+        if detected_tempo:
+            has_tempo = any(isinstance(el, tempo.MetronomeMark) for el in score.recurse())
+            if not has_tempo:
+                for part in score.parts:
+                    part.insert(0, tempo.MetronomeMark(number=detected_tempo))
+                logger.debug(f"  Set tempo: {detected_tempo:.0f} BPM")
 
         # Apply instrument-specific settings
         score = _apply_instrument_settings(score, stem_type)
@@ -184,6 +196,37 @@ def _detect_triplets(score: 'stream.Score') -> bool:
         pass
 
     return False
+
+
+def _detect_tempo(score: 'stream.Score', audio_path: Optional[str] = None) -> Optional[float]:
+    """
+    Detect tempo with priority: MIDI embedded > librosa beat tracking > default.
+    """
+    # 1. Check MIDI for existing MetronomeMark
+    try:
+        for el in score.recurse():
+            if isinstance(el, tempo.MetronomeMark):
+                if 40 < el.number < 240:
+                    logger.debug(f"  Found tempo in MIDI: {el.number:.0f} BPM")
+                    return el.number
+    except Exception:
+        pass
+
+    # 2. Librosa beat tracking from source audio
+    if audio_path and Path(audio_path).exists():
+        try:
+            import librosa
+            y, sr = librosa.load(str(audio_path), duration=60)
+            tempo_detected, _ = librosa.beat.beat_track(y=y, sr=sr)
+            tempo_val = float(tempo_detected) if hasattr(tempo_detected, '__float__') else float(tempo_detected[0])
+            if 40 < tempo_val < 240:
+                logger.info(f"  Detected tempo from audio: {tempo_val:.0f} BPM")
+                return tempo_val
+        except Exception as e:
+            logger.debug(f"  Librosa tempo detection failed: {e}")
+
+    # 3. Default
+    return 120.0
 
 
 def _cleanup_for_notation(score: 'stream.Score', stem_type: str,
