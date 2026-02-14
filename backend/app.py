@@ -138,6 +138,18 @@ except ImportError as e:
     ENHANCED_SEPARATOR_AVAILABLE = False
     logger.warning(f"Enhanced separator not available: {e}")
 
+# Guitar lead/rhythm separator (trained MelBand-RoFormer)
+try:
+    from guitar_separator import (
+        GuitarSeparator, separate_guitar,
+        GUITAR_SEPARATOR_AVAILABLE, is_available as guitar_separator_is_available
+    )
+    if GUITAR_SEPARATOR_AVAILABLE:
+        logger.info("✅ Guitar lead/rhythm separator available (MelBand-RoFormer)")
+except ImportError as e:
+    GUITAR_SEPARATOR_AVAILABLE = False
+    logger.warning(f"Guitar lead/rhythm separator not available: {e}")
+
 # Track info fetcher for context and learning tips
 try:
     from track_info import fetch_track_info, extract_artist_from_title, get_instrument_tips, LOCAL_KNOWLEDGE, should_stereo_split
@@ -2230,6 +2242,52 @@ def process_audio(job: ProcessingJob, audio_path: Path, hq_vocals: bool = False,
             except Exception as e:
                 logger.warning(f"Auto vocal split failed (non-fatal): {e}")
 
+        # Auto-split guitar into lead/rhythm using trained MelBand-RoFormer
+        if GUITAR_SEPARATOR_AVAILABLE and 'guitar' in job.stems:
+            try:
+                job.stage = 'Splitting lead/rhythm guitar (MelBand-RoFormer)'
+                job.progress = 48
+                logger.info("🎸 Auto-splitting guitar into lead/rhythm with trained MelBand-RoFormer...")
+
+                guitar_split_dir = OUTPUT_DIR / job.job_id / 'stems' / 'guitar_split'
+                guitar_split_dir.mkdir(parents=True, exist_ok=True)
+
+                guitar_sep = GuitarSeparator(output_dir=str(guitar_split_dir))
+                lead_guitar_path, rhythm_guitar_path = guitar_sep.separate(job.stems['guitar'])
+
+                if lead_guitar_path and rhythm_guitar_path:
+                    # Convert to MP3 for consistency with other stems
+                    lead_mp3 = guitar_split_dir / 'guitar_lead.mp3'
+                    rhythm_mp3 = guitar_split_dir / 'guitar_rhythm.mp3'
+
+                    import subprocess
+                    for src, dst in [(lead_guitar_path, lead_mp3), (rhythm_guitar_path, rhythm_mp3)]:
+                        try:
+                            subprocess.run([
+                                'ffmpeg', '-y', '-i', str(src),
+                                '-codec:a', 'libmp3lame', '-b:a', '320k',
+                                str(dst)
+                            ], capture_output=True, timeout=120)
+                        except Exception:
+                            pass
+
+                    if lead_mp3.exists():
+                        job.stems['guitar_lead'] = str(lead_mp3)
+                    else:
+                        job.stems['guitar_lead'] = lead_guitar_path
+
+                    if rhythm_mp3.exists():
+                        job.stems['guitar_rhythm'] = str(rhythm_mp3)
+                    else:
+                        job.stems['guitar_rhythm'] = rhythm_guitar_path
+
+                    logger.info(f"✅ Guitar split: lead={Path(job.stems['guitar_lead']).name}, "
+                                f"rhythm={Path(job.stems['guitar_rhythm']).name}")
+                else:
+                    logger.warning("Guitar split returned empty paths")
+            except Exception as e:
+                logger.warning(f"Auto guitar lead/rhythm split failed (non-fatal): {e}")
+
         # Smart Deep Extraction: Automatically analyze and extract all instruments
         # Replaces manual cascade separation — one button, best result every time
         try:
@@ -3042,6 +3100,7 @@ def get_available_models():
     return jsonify({
         'enhanced_separator_available': ENHANCED_SEPARATOR_AVAILABLE,
         'stereo_splitter_available': STEREO_SPLITTER_AVAILABLE,
+        'guitar_separator_available': GUITAR_SEPARATOR_AVAILABLE,
         'oaf_drums_available': OAF_DRUM_TRANSCRIBER_AVAILABLE and OAF_AVAILABLE,
         'drum_transcriber_v2_available': DRUM_TRANSCRIBER_V2_AVAILABLE,
         'enhanced_transcriber_available': ENHANCED_TRANSCRIBER_AVAILABLE,

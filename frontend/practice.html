@@ -625,6 +625,8 @@
             drums:    { icon: '🥁', color: '#e5c07b' },
             bass:     { icon: '🔊', color: '#ff7b54' },
             guitar:   { icon: '🎸', color: '#61afef' },
+            guitar_lead: { icon: '🎸', color: '#61afef' },
+            guitar_rhythm: { icon: '🎸', color: '#5a9bd4' },
             piano:    { icon: '🎹', color: '#98c379' },
             other:    { icon: '🎻', color: '#c678dd' }
         };
@@ -758,7 +760,7 @@
             container.innerHTML = '';
             stemAudios = {};
 
-            const stemOrder = ['vocals', 'vocals_lead', 'vocals_backing', 'guitar', 'bass', 'drums', 'piano', 'other'];
+            const stemOrder = ['vocals', 'vocals_lead', 'vocals_backing', 'guitar', 'guitar_lead', 'guitar_rhythm', 'bass', 'drums', 'piano', 'other'];
             const sorted = Object.entries(job.stems).sort((a, b) =>
                 (stemOrder.indexOf(a[0]) === -1 ? 99 : stemOrder.indexOf(a[0])) -
                 (stemOrder.indexOf(b[0]) === -1 ? 99 : stemOrder.indexOf(b[0]))
