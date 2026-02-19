@@ -268,6 +268,30 @@ except ImportError as e:
     GUITAR_TAB_MODEL_AVAILABLE = False
     logger.warning(f"Guitar tab model not available: {e}")
 
+# Neural bass transcription model (CRNN trained on Slakh2100, 4-string × 24-fret)
+try:
+    from bass_transcriber import (
+        BassTranscriber, transcribe_bass,
+        BASS_MODEL_AVAILABLE, is_available as bass_nn_is_available
+    )
+    if BASS_MODEL_AVAILABLE:
+        logger.info("✅ Neural bass model available (CRNN, 4-string × 24-fret, Slakh2100)")
+except ImportError as e:
+    BASS_MODEL_AVAILABLE = False
+    logger.warning(f"Neural bass model not available: {e}")
+
+# Neural piano transcription model (CRNN trained on MAESTRO, 88 keys)
+try:
+    from piano_transcriber import (
+        PianoTranscriber, transcribe_piano,
+        PIANO_MODEL_AVAILABLE, is_available as piano_nn_is_available
+    )
+    if PIANO_MODEL_AVAILABLE:
+        logger.info("✅ Neural piano model available (CRNN, 88-key, MAESTRO v3)")
+except ImportError as e:
+    PIANO_MODEL_AVAILABLE = False
+    logger.warning(f"Neural piano model not available: {e}")
+
 # Internet Archive Live Music pipeline (search/browse/batch)
 try:
     from archive_pipeline import ArchivePipeline, search_archive, get_show_info, get_pipeline as get_archive_pipeline
@@ -1982,6 +2006,86 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                         )
                 except Exception as e:
                     logger.warning(f"Guitar tab model failed for {stem_name}: {e}")
+                    # Fall through to melody extractor / enhanced transcriber
+
+            # ---- HIGHEST PRIORITY: Neural bass model for bass stems ----
+            if stem_type == 'bass' and BASS_MODEL_AVAILABLE:
+                logger.info(f"🎸 Transcribing {stem_name} with neural bass model (CRNN)...")
+                job.stage = f'Transcribing {stem_name} (neural bass model)'
+
+                try:
+                    bass_transcriber = BassTranscriber()
+                    bass_result = bass_transcriber.transcribe(
+                        audio_path=stem_path,
+                        output_dir=str(midi_output_dir),
+                        tempo_hint=job.metadata.get('tempo'),
+                    )
+
+                    if (bass_result.midi_path
+                            and Path(bass_result.midi_path).exists()
+                            and bass_result.quality_score > 0.3):
+                        job.midi_files[stem_name] = bass_result.midi_path
+                        job.transcription_quality[stem_name] = bass_result.quality_score
+                        job.transcription_mode[stem_name] = 'bass_nn'
+
+                        logger.info(
+                            f"✓ Bass MIDI for {stem_name}: "
+                            f"{bass_result.num_notes} notes, "
+                            f"{bass_result.num_strings_used} strings, "
+                            f"frets {bass_result.fret_range[0]}-{bass_result.fret_range[1]}, "
+                            f"quality: {bass_result.quality_score:.2f}"
+                        )
+                        successful += 1
+                        job.progress = 60 + int((idx + 1) / total_stems * 35)
+                        continue
+                    else:
+                        quality = bass_result.quality_score if bass_result else 0
+                        logger.info(
+                            f"  Bass model quality too low ({quality:.2f}), "
+                            f"falling back to melody/enhanced transcriber"
+                        )
+                except Exception as e:
+                    logger.warning(f"Neural bass model failed for {stem_name}: {e}")
+                    # Fall through to melody extractor / enhanced transcriber
+
+            # ---- HIGHEST PRIORITY: Neural piano model for piano/keys stems ----
+            if stem_type in ('piano', 'keys', 'keyboard') and PIANO_MODEL_AVAILABLE:
+                logger.info(f"🎹 Transcribing {stem_name} with neural piano model (CRNN)...")
+                job.stage = f'Transcribing {stem_name} (neural piano model)'
+
+                try:
+                    piano_transcriber_inst = PianoTranscriber()
+                    piano_result = piano_transcriber_inst.transcribe(
+                        audio_path=stem_path,
+                        output_dir=str(midi_output_dir),
+                        tempo_hint=job.metadata.get('tempo'),
+                    )
+
+                    if (piano_result.midi_path
+                            and Path(piano_result.midi_path).exists()
+                            and piano_result.quality_score > 0.3):
+                        job.midi_files[stem_name] = piano_result.midi_path
+                        job.transcription_quality[stem_name] = piano_result.quality_score
+                        job.transcription_mode[stem_name] = 'piano_nn'
+
+                        logger.info(
+                            f"✓ Piano MIDI for {stem_name}: "
+                            f"{piano_result.num_notes} notes, "
+                            f"range {piano_result.pitch_range[0]}-{piano_result.pitch_range[1]}, "
+                            f"polyphony {piano_result.polyphony_avg:.1f}, "
+                            f"quality: {piano_result.quality_score:.2f}"
+                        )
+                        successful += 1
+                        job.progress = 60 + int((idx + 1) / total_stems * 35)
+                        continue
+                    else:
+                        quality = piano_result.quality_score if piano_result else 0
+                        logger.info(
+                            f"  Piano model quality too low ({quality:.2f}), "
+                            f"falling back to melody/enhanced transcriber"
+                        )
+                except Exception as e:
+                    logger.warning(f"Neural piano model failed for {stem_name}: {e}")
                     # Fall through to melody extractor / enhanced transcriber
 
             # ---- Try melody transcriber first for lead/monophonic stems ----

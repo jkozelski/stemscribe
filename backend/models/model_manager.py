@@ -97,6 +97,22 @@ MODELS = {
         'type': 'pytorch',
         'task': 'drums',
     },
+
+    # Bass transcription model (CRNN, trained on Slakh2100)
+    'bass_nn': {
+        'filename': 'pretrained/best_bass_model.pt',
+        'description': 'Bass CRNN - 4-string × 24-fret onset/frame/velocity (Slakh2100)',
+        'type': 'pytorch',
+        'task': 'bass',
+    },
+
+    # Piano transcription model (CRNN, trained on MAESTRO v3)
+    'piano_nn': {
+        'filename': 'pretrained/best_piano_model.pt',
+        'description': 'Piano CRNN - 88-key onset/frame/velocity (MAESTRO v3.0.0)',
+        'type': 'pytorch',
+        'task': 'piano',
+    },
 }
 
 
