@@ -191,6 +191,18 @@ except ImportError as e:
     OAF_AVAILABLE = False
     logger.warning(f"OaF Drum transcriber not available: {e}")
 
+# Neural drum transcription model (CRNN trained on E-GMD, 8 classes)
+try:
+    from drum_nn_transcriber import (
+        NeuralDrumTranscriber, transcribe_drums_nn,
+        DRUM_NN_MODEL_AVAILABLE, is_available as drum_nn_is_available
+    )
+    if DRUM_NN_MODEL_AVAILABLE:
+        logger.info("✅ Neural drum model available (CRNN, 8-class, val_loss 0.0335)")
+except ImportError as e:
+    DRUM_NN_MODEL_AVAILABLE = False
+    logger.warning(f"Neural drum model not available: {e}")
+
 # Model manager for pretrained models
 try:
     from models.model_manager import ModelManager, ensure_model, list_available_models
@@ -243,6 +255,18 @@ try:
 except ImportError as e:
     MELODY_TRANSCRIBER_AVAILABLE = False
     logger.warning(f"Melody transcriber not available: {e}")
+
+# Guitar tab model (CRNN neural network for string/fret prediction)
+try:
+    from guitar_tab_transcriber import (
+        GuitarTabTranscriber, transcribe_guitar_tab,
+        GUITAR_TAB_MODEL_AVAILABLE, is_available as guitar_tab_is_available
+    )
+    if GUITAR_TAB_MODEL_AVAILABLE:
+        logger.info("✅ Guitar tab model available (CRNN, 6-string x 20-fret)")
+except ImportError as e:
+    GUITAR_TAB_MODEL_AVAILABLE = False
+    logger.warning(f"Guitar tab model not available: {e}")
 
 # Internet Archive Live Music pipeline (search/browse/batch)
 try:
@@ -1798,11 +1822,52 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                 logger.error(f"Stem file not found: {stem_path}")
                 continue
 
-            # ==== DRUMS: Use OaF neural transcriber, fallback to v2/v1 ====
+            # ==== DRUMS: Neural CRNN -> OaF -> v2 spectral -> v1 ====
             if stem_name.lower() == 'drums' or '_drums' in stem_name.lower():
                 drum_midi_path = midi_output_dir / f"{stem_name}_transcribed.mid"
 
-                # Try OaF neural network transcriber first (best quality)
+                # HIGHEST PRIORITY: Our trained CRNN drum model (E-GMD, 8 classes)
+                if DRUM_NN_MODEL_AVAILABLE:
+                    logger.info(f"🥁 Transcribing {stem_name} with neural drum model (CRNN)...")
+                    job.stage = f'Transcribing {stem_name} (neural drum model)'
+
+                    try:
+                        drum_transcriber = NeuralDrumTranscriber()
+                        drum_result = drum_transcriber.transcribe(
+                            audio_path=stem_path,
+                            output_dir=str(midi_output_dir),
+                            sensitivity=0.5,
+                            tempo_hint=job.metadata.get('tempo'),
+                        )
+
+                        if (drum_result.midi_path
+                                and Path(drum_result.midi_path).exists()
+                                and drum_result.quality_score > 0.3):
+                            job.midi_files[stem_name] = drum_result.midi_path
+                            job.transcription_quality[stem_name] = drum_result.quality_score
+                            job.transcription_mode[stem_name] = 'drum_nn'
+
+                            logger.info(
+                                f"✓ Drum MIDI (neural): "
+                                f"{drum_result.total_hits} hits, "
+                                f"types: {list(drum_result.hits_by_type.keys())}, "
+                                f"tempo: {drum_result.tempo:.0f}, "
+                                f"quality: {drum_result.quality_score:.2f}"
+                            )
+                            successful += 1
+                            job.progress = 60 + int((idx + 1) / total_stems * 35)
+                            continue
+                        else:
+                            quality = drum_result.quality_score if drum_result else 0
+                            logger.info(
+                                f"  Neural drum quality too low ({quality:.2f}), "
+                                f"falling back to OaF/spectral"
+                            )
+                    except Exception as e:
+                        logger.warning(f"Neural drum model failed: {e}")
+                        # Fall through to OaF / spectral fallbacks
+
+                # Try OaF neural network transcriber (fallback)
                 if OAF_DRUM_TRANSCRIBER_AVAILABLE:
                     logger.info(f"🥁 Transcribing {stem_name} with OaF drum transcriber...")
                     job.stage = f'Transcribing {stem_name} (neural network)'
@@ -1878,6 +1943,46 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
 
             # ==== MELODIC INSTRUMENTS ====
             stem_type = stem_name.lower().split('_')[0]  # Handle guitar_left, bass_right, etc.
+
+            # ---- HIGHEST PRIORITY: Neural tab model for guitar stems ----
+            if stem_type == 'guitar' and GUITAR_TAB_MODEL_AVAILABLE:
+                logger.info(f"🎸 Transcribing {stem_name} with guitar tab model (CRNN)...")
+                job.stage = f'Transcribing {stem_name} (neural tab model)'
+
+                try:
+                    tab_transcriber = GuitarTabTranscriber()
+                    tab_result = tab_transcriber.transcribe(
+                        audio_path=stem_path,
+                        output_dir=str(midi_output_dir),
+                        tempo_hint=job.metadata.get('tempo'),
+                    )
+
+                    if (tab_result.midi_path
+                            and Path(tab_result.midi_path).exists()
+                            and tab_result.quality_score > 0.3):
+                        job.midi_files[stem_name] = tab_result.midi_path
+                        job.transcription_quality[stem_name] = tab_result.quality_score
+                        job.transcription_mode[stem_name] = 'guitar_tab'
+
+                        logger.info(
+                            f"✓ Tab MIDI for {stem_name}: "
+                            f"{tab_result.num_notes} notes, "
+                            f"{tab_result.num_strings_used} strings, "
+                            f"frets {tab_result.fret_range[0]}-{tab_result.fret_range[1]}, "
+                            f"quality: {tab_result.quality_score:.2f}"
+                        )
+                        successful += 1
+                        job.progress = 60 + int((idx + 1) / total_stems * 35)
+                        continue
+                    else:
+                        quality = tab_result.quality_score if tab_result else 0
+                        logger.info(
+                            f"  Tab model quality too low ({quality:.2f}), "
+                            f"falling back to melody/enhanced transcriber"
+                        )
+                except Exception as e:
+                    logger.warning(f"Guitar tab model failed for {stem_name}: {e}")
+                    # Fall through to melody extractor / enhanced transcriber
 
             # ---- Try melody transcriber first for lead/monophonic stems ----
             is_lead_stem = stem_name.lower() in ['guitar_lead', 'vocals', 'vocals_lead', 'bass']

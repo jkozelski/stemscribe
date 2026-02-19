@@ -80,7 +80,23 @@ MODELS = {
         'url': 'gs://mt3/checkpoints/mt3/',
         'size_mb': 400,
         'optional': True
-    }
+    },
+
+    # Guitar tab transcription model (CRNN, trained on GuitarSet)
+    'guitar_tab': {
+        'filename': 'pretrained/best_tab_model.pt',
+        'description': 'Guitar Tab CRNN - 6x20 string/fret prediction (GuitarSet, val_loss 0.0498)',
+        'type': 'pytorch',
+        'task': 'tab',
+    },
+
+    # Drum transcription model (CRNN, trained on E-GMD)
+    'drum_nn': {
+        'filename': 'pretrained/best_drum_model.pt',
+        'description': 'Drum CRNN - 8-class onset/frame/velocity (E-GMD, val_loss 0.0335)',
+        'type': 'pytorch',
+        'task': 'drums',
+    },
 }
 
 
