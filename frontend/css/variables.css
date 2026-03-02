@@ -1,0 +1,33 @@
+/* ===========================================
+   StemScribe - CSS Variables & Reset
+   =========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-deep: #0d0d12;
+    --bg-dark: #13131a;
+    --bg-card: #1a1a24;
+    --psych-orange: #ff7b54;
+    --psych-pink: #ff6b9d;
+    --psych-purple: #c678dd;
+    --psych-blue: #61afef;
+    --psych-teal: #56b6c2;
+    --psych-yellow: #e5c07b;
+    --psych-green: #98c379;
+    --cream: #f5f0e8;
+    --text: #e8e4df;
+    --text-dim: #7a7a85;
+}
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+}

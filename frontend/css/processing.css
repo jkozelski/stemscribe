@@ -1,0 +1,1430 @@
+/* ===========================================
+   StemScribe - Processing Section
+   (Vinyl spinner, progress bar, tour bus,
+    city skylines, road animation)
+   =========================================== */
+
+/* Processing Section */
+.processing-section {
+    display: none;
+    text-align: center;
+    padding: 3rem;
+}
+
+.processing-section.active {
+    display: block;
+}
+
+/* Vinyl Spinner */
+.vinyl-spinner {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 2rem;
+    position: relative;
+}
+
+.vinyl {
+    width: 100%;
+    height: 100%;
+    background:
+        /* Center hole */
+        radial-gradient(circle at 50% 50%, #0a0a0f 0%, #0a0a0f 8%, transparent 8%),
+        /* Label area */
+        radial-gradient(circle at 50% 50%, var(--psych-orange) 8%, var(--psych-pink) 18%, transparent 18%),
+        /* Inner groove ring */
+        radial-gradient(circle at 50% 50%, rgba(40,40,50,1) 18%, rgba(30,30,40,1) 19%, transparent 19%),
+        /* Vinyl grooves - more visible */
+        repeating-radial-gradient(circle at 50% 50%,
+            rgba(20,20,30,1) 20%,
+            rgba(40,40,55,1) 21%,
+            rgba(25,25,35,1) 22%,
+            rgba(45,45,60,1) 23%,
+            rgba(20,20,30,1) 24%
+        ),
+        /* Base vinyl color */
+        radial-gradient(circle at 30% 30%, #3a3a4a 0%, #1a1a24 100%);
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+    box-shadow:
+        0 0 0 8px #13131a,
+        0 0 0 10px rgba(255,255,255,0.08),
+        inset 0 0 30px rgba(0,0,0,0.5),
+        0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* Vinyl shine/reflection */
+.vinyl::after {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    width: 30%;
+    height: 40%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.vinyl-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 65px;
+    height: 65px;
+    margin-left: -32.5px;
+    margin-top: -32.5px;
+    background:
+        radial-gradient(circle at 50% 50%, #1a1a24 0%, #1a1a24 15%, transparent 15%),
+        conic-gradient(from 0deg, var(--psych-orange), var(--psych-pink), var(--psych-purple), var(--psych-orange));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    animation: label-spin 1.5s linear infinite;
+}
+
+@keyframes label-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.stage-text {
+    font-family: 'Righteous', cursive;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.75rem;
+}
+
+.stage-subtitle {
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-dim);
+}
+
+/* Progress Bar - Tour Bus Road */
+.progress-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 3rem auto 2rem;
+    position: relative;
+    padding-top: 100px;
+}
+
+/* City Skyline Background */
+.city-skyline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 95px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 10px;
+    pointer-events: none;
+}
+
+.city {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.3;
+    transition: all 0.6s ease;
+    filter: grayscale(100%);
+}
+
+.city.visited {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.1);
+    animation: city-arrival 0.8s ease-out;
+}
+
+@keyframes city-arrival {
+    0% { transform: scale(1.0); filter: grayscale(100%) brightness(1); }
+    30% { transform: scale(1.3); filter: grayscale(0%) brightness(1.8); }
+    50% { transform: scale(1.15); filter: brightness(1.4); }
+    100% { transform: scale(1.1); filter: brightness(1); }
+}
+
+/* Neon glow pulse behind visited cities */
+.city.visited::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,123,84,0.4) 0%, rgba(255,107,157,0.2) 40%, transparent 70%);
+    border-radius: 50%;
+    animation: city-glow-pulse 2s ease-in-out infinite;
+    z-index: -1;
+}
+
+@keyframes city-glow-pulse {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Sparkle particles when visited */
+.city.visited::after {
+    content: '✨';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    animation: sparkle-float 1.5s ease-out infinite;
+    opacity: 0;
+}
+
+@keyframes sparkle-float {
+    0% { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.5); }
+    20% { opacity: 1; transform: translateX(-50%) translateY(-5px) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.3); }
+}
+
+.city-name {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    color: var(--text-dim);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    transition: all 0.4s ease;
+}
+
+.city.visited .city-name {
+    color: var(--psych-orange);
+    text-shadow: 0 0 10px rgba(255, 123, 84, 0.8), 0 0 20px rgba(255, 123, 84, 0.4);
+    animation: neon-flicker 0.5s ease-out, neon-pulse 2s ease-in-out infinite 0.5s;
+}
+
+@keyframes neon-flicker {
+    0% { opacity: 0.4; }
+    10% { opacity: 1; }
+    20% { opacity: 0.6; }
+    30% { opacity: 1; }
+    40% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+@keyframes neon-pulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(255, 123, 84, 0.8), 0 0 20px rgba(255, 123, 84, 0.4); }
+    50% { text-shadow: 0 0 15px rgba(255, 123, 84, 1), 0 0 30px rgba(255, 123, 84, 0.6), 0 0 40px rgba(255, 107, 157, 0.3); }
+}
+
+/* Window lights twinkle when city is visited */
+.city.visited .building::after {
+    animation: window-twinkle 1.5s ease-in-out infinite;
+}
+
+@keyframes window-twinkle {
+    0%, 100% { opacity: 0.8; background-color: rgba(255, 220, 150, 0.9); }
+    25% { opacity: 1; background-color: rgba(255, 255, 200, 1); }
+    50% { opacity: 0.6; background-color: rgba(255, 200, 100, 0.8); }
+    75% { opacity: 0.95; background-color: rgba(255, 240, 180, 0.95); }
+}
+
+/* Buildings glow when visited */
+.city.visited .building {
+    filter: drop-shadow(0 0 8px rgba(255, 200, 100, 0.5));
+}
+
+/* San Francisco - Golden Gate Bridge (SVG Version) */
+.city-sf .skyline {
+    width: 120px;
+    height: 70px;
+    position: relative;
+}
+
+.city-sf .guardrail {
+    stroke: #c4461c;
+    stroke-width: 1;
+}
+
+.city-sf.visited .guardrail {
+    stroke: #ff6b4a;
+    filter: drop-shadow(0 0 2px rgba(255, 107, 74, 0.5));
+}
+
+.city-sf .tower .brace {
+    fill: #c4461c;
+}
+
+.city-sf.visited .tower .brace {
+    fill: #ff6b4a;
+}
+
+/* Suspender cables */
+.city-sf .suspenders line {
+    stroke: #c4461c;
+    stroke-width: 0.6;
+}
+
+.city-sf.visited .suspenders line {
+    stroke: #ff6b4a;
+    filter: drop-shadow(0 0 2px rgba(255, 107, 74, 0.4));
+}
+
+.city-sf .gg-bridge {
+    width: 100%;
+    height: 100%;
+}
+
+/* Water - deep blue bay */
+.city-sf .gg-bridge .water {
+    fill: #1a4a6a;
+}
+
+/* Fog effect */
+.city-sf .fog {
+    fill: rgba(200, 215, 230, 0.25);
+    animation: sf-fog 6s ease-in-out infinite;
+}
+
+@keyframes sf-fog {
+    0%, 100% { opacity: 0.25; transform: translateX(-3px); }
+    50% { opacity: 0.4; transform: translateX(3px); }
+}
+
+/* Road deck */
+.city-sf .gg-bridge .deck {
+    fill: #3a3a3a;
+}
+
+.city-sf .road-line {
+    stroke: #ffcc00;
+    stroke-width: 1;
+}
+
+/* Towers - International Orange #c4461c */
+.city-sf .tower rect {
+    fill: #c4461c;
+    stroke: #8a2a10;
+    stroke-width: 0.5;
+}
+
+.city-sf .tower .brace {
+    stroke: #c4461c;
+    stroke-width: 2;
+}
+
+.city-sf .tower .cap {
+    fill: #d85030;
+    stroke: #8a2a10;
+    stroke-width: 0.5;
+}
+
+/* Main suspension cable */
+.city-sf .main-cable {
+    stroke: #c4461c;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+}
+
+/* === VISITED STATE === */
+.city-sf.visited .tower rect {
+    fill: #ff6b4a;
+    stroke: #e85a38;
+    filter: drop-shadow(0 0 8px rgba(255, 100, 50, 0.8));
+}
+
+.city-sf.visited .tower .brace {
+    stroke: #ff6b4a;
+    filter: drop-shadow(0 0 5px rgba(255, 107, 74, 0.6));
+}
+
+.city-sf.visited .tower .cap {
+    fill: #ff8866;
+    stroke: #e85a38;
+}
+
+.city-sf.visited .main-cable {
+    stroke: #ff6b4a;
+    filter: drop-shadow(0 0 5px rgba(255, 107, 74, 0.9));
+    animation: cable-glow 2s ease-in-out infinite;
+}
+
+@keyframes cable-glow {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 107, 74, 0.9)); }
+    50% { filter: drop-shadow(0 0 10px rgba(255, 107, 74, 1)); }
+}
+
+.city-sf.visited .gg-bridge .water {
+    fill: #2a6a9a;
+}
+
+.city-sf.visited .fog {
+    fill: rgba(255, 200, 150, 0.15);
+}
+
+/* Denver - Rocky Mountains (SVG Version) */
+.city-denver .skyline {
+    width: 95px;
+    height: 55px;
+    position: relative;
+}
+
+.city-denver .rockies {
+    width: 100%;
+    height: 100%;
+}
+
+/* Back mountain range - distant, hazier */
+.city-denver .mountain-back {
+    fill: #4a5a70;
+    opacity: 0.6;
+}
+
+/* Middle range */
+.city-denver .mountain-mid {
+    fill: #5a7090;
+    opacity: 0.8;
+}
+
+/* Front range - main peaks */
+.city-denver .mountain-front {
+    fill: #6a88a8;
+}
+
+/* Snow caps */
+.city-denver .snow {
+    fill: #e8f0f8;
+}
+
+.city-denver .snow-small {
+    fill: #dde8f2;
+}
+
+/* Pine forest */
+.city-denver .trees {
+    fill: #1a3828;
+}
+
+/* Ground */
+.city-denver .ground {
+    fill: #2a4038;
+}
+
+/* === VISITED STATE - Alpenglow === */
+.city-denver.visited .mountain-front {
+    fill: #7a98b8;
+    filter: drop-shadow(0 0 10px rgba(255, 150, 100, 0.5));
+    animation: mountain-glow 3s ease-in-out infinite;
+}
+
+@keyframes mountain-glow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 150, 100, 0.5)); }
+    50% { filter: drop-shadow(0 0 20px rgba(255, 120, 60, 0.8)); }
+}
+
+.city-denver.visited .snow {
+    fill: #fff5e8;
+    filter: drop-shadow(0 0 8px rgba(255, 200, 150, 0.8));
+    animation: snow-glow 2s ease-in-out infinite;
+}
+
+@keyframes snow-glow {
+    0%, 100% { fill: #fff5e8; filter: drop-shadow(0 0 8px rgba(255, 200, 150, 0.8)); }
+    50% { fill: #ffeecc; filter: drop-shadow(0 0 15px rgba(255, 180, 100, 1)); }
+}
+
+.city-denver.visited .trees {
+    fill: #2a4838;
+    filter: drop-shadow(0 -3px 8px rgba(255, 150, 100, 0.3));
+}
+
+/* Chicago - SVG Skyline (The Windy City) */
+.city-chicago .skyline {
+    width: 100px;
+    height: 70px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+}
+
+.chi-skyline {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+/* Lake Michigan */
+.chi-skyline .lake {
+    fill: #3a6080;
+    opacity: 0.6;
+}
+
+/* Building base style */
+.chi-skyline .building {
+    fill: #5a7898;
+    stroke: #3a4858;
+    stroke-width: 0.5;
+}
+
+/* John Hancock Center */
+.chi-skyline .hancock .building {
+    fill: url(#hancock-gradient);
+}
+
+.chi-skyline .x-brace {
+    stroke: #1a2838;
+    stroke-width: 1.5;
+    opacity: 0.7;
+}
+
+/* Willis/Sears Tower */
+.chi-skyline .willis .building {
+    fill: #2a3848;
+}
+
+.chi-skyline .antenna {
+    stroke: #8a9aa8;
+    stroke-width: 1.5;
+}
+
+.chi-skyline .beacon {
+    fill: #cc3333;
+    opacity: 0.5;
+}
+
+/* Aon Center */
+.chi-skyline .aon .building {
+    fill: #d8e0e8;
+    stroke: #a0b0c0;
+}
+
+/* Other buildings */
+.chi-skyline .other-buildings .building {
+    fill: #6a8098;
+    stroke: #4a5868;
+    stroke-width: 0.3;
+}
+
+/* Window patterns */
+.chi-skyline .windows {
+    stroke: rgba(255, 240, 180, 0.15);
+    stroke-width: 0.3;
+}
+
+/* === VISITED STATE === */
+.city-chicago.visited .chi-skyline .building {
+    filter: drop-shadow(0 0 6px rgba(255, 200, 100, 0.4));
+}
+
+.city-chicago.visited .beacon {
+    fill: #ff4444;
+    opacity: 1;
+    animation: chi-beacon 1.2s ease-in-out infinite;
+}
+
+.city-chicago.visited .right-beacon {
+    animation-delay: 0.6s;
+}
+
+@keyframes chi-beacon {
+    0%, 45%, 100% {
+        opacity: 0.4;
+        filter: drop-shadow(0 0 2px rgba(255, 50, 50, 0.5));
+    }
+    50%, 95% {
+        opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(255, 50, 50, 1));
+    }
+}
+
+.city-chicago.visited .lake {
+    fill: #4a7898;
+    animation: lake-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes lake-shimmer {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+}
+
+.city-chicago.visited .willis .building {
+    fill: #3a4858;
+    filter: drop-shadow(0 0 10px rgba(255, 180, 100, 0.5));
+}
+
+.city-chicago.visited .hancock .building {
+    filter: drop-shadow(0 0 8px rgba(255, 180, 100, 0.4));
+}
+
+.city-chicago.visited .aon .building {
+    fill: #e8f0f8;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+}
+
+/* NYC - Detailed Skyline */
+.city-nyc .skyline {
+    width: 85px;
+    height: 70px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+    position: relative;
+}
+
+.city-nyc .building {
+    background: linear-gradient(180deg, #8aa8c8 0%, #506888 100%);
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    box-shadow: 1px 0 2px rgba(0,0,0,0.3);
+}
+
+/* Window lights */
+.city-nyc .building::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 1px;
+    right: 1px;
+    bottom: 4px;
+    background: repeating-linear-gradient(180deg,
+        rgba(255,255,200,0.25) 0px, rgba(255,255,200,0.25) 2px,
+        transparent 2px, transparent 5px);
+}
+
+.city-nyc .b1 { width: 8px; height: 32px; }
+.city-nyc .b2 { width: 10px; height: 45px; }
+
+.city-nyc .empire {
+    width: 14px;
+    height: 62px;
+    background: linear-gradient(180deg, #a0b8d8 0%, #607898 100%);
+}
+.city-nyc .empire::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 12px;
+    background: linear-gradient(180deg, #c8d8e8 0%, #a0b8d8 100%);
+}
+
+.city-nyc .chrysler {
+    width: 12px;
+    height: 55px;
+    background: linear-gradient(180deg, #b0c8e0 0%, #708898 100%);
+}
+.city-nyc .chrysler::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-width: 0 6px 10px 6px;
+    border-style: solid;
+    border-color: transparent transparent #b0c8e0 transparent;
+}
+
+.city-nyc .owtc {
+    width: 10px;
+    height: 58px;
+    background: linear-gradient(180deg, #90a8c0 0%, #607080 100%);
+}
+.city-nyc .b5 { width: 8px; height: 38px; }
+
+/* King Kong climbing the Empire State! */
+.city-nyc .king-kong {
+    position: absolute;
+    left: 28px;
+    bottom: 42px;
+    width: 10px;
+    height: 12px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.city-nyc.visited .king-kong {
+    opacity: 1;
+    animation: kong-climb 3s ease-in-out infinite;
+}
+
+@keyframes kong-climb {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-4px) rotate(5deg); }
+}
+
+/* Kong's body */
+.king-kong .kong-body {
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(ellipse at 40% 30%, #4a3a2a 0%, #2a1a0a 100%);
+    border-radius: 40% 40% 50% 50%;
+    position: absolute;
+    bottom: 0;
+}
+
+/* Kong's head */
+.king-kong .kong-head {
+    width: 6px;
+    height: 5px;
+    background: radial-gradient(ellipse at 40% 30%, #3a2a1a 0%, #1a0a00 100%);
+    border-radius: 50% 50% 40% 40%;
+    position: absolute;
+    bottom: 7px;
+    left: 1px;
+}
+
+/* Kong's face */
+.king-kong .kong-head::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 1px;
+    width: 4px;
+    height: 3px;
+    background: #5a4a3a;
+    border-radius: 0 0 50% 50%;
+}
+
+/* Kong's arms reaching */
+.king-kong .kong-arm {
+    position: absolute;
+    width: 3px;
+    height: 6px;
+    background: #3a2a1a;
+    border-radius: 2px;
+}
+
+.king-kong .kong-arm.left {
+    bottom: 5px;
+    left: -2px;
+    transform: rotate(30deg);
+}
+
+.king-kong .kong-arm.right {
+    bottom: 6px;
+    right: -1px;
+    transform: rotate(-45deg);
+}
+
+/* The Biplane buzzing around! */
+.city-nyc .biplane {
+    position: absolute;
+    width: 16px;
+    height: 8px;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.city-nyc.visited .biplane {
+    opacity: 1;
+    animation: biplane-circle 4s linear infinite;
+}
+
+@keyframes biplane-circle {
+    0% {
+        top: -5px;
+        right: 10px;
+        transform: rotate(15deg);
+    }
+    25% {
+        top: 15px;
+        right: -15px;
+        transform: rotate(-10deg) scaleX(-1);
+    }
+    50% {
+        top: 35px;
+        right: 5px;
+        transform: rotate(-15deg) scaleX(-1);
+    }
+    75% {
+        top: 10px;
+        right: 25px;
+        transform: rotate(10deg);
+    }
+    100% {
+        top: -5px;
+        right: 10px;
+        transform: rotate(15deg);
+    }
+}
+
+/* Biplane body */
+.biplane .plane-body {
+    position: absolute;
+    width: 12px;
+    height: 4px;
+    background: linear-gradient(180deg, #d4a556 0%, #b8944a 100%);
+    border-radius: 6px 2px 2px 6px;
+    top: 2px;
+    left: 0;
+}
+
+/* Biplane wings (stacked) */
+.biplane .plane-wings {
+    position: absolute;
+    width: 14px;
+    height: 2px;
+    background: #e8c878;
+    top: 0;
+    left: 1px;
+    border-radius: 1px;
+    box-shadow: 0 6px 0 #e8c878;
+}
+
+/* Propeller */
+.biplane .plane-prop {
+    position: absolute;
+    width: 2px;
+    height: 6px;
+    background: #888;
+    left: 11px;
+    top: 1px;
+    border-radius: 1px;
+    animation: prop-spin 0.1s linear infinite;
+}
+
+@keyframes prop-spin {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(0.3); }
+    100% { transform: scaleY(1); }
+}
+
+/* Tail */
+.biplane .plane-tail {
+    position: absolute;
+    width: 4px;
+    height: 3px;
+    background: #d4a556;
+    left: -2px;
+    top: 1px;
+    clip-path: polygon(100% 0, 100% 100%, 0 50%);
+}
+
+/* Antenna warning light on Empire State - blinks when visited */
+.city-nyc.visited .empire::after {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ff3333;
+    box-shadow: 0 0 6px 2px rgba(255, 50, 50, 0.8);
+    animation: antenna-blink 1s ease-in-out infinite;
+}
+
+@keyframes antenna-blink {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px 2px rgba(255, 50, 50, 0.8); }
+    50% { opacity: 0.3; box-shadow: 0 0 3px 1px rgba(255, 50, 50, 0.4); }
+}
+
+/* NYC skyline glow when visited - Times Square neon vibes */
+.city-nyc.visited .building {
+    filter: drop-shadow(0 0 8px rgba(255, 200, 100, 0.4));
+    animation: nyc-nightlife 2s ease-in-out infinite;
+}
+
+@keyframes nyc-nightlife {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 200, 100, 0.4)); }
+    25% { filter: drop-shadow(0 0 12px rgba(255, 107, 157, 0.5)); }
+    50% { filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.5)); }
+    75% { filter: drop-shadow(0 0 12px rgba(255, 123, 84, 0.5)); }
+}
+
+/* Empire State gets special treatment */
+.city-nyc.visited .empire {
+    background: linear-gradient(180deg, #d8e8f8 0%, #a8c8e8 100%);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(97, 218, 251, 0.2);
+}
+
+/* Chicago - Windy City lights up blue */
+.city-chicago.visited .building {
+    filter: drop-shadow(0 0 10px rgba(97, 175, 239, 0.5));
+    animation: chicago-lights 2s ease-in-out infinite;
+}
+
+@keyframes chicago-lights {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(97, 175, 239, 0.5)); }
+    50% { filter: drop-shadow(0 0 18px rgba(97, 175, 239, 0.8)) drop-shadow(0 0 30px rgba(97, 175, 239, 0.3)); }
+}
+
+/* Willis Tower antenna blinks */
+.city-chicago.visited .willis::before {
+    animation: willis-beacon 1s ease-in-out infinite;
+}
+
+@keyframes willis-beacon {
+    0%, 100% { box-shadow: 0 0 4px 2px rgba(255, 50, 50, 0.8); opacity: 1; }
+    50% { box-shadow: 0 0 8px 4px rgba(255, 50, 50, 1); opacity: 0.6; }
+}
+
+/* Chicago windows glow warmer */
+.city-chicago.visited .building::after {
+    background: linear-gradient(180deg,
+        transparent 0%, transparent 10%,
+        rgba(255, 220, 150, 0.9) 10%, rgba(255, 220, 150, 0.9) 20%,
+        transparent 20%, transparent 30%,
+        rgba(255, 200, 100, 0.8) 30%, rgba(255, 200, 100, 0.8) 40%,
+        transparent 40%, transparent 50%,
+        rgba(255, 230, 180, 0.9) 50%, rgba(255, 230, 180, 0.9) 60%,
+        transparent 60%
+    );
+}
+
+.progress-road {
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(180deg, #2a2a35 0%, #1a1a24 50%, #2a2a35 100%);
+    border-radius: 20px;
+    position: relative;
+    border: 2px solid rgba(255,255,255,0.1);
+    /* Don't clip - let the bus overflow */
+}
+
+/* Road markings container - this gets clipped */
+.progress-road::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg,
+        var(--psych-yellow) 0px, var(--psych-yellow) 30px,
+        transparent 30px, transparent 60px);
+    transform: translateY(-50%);
+    opacity: 0.8;
+    animation: road-scroll 0.4s linear infinite;
+    background-size: 60px 4px;
+}
+
+@keyframes road-scroll {
+    0% { background-position: 0 0; }
+    100% { background-position: -60px 0; }
+}
+
+/* Road edge shadow */
+.progress-road::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 20px;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5), inset 0 -2px 6px rgba(0,0,0,0.3);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--psych-orange), var(--psych-pink), var(--psych-purple), var(--psych-blue));
+    background-size: 300% 100%;
+    transition: width 0.5s ease-out;
+    border-radius: 18px;
+    transition: width 0.3s ease;
+    animation: rainbow-road 3s linear infinite;
+    position: relative;
+}
+
+@keyframes rainbow-road {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
+
+/* The Tour Bus - Luxury Prevost Style */
+.tour-bus {
+    position: absolute;
+    top: -45px;
+    left: 0%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 70px;
+    transition: left 0.3s ease;
+    z-index: 10;
+    animation: bus-cruise 0.5s ease-in-out infinite;
+}
+
+@keyframes bus-cruise {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-2px); }
+}
+
+/* Bus body - Sleek black luxury coach */
+.bus-body {
+    position: absolute;
+    bottom: 14px;
+    left: 5px;
+    width: 105px;
+    height: 42px;
+    background: linear-gradient(180deg,
+        #2a2a30 0%,
+        #1a1a20 20%,
+        #0f0f12 50%,
+        #1a1a20 80%,
+        #252530 100%
+    );
+    border-radius: 6px 6px 3px 3px;
+    border: 1px solid #3a3a44;
+    box-shadow:
+        0 4px 12px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* Chrome trim stripe */
+.bus-body::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(180deg,
+        #888 0%, #ccc 30%, #fff 50%, #ccc 70%, #888 100%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Accent stripe - can be custom color */
+.bus-body::after {
+    content: '';
+    position: absolute;
+    top: calc(50% + 4px);
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+        var(--psych-purple), var(--psych-pink), var(--psych-orange));
+}
+
+/* Running lights along bottom */
+.bus-running-lights {
+    position: absolute;
+    bottom: 2px;
+    left: 15px;
+    right: 15px;
+    height: 2px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.running-light {
+    width: 4px;
+    height: 2px;
+    background: #ffaa00;
+    border-radius: 1px;
+    box-shadow: 0 0 4px 1px rgba(255, 170, 0, 0.6);
+    animation: running-light-pulse 1s ease-in-out infinite;
+}
+
+.running-light:nth-child(2n) { animation-delay: 0.5s; }
+
+@keyframes running-light-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Bus windows - Dark tinted luxury style */
+.bus-windows {
+    position: absolute;
+    top: 6px;
+    left: 12px;
+    right: 20px;
+    height: 16px;
+    display: flex;
+    gap: 2px;
+}
+
+.bus-window {
+    flex: 1;
+    background: linear-gradient(180deg,
+        #1a2030 0%,
+        #2a3040 30%,
+        #354050 50%,
+        #2a3040 70%,
+        #1a2030 100%);
+    border-radius: 2px;
+    border: 1px solid #4a4a54;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Tinted glass reflection */
+.bus-window::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(180deg,
+        rgba(255,255,255,0.15) 0%,
+        transparent 100%);
+}
+
+/* People silhouettes in windows */
+.bus-person {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 10px;
+    opacity: 0.7;
+    animation: person-sway 2s ease-in-out infinite;
+}
+
+.bus-person .head {
+    width: 5px;
+    height: 5px;
+    background: #3a3a44;
+    border-radius: 50%;
+    margin: 0 auto 1px;
+}
+
+.bus-person .body {
+    width: 7px;
+    height: 5px;
+    background: #3a3a44;
+    border-radius: 2px 2px 0 0;
+    margin: 0 auto;
+}
+
+/* Different animation timings */
+.bus-window:nth-child(1) .bus-person { animation-delay: 0s; }
+.bus-window:nth-child(2) .bus-person { animation-delay: 0.4s; }
+.bus-window:nth-child(3) .bus-person { animation-delay: 0.8s; }
+.bus-window:nth-child(4) .bus-person { animation-delay: 1.2s; }
+
+@keyframes person-sway {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-1px); }
+}
+
+/* Arms not visible through tinted glass */
+.bus-person .arm { display: none; }
+
+/* ROOFTOP - AC Units & Luggage Bay (more realistic) */
+.bus-roof {
+    position: absolute;
+    top: 8px;
+    left: 15px;
+    right: 25px;
+    height: 6px;
+    background: linear-gradient(180deg, #3a3a44 0%, #2a2a30 100%);
+    border-radius: 3px 3px 0 0;
+    display: flex;
+    gap: 8px;
+    padding: 0 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* AC units on roof */
+.roof-rider {
+    display: none; /* Hide the people for cleaner look */
+}
+
+.bus-roof::before {
+    content: '';
+    width: 15px;
+    height: 4px;
+    background: linear-gradient(180deg, #555 0%, #3a3a40 100%);
+    border-radius: 1px;
+    box-shadow: 20px 0 0 #3a3a40, 40px 0 0 #3a3a40;
+}
+
+/* Bus front - Aerodynamic luxury style */
+.bus-front {
+    position: absolute;
+    bottom: 14px;
+    right: 0;
+    width: 18px;
+    height: 42px;
+    background: linear-gradient(90deg,
+        #1a1a20 0%,
+        #2a2a30 40%,
+        #3a3a44 100%);
+    border-radius: 0 12px 6px 0;
+    border: 1px solid #4a4a54;
+    border-left: none;
+}
+
+/* Windshield */
+.bus-front::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    width: 12px;
+    height: 18px;
+    background: linear-gradient(180deg,
+        #1a2030 0%,
+        #2a3545 50%,
+        #1a2030 100%);
+    border-radius: 2px 8px 4px 2px;
+    border: 1px solid #4a4a54;
+}
+
+/* Headlights - Modern LED style */
+.bus-front::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    right: 3px;
+    width: 10px;
+    height: 6px;
+    background: linear-gradient(180deg, #fff 0%, #ffffcc 50%, #fff 100%);
+    border-radius: 2px;
+    box-shadow:
+        0 0 10px 4px rgba(255, 255, 255, 0.9),
+        0 0 20px 8px rgba(255, 255, 200, 0.5),
+        15px 0 30px 10px rgba(255, 255, 200, 0.3);
+    animation: led-headlight 2s ease-in-out infinite;
+}
+
+@keyframes led-headlight {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.9; }
+}
+
+/* Bus wheels - Chrome alloy style */
+.bus-wheel {
+    position: absolute;
+    bottom: 4px;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle at 35% 35%,
+        #4a4a4a 0%,
+        #2a2a2a 40%,
+        #1a1a1a 70%,
+        #0a0a0a 100%);
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+    box-shadow:
+        0 3px 8px rgba(0,0,0,0.7),
+        inset 0 1px 2px rgba(255,255,255,0.1);
+    animation: wheel-spin 0.25s linear infinite;
+}
+
+.bus-wheel.front { left: 15px; }
+.bus-wheel.back { left: 80px; }
+
+@keyframes wheel-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Chrome hub cap */
+.bus-wheel::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 30% 30%,
+        #fff 0%, #ccc 20%, #999 50%, #666 80%, #444 100%);
+    border-radius: 50%;
+    border: 1px solid #888;
+}
+
+/* Chrome spokes */
+.bus-wheel::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    background:
+        linear-gradient(0deg, transparent 45%, #777 48%, #777 52%, transparent 55%),
+        linear-gradient(60deg, transparent 45%, #777 48%, #777 52%, transparent 55%),
+        linear-gradient(120deg, transparent 45%, #777 48%, #777 52%, transparent 55%);
+    border-radius: 50%;
+}
+
+/* LED destination sign */
+.bus-sign {
+    position: absolute;
+    top: 16px;
+    left: 14px;
+    background: #0a0a0f;
+    color: #ff6b00;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.4rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    border: 1px solid #333;
+    text-shadow: 0 0 4px #ff6b00;
+    box-shadow: inset 0 0 3px rgba(255, 107, 0, 0.3);
+    z-index: 5;
+    animation: sign-flicker 3s ease-in-out infinite;
+}
+
+@keyframes sign-flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.7; }
+    94% { opacity: 1; }
+    95% { opacity: 0.8; }
+    96% { opacity: 1; }
+}
+
+/* Side mirror */
+.bus-mirror {
+    position: absolute;
+    top: 18px;
+    right: -4px;
+    width: 6px;
+    height: 4px;
+    background: linear-gradient(90deg, #2a2a30 0%, #4a4a54 100%);
+    border-radius: 1px;
+    z-index: 6;
+}
+
+.bus-mirror::before {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 4px;
+    height: 4px;
+    background: linear-gradient(135deg, #1a2030 0%, #2a3545 50%, #3a4555 100%);
+    border: 1px solid #4a4a54;
+    border-radius: 1px;
+}
+
+/* Chrome mud flaps */
+.bus-mud-flap {
+    position: absolute;
+    bottom: 8px;
+    width: 4px;
+    height: 10px;
+    background: linear-gradient(180deg, #666 0%, #888 50%, #666 100%);
+    border-radius: 0 0 2px 2px;
+    z-index: 3;
+}
+
+.bus-mud-flap.front { left: 34px; }
+.bus-mud-flap.back { left: 99px; }
+
+/* Custom band artwork wrap - premium look */
+.bus-wrap {
+    position: absolute;
+    bottom: 6px;
+    left: 10px;
+    right: 18px;
+    height: 12px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(138, 43, 226, 0.15) 10%,
+        rgba(255, 105, 180, 0.2) 30%,
+        rgba(255, 165, 0, 0.15) 50%,
+        rgba(0, 206, 209, 0.2) 70%,
+        rgba(138, 43, 226, 0.15) 90%,
+        transparent 100%
+    );
+    border-radius: 2px;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+/* Exhaust - subtle diesel smoke */
+.bus-exhaust {
+    position: absolute;
+    bottom: 18px;
+    left: -8px;
+    width: 16px;
+    height: 10px;
+}
+
+.smoke-puff {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: diesel-puff 1s ease-out infinite;
+}
+
+/* Subtle gray diesel smoke */
+.smoke-puff:nth-child(1) {
+    left: 0;
+    animation-delay: 0s;
+    background: radial-gradient(circle, rgba(100,100,100,0.5) 0%, rgba(80,80,80,0.2) 50%, transparent 70%);
+}
+.smoke-puff:nth-child(2) {
+    left: -6px;
+    animation-delay: 0.3s;
+    background: radial-gradient(circle, rgba(90,90,90,0.4) 0%, rgba(70,70,70,0.15) 50%, transparent 70%);
+}
+.smoke-puff:nth-child(3) {
+    left: -12px;
+    animation-delay: 0.6s;
+    background: radial-gradient(circle, rgba(80,80,80,0.3) 0%, rgba(60,60,60,0.1) 50%, transparent 70%);
+}
+
+@keyframes diesel-puff {
+    0% { opacity: 0.8; transform: scale(0.4) translateY(0); }
+    50% { opacity: 0.4; transform: scale(1) translateY(-6px) translateX(-4px); }
+    100% { opacity: 0; transform: scale(1.8) translateY(-15px) translateX(-10px); }
+}
+
+/* Psychedelic smoke trail */
+.bus-trail {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 20px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(198, 120, 221, 0.3),
+        rgba(255, 107, 157, 0.4),
+        rgba(255, 123, 84, 0.5)
+    );
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    filter: blur(4px);
+}
+
+.progress-text {
+    font-family: 'Righteous', cursive;
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.progress-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    font-style: italic;
+}

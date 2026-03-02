@@ -1,0 +1,877 @@
+/* ===========================================
+   StemScribe - Responsive Overrides
+   Breakpoints:
+     768px — Tablet / iPad
+     480px — Small phone
+     375px — iPhone SE / narrow
+   =========================================== */
+
+/* Mobile menu button: hidden by default */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 1.4rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.mobile-menu-btn:hover {
+    border-color: var(--psych-orange);
+    color: var(--psych-orange);
+}
+
+/* ── Tablet: 768px ── */
+@media (max-width: 768px) {
+
+    /* Header */
+    .header {
+        padding: 0.75rem 1rem;
+    }
+
+    .logo-symbol {
+        font-size: 1.5rem;
+    }
+
+    .logo-text {
+        font-size: 1.3rem;
+    }
+
+    .nav-links {
+        gap: 0.75rem;
+    }
+
+    .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    .library-btn, .settings-btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+    }
+
+    /* Hero */
+    .hero {
+        margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .hero-label {
+        font-size: 0.65rem;
+        letter-spacing: 2px;
+        padding: 0.4rem 1rem;
+    }
+
+    /* Container */
+    .container {
+        padding: 2rem 1rem;
+    }
+
+    /* Upload */
+    .upload-section {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .drop-zone {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .drop-icon {
+        font-size: 3rem;
+    }
+
+    .drop-title {
+        font-size: 1.1rem;
+    }
+
+    .mode-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .url-input {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .archive-search {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .submit-btn {
+        font-size: 1rem;
+        padding: 1rem 2rem;
+    }
+
+    /* Mixer: 3 columns at tablet */
+    .stems-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Neve console: reduce side margins */
+    .neve-console {
+        margin: 0 10px;
+    }
+
+    .neve-console::before { left: -14px; width: 12px; }
+    .neve-console::after { right: -14px; width: 12px; }
+
+    /* Transport: wrap controls */
+    .transport-controls {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .play-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+
+    .skip-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .volume-slider {
+        width: 80px;
+    }
+
+    /* Master transport */
+    .master-transport {
+        padding: 1rem 1.25rem;
+        border-radius: 14px;
+    }
+
+    /* Song card */
+    .song-card {
+        padding: 1rem;
+        gap: 1rem;
+        border-radius: 12px;
+    }
+
+    .song-thumb {
+        width: 60px;
+        height: 60px;
+    }
+
+    /* Track info panel */
+    .track-info-panel {
+        border-radius: 12px;
+    }
+
+    .info-content {
+        padding: 1rem;
+    }
+
+    /* Settings/Library panels */
+    .settings-panel {
+        width: 320px;
+        right: -340px;
+    }
+
+    .library-panel {
+        width: 320px;
+    }
+
+    /* Practice CTA */
+    .practice-cta {
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .practice-btn {
+        font-size: 0.95rem;
+        padding: 0.85rem 1.75rem;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 2rem 1rem;
+    }
+
+    .footer-links {
+        gap: 1rem;
+    }
+}
+
+/* ── Small phone: 480px ── */
+@media (max-width: 480px) {
+
+    /* Header: collapsible mobile nav */
+    .header {
+        padding: 0.5rem 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        margin-top: 0.5rem;
+    }
+
+    .nav-links.open {
+        display: flex;
+    }
+
+    .nav-links a {
+        font-size: 0.85rem;
+        padding: 0.4rem 0;
+    }
+
+    .nav-links button {
+        width: 100%;
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+    .logo-symbol {
+        font-size: 1.2rem;
+    }
+
+    .logo-text {
+        font-size: 1.1rem;
+    }
+
+    .logo {
+        gap: 0.5rem;
+    }
+
+    /* Hero */
+    .hero {
+        margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .hero-label {
+        font-size: 0.6rem;
+        letter-spacing: 1.5px;
+        padding: 0.3rem 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Container */
+    .container {
+        padding: 1.25rem 0.75rem;
+    }
+
+    /* Upload */
+    .upload-section {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .mode-toggle {
+        margin-bottom: 1rem;
+    }
+
+    .mode-btn {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.75rem;
+        gap: 0.25rem;
+    }
+
+    .drop-zone {
+        padding: 2rem 1rem;
+        border-radius: 12px;
+    }
+
+    .drop-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .drop-title {
+        font-size: 1rem;
+    }
+
+    .drop-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .url-input {
+        padding: 0.85rem;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+
+    .platforms {
+        gap: 0.4rem;
+        margin-top: 0.75rem;
+    }
+
+    .platform-pill {
+        font-size: 0.65rem;
+        padding: 0.35rem 0.6rem;
+    }
+
+    .archive-search {
+        padding: 0.85rem;
+        font-size: 0.85rem;
+    }
+
+    .archive-filters {
+        gap: 0.35rem;
+    }
+
+    .archive-filter {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+    }
+
+    .submit-btn {
+        font-size: 0.9rem;
+        padding: 0.85rem 1.5rem;
+        margin-top: 1.25rem;
+        width: 100%;
+    }
+
+    /* Mixer: 2 columns */
+    .stems-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Neve console: minimal margins */
+    .neve-console {
+        margin: 0 4px;
+        padding: 0.75rem;
+        padding-bottom: 2rem;
+        border-width: 2px;
+    }
+
+    .neve-console::before,
+    .neve-console::after {
+        display: none;
+    }
+
+    .neve-armrest {
+        left: -6px;
+        right: -6px;
+        height: 36px;
+        bottom: -20px;
+    }
+
+    .neve-screw {
+        width: 7px;
+        height: 7px;
+    }
+
+    /* Stem card: compact layout */
+    .stem-card {
+        padding: 0.5rem 0.35rem 0.75rem;
+        min-height: 380px;
+    }
+
+    .stem-icon {
+        font-size: 1.1rem;
+    }
+
+    .stem-name {
+        font-size: 0.55rem;
+        letter-spacing: 1px;
+        margin-bottom: 0.35rem;
+    }
+
+    /* Per-stem waveform: slightly shorter */
+    .stem-waveform {
+        height: 30px;
+        margin-bottom: 0.35rem;
+    }
+
+    /* VU meter: compact */
+    .vu-meter {
+        height: 65px;
+        margin-bottom: 0.5rem;
+    }
+
+    .vu-needle {
+        height: 40px;
+    }
+
+    /* Mixer controls */
+    .mute-btn, .solo-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 0.55rem;
+    }
+
+    .stem-mixer-controls {
+        gap: 0.3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Fader: shorter */
+    .fader-track {
+        height: 90px;
+    }
+
+    .led-meter {
+        height: 90px;
+        width: 12px;
+    }
+
+    .fader-cap {
+        width: 28px;
+        height: 20px;
+    }
+
+    /* Stem actions: compact */
+    .stem-actions {
+        gap: 0.25rem;
+        margin-top: 0.35rem;
+    }
+
+    .stem-btn {
+        font-size: 0.55rem;
+        padding: 0.3rem 0.35rem;
+    }
+
+    /* Transport: stacked layout for touch */
+    .master-transport {
+        padding: 0.75rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .transport-controls {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .play-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .skip-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
+    }
+
+    .timeline-container {
+        width: 100%;
+        order: 10;
+    }
+
+    .timeline {
+        height: 12px;
+        padding: 10px 0;
+    }
+
+    .timeline-handle {
+        width: 22px;
+        height: 22px;
+    }
+
+    .time-display {
+        font-size: 0.75rem;
+    }
+
+    .speed-control .speed-btn {
+        padding: 5px 10px;
+        font-size: 0.7rem;
+    }
+
+    .loop-control .loop-btn {
+        padding: 5px 10px;
+        font-size: 0.65rem;
+    }
+
+    .master-volume {
+        gap: 0.4rem;
+    }
+
+    .master-volume span {
+        font-size: 1rem;
+    }
+
+    .volume-slider {
+        width: 60px;
+    }
+
+    /* Master waveform */
+    .master-waveform-container {
+        padding: 8px 10px;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Song card: vertical stack */
+    .song-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+        gap: 0.75rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .song-thumb {
+        width: 64px;
+        height: 64px;
+    }
+
+    .song-details h3 {
+        font-size: 0.95rem;
+    }
+
+    .song-details p {
+        font-size: 0.8rem;
+    }
+
+    .info-toggle-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    /* Results header */
+    .results-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .results-header {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Track info panel */
+    .track-info-panel {
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .info-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .info-content {
+        padding: 0.75rem;
+    }
+
+    .info-section h4 {
+        font-size: 0.75rem;
+    }
+
+    .info-section p {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    /* Settings/Library: full width */
+    .settings-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    .library-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    /* Practice CTA */
+    .practice-cta {
+        padding: 1rem;
+        margin-top: 1.5rem;
+        border-radius: 12px;
+    }
+
+    .practice-btn {
+        font-size: 0.85rem;
+        padding: 0.75rem 1.5rem;
+        width: 100%;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+
+    .footer p {
+        font-size: 0.75rem;
+    }
+
+    /* Processing section */
+    .vinyl-spinner {
+        transform: scale(0.8);
+    }
+
+    .stage-text {
+        font-size: 0.9rem;
+    }
+
+    .stage-subtitle {
+        font-size: 0.8rem;
+    }
+}
+
+/* ── iPhone SE narrow: 375px ── */
+@media (max-width: 375px) {
+
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero p {
+        font-size: 0.8rem;
+    }
+
+    .container {
+        padding: 1rem 0.5rem;
+    }
+
+    .upload-section {
+        padding: 0.75rem;
+    }
+
+    .mode-btn {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    .drop-zone {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .drop-title {
+        font-size: 0.9rem;
+    }
+
+    /* Mixer: single column */
+    .stems-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stem-card {
+        min-height: auto;
+        padding: 0.5rem 0.75rem 0.75rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: auto auto;
+        gap: 0.25rem 0.5rem;
+        text-align: left;
+    }
+
+    .stem-card .stem-icon {
+        grid-row: 1 / 3;
+        grid-column: 1;
+        align-self: center;
+        font-size: 1.5rem;
+    }
+
+    .stem-card .stem-name {
+        grid-row: 1;
+        grid-column: 2;
+        align-self: center;
+        margin-bottom: 0;
+    }
+
+    .stem-card .stem-waveform {
+        grid-row: 2;
+        grid-column: 2;
+        width: 100%;
+        height: 28px;
+        margin: 0;
+    }
+
+    .stem-card .vu-meter {
+        display: none;
+    }
+
+    .stem-card .stem-mixer-controls {
+        grid-row: 1;
+        grid-column: 3;
+        margin-bottom: 0;
+    }
+
+    .stem-card .fader-section {
+        grid-row: 2;
+        grid-column: 3;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .stem-card .fader-section .led-meter {
+        display: none;
+    }
+
+    .stem-card .fader-section .fader-track {
+        height: 28px;
+        width: 80px;
+        transform: none;
+    }
+
+    .stem-card .fader-section .fader-groove {
+        top: 50%;
+        left: 8px;
+        right: 8px;
+        bottom: auto;
+        width: auto;
+        height: 4px;
+        transform: translateY(-50%);
+    }
+
+    .stem-card .fader-section .fader-cap {
+        top: 50% !important;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 28px;
+    }
+
+    .stem-card .stem-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 0.25rem;
+    }
+
+    .stem-card .stem-actions .stem-btn {
+        flex: 1;
+        min-width: 60px;
+        text-align: center;
+    }
+
+    .stem-card .cascade-badge {
+        top: 2px;
+        right: 2px;
+        width: 14px;
+        height: 14px;
+        font-size: 0.55rem;
+    }
+
+    /* Transport: fully stacked */
+    .transport-controls {
+        justify-content: center;
+    }
+
+    .play-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .skip-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+
+    .volume-slider {
+        width: 50px;
+    }
+
+    .master-transport {
+        padding: 0.5rem;
+    }
+
+    .song-card {
+        padding: 0.75rem;
+    }
+
+    .song-thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+    }
+
+    /* Neve console: no decorative elements on tiny screens */
+    .neve-console {
+        margin: 0;
+        padding: 0.5rem;
+        padding-bottom: 1.5rem;
+        border-radius: 8px;
+        border-width: 2px;
+    }
+
+    .neve-armrest {
+        height: 28px;
+        bottom: -16px;
+        left: -2px;
+        right: -2px;
+        border-radius: 6px 6px 10px 10px;
+    }
+
+    .neve-armrest-end {
+        display: none;
+    }
+
+    .submit-btn {
+        font-size: 0.85rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* ── Touch-friendly: coarse pointer devices ── */
+@media (pointer: coarse) {
+    .timeline {
+        min-height: 16px;
+        padding: 12px 0;
+    }
+
+    .timeline-handle {
+        width: 24px;
+        height: 24px;
+    }
+
+    .mute-btn, .solo-btn {
+        min-width: 28px;
+        min-height: 28px;
+    }
+
+    .stem-btn {
+        min-height: 32px;
+    }
+
+    .play-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .skip-btn {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .speed-btn, .loop-btn, .loop-clear-btn {
+        min-height: 32px;
+        min-width: 32px;
+    }
+}
