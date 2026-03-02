@@ -1,22 +1,20 @@
 """
-Neural Guitar Transcriber v3 for StemScribe
-============================================
-Uses a trained transfer-learning model (Piano CNN + Adapter + Attention + BiLSTM)
-to transcribe guitar audio into MIDI with 49-key polyphonic output.
+Neural Guitar Transcriber for StemScribe
+=========================================
+Uses a Kong-style CRNN model fine-tuned on GuitarSet via domain adaptation
+from the Kong et al. piano transcription checkpoint.
 
-Architecture: GuitarTranscriptionModel_v3
-  Mel(229) -> Piano CNN (frozen) -> Adapter(1792->1024) + Residual
-  -> MultiheadAttention(1024, 8 heads)
-  -> onset_lstm BiLSTM(1024, 192) -> onset_head Linear(384, 49)
-  -> frame_lstm BiLSTM(1024+49, 192) -> frame_head Linear(384, 49)
-  -> velocity_head Linear(384, 49) + Sigmoid
+Architecture: GuitarTranscriptionModel (Kong-style)
+  4x AcousticModelCRnn8Dropout (frame, onset, offset, velocity)
+  Each: 4 ConvBlocks -> FC(1792,768) -> BiGRU(768,256) -> FC(512, 48)
+  Conditioning: onset <- velocity, frame <- onset + offset
 
-Checkpoint: backend/models/pretrained/best_guitar_v3_model.pt
-Training: train_tab_model/train_guitar_v3.py (GuitarSet, transfer from piano CNN)
+Checkpoint: backend/models/pretrained/best_guitar_model.pt
+Training: train_guitar_model/train_guitar_runpod.py (GuitarSet, Kong domain adaptation)
 
-Guitar Range: E2 (MIDI 40) to C#6 (MIDI 88) -- 49 keys
+Guitar Range: E2 (MIDI 40) to Eb6 (MIDI 87) -- 48 pitches
 
-Falls back to Basic Pitch guitar_tab_transcriber when no v3 model exists.
+Falls back to Basic Pitch guitar_tab_transcriber when no checkpoint exists.
 """
 
 import logging
@@ -27,6 +25,7 @@ from dataclasses import dataclass
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 logger = logging.getLogger(__name__)
 
@@ -34,209 +33,188 @@ logger = logging.getLogger(__name__)
 # CONSTANTS -- MUST match training CONFIG exactly
 # ============================================================================
 
-CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_guitar_v3_model.pt'
-PIANO_CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_piano_model.pt'
-MODEL_AVAILABLE = CHECKPOINT_PATH.exists() and PIANO_CHECKPOINT_PATH.exists()
+CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_guitar_model.pt'
+MODEL_AVAILABLE = CHECKPOINT_PATH.exists()
 
 SAMPLE_RATE = 16000
-HOP_LENGTH = 256
+HOP_LENGTH = 160
 N_MELS = 229
 N_FFT = 2048
-FMIN = 30.0
-FMAX = 8000.0
-CHUNK_DURATION = 5.0
-NUM_KEYS = 49
+NUM_KEYS = 48
 MIN_MIDI = 40   # E2
-MAX_MIDI = 88   # C#6
+MAX_MIDI = 88   # exclusive upper bound (48 pitches: MIDI 40-87)
+CHUNK_DURATION = 10.0
 
 CHUNK_SAMPLES = int(CHUNK_DURATION * SAMPLE_RATE)
-CHUNK_FRAMES = int(CHUNK_SAMPLES / HOP_LENGTH)
+CHUNK_FRAMES = CHUNK_SAMPLES // HOP_LENGTH
 
 if MODEL_AVAILABLE:
-    logger.info(f"Guitar v3 model found ({CHECKPOINT_PATH.stat().st_size / 1e6:.0f}MB)")
+    logger.info(f"Guitar NN model found ({CHECKPOINT_PATH.stat().st_size / 1e6:.0f}MB)")
 else:
-    logger.debug(f"Guitar v3 model not found at {CHECKPOINT_PATH}")
+    logger.debug(f"Guitar NN model not found at {CHECKPOINT_PATH}")
 
 
 # ============================================================================
-# PIANO CNN (must match piano_transcriber.py exactly for weight loading)
+# KONG-STYLE MODEL ARCHITECTURE (must match train_guitar_runpod.py exactly)
 # ============================================================================
 
-class PianoTranscriptionModel(nn.Module):
-    """Exact copy of piano CNN architecture for checkpoint loading."""
+def _init_layer(layer):
+    nn.init.xavier_uniform_(layer.weight)
+    if hasattr(layer, 'bias') and layer.bias is not None:
+        layer.bias.data.fill_(0.)
 
-    def __init__(self, n_mels=229, num_keys=88,
-                 hidden_size=256, num_layers=2, dropout=0.25):
+
+def _init_bn(bn):
+    bn.bias.data.fill_(0.)
+    bn.weight.data.fill_(1.)
+
+
+def _init_gru(rnn):
+    for name, param in rnn.named_parameters():
+        if 'weight_ih' in name:
+            nn.init.xavier_uniform_(param.data)
+        elif 'weight_hh' in name:
+            nn.init.orthogonal_(param.data)
+        elif 'bias' in name:
+            param.data.fill_(0.)
+
+
+class ConvBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.num_keys = num_keys
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        _init_bn(self.bn1)
+        _init_bn(self.bn2)
+        _init_layer(self.conv1)
+        _init_layer(self.conv2)
 
-        self.cnn = nn.Sequential(
-            nn.Conv2d(1, 48, kernel_size=3, padding=1),
-            nn.BatchNorm2d(48),
-            nn.ReLU(),
-            nn.Conv2d(48, 48, kernel_size=3, padding=1),
-            nn.BatchNorm2d(48),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),
-            nn.Dropout2d(dropout),
-
-            nn.Conv2d(48, 64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),
-            nn.Dropout2d(dropout),
-
-            nn.Conv2d(64, 96, kernel_size=3, padding=1),
-            nn.BatchNorm2d(96),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),
-            nn.Dropout2d(dropout),
-
-            nn.Conv2d(96, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),
-            nn.Dropout2d(dropout),
-        )
-
-        cnn_output_dim = 128 * 14
-        self.onset_lstm = nn.LSTM(
-            input_size=cnn_output_dim, hidden_size=hidden_size,
-            num_layers=num_layers, batch_first=True, bidirectional=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
-        self.frame_lstm = nn.LSTM(
-            input_size=cnn_output_dim + num_keys, hidden_size=hidden_size,
-            num_layers=num_layers, batch_first=True, bidirectional=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
-        lstm_output_dim = hidden_size * 2
-        self.onset_head = nn.Linear(lstm_output_dim, num_keys)
-        self.frame_head = nn.Linear(lstm_output_dim, num_keys)
-        self.velocity_head = nn.Sequential(
-            nn.Linear(lstm_output_dim, num_keys), nn.Sigmoid(),
-        )
-
-    def forward(self, x):
-        batch, n_mels, time = x.shape
-        cnn_out = self.cnn(x.unsqueeze(1))
-        cnn_features = cnn_out.permute(0, 3, 1, 2).reshape(batch, time, -1)
-        onset_out, _ = self.onset_lstm(cnn_features)
-        onset_logits = self.onset_head(onset_out)
-        onset_pred = torch.sigmoid(onset_logits)
-        frame_input = torch.cat([cnn_features, onset_pred.detach()], dim=-1)
-        frame_out, _ = self.frame_lstm(frame_input)
-        frame_logits = self.frame_head(frame_out)
-        frame_pred = torch.sigmoid(frame_logits)
-        velocity_pred = self.velocity_head(onset_out)
-        return (
-            onset_pred.permute(0, 2, 1),
-            frame_pred.permute(0, 2, 1),
-            velocity_pred.permute(0, 2, 1),
-        )
+    def forward(self, x, pool_size=(2, 2), pool_type='avg'):
+        x = F.relu_(self.bn1(self.conv1(x)))
+        x = F.relu_(self.bn2(self.conv2(x)))
+        if pool_type == 'avg':
+            x = F.avg_pool2d(x, kernel_size=pool_size)
+        elif pool_type == 'max':
+            x = F.max_pool2d(x, kernel_size=pool_size)
+        return x
 
 
-# ============================================================================
-# V3 GUITAR MODEL (must match train_guitar_v3.py exactly)
-# ============================================================================
-
-class GuitarTranscriptionModel_v3(nn.Module):
-    """
-    Transfer-learned guitar transcriber.
-
-    Piano CNN (frozen) -> Adapter -> Self-Attention -> Guitar LSTM -> Pitch heads (49 keys)
-
-    Input:  Mel spectrogram (B, 229, T)
-    Output: onset_logits    (B, 49, T)
-            frame_logits    (B, 49, T)
-            velocity_pred   (B, 49, T)
-    """
-
-    def __init__(self, num_keys=49, hidden_size=192, num_layers=2, dropout=0.3):
+class AcousticModelCRnn8Dropout(nn.Module):
+    """Kong's CRNN acoustic model: 4 ConvBlocks -> FC -> BiGRU -> Linear"""
+    def __init__(self, classes_num, midfeat, momentum):
         super().__init__()
-        self.num_keys = num_keys
+        self.conv_block1 = ConvBlock(1, 48)
+        self.conv_block2 = ConvBlock(48, 64)
+        self.conv_block3 = ConvBlock(64, 96)
+        self.conv_block4 = ConvBlock(96, 128)
 
-        # Frozen piano CNN (set externally)
-        self.cnn = None
+        self.fc5 = nn.Linear(midfeat, 768, bias=False)
+        self.bn5 = nn.BatchNorm1d(768, momentum=momentum)
+        _init_layer(self.fc5)
+        _init_bn(self.bn5)
 
-        # Domain adapter with residual
-        self.adapter = nn.Sequential(
-            nn.Linear(1792, 1024),
-            nn.LayerNorm(1024),
-            nn.GELU(),
-            nn.Dropout(dropout),
-            nn.Linear(1024, 1024),
-            nn.LayerNorm(1024),
-            nn.GELU(),
-            nn.Dropout(dropout),
-        )
-        self.adapter_residual = nn.Linear(1792, 1024)
+        self.gru = nn.GRU(input_size=768, hidden_size=256, num_layers=2,
+                          bias=True, batch_first=True, dropout=0.0, bidirectional=True)
+        _init_gru(self.gru)
 
-        # Multi-head self-attention
-        self.attention = nn.MultiheadAttention(
-            embed_dim=1024, num_heads=8, dropout=dropout, batch_first=True
-        )
-        self.attn_norm = nn.LayerNorm(1024)
+        self.fc = nn.Linear(512, classes_num, bias=True)
+        _init_layer(self.fc)
 
-        # Onset and Frame LSTMs
-        self.onset_lstm = nn.LSTM(
-            input_size=1024, hidden_size=hidden_size,
-            num_layers=num_layers, batch_first=True,
-            bidirectional=True, dropout=dropout,
-        )
-        self.frame_lstm = nn.LSTM(
-            input_size=1024 + num_keys, hidden_size=hidden_size,
-            num_layers=num_layers, batch_first=True,
-            bidirectional=True, dropout=dropout,
-        )
+    def forward(self, input):
+        # input: (batch, 1, time, mel_bins)
+        x = self.conv_block1(input, pool_size=(1, 2), pool_type='avg')
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = self.conv_block2(x, pool_size=(1, 2), pool_type='avg')
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = self.conv_block3(x, pool_size=(1, 2), pool_type='avg')
+        x = F.dropout(x, p=0.2, training=self.training)
+        x = self.conv_block4(x, pool_size=(1, 2), pool_type='avg')
+        x = F.dropout(x, p=0.2, training=self.training)
 
-        lstm_dim = hidden_size * 2  # 384
+        # (batch, 128, time, mel_bins // 16)
+        x = x.transpose(1, 2).flatten(2)  # (batch, time, 128 * mel_bins // 16)
+        x = F.relu(self.bn5(self.fc5(x).transpose(1, 2)).transpose(1, 2))
+        x = F.dropout(x, p=0.5, training=self.training)
 
-        # Output heads
-        self.onset_head = nn.Linear(lstm_dim, num_keys)
-        self.frame_head = nn.Linear(lstm_dim, num_keys)
-        self.velocity_head = nn.Sequential(
-            nn.Linear(lstm_dim, num_keys),
-            nn.Sigmoid(),
-        )
+        x, _ = self.gru(x)
+        x = self.fc(x)
+        return x
 
-        nn.init.constant_(self.onset_head.bias, -3.0)
-        nn.init.constant_(self.frame_head.bias, -2.0)
+
+class GuitarTranscriptionModel(nn.Module):
+    """
+    Kong-style guitar transcription model with 4 parallel acoustic models
+    and onset/frame conditioning. 48 pitches (E2-Eb6).
+
+    Input:  (batch, time, n_mels) -- power_to_db mel spectrogram
+    Output: onset_logits    (batch, time, 48)
+            frame_logits    (batch, time, 48)
+            velocity_pred   (batch, time, 48) -- sigmoid, [0, 1]
+    """
+    def __init__(self, n_pitches=48):
+        super().__init__()
+        self.n_pitches = n_pitches
+
+        # midfeat = 128 * (229 // 16) = 128 * 14 = 1792
+        midfeat = 128 * (N_MELS // 16)
+
+        # Four parallel acoustic models (matching Kong architecture)
+        self.frame_model = AcousticModelCRnn8Dropout(n_pitches, midfeat, momentum=0.01)
+        self.onset_model = AcousticModelCRnn8Dropout(n_pitches, midfeat, momentum=0.01)
+        self.offset_model = AcousticModelCRnn8Dropout(n_pitches, midfeat, momentum=0.01)
+        self.velocity_model = AcousticModelCRnn8Dropout(n_pitches, midfeat, momentum=0.01)
+
+        # Conditioning GRUs (matching Kong)
+        self.onset_gru = nn.GRU(input_size=n_pitches * 2, hidden_size=n_pitches,
+                                num_layers=1, bias=True, batch_first=True, bidirectional=True)
+        _init_gru(self.onset_gru)
+        self.onset_fc = nn.Linear(n_pitches * 2, n_pitches, bias=True)
+        _init_layer(self.onset_fc)
+
+        self.frame_gru = nn.GRU(input_size=n_pitches * 3, hidden_size=n_pitches,
+                                num_layers=1, bias=True, batch_first=True, bidirectional=True)
+        _init_gru(self.frame_gru)
+        self.frame_fc = nn.Linear(n_pitches * 2, n_pitches, bias=True)
+        _init_layer(self.frame_fc)
 
     def forward(self, mel):
-        batch, n_mels, time = mel.shape
+        """
+        Args:
+            mel: (batch, time, n_mels) log-mel spectrogram
 
-        # Frozen CNN features
-        with torch.no_grad():
-            cnn_out = self.cnn(mel.unsqueeze(1))  # (B, 128, 14, T)
+        Returns:
+            onset_output:    (batch, time, n_pitches) -- onset logits
+            frame_output:    (batch, time, n_pitches) -- frame logits
+            velocity_output: (batch, time, n_pitches) -- velocity [0, 1]
+        """
+        # Reshape for CNN: (batch, 1, time, n_mels)
+        x = mel.unsqueeze(1)
 
-        cnn_features = cnn_out.permute(0, 3, 1, 2).reshape(batch, time, -1)  # (B, T, 1792)
+        # Run parallel acoustic models
+        frame_out = self.frame_model(x)
+        onset_out = self.onset_model(x)
+        offset_out = self.offset_model(x)
+        velocity_out = self.velocity_model(x)
 
-        # Domain adapter with residual
-        adapted = self.adapter(cnn_features) + self.adapter_residual(cnn_features)
+        # Condition onset on velocity (Kong's recipe)
+        velocity_sigmoid = torch.sigmoid(velocity_out)
+        onset_concat = torch.cat([onset_out, onset_out * velocity_sigmoid], dim=2)
+        onset_gru_out, _ = self.onset_gru(onset_concat)
+        onset_output = self.onset_fc(onset_gru_out)
 
-        # Self-attention
-        attn_out, _ = self.attention(adapted, adapted, adapted)
-        adapted = self.attn_norm(adapted + attn_out)
+        # Condition frame on onset + offset (Kong's recipe)
+        onset_sigmoid = torch.sigmoid(onset_output)
+        offset_sigmoid = torch.sigmoid(offset_out)
+        frame_concat = torch.cat([frame_out, onset_sigmoid, offset_sigmoid], dim=2)
+        frame_gru_out, _ = self.frame_gru(frame_concat)
+        frame_output = self.frame_fc(frame_gru_out)
 
-        # Onset prediction
-        onset_out, _ = self.onset_lstm(adapted)
-        onset_logits = self.onset_head(onset_out)
-        onset_pred = torch.sigmoid(onset_logits)
+        # Velocity uses sigmoid for [0, 1] output
+        velocity_output = velocity_sigmoid
 
-        # Frame prediction (onset-conditioned)
-        frame_input = torch.cat([adapted, onset_pred.detach()], dim=-1)
-        frame_out, _ = self.frame_lstm(frame_input)
-        frame_logits = self.frame_head(frame_out)
-
-        # Velocity
-        velocity_pred = self.velocity_head(onset_out)
-
-        return (
-            onset_logits.permute(0, 2, 1),   # (B, 49, T) -- raw logits
-            frame_logits.permute(0, 2, 1),   # (B, 49, T) -- raw logits
-            velocity_pred.permute(0, 2, 1),  # (B, 49, T) -- [0, 1]
-        )
+        return onset_output, frame_output, velocity_output
 
 
 # ============================================================================
@@ -259,8 +237,8 @@ class GuitarTranscriptionResult:
 
 class GuitarNNTranscriber:
     """
-    Guitar transcriber using the v3 transfer-learning CRNN model.
-    Lazy-loads model on first use. Falls back to Basic Pitch when no model exists.
+    Guitar transcriber using the Kong-style CRNN model fine-tuned on GuitarSet.
+    Lazy-loads model on first use. Falls back to Basic Pitch when no checkpoint exists.
     """
 
     def __init__(self):
@@ -273,8 +251,7 @@ class GuitarNNTranscriber:
 
         if not MODEL_AVAILABLE:
             raise RuntimeError(
-                f"Guitar v3 model not found at {CHECKPOINT_PATH} "
-                f"or piano model not found at {PIANO_CHECKPOINT_PATH}"
+                f"Guitar NN model not found at {CHECKPOINT_PATH}"
             )
 
         self._device = torch.device(
@@ -282,32 +259,18 @@ class GuitarNNTranscriber:
             'mps' if torch.backends.mps.is_available() else 'cpu'
         )
 
-        # Load piano CNN from piano checkpoint
-        piano_checkpoint = torch.load(
-            PIANO_CHECKPOINT_PATH, map_location=self._device, weights_only=False
-        )
-        piano_model = PianoTranscriptionModel()
-        piano_model.load_state_dict(piano_checkpoint['model_state_dict'])
-        piano_cnn = piano_model.cnn
-        for param in piano_cnn.parameters():
-            param.requires_grad = False
-        piano_cnn.eval()
-
-        # Load guitar v3 model
-        guitar_checkpoint = torch.load(
+        checkpoint = torch.load(
             CHECKPOINT_PATH, map_location=self._device, weights_only=False
         )
 
-        self._model = GuitarTranscriptionModel_v3(num_keys=NUM_KEYS)
-        self._model.cnn = piano_cnn
-
-        self._model.load_state_dict(guitar_checkpoint['model_state_dict'])
+        self._model = GuitarTranscriptionModel(n_pitches=NUM_KEYS)
+        self._model.load_state_dict(checkpoint['model_state_dict'])
         self._model.to(self._device)
         self._model.eval()
 
-        epoch = guitar_checkpoint.get('epoch', '?')
-        val_f1 = guitar_checkpoint.get('val_f1', '?')
-        logger.info(f"Guitar v3 model loaded on {self._device} "
+        epoch = checkpoint.get('epoch', '?')
+        val_f1 = checkpoint.get('val_f1', '?')
+        logger.info(f"Guitar NN model loaded on {self._device} "
                     f"(epoch={epoch}, val_f1={val_f1})")
 
     def transcribe(self, audio_path: str, output_dir: str,
@@ -332,24 +295,25 @@ class GuitarNNTranscriber:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Transcribing guitar (v3 NN): {audio_path.name}")
+        logger.info(f"Transcribing guitar (NN): {audio_path.name}")
 
         # Load audio
         audio, sr = librosa.load(str(audio_path), sr=SAMPLE_RATE, mono=True)
         duration = len(audio) / sr
 
-        # Compute mel spectrogram (MUST match training)
+        # Compute mel spectrogram (MUST match training exactly)
         mel = librosa.feature.melspectrogram(
             y=audio, sr=SAMPLE_RATE,
             n_fft=N_FFT, hop_length=HOP_LENGTH,
-            n_mels=N_MELS, fmin=FMIN, fmax=FMAX,
+            n_mels=N_MELS,
         )
-        mel = np.log(mel + 1e-8)
+        mel_db = librosa.power_to_db(mel, ref=np.max)  # (n_mels, T)
+        mel_db = mel_db.T  # (T, n_mels) -- model expects time-first
 
-        total_frames = mel.shape[1]
+        total_frames = mel_db.shape[0]
 
-        # Overlap-add inference
-        onset_logits, frame_logits, velocity_pred = self._infer_overlap(mel, total_frames)
+        # Run inference with overlap-add for long audio
+        onset_logits, frame_logits, velocity_pred = self._infer_overlap(mel_db, total_frames)
 
         # Apply sigmoid to logits for note extraction
         onset_pred = 1.0 / (1.0 + np.exp(-onset_logits))
@@ -362,7 +326,7 @@ class GuitarNNTranscriber:
         if not notes:
             return GuitarTranscriptionResult(
                 midi_path=None, num_notes=0, quality_score=0.0,
-                method='guitar_v3_nn', pitch_range=(0, 0), polyphony_avg=0.0,
+                method='guitar_nn', pitch_range=(0, 0), polyphony_avg=0.0,
             )
 
         # Tempo
@@ -430,46 +394,57 @@ class GuitarNNTranscriber:
             midi_path=str(midi_path),
             num_notes=len(notes),
             quality_score=quality,
-            method='guitar_v3_nn',
+            method='guitar_nn',
             pitch_range=pitch_range,
             polyphony_avg=polyphony,
         )
 
-    def _infer_overlap(self, mel, total_frames):
-        """Run model with overlap-add for long audio. Returns raw logits for onset/frame."""
-        if total_frames <= CHUNK_FRAMES:
-            mel_tensor = torch.from_numpy(mel).unsqueeze(0).float().to(self._device)
-            if mel_tensor.shape[2] < CHUNK_FRAMES:
-                pad = CHUNK_FRAMES - mel_tensor.shape[2]
-                mel_tensor = torch.nn.functional.pad(mel_tensor, (0, pad))
+    def _infer_overlap(self, mel_db, total_frames):
+        """
+        Run model with overlap-add for long audio.
 
+        Args:
+            mel_db: (T, n_mels) power_to_db mel spectrogram, time-first
+
+        Returns:
+            onset_logits:  (T, n_pitches) raw logits
+            frame_logits:  (T, n_pitches) raw logits
+            velocity_pred: (T, n_pitches) sigmoid [0, 1]
+        """
+        if total_frames <= CHUNK_FRAMES:
+            chunk = mel_db
+            if chunk.shape[0] < CHUNK_FRAMES:
+                pad = CHUNK_FRAMES - chunk.shape[0]
+                chunk = np.pad(chunk, ((0, pad), (0, 0)))
+
+            mel_tensor = torch.from_numpy(chunk).unsqueeze(0).float().to(self._device)
             with torch.no_grad():
                 onset, frame, vel = self._model(mel_tensor)
 
             return (
-                onset[0].cpu().numpy()[:, :total_frames],
-                frame[0].cpu().numpy()[:, :total_frames],
-                vel[0].cpu().numpy()[:, :total_frames],
+                onset[0, :total_frames].cpu().numpy(),
+                frame[0, :total_frames].cpu().numpy(),
+                vel[0, :total_frames].cpu().numpy(),
             )
 
-        # Overlap-add
+        # Overlap-add for long audio
         overlap = CHUNK_FRAMES // 2
         hop = CHUNK_FRAMES - overlap
         window = np.hanning(CHUNK_FRAMES)
 
-        onset_acc = np.zeros((NUM_KEYS, total_frames), dtype=np.float32)
-        frame_acc = np.zeros((NUM_KEYS, total_frames), dtype=np.float32)
-        vel_acc = np.zeros((NUM_KEYS, total_frames), dtype=np.float32)
+        onset_acc = np.zeros((total_frames, NUM_KEYS), dtype=np.float32)
+        frame_acc = np.zeros((total_frames, NUM_KEYS), dtype=np.float32)
+        vel_acc = np.zeros((total_frames, NUM_KEYS), dtype=np.float32)
         weight_acc = np.zeros(total_frames, dtype=np.float32)
 
         start = 0
         while start < total_frames:
             end = min(start + CHUNK_FRAMES, total_frames)
-            chunk = mel[:, start:end]
+            chunk = mel_db[start:end]
 
-            if chunk.shape[1] < CHUNK_FRAMES:
-                pad = CHUNK_FRAMES - chunk.shape[1]
-                chunk = np.pad(chunk, ((0, 0), (0, pad)))
+            if chunk.shape[0] < CHUNK_FRAMES:
+                pad = CHUNK_FRAMES - chunk.shape[0]
+                chunk = np.pad(chunk, ((0, pad), (0, 0)))
 
             chunk_tensor = torch.from_numpy(chunk).unsqueeze(0).float().to(self._device)
             with torch.no_grad():
@@ -478,34 +453,43 @@ class GuitarNNTranscriber:
             actual_len = min(CHUNK_FRAMES, total_frames - start)
             w = window[:actual_len]
 
-            onset_acc[:, start:start + actual_len] += o[0].cpu().numpy()[:, :actual_len] * w
-            frame_acc[:, start:start + actual_len] += f[0].cpu().numpy()[:, :actual_len] * w
-            vel_acc[:, start:start + actual_len] += v[0].cpu().numpy()[:, :actual_len] * w
+            # Model output is (batch, time, pitches)
+            onset_acc[start:start + actual_len] += o[0, :actual_len].cpu().numpy() * w[:, None]
+            frame_acc[start:start + actual_len] += f[0, :actual_len].cpu().numpy() * w[:, None]
+            vel_acc[start:start + actual_len] += v[0, :actual_len].cpu().numpy() * w[:, None]
             weight_acc[start:start + actual_len] += w
 
             start += hop
 
         weight_acc = np.maximum(weight_acc, 1e-8)
-        return onset_acc / weight_acc, frame_acc / weight_acc, vel_acc / weight_acc
+        return (
+            onset_acc / weight_acc[:, None],
+            frame_acc / weight_acc[:, None],
+            vel_acc / weight_acc[:, None],
+        )
 
     def _extract_notes(self, onset_pred, frame_pred, velocity_pred,
                        onset_threshold=0.5, frame_threshold=0.3,
                        min_frames=2):
-        """Extract notes using onset-triggered, frame-sustained logic."""
+        """
+        Extract notes using onset-triggered, frame-sustained logic.
+
+        All inputs are (T, n_pitches) -- time-first layout matching model output.
+        """
         notes = []
-        num_keys, total_frames = onset_pred.shape
+        total_frames, num_keys = onset_pred.shape
 
         for k in range(num_keys):
             midi_pitch = k + MIN_MIDI
             t = 0
             while t < total_frames:
-                if onset_pred[k, t] > onset_threshold:
+                if onset_pred[t, k] > onset_threshold:
                     onset_frame = t
-                    vel = velocity_pred[k, t]
+                    vel = velocity_pred[t, k]
                     velocity = int(40 + 87 * min(1.0, vel))
 
                     t += 1
-                    while t < total_frames and frame_pred[k, t] > frame_threshold:
+                    while t < total_frames and frame_pred[t, k] > frame_threshold:
                         t += 1
 
                     offset_frame = t
@@ -556,7 +540,7 @@ def transcribe_guitar_nn(audio_path: str, output_dir: str,
             return result.midi_path
         return None
     except Exception as e:
-        logger.error(f"Guitar v3 transcription failed: {e}")
+        logger.error(f"Guitar NN transcription failed: {e}")
         return None
 
 
