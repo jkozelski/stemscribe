@@ -1,0 +1,136 @@
+# StemScribe AI Agent Team Configuration
+# ========================================
+# This config defines all agents, their roles, and task workflows
+# for the StemScribe research + marketing operation.
+
+company:
+  name: "StemScribe"
+  tagline: "AI-Powered Stem Separation & Music Transcription"
+  url: "https://stemscribe.app"
+  product_type: "SaaS / Music Tool"
+  target_audiences:
+    - jazz_musicians
+    - worship_teams
+    - music_students
+    - producers_remixers
+    - guitar_bass_players
+    - bluegrass_country
+
+competitors:
+  - name: "Moises"
+    url: "https://moises.ai"
+    pricing: "$3.99-$18.33/mo subscription"
+    strengths: "30M+ users, mobile-first, practice tools"
+  - name: "Chordify"
+    url: "https://chordify.net"
+    pricing: "$3.49-$6.99/mo subscription"
+    strengths: "Chord recognition, YouTube integration, $11M/yr revenue"
+  - name: "LALAL.AI"
+    url: "https://lalal.ai"
+    pricing: "$18-$300 credit packs"
+    strengths: "10-stem separation, pay-per-use, API for B2B"
+  - name: "RipX"
+    url: "https://hitnmix.com"
+    pricing: "$99-$199 one-time"
+    strengths: "Desktop DAW, full remixing environment"
+  - name: "iZotope RX"
+    url: "https://izotope.com"
+    pricing: "$129-$999"
+    strengths: "Industry standard, audio repair"
+
+pricing_tiers:
+  free:
+    price: 0
+    features:
+      - "3 songs per month"
+      - "Basic 4-stem separation"
+      - "Standard quality"
+  premium:
+    price: 4.99
+    billing: "monthly"
+    features:
+      - "Unlimited songs"
+      - "6-stem separation (vocals, guitar, bass, drums, keys, other)"
+      - "Chord recognition"
+      - "MIDI export"
+      - "HQ audio output"
+  pro:
+    price: 14.99
+    billing: "monthly"
+    features:
+      - "Everything in Premium"
+      - "Transposition (all 12 keys)"
+      - "Multi-genre chord models (Jazz, Bluegrass, Rock, Country)"
+      - "Stereo splitting (dual guitar/drum bands)"
+      - "Guitar Pro tab export"
+      - "Notation/sheet music export"
+      - "Priority processing"
+
+content_pillars:
+  - "stem_separation_tutorials"     # How to isolate instruments
+  - "music_learning_tips"           # Practice with stems
+  - "chord_recognition_demos"       # AI chord detection showcases
+  - "genre_spotlights"              # Jazz, bluegrass, rock, country
+  - "musician_stories"              # How musicians use StemScribe
+  - "product_updates"               # New features, improvements
+
+social_channels:
+  youtube:
+    priority: "high"
+    content_types: ["demo_videos", "tutorials", "comparisons"]
+  tiktok:
+    priority: "high"
+    content_types: ["short_demos", "before_after", "viral_clips"]
+  reddit:
+    priority: "high"
+    subreddits:
+      - "r/musictheory"
+      - "r/WeAreTheMusicMakers"
+      - "r/jazz"
+      - "r/Guitar"
+      - "r/Bass"
+      - "r/bluegrass"
+      - "r/drums"
+      - "r/gratefulDead"
+      - "r/musicproduction"
+  instagram:
+    priority: "medium"
+    content_types: ["reels", "carousels", "stories"]
+  twitter:
+    priority: "medium"
+    content_types: ["threads", "announcements", "engagement"]
+
+email_sequences:
+  welcome:
+    - day: 0
+      subject: "Welcome to StemScribe"
+      content_type: "onboarding"
+    - day: 2
+      subject: "Try separating your first song"
+      content_type: "tutorial"
+    - day: 5
+      subject: "Did you know? Chord recognition works for jazz standards"
+      content_type: "feature_highlight"
+    - day: 10
+      subject: "Unlock unlimited stems with Premium"
+      content_type: "upsell"
+
+seo_keywords:
+  primary:
+    - "stem separation"
+    - "AI music transcription"
+    - "chord recognition app"
+    - "isolate vocals from song"
+    - "separate instruments from song"
+  secondary:
+    - "learn jazz standards"
+    - "grateful dead tabs"
+    - "worship chord charts"
+    - "music practice tool"
+    - "MIDI transcription"
+  long_tail:
+    - "how to separate bass from a song"
+    - "AI chord recognition for jazz"
+    - "free stem separation tool 2026"
+    - "isolate guitar from recording"
+    - "transcribe music to sheet music AI"

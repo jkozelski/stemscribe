@@ -77,20 +77,23 @@ class DemucsRunner:
         re.compile(r'killed', re.IGNORECASE),
     ]
     
-    def __init__(self, 
+    def __init__(self,
                  model: str = 'htdemucs_6s',
                  device: str = 'auto',
+                 extra_args: Optional[list] = None,
                  progress_callback: Optional[Callable[[DemucsProgress], None]] = None):
         """
         Initialize Demucs runner.
-        
+
         Args:
             model: Demucs model name (htdemucs, htdemucs_ft, htdemucs_6s)
             device: Device to use (auto, cuda, mps, cpu)
+            extra_args: Additional CLI args for demucs (e.g., ['--two-stems', 'vocals', '--shifts', '2'])
             progress_callback: Optional callback for progress updates
         """
         self.model = model
         self.device = device
+        self.extra_args = extra_args or []
         self.progress_callback = progress_callback
         self._process: Optional[subprocess.Popen] = None
         self._cancelled = False
@@ -197,11 +200,15 @@ class DemucsRunner:
             '--out', str(output_dir),
             '-n', self.model,
         ]
-        
+
         # Add device flag if specified
         if self.device and self.device != 'auto':
             cmd.extend(['-d', self.device])
-        
+
+        # Add any extra arguments (e.g., --two-stems, --shifts)
+        if self.extra_args:
+            cmd.extend(self.extra_args)
+
         cmd.append(str(audio_path))
         
         logger.info(f"Starting Demucs: {' '.join(cmd)}")

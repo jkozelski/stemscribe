@@ -1,0 +1,40 @@
+# StemScribe AI Marketing & Research Team
+# CrewAI Agent Framework
+crewai[tools]>=0.80.0
+crewai-tools>=0.14.0
+
+# LLM Providers
+anthropic>=0.40.0
+openai>=1.50.0
+
+# Web Research
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+feedparser>=6.0.0
+
+# Social Media APIs
+tweepy>=4.14.0          # Twitter/X
+praw>=7.7.0             # Reddit
+
+# Email Marketing
+brevo-python>=1.0.0     # Brevo (formerly Sendinblue) - free tier
+
+# SEO
+google-api-python-client>=2.100.0
+
+# Content Generation
+markdown>=3.5.0
+jinja2>=3.1.0
+
+# Scheduling
+schedule>=1.2.0
+python-crontab>=3.0.0
+
+# Data & Analytics
+pandas>=2.1.0
+matplotlib>=3.8.0
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+rich>=13.7.0            # Pretty terminal output

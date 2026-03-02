@@ -125,7 +125,7 @@ class EnhancedSeparator:
         self._separator = None
         self._current_model = None
 
-    def _get_separator(self, model_key: str = 'vocals_best') -> Separator:
+    def _get_separator(self, model_key: str = 'vocals_best') -> 'Separator':
         """Get or create separator with specified model."""
         model_config = MODELS.get(model_key)
         if not model_config:

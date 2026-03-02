@@ -64,3 +64,41 @@ PyMuPDF                     # PDF parsing (fitz)
 # HTTP & API
 # =============================================================================
 requests                    # MusicBrainz, Wikipedia API calls
+
+# =============================================================================
+# Authentication & Security
+# =============================================================================
+flask-jwt-extended          # JWT token management
+passlib[bcrypt]             # Password hashing (bcrypt)
+email-validator             # Email format validation
+flask-limiter               # Request rate limiting by IP/tier
+
+# =============================================================================
+# Database (Supabase/Postgres)
+# =============================================================================
+psycopg2-binary             # Postgres driver
+
+# =============================================================================
+# Billing (Stripe) — needed for Phase B
+# =============================================================================
+stripe                      # Stripe API client
+
+# =============================================================================
+# File Storage (Cloudflare R2) — needed for Phase C
+# =============================================================================
+boto3                       # S3-compatible R2 client
+
+# =============================================================================
+# GPU Processing — needed for Phase D
+# =============================================================================
+replicate                   # Replicate API (Demucs on GPU)
+
+# =============================================================================
+# Email (password resets, notifications)
+# =============================================================================
+resend                      # Resend email API
+
+# =============================================================================
+# Production Server
+# =============================================================================
+gunicorn                    # WSGI server for Railway deployment

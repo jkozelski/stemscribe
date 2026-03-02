@@ -1,188 +1,96 @@
 """
 Guitar Tab Transcriber for StemScribe
 =====================================
-Uses a trained CRNN (CQT -> Conv2d -> BiLSTM -> onset/frame heads) to
-predict per-(string, fret) activations for guitar audio, then converts
-the predictions to standard MIDI for downstream Guitar Pro conversion.
+Uses Basic Pitch (Google/Spotify) for polyphonic pitch detection, then applies
+guitar-specific post-processing to produce high-quality guitar tablature MIDI.
 
-Architecture: GuitarTabModel (CRNN, 84-bin CQT input, 6x20 output)
-Checkpoint: backend/models/pretrained/best_tab_model.pt
-Training: 100 epochs on GuitarSet, best val_loss 0.0498 at epoch 48
+Post-processing pipeline:
+  1. Basic Pitch raw transcription (polyphonic AMT)
+  2. Key detection for spurious note filtering
+  3. Guitar range filtering (E2=40 to E6=88)
+  4. Polyphony limiting (max 6 simultaneous notes)
+  5. Note grouping — simultaneous notes assigned as chords
+  6. String/fret assignment using chord-shape-aware FretMapper with hand position model
+  7. Very short note cleanup (< 30ms glitches)
+  8. Velocity dynamics from Basic Pitch confidence
 
-The model outputs onset and frame probabilities for each of the 120
-(6 strings x 20 frets) positions at each time frame. Notes are extracted
-using onset-triggered, frame-sustained logic, then written to standard
-MIDI which flows through the existing midi_to_gp.py Guitar Pro pipeline.
+The output MIDI uses guitar MIDI note numbers (TUNING[string] + fret)
+which flow directly into the existing midi_to_gp.py Guitar Pro pipeline.
 """
 
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict, Set
 from dataclasses import dataclass
-
-import torch
-import torch.nn as nn
+from collections import Counter
 
 logger = logging.getLogger(__name__)
 
 
 # ============================================================================
-# PATHS & AVAILABILITY
+# CHECK BASIC PITCH AVAILABILITY
 # ============================================================================
 
-CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_tab_model.pt'
-MODEL_AVAILABLE = CHECKPOINT_PATH.exists()
+try:
+    from basic_pitch.inference import predict
+    from basic_pitch import ICASSP_2022_MODEL_PATH
+    BASIC_PITCH_AVAILABLE = True
+except ImportError:
+    BASIC_PITCH_AVAILABLE = False
+    logger.warning("basic_pitch not available — guitar tab transcriber disabled")
+
+try:
+    import pretty_midi
+    PRETTY_MIDI_AVAILABLE = True
+except ImportError:
+    PRETTY_MIDI_AVAILABLE = False
+
+MODEL_AVAILABLE = BASIC_PITCH_AVAILABLE and PRETTY_MIDI_AVAILABLE
 
 if MODEL_AVAILABLE:
-    logger.info(f"Guitar tab model available "
-                f"(checkpoint: {CHECKPOINT_PATH.stat().st_size / 1e6:.1f}MB)")
-else:
-    logger.warning(f"Guitar tab model: checkpoint not found at {CHECKPOINT_PATH}")
+    logger.info("Guitar tab transcriber ready (Basic Pitch + post-processing)")
 
 
 # ============================================================================
-# CONSTANTS (must match training exactly)
+# CONSTANTS
 # ============================================================================
 
 SAMPLE_RATE = 22050
-HOP_LENGTH = 256
-N_BINS = 84                     # 7 octaves x 12 semitones
-BINS_PER_OCTAVE = 12
 NUM_STRINGS = 6
-NUM_FRETS = 20                  # Frets 0-19
-
-CHUNK_DURATION = 3.0            # Training chunk size in seconds
-CHUNK_SAMPLES = int(CHUNK_DURATION * SAMPLE_RATE)   # 66150
-CHUNK_FRAMES = CHUNK_SAMPLES // HOP_LENGTH           # ~258
+NUM_FRETS = 20
 
 # Standard guitar tuning: E2 A2 D3 G3 B3 E4 (MIDI note numbers)
 # Matches midi_to_gp.py TUNINGS['guitar'] exactly
 TUNING = [40, 45, 50, 55, 59, 64]
 
+# Guitar range limits
+GUITAR_MIN_MIDI = 40   # E2 (low E open)
+GUITAR_MAX_MIDI = 88   # E6 (fret 24 on high E, generous upper bound)
+MAX_POLYPHONY = 6       # Can't play more than 6 notes at once
 
-# ============================================================================
-# MODEL ARCHITECTURE (must match training notebook cell-8 exactly)
-# ============================================================================
+# Chord grouping: notes starting within this window are treated as simultaneous
+CHORD_ONSET_TOLERANCE = 0.03  # 30ms — typical strum spread
 
-class GuitarTabModel(nn.Module):
-    """CRNN model for guitar tablature transcription.
+# Key detection: pitch class profiles for major and minor keys (Krumhansl-Kessler)
+# Index 0 = C, 1 = C#, ..., 11 = B
+MAJOR_PROFILE = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]
+MINOR_PROFILE = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17]
+NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-    Input:  CQT spectrogram (batch, 84, time)
-    Output: onset_pred, frame_pred — each (batch, 6, 20, time)
-            6 strings x 20 frets, sigmoid activations [0, 1]
-    """
-
-    def __init__(self, n_bins=84, num_strings=6, num_frets=20):
-        super().__init__()
-
-        self.num_strings = num_strings
-        self.num_frets = num_frets
-
-        # CNN encoder — pools frequency only, preserves time dimension
-        self.conv_stack = nn.Sequential(
-            # Block 1: n_bins -> n_bins/2
-            nn.Conv2d(1, 32, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.Conv2d(32, 32, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),       # 84 -> 42 freq, time unchanged
-            nn.Dropout(0.25),
-
-            # Block 2: n_bins/2 -> n_bins/4
-            nn.Conv2d(32, 64, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),       # 42 -> 21 freq, time unchanged
-            nn.Dropout(0.25),
-
-            # Block 3: n_bins/4 -> n_bins/8
-            nn.Conv2d(64, 128, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d((2, 1)),       # 21 -> 10 freq, time unchanged
-            nn.Dropout(0.25),
-        )
-
-        # After conv: (batch, 128, n_bins//8, time) = (batch, 128, 10, time)
-        self.flat_size = 128 * (n_bins // 8)    # 1280
-
-        # Bidirectional LSTM for temporal context
-        self.lstm = nn.LSTM(
-            self.flat_size, 256, num_layers=2,
-            batch_first=True, bidirectional=True, dropout=0.3
-        )
-        # Output: (batch, time, 512) [256 x 2 directions]
-
-        # Output heads — predict per-string-fret activation
-        self.onset_head = nn.Linear(512, num_strings * num_frets)   # 120
-        self.frame_head = nn.Linear(512, num_strings * num_frets)   # 120
-
-    def forward(self, x):
-        # x: (batch, n_bins=84, time)
-        x = x.unsqueeze(1)                 # (batch, 1, 84, time)
-
-        # CNN
-        x = self.conv_stack(x)             # (batch, 128, 10, time)
-
-        # Reshape for LSTM: (batch, time, features)
-        batch, channels, freq, time = x.shape
-        x = x.permute(0, 3, 1, 2).reshape(batch, time, -1)    # (batch, time, 1280)
-
-        # LSTM
-        x, _ = self.lstm(x)               # (batch, time, 512)
-
-        # Predictions with sigmoid
-        onset_pred = torch.sigmoid(self.onset_head(x))
-        frame_pred = torch.sigmoid(self.frame_head(x))
-
-        # Reshape to (batch, strings, frets, time)
-        onset_pred = onset_pred.view(batch, time, self.num_strings, self.num_frets)
-        onset_pred = onset_pred.permute(0, 2, 3, 1)
-
-        frame_pred = frame_pred.view(batch, time, self.num_strings, self.num_frets)
-        frame_pred = frame_pred.permute(0, 2, 3, 1)
-
-        return onset_pred, frame_pred
-
-
-# ============================================================================
-# MODEL LOADING
-# ============================================================================
-
-def _load_model(device: torch.device = None) -> GuitarTabModel:
-    """Load the Guitar Tab model from checkpoint."""
-    if device is None:
-        device = torch.device(
-            'cuda' if torch.cuda.is_available() else
-            'mps' if torch.backends.mps.is_available() else 'cpu'
-        )
-
-    model = GuitarTabModel(n_bins=N_BINS, num_strings=NUM_STRINGS, num_frets=NUM_FRETS)
-
-    logger.info(f"Loading guitar tab model from {CHECKPOINT_PATH}")
-    checkpoint = torch.load(CHECKPOINT_PATH, map_location=device, weights_only=False)
-
-    # Handle different checkpoint formats
-    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-        state_dict = checkpoint['model_state_dict']
-        epoch = checkpoint.get('epoch', '?')
-        val_loss = checkpoint.get('val_loss', '?')
-        logger.info(f"Checkpoint: epoch={epoch}, val_loss={val_loss}")
-    elif isinstance(checkpoint, dict) and 'state_dict' in checkpoint:
-        state_dict = checkpoint['state_dict']
-    else:
-        state_dict = checkpoint
-
-    model.load_state_dict(state_dict)
-    model.to(device)
-    model.eval()
-
-    param_count = sum(p.numel() for p in model.parameters())
-    logger.info(f"Guitar tab model loaded on {device} ({param_count / 1e6:.1f}M params)")
-    return model
+# Common open chord shapes — (fret_min, fret_max, frozenset of intervals from root)
+# Used to bias fret assignment toward recognizable chord voicings
+COMMON_CHORD_INTERVALS = {
+    'major':     frozenset([0, 4, 7]),
+    'minor':     frozenset([0, 3, 7]),
+    'dom7':      frozenset([0, 4, 7, 10]),
+    'min7':      frozenset([0, 3, 7, 10]),
+    'maj7':      frozenset([0, 4, 7, 11]),
+    'sus2':      frozenset([0, 2, 7]),
+    'sus4':      frozenset([0, 5, 7]),
+    'power':     frozenset([0, 7]),
+    'add9':      frozenset([0, 2, 4, 7]),
+}
 
 
 # ============================================================================
@@ -195,9 +103,469 @@ class TabTranscriptionResult:
     midi_path: Optional[str]
     num_notes: int
     quality_score: float            # 0.0 - 1.0
-    method: str                     # 'guitar_tab_model'
+    method: str                     # 'basic_pitch_guitar'
     num_strings_used: int           # How many strings had notes (0-6)
     fret_range: Tuple[int, int]     # (min_fret, max_fret)
+
+
+# ============================================================================
+# KEY DETECTION
+# ============================================================================
+
+def _detect_key(notes: List) -> Optional[Tuple[str, str]]:
+    """
+    Detect the musical key from a list of MIDI notes using Krumhansl-Kessler
+    pitch-class profile correlation.
+
+    Returns:
+        (root_name, mode) e.g. ('G', 'major') or ('E', 'minor'), or None
+    """
+    if not notes or len(notes) < 8:
+        return None
+
+    # Build weighted pitch-class histogram (weight by duration * velocity)
+    pc_histogram = np.zeros(12)
+    for n in notes:
+        pc = n.pitch % 12
+        duration = max(0.01, n.end - n.start)
+        weight = duration * (n.velocity / 127.0)
+        pc_histogram[pc] += weight
+
+    if pc_histogram.sum() == 0:
+        return None
+
+    # Normalize
+    pc_histogram = pc_histogram / pc_histogram.sum()
+
+    best_key = None
+    best_corr = -2.0
+
+    major = np.array(MAJOR_PROFILE)
+    minor = np.array(MINOR_PROFILE)
+
+    for root in range(12):
+        # Rotate histogram so root aligns with index 0
+        rotated = np.roll(pc_histogram, -root)
+
+        # Correlate with major profile
+        corr_maj = np.corrcoef(rotated, major)[0, 1]
+        if corr_maj > best_corr:
+            best_corr = corr_maj
+            best_key = (NOTE_NAMES[root], 'major')
+
+        # Correlate with minor profile
+        corr_min = np.corrcoef(rotated, minor)[0, 1]
+        if corr_min > best_corr:
+            best_corr = corr_min
+            best_key = (NOTE_NAMES[root], 'minor')
+
+    if best_corr < 0.3:
+        return None  # Low confidence — don't trust it
+
+    return best_key
+
+
+def _get_scale_pitches(key: Tuple[str, str]) -> Set[int]:
+    """
+    Get the set of pitch classes (0-11) that belong to a key's scale.
+
+    Args:
+        key: (root_name, mode) from _detect_key
+
+    Returns:
+        Set of pitch class integers (0=C, 1=C#, ...)
+    """
+    root_pc = NOTE_NAMES.index(key[0])
+
+    if key[1] == 'major':
+        intervals = [0, 2, 4, 5, 7, 9, 11]
+    else:  # minor (natural)
+        intervals = [0, 2, 3, 5, 7, 8, 10]
+
+    return {(root_pc + i) % 12 for i in intervals}
+
+
+def _filter_by_key(notes: List, key: Tuple[str, str],
+                   tolerance: float = 0.15) -> List:
+    """
+    Filter out notes that are very unlikely given the detected key.
+
+    Only removes low-confidence notes (low velocity) that are off-scale.
+    High-velocity off-scale notes are kept (accidentals, chromatic passing tones).
+
+    Args:
+        notes: List of MIDI notes
+        key: Detected key (root, mode)
+        tolerance: Fraction of notes allowed to be off-scale before disabling filter
+
+    Returns:
+        Filtered note list
+    """
+    scale_pcs = _get_scale_pitches(key)
+
+    # Count how many notes are off-scale
+    off_scale = sum(1 for n in notes if (n.pitch % 12) not in scale_pcs)
+    off_ratio = off_scale / max(len(notes), 1)
+
+    # If too many notes are off-scale, the key detection is probably wrong
+    if off_ratio > tolerance:
+        return notes
+
+    # Only remove off-scale notes that also have low velocity (likely spurious)
+    # Median velocity threshold: notes below median AND off-scale get removed
+    velocities = [n.velocity for n in notes]
+    vel_threshold = np.percentile(velocities, 30) if velocities else 50
+
+    filtered = []
+    removed = 0
+    for n in notes:
+        pc = n.pitch % 12
+        if pc not in scale_pcs and n.velocity < vel_threshold:
+            removed += 1
+            continue
+        filtered.append(n)
+
+    if removed > 0:
+        logger.info(f"Key filter ({key[0]} {key[1]}): removed {removed} low-confidence off-scale notes")
+
+    return filtered
+
+
+# ============================================================================
+# NOTE GROUPING
+# ============================================================================
+
+def _group_simultaneous_notes(notes: List, tolerance: float = CHORD_ONSET_TOLERANCE) -> List[List]:
+    """
+    Group notes that start within `tolerance` seconds of each other.
+    These are likely part of the same chord strum or arpeggio.
+
+    Returns:
+        List of note groups. Single notes are groups of length 1.
+    """
+    if not notes:
+        return []
+
+    sorted_notes = sorted(notes, key=lambda n: n.start)
+    groups = []
+    current_group = [sorted_notes[0]]
+
+    for note in sorted_notes[1:]:
+        if note.start - current_group[0].start <= tolerance:
+            current_group.append(note)
+        else:
+            groups.append(current_group)
+            current_group = [note]
+
+    groups.append(current_group)
+    return groups
+
+
+# ============================================================================
+# STRING/FRET ASSIGNMENT (CHORD-AWARE)
+# ============================================================================
+
+def _assign_string_fret(midi_note: int, prev_fret: int = None,
+                        prev_string: int = None,
+                        hand_position: float = None) -> Optional[Tuple[int, int]]:
+    """
+    Assign a MIDI note to (string, fret) on guitar using playability heuristics.
+
+    Prefers:
+      - Positions near current hand position
+      - Lower fret positions (more comfortable)
+      - Continuity with previous note (minimal hand movement)
+      - Middle strings for single notes
+      - Open strings when appropriate
+
+    Args:
+        midi_note: MIDI note number
+        prev_fret: Previous note's fret (for position continuity)
+        prev_string: Previous note's string (0-indexed)
+        hand_position: Current average hand position (fret number)
+
+    Returns:
+        (string_index, fret) -- 0-indexed string, or None if out of range
+    """
+    candidates = []
+
+    for s_idx, open_note in enumerate(TUNING):
+        fret = midi_note - open_note
+        if 0 <= fret <= NUM_FRETS:
+            score = 0.0
+
+            # Prefer lower frets
+            if fret == 0:
+                score += 2       # Open strings are easy
+            elif fret <= 4:
+                score += 0       # First position
+            elif fret <= 7:
+                score += 3
+            elif fret <= 12:
+                score += 8
+            else:
+                score += 15
+
+            # Prefer middle strings for single notes
+            mid = NUM_STRINGS // 2
+            score += abs(s_idx - mid) * 2
+
+            # Hand position proximity (weighted average of recent frets)
+            if hand_position is not None:
+                pos_distance = abs(fret - hand_position)
+                if pos_distance <= 2:
+                    score -= 4  # Within hand span
+                elif pos_distance <= 4:
+                    score += 2
+                else:
+                    score += pos_distance * 1.5
+
+            # Hand position continuity
+            if prev_fret is not None:
+                fret_jump = abs(fret - prev_fret)
+                if fret_jump == 0:
+                    score -= 3
+                elif fret_jump <= 2:
+                    score += 0
+                elif fret_jump <= 4:
+                    score += 5
+                else:
+                    score += fret_jump * 2
+
+            # String continuity
+            if prev_string is not None:
+                string_jump = abs(s_idx - prev_string)
+                if string_jump == 0:
+                    score -= 2
+                elif string_jump == 1:
+                    score += 0
+                else:
+                    score += string_jump * 3
+
+            candidates.append((s_idx, fret, score))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda x: x[2])
+    return (candidates[0][0], candidates[0][1])
+
+
+def _assign_chord_frets(chord_notes: List, prev_fret: int = None,
+                        prev_string: int = None,
+                        hand_position: float = None) -> List[dict]:
+    """
+    Assign string/fret positions for a group of simultaneous notes (chord).
+
+    Ensures:
+      - Each note on a different string
+      - Fret span <= 4 (comfortable hand stretch)
+      - Preference for known chord shapes
+      - Minimal hand movement from previous position
+
+    Args:
+        chord_notes: List of MIDI notes sounding together
+        prev_fret: Previous position's fret
+        prev_string: Previous position's string
+        hand_position: Current average hand position
+
+    Returns:
+        List of dicts with 'pitch', 'string', 'fret', 'start', 'end', 'velocity'
+    """
+    if len(chord_notes) == 1:
+        # Single note — use the standard single-note assigner
+        note = chord_notes[0]
+        result = _assign_string_fret(note.pitch, prev_fret, prev_string, hand_position)
+        if result is None:
+            return []
+        s_idx, fret = result
+        return [{
+            'pitch': note.pitch,
+            'string': s_idx,
+            'fret': fret,
+            'start': note.start,
+            'end': note.end,
+            'velocity': note.velocity,
+        }]
+
+    # Sort notes low to high for consistent string assignment
+    sorted_notes = sorted(chord_notes, key=lambda n: n.pitch)
+
+    # Find all valid (string, fret) for each note
+    all_candidates = []
+    for note in sorted_notes:
+        note_options = []
+        for s_idx, open_note in enumerate(TUNING):
+            fret = note.pitch - open_note
+            if 0 <= fret <= NUM_FRETS:
+                note_options.append((s_idx, fret))
+        all_candidates.append(note_options)
+
+    # If any note has no valid position, skip it
+    if not all(all_candidates):
+        # Fall back to individual assignment for whatever we can
+        results = []
+        for note in sorted_notes:
+            r = _assign_string_fret(note.pitch, prev_fret, prev_string, hand_position)
+            if r:
+                results.append({
+                    'pitch': note.pitch, 'string': r[0], 'fret': r[1],
+                    'start': note.start, 'end': note.end, 'velocity': note.velocity,
+                })
+        return results
+
+    # Search for best combination with unique strings and playable fret span
+    best_combo = None
+    best_score = float('inf')
+
+    def _search(note_idx, used_strings, current_combo):
+        nonlocal best_combo, best_score
+
+        if note_idx == len(sorted_notes):
+            frets = [f for _, f in current_combo]
+            non_open = [f for f in frets if f > 0]
+
+            if non_open:
+                fret_span = max(non_open) - min(non_open)
+                if fret_span > 5:
+                    return  # Hand can't stretch this far
+
+                # Score the combination
+                score = 0.0
+
+                # Prefer smaller fret span
+                score += fret_span * 3
+
+                # Prefer lower positions
+                score += min(non_open) * 0.5
+
+                # Prefer positions near current hand position
+                if hand_position is not None:
+                    avg_fret = sum(non_open) / len(non_open)
+                    score += abs(avg_fret - hand_position) * 2
+
+                # Prefer positions near previous fret
+                if prev_fret is not None:
+                    avg_fret = sum(frets) / len(frets)
+                    score += abs(avg_fret - prev_fret) * 1.5
+
+                # Check if it matches a known chord shape (bonus)
+                pitch_classes = frozenset(sorted_notes[i].pitch % 12 for i in range(len(sorted_notes)))
+                root_pc = min(pitch_classes)
+                intervals = frozenset((pc - root_pc) % 12 for pc in pitch_classes)
+                for shape_intervals in COMMON_CHORD_INTERVALS.values():
+                    if intervals == shape_intervals:
+                        score -= 5  # Reward recognized chord shapes
+                        break
+            else:
+                score = 0  # All open strings — great
+
+            if score < best_score:
+                best_score = score
+                best_combo = list(current_combo)
+            return
+
+        for s_idx, fret in all_candidates[note_idx]:
+            if s_idx not in used_strings:
+                _search(
+                    note_idx + 1,
+                    used_strings | {s_idx},
+                    current_combo + [(s_idx, fret)]
+                )
+
+    _search(0, set(), [])
+
+    if best_combo is None:
+        # No valid chord voicing found — fall back to individual assignment
+        results = []
+        for note in sorted_notes:
+            r = _assign_string_fret(note.pitch, prev_fret, prev_string, hand_position)
+            if r:
+                results.append({
+                    'pitch': note.pitch, 'string': r[0], 'fret': r[1],
+                    'start': note.start, 'end': note.end, 'velocity': note.velocity,
+                })
+        return results
+
+    results = []
+    for i, (s_idx, fret) in enumerate(best_combo):
+        note = sorted_notes[i]
+        results.append({
+            'pitch': note.pitch,
+            'string': s_idx,
+            'fret': fret,
+            'start': note.start,
+            'end': note.end,
+            'velocity': note.velocity,
+        })
+
+    return results
+
+
+# ============================================================================
+# POST-PROCESSING
+# ============================================================================
+
+def _filter_guitar_range(notes: List) -> List:
+    """Remove notes outside guitar range."""
+    return [n for n in notes if GUITAR_MIN_MIDI <= n.pitch <= GUITAR_MAX_MIDI]
+
+
+def _remove_short_notes(notes: List, min_duration: float = 0.03) -> List:
+    """Remove very short notes (likely glitches)."""
+    return [n for n in notes if (n.end - n.start) >= min_duration]
+
+
+def _limit_polyphony(notes: List, max_voices: int = MAX_POLYPHONY) -> List:
+    """
+    Limit simultaneous notes to max_voices (6 for guitar).
+
+    When more than max_voices notes overlap, keep the ones with
+    highest velocity (strongest detection confidence).
+    """
+    if not notes:
+        return notes
+
+    # Sort by start time
+    notes_sorted = sorted(notes, key=lambda n: n.start)
+
+    # Build timeline of active notes
+    kept = []
+    for note in notes_sorted:
+        # Count how many kept notes are active at this note's start
+        active = [n for n in kept if n.end > note.start + 0.005]
+        if len(active) < max_voices:
+            kept.append(note)
+        else:
+            # Replace weakest active note if this one is stronger
+            weakest = min(active, key=lambda n: n.velocity)
+            if note.velocity > weakest.velocity:
+                kept.remove(weakest)
+                kept.append(note)
+
+    return kept
+
+
+def _fix_overlapping_same_pitch(notes: List) -> List:
+    """Fix overlapping notes on the same pitch (re-strikes)."""
+    notes_by_pitch = {}
+    for n in notes:
+        notes_by_pitch.setdefault(n.pitch, []).append(n)
+
+    cleaned = []
+    for pitch, pitch_notes in notes_by_pitch.items():
+        pitch_notes.sort(key=lambda n: n.start)
+        for i, note in enumerate(pitch_notes):
+            if i + 1 < len(pitch_notes):
+                next_note = pitch_notes[i + 1]
+                if note.end > next_note.start:
+                    # Truncate to avoid overlap
+                    note.end = next_note.start - 0.005
+                    if note.end <= note.start:
+                        continue  # Skip if too short
+            cleaned.append(note)
+
+    return cleaned
 
 
 # ============================================================================
@@ -206,299 +574,25 @@ class TabTranscriptionResult:
 
 class GuitarTabTranscriber:
     """
-    Transcribes guitar audio to MIDI using the trained CRNN tab model.
-
-    The model outputs per-frame (string, fret) activations. We fuse onset
-    and frame predictions, extract notes, and write standard MIDI that flows
-    through the existing midi_to_gp.py pipeline.
+    Transcribes guitar audio to MIDI using Basic Pitch + guitar post-processing.
 
     Usage:
         transcriber = GuitarTabTranscriber()
         result = transcriber.transcribe('guitar_stem.wav', '/output/dir')
     """
 
-    def __init__(self):
-        self._model = None
-        self._device = None
-
-    def _ensure_model(self):
-        """Lazy-load model on first use."""
-        if self._model is None:
-            self._device = torch.device(
-                'cuda' if torch.cuda.is_available() else
-                'mps' if torch.backends.mps.is_available() else 'cpu'
-            )
-            self._model = _load_model(self._device)
-
-    # ----------------------------------------------------------------
-    # CQT Feature Extraction
-    # ----------------------------------------------------------------
-
-    def _compute_cqt(self, audio: np.ndarray) -> np.ndarray:
-        """
-        Compute CQT spectrogram matching training preprocessing exactly.
-
-        CRITICAL: The normalization must match training:
-            cqt = np.log(np.abs(cqt) + 1e-8)
-        NOT np.log1p, NOT librosa.amplitude_to_db.
-
-        Args:
-            audio: Mono audio at SAMPLE_RATE (22050 Hz)
-
-        Returns:
-            np.ndarray of shape (84, time_frames), log-scaled CQT
-        """
-        import librosa
-
-        cqt = librosa.cqt(
-            audio,
-            sr=SAMPLE_RATE,
-            hop_length=HOP_LENGTH,
-            n_bins=N_BINS,
-            bins_per_octave=BINS_PER_OCTAVE,
-        )
-
-        # Match training: np.abs then np.log with epsilon
-        cqt = np.abs(cqt)
-        cqt = np.log(cqt + 1e-8).astype(np.float32)
-
-        return cqt  # shape: (84, time_frames)
-
-    # ----------------------------------------------------------------
-    # Overlap-Add Inference
-    # ----------------------------------------------------------------
-
-    def _infer_full_audio(self, cqt: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Run model inference with overlap-add for full-song CQT.
-
-        The model was trained on 3-second chunks (~258 frames). For longer
-        audio, we use 50% overlap with Hann window blending.
-
-        Time dimension is preserved through the network because MaxPool2d
-        only pools the frequency axis (kernel (2,1)), never time.
-
-        Args:
-            cqt: Full CQT spectrogram, shape (84, total_frames)
-
-        Returns:
-            onset_pred: (6, 20, total_frames)
-            frame_pred: (6, 20, total_frames)
-        """
-        total_frames = cqt.shape[1]
-
-        # Short audio — process in one pass
-        if total_frames <= CHUNK_FRAMES:
-            x = torch.from_numpy(cqt).float().unsqueeze(0).to(self._device)
-            with torch.no_grad():
-                onset, frame = self._model(x)
-            return onset[0].cpu().numpy(), frame[0].cpu().numpy()
-
-        # Overlap-add for long audio
-        overlap_ratio = 0.5
-        hop_frames = int(CHUNK_FRAMES * (1 - overlap_ratio))    # ~129 frames
-
-        num_chunks = max(1, (total_frames - CHUNK_FRAMES) // hop_frames + 1)
-        pad_needed = (num_chunks - 1) * hop_frames + CHUNK_FRAMES - total_frames
-        if pad_needed > 0:
-            cqt_padded = np.pad(cqt, ((0, 0), (0, pad_needed)), mode='constant')
-        else:
-            cqt_padded = cqt
-            pad_needed = 0
-
-        padded_frames = cqt_padded.shape[1]
-
-        # Hann window for crossfade blending
-        window = np.hanning(CHUNK_FRAMES).astype(np.float32)
-
-        # Accumulators
-        onset_acc = np.zeros((NUM_STRINGS, NUM_FRETS, padded_frames), dtype=np.float32)
-        frame_acc = np.zeros((NUM_STRINGS, NUM_FRETS, padded_frames), dtype=np.float32)
-        weight_acc = np.zeros(padded_frames, dtype=np.float32)
-
-        for i in range(num_chunks + 1):
-            start = i * hop_frames
-            end = start + CHUNK_FRAMES
-
-            if start >= padded_frames:
-                break
-
-            # Extract chunk, pad if needed
-            if end > padded_frames:
-                chunk_cqt = cqt_padded[:, start:]
-                pad_right = CHUNK_FRAMES - chunk_cqt.shape[1]
-                if pad_right > 0:
-                    chunk_cqt = np.pad(chunk_cqt, ((0, 0), (0, pad_right)))
-            else:
-                chunk_cqt = cqt_padded[:, start:end]
-
-            # Model forward pass
-            x = torch.from_numpy(chunk_cqt).float().unsqueeze(0).to(self._device)
-            with torch.no_grad():
-                onset_chunk, frame_chunk = self._model(x)
-
-            onset_np = onset_chunk[0].cpu().numpy()     # (6, 20, time)
-            frame_np = frame_chunk[0].cpu().numpy()
-
-            # Verify time dimension preserved (should match input)
-            out_t = onset_np.shape[2]
-            actual_len = min(out_t, padded_frames - start)
-            w = window[:actual_len]
-
-            onset_acc[:, :, start:start + actual_len] += onset_np[:, :, :actual_len] * w
-            frame_acc[:, :, start:start + actual_len] += frame_np[:, :, :actual_len] * w
-            weight_acc[start:start + actual_len] += w
-
-        # Normalize by accumulated weights
-        weight_acc = np.maximum(weight_acc, 1e-8)
-        onset_acc /= weight_acc
-        frame_acc /= weight_acc
-
-        # Trim to original length
-        return onset_acc[:, :, :total_frames], frame_acc[:, :, :total_frames]
-
-    # ----------------------------------------------------------------
-    # Note Extraction
-    # ----------------------------------------------------------------
-
-    def _extract_notes(self, onset_pred: np.ndarray, frame_pred: np.ndarray,
-                       onset_threshold: float = 0.5,
-                       frame_threshold: float = 0.3) -> List[dict]:
-        """
-        Extract discrete notes from onset/frame predictions.
-
-        Uses onset-triggered, frame-sustained logic:
-        - A note STARTS when onset > onset_threshold
-        - A note CONTINUES while frame > frame_threshold
-        - A note ENDS when frame drops below threshold
-
-        Args:
-            onset_pred: (6, 20, time) onset probabilities
-            frame_pred: (6, 20, time) frame probabilities
-            onset_threshold: Threshold for onset detection (default 0.5)
-            frame_threshold: Threshold for frame sustain (default 0.3)
-
-        Returns:
-            List of note dicts sorted by start time
-        """
-        notes = []
-        num_strings, num_frets, num_frames = onset_pred.shape
-
-        for s in range(num_strings):
-            for f in range(num_frets):
-                onset_row = onset_pred[s, f, :]
-                frame_row = frame_pred[s, f, :]
-
-                in_note = False
-                note_start = 0
-                peak_onset = 0.0
-
-                for t in range(num_frames):
-                    if not in_note and onset_row[t] > onset_threshold:
-                        # Note onset detected
-                        in_note = True
-                        note_start = t
-                        peak_onset = onset_row[t]
-
-                    elif in_note:
-                        if frame_row[t] < frame_threshold:
-                            # Note offset — frame activation dropped
-                            duration_frames = t - note_start
-                            if duration_frames >= 2:    # Min ~23ms at hop=256/sr=22050
-                                midi_note = TUNING[s] + f
-                                velocity = int(40 + 87 * min(1.0, peak_onset))
-                                notes.append({
-                                    'string': s,
-                                    'fret': f,
-                                    'midi_note': midi_note,
-                                    'start_frame': note_start,
-                                    'end_frame': t,
-                                    'velocity': velocity,
-                                })
-                            in_note = False
-                        else:
-                            # Track peak onset for velocity
-                            peak_onset = max(peak_onset, onset_row[t])
-
-                # Handle note still active at end of audio
-                if in_note:
-                    duration_frames = num_frames - note_start
-                    if duration_frames >= 2:
-                        midi_note = TUNING[s] + f
-                        velocity = int(40 + 87 * min(1.0, peak_onset))
-                        notes.append({
-                            'string': s,
-                            'fret': f,
-                            'midi_note': midi_note,
-                            'start_frame': note_start,
-                            'end_frame': num_frames,
-                            'velocity': velocity,
-                        })
-
-        # Sort by start time, then by string (low to high)
-        notes.sort(key=lambda n: (n['start_frame'], n['string']))
-        return notes
-
-    # ----------------------------------------------------------------
-    # MIDI Generation
-    # ----------------------------------------------------------------
-
-    def _notes_to_midi(self, notes: List[dict],
-                       tempo: float = 120.0) -> 'pretty_midi.PrettyMIDI':
-        """
-        Convert extracted notes to a pretty_midi MIDI object.
-
-        MIDI note = TUNING[string] + fret, which matches midi_to_gp.py's
-        FretMapper tuning exactly. The GP converter will reconstruct the
-        same (string, fret) positions.
-
-        Args:
-            notes: List of note dicts from _extract_notes()
-            tempo: BPM for the MIDI file
-
-        Returns:
-            pretty_midi.PrettyMIDI object
-        """
-        import pretty_midi
-
-        midi = pretty_midi.PrettyMIDI(initial_tempo=tempo)
-        instrument = pretty_midi.Instrument(program=25, name='Guitar')  # Acoustic guitar
-
-        frames_per_sec = SAMPLE_RATE / HOP_LENGTH   # ~86.13
-
-        for note_data in notes:
-            start_time = note_data['start_frame'] / frames_per_sec
-            end_time = note_data['end_frame'] / frames_per_sec
-
-            # Ensure minimum note length of ~30ms
-            if end_time - start_time < 0.03:
-                end_time = start_time + 0.03
-
-            midi_note = pretty_midi.Note(
-                velocity=note_data['velocity'],
-                pitch=note_data['midi_note'],
-                start=start_time,
-                end=end_time,
-            )
-            instrument.notes.append(midi_note)
-
-        midi.instruments.append(instrument)
-        return midi
-
-    # ----------------------------------------------------------------
-    # Main Transcription Pipeline
-    # ----------------------------------------------------------------
-
     def transcribe(self, audio_path: str, output_dir: str,
                    tempo_hint: float = None) -> TabTranscriptionResult:
         """
         Full guitar tab transcription pipeline.
 
-        1. Load audio at 22050 Hz
-        2. Compute CQT (84 bins, matching training)
-        3. Run model with overlap-add
-        4. Extract notes (onset/frame fusion)
-        5. Write MIDI
+        1. Run Basic Pitch polyphonic AMT
+        2. Filter to guitar range (E2-E6)
+        3. Remove glitch notes (< 30ms)
+        4. Limit polyphony to 6 voices
+        5. Fix overlapping same-pitch notes
+        6. Assign string/fret positions
+        7. Write MIDI with guitar program
 
         Args:
             audio_path: Path to guitar audio file (WAV, MP3, etc.)
@@ -508,8 +602,6 @@ class GuitarTabTranscriber:
         Returns:
             TabTranscriptionResult with MIDI path and quality metrics
         """
-        import librosa
-
         audio_path = Path(audio_path)
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -517,48 +609,162 @@ class GuitarTabTranscriber:
         if not audio_path.exists():
             raise FileNotFoundError(f"Audio not found: {audio_path}")
 
-        self._ensure_model()
+        if not MODEL_AVAILABLE:
+            logger.warning("Basic Pitch not available for guitar transcription")
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='basic_pitch_guitar', num_strings_used=0,
+                fret_range=(0, 0),
+            )
 
         logger.info(f"Guitar tab transcription: {audio_path.name}")
 
-        # Load audio at training sample rate (mono)
-        audio, sr = librosa.load(str(audio_path), sr=SAMPLE_RATE)
-
-        if len(audio) < SAMPLE_RATE:
-            logger.warning(f"Audio too short ({len(audio) / SAMPLE_RATE:.1f}s), skipping")
+        # --- Step 1: Basic Pitch transcription ---
+        # Tuned for guitar: lower onset threshold catches more notes,
+        # narrower frequency range avoids harmonics/noise
+        try:
+            # Thresholds tuned for separated guitar stems (cleaner signal
+            # than full mix): lower onset threshold catches more articulations,
+            # lower frame threshold preserves sustain, but minimum_note_length
+            # prevents ghost notes from bleeding residuals.
+            model_output, midi_data, note_events = predict(
+                str(audio_path),
+                onset_threshold=0.40,       # Lower for separated stems (less noise)
+                frame_threshold=0.25,       # Catch full sustain on clean signal
+                minimum_note_length=50,     # 50ms min -- catches fast picking
+                minimum_frequency=80.0,     # ~E2 (82 Hz)
+                maximum_frequency=1400.0,   # ~F6 -- guitar fundamental range
+            )
+        except Exception as e:
+            logger.error(f"Basic Pitch failed: {e}")
             return TabTranscriptionResult(
                 midi_path=None, num_notes=0, quality_score=0.0,
-                method='guitar_tab_model', num_strings_used=0,
+                method='basic_pitch_guitar', num_strings_used=0,
                 fret_range=(0, 0),
             )
 
-        # Compute CQT
-        cqt = self._compute_cqt(audio)      # (84, frames)
-        duration = len(audio) / SAMPLE_RATE
-        logger.info(f"CQT: {cqt.shape[1]} frames ({duration:.1f}s)")
+        if midi_data is None or not midi_data.instruments:
+            logger.info("Basic Pitch produced no notes")
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='basic_pitch_guitar', num_strings_used=0,
+                fret_range=(0, 0),
+            )
 
-        # Run model inference with overlap-add
-        onset_pred, frame_pred = self._infer_full_audio(cqt)
+        raw_notes = midi_data.instruments[0].notes
+        logger.info(f"Basic Pitch raw: {len(raw_notes)} notes")
 
-        # Extract notes from onset/frame predictions
-        notes = self._extract_notes(onset_pred, frame_pred)
-        logger.info(f"Extracted {len(notes)} notes from tab model")
+        # --- Step 2: Guitar-specific post-processing ---
+        notes = _filter_guitar_range(raw_notes)
+        logger.info(f"After guitar range filter: {len(notes)} notes")
+
+        notes = _remove_short_notes(notes, min_duration=0.03)
+        notes = _fix_overlapping_same_pitch(notes)
+        notes = _limit_polyphony(notes, MAX_POLYPHONY)
+        logger.info(f"After cleanup: {len(notes)} notes")
 
         if not notes:
-            logger.info("No notes detected by tab model")
             return TabTranscriptionResult(
                 midi_path=None, num_notes=0, quality_score=0.0,
-                method='guitar_tab_model', num_strings_used=0,
+                method='basic_pitch_guitar', num_strings_used=0,
                 fret_range=(0, 0),
             )
 
-        # Tempo detection (or use hint from job metadata)
+        # --- Step 2b: Key detection and spurious note filtering ---
+        detected_key = _detect_key(notes)
+        if detected_key:
+            logger.info(f"Detected key: {detected_key[0]} {detected_key[1]}")
+            notes = _filter_by_key(notes, detected_key)
+            logger.info(f"After key filter: {len(notes)} notes")
+
+        if not notes:
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='basic_pitch_guitar', num_strings_used=0,
+                fret_range=(0, 0),
+            )
+
+        # --- Step 3: Group simultaneous notes and assign string/fret ---
+        note_groups = _group_simultaneous_notes(notes)
+        logger.info(f"Note groups: {len(note_groups)} ({sum(1 for g in note_groups if len(g) > 1)} chords)")
+
+        tab_notes = []
+        prev_fret = None
+        prev_string = None
+        strings_used = set()
+        frets_used = []
+
+        # Hand position model: weighted moving average of recent fret positions
+        position_history = []
+        hand_position = None
+
+        for group in note_groups:
+            if len(group) == 1:
+                # Single note
+                note = group[0]
+                result = _assign_string_fret(note.pitch, prev_fret, prev_string, hand_position)
+                if result is not None:
+                    s_idx, fret = result
+                    strings_used.add(s_idx)
+                    frets_used.append(fret)
+                    prev_fret = fret
+                    prev_string = s_idx
+
+                    # Update hand position model
+                    position_history.append(fret)
+                    if len(position_history) > 8:
+                        position_history.pop(0)
+                    # Weighted average: recent positions count more
+                    weights = list(range(1, len(position_history) + 1))
+                    hand_position = sum(f * w for f, w in zip(position_history, weights)) / sum(weights)
+
+                    tab_notes.append({
+                        'pitch': note.pitch,
+                        'string': s_idx,
+                        'fret': fret,
+                        'start': note.start,
+                        'end': note.end,
+                        'velocity': note.velocity,
+                    })
+            else:
+                # Chord (multiple simultaneous notes)
+                chord_results = _assign_chord_frets(group, prev_fret, prev_string, hand_position)
+                for cr in chord_results:
+                    strings_used.add(cr['string'])
+                    frets_used.append(cr['fret'])
+                    tab_notes.append(cr)
+
+                # Update context from chord
+                if chord_results:
+                    # Use the lowest note as the reference for next position
+                    lowest = min(chord_results, key=lambda x: x['string'])
+                    prev_fret = lowest['fret']
+                    prev_string = lowest['string']
+
+                    chord_frets = [cr['fret'] for cr in chord_results if cr['fret'] > 0]
+                    if chord_frets:
+                        avg_fret = sum(chord_frets) / len(chord_frets)
+                        position_history.append(avg_fret)
+                        if len(position_history) > 8:
+                            position_history.pop(0)
+                        weights = list(range(1, len(position_history) + 1))
+                        hand_position = sum(f * w for f, w in zip(position_history, weights)) / sum(weights)
+
+        if not tab_notes:
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='basic_pitch_guitar', num_strings_used=0,
+                fret_range=(0, 0),
+            )
+
+        # --- Step 4: Tempo detection ---
         if tempo_hint and 40 < tempo_hint < 300:
             tempo = tempo_hint
         else:
             try:
-                tempo_result = librosa.beat.beat_track(y=audio, sr=SAMPLE_RATE)
-                # librosa returns (tempo_array, beat_frames) or (tempo, beat_frames)
+                import librosa
+                audio, sr = librosa.load(str(audio_path), sr=SAMPLE_RATE)
+                tempo_result = librosa.beat.beat_track(y=audio, sr=sr)
                 if hasattr(tempo_result[0], '__len__'):
                     tempo = float(tempo_result[0][0])
                 else:
@@ -567,43 +773,54 @@ class GuitarTabTranscriber:
             except Exception:
                 tempo = 120.0
 
-        # Generate MIDI
-        midi_obj = self._notes_to_midi(notes, tempo)
+        # --- Step 5: Write MIDI ---
+        midi_out = pretty_midi.PrettyMIDI(initial_tempo=tempo)
+        instrument = pretty_midi.Instrument(program=25, name='Guitar')
+
+        for tn in tab_notes:
+            midi_note = pretty_midi.Note(
+                velocity=tn['velocity'],
+                pitch=tn['pitch'],
+                start=tn['start'],
+                end=max(tn['end'], tn['start'] + 0.03),
+            )
+            instrument.notes.append(midi_note)
+
+        midi_out.instruments.append(instrument)
+
         midi_filename = f"{audio_path.stem}_tab.mid"
         midi_path = output_dir / midi_filename
-        midi_obj.write(str(midi_path))
+        midi_out.write(str(midi_path))
 
-        # Compute quality metrics
-        strings_used = set(n['string'] for n in notes)
-        frets = [n['fret'] for n in notes]
-        note_density = len(notes) / duration
+        # --- Step 6: Quality metrics ---
+        duration = max(n['end'] for n in tab_notes) - min(n['start'] for n in tab_notes)
+        note_density = len(tab_notes) / max(duration, 0.1)
 
-        # Quality heuristic (0.0 - 1.0)
         quality = 0.0
-        quality += 0.3 * min(1.0, len(notes) / (duration * 2))     # Note density
-        quality += 0.2 * min(1.0, len(strings_used) / 4)            # String diversity
-        quality += 0.2 if 1.0 < note_density < 15.0 else 0.0        # Sane density
-        quality += 0.15 if max(frets) - min(frets) < 15 else 0.0    # Reasonable range
-        quality += 0.15                                               # Base neural confidence
+        quality += 0.3 * min(1.0, len(tab_notes) / (duration * 2))   # Note density
+        quality += 0.2 * min(1.0, len(strings_used) / 4)              # String diversity
+        quality += 0.2 if 1.0 < note_density < 15.0 else 0.0          # Sane density
+        quality += 0.15 if max(frets_used) - min(frets_used) < 15 else 0.0
+        quality += 0.15                                                 # Base confidence
         quality = min(1.0, quality)
 
-        logger.info(f"Tab MIDI: {midi_path.name}, {len(notes)} notes, "
+        logger.info(f"Tab MIDI: {midi_path.name}, {len(tab_notes)} notes, "
                     f"strings={sorted(strings_used)}, "
-                    f"frets={min(frets)}-{max(frets)}, "
+                    f"frets={min(frets_used)}-{max(frets_used)}, "
                     f"tempo={tempo:.0f}, quality={quality:.2f}")
 
         return TabTranscriptionResult(
             midi_path=str(midi_path),
-            num_notes=len(notes),
+            num_notes=len(tab_notes),
             quality_score=quality,
-            method='guitar_tab_model',
+            method='basic_pitch_guitar',
             num_strings_used=len(strings_used),
-            fret_range=(min(frets), max(frets)),
+            fret_range=(min(frets_used), max(frets_used)),
         )
 
 
 # ============================================================================
-# CONVENIENCE FUNCTIONS (matches guitar_separator.py pattern)
+# CONVENIENCE FUNCTIONS (matches existing API exactly)
 # ============================================================================
 
 _transcriber: Optional[GuitarTabTranscriber] = None
@@ -612,17 +829,8 @@ _transcriber: Optional[GuitarTabTranscriber] = None
 def transcribe_guitar_tab(audio_path: str, output_dir: str,
                           tempo_hint: float = None) -> Optional[str]:
     """
-    Convenience function: transcribe guitar audio to MIDI using tab model.
-
-    Uses a cached singleton transcriber.
-
-    Args:
-        audio_path: Path to guitar audio file
-        output_dir: Output directory for MIDI
-        tempo_hint: Known tempo (optional)
-
-    Returns:
-        MIDI file path, or None if transcription failed/low quality
+    Convenience function: transcribe guitar audio to MIDI.
+    Returns MIDI file path, or None if transcription failed/low quality.
     """
     global _transcriber
 
@@ -644,7 +852,7 @@ def transcribe_guitar_tab(audio_path: str, output_dir: str,
 
 
 def is_available() -> bool:
-    """Check if guitar tab model is available."""
+    """Check if guitar tab transcriber is available."""
     return MODEL_AVAILABLE
 
 
@@ -661,12 +869,11 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO)
 
-    print("Guitar Tab Transcriber")
-    print(f"  Model available: {MODEL_AVAILABLE}")
-    print(f"  Checkpoint: {CHECKPOINT_PATH}")
-    print(f"  Sample rate: {SAMPLE_RATE}")
-    print(f"  CQT bins: {N_BINS}")
+    print("Guitar Tab Transcriber (Basic Pitch + Post-Processing)")
+    print(f"  Available: {MODEL_AVAILABLE}")
+    print(f"  Basic Pitch: {BASIC_PITCH_AVAILABLE}")
     print(f"  Tuning: {TUNING}")
+    print(f"  Fret range: 0-{NUM_FRETS}")
 
     if len(sys.argv) >= 3:
         audio_path = sys.argv[1]

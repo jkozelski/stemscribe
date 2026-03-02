@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+venv*/
 .venv/
 ENV/
 env.bak/
@@ -82,5 +83,11 @@ frontend/dist/
 # Log files
 *.log
 
+# Runtime caches
+backend/songsterr_cache/
+
 # Symlinks to outputs
 backend/outputs
+
+# Model pretrained weights
+backend/models/pretrained/

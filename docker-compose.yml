@@ -1,0 +1,64 @@
+version: "3.8"
+
+# Local development stack: Postgres + Redis + StemScribe API
+# Usage:
+#   docker compose up          — start all services
+#   docker compose up -d db    — start just Postgres (for running app locally)
+#   docker compose down -v     — stop and remove volumes
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stemscribe
+      POSTGRES_USER: stemscribe
+      POSTGRES_PASSWORD: localdev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Auto-run initial migration on first start
+      - ./backend/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_initial_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stemscribe"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "5555:5555"
+    environment:
+      FLASK_ENV: development
+      PORT: "5555"
+      APP_URL: http://localhost:5555
+      API_URL: http://localhost:5555
+      DATABASE_URL: postgresql://stemscribe:localdev@db:5432/stemscribe
+      JWT_SECRET_KEY: local-dev-secret-do-not-use-in-production
+      REDIS_URL: redis://redis:6379
+      # R2 and Stripe are optional for local dev — app falls back gracefully
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      # Mount source for live reload (remove for production-like testing)
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+
+volumes:
+  pgdata:
