@@ -49,7 +49,7 @@ def convert_wavs_to_mp3(directory: Path) -> dict:
     for wav_file in directory.glob('*.wav'):
         mp3_file = wav_file.with_suffix('.mp3')
         try:
-            result = subprocess.run([
+            _result = subprocess.run([
                 'ffmpeg', '-y', '-i', str(wav_file),
                 '-codec:a', 'libmp3lame', '-b:a', '320k',
                 str(mp3_file)

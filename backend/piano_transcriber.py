@@ -14,7 +14,7 @@ Piano Range: A0 (MIDI 21) to C8 (MIDI 108) — 88 keys
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional
 from dataclasses import dataclass
 
 import torch

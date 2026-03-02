@@ -13,7 +13,6 @@ Improvements over basic version:
 
 import numpy as np
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +170,7 @@ def classify_drum_hit_improved(segment: np.ndarray, sr: int) -> tuple:
     kick_energy = band_energy(kick_mask)
     snare_low_energy = band_energy(snare_low_mask)
     snare_high_energy = band_energy(snare_high_mask)
-    tom_energy = band_energy(tom_mask)
+    _tom_energy = band_energy(tom_mask)
     hihat_energy = band_energy(hihat_mask)
     cymbal_energy = band_energy(cymbal_mask)
     low_mid_energy = band_energy(low_mid_mask)
@@ -259,7 +258,7 @@ def estimate_tempo(audio_path: str) -> float:
         y, sr = librosa.load(audio_path, sr=22050, mono=True)
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
         return float(tempo)
-    except:
+    except Exception:
         return 120.0
 
 

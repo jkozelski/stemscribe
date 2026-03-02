@@ -8,9 +8,8 @@ Heavy ML dependencies (scipy, torch, demucs, etc.) are pre-mocked
 in conftest.py so that `import app` succeeds without real libraries.
 """
 
-import json
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from io import BytesIO
 
 import pytest

@@ -23,8 +23,7 @@ import logging
 import time
 import urllib.parse
 import urllib.request
-from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -392,7 +391,7 @@ def fetch_track_info(track_name: str, artist: str = None,
             era_info = get_grateful_dead_era(int(info['album_year']))
             if era_info:
                 info['era'] = era_info
-        except:
+        except Exception:
             pass
 
     # Try to find song-specific Wikipedia page
@@ -426,7 +425,7 @@ def fetch_track_info(track_name: str, artist: str = None,
 
     # If found locally, return instantly (FAST PATH)
     if found_local:
-        logger.info(f"  ✓ Returning local data instantly")
+        logger.info("  ✓ Returning local data instantly")
         return info
 
     # ==========================================
@@ -442,7 +441,7 @@ def fetch_track_info(track_name: str, artist: str = None,
             info['wikipedia_url'] = wiki_info.get('url')
             info['thumbnail'] = wiki_info.get('thumbnail')
             info['fetched_from'].append('wikipedia')
-            logger.info(f"  ✓ Got Wikipedia info")
+            logger.info("  ✓ Got Wikipedia info")
     except Exception as e:
         logger.debug(f"  Wikipedia failed: {e}")
 

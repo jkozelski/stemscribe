@@ -14,7 +14,7 @@ to improve transcription quality for guitar and other instruments.
 import numpy as np
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple, Optional
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -35,8 +35,8 @@ except ImportError:
     logger.warning("pretty_midi not available")
 
 try:
-    from basic_pitch.inference import predict
-    from basic_pitch import ICASSP_2022_MODEL_PATH
+    from basic_pitch.inference import predict  # noqa: F401
+    from basic_pitch import ICASSP_2022_MODEL_PATH  # noqa: F401
     BASIC_PITCH_AVAILABLE = True
 except ImportError:
     BASIC_PITCH_AVAILABLE = False
@@ -296,7 +296,7 @@ class EnhancedTranscriber:
     def _transcribe_basic_pitch(self, audio_path: Path) -> Tuple[Optional['pretty_midi.PrettyMIDI'], List]:
         """Use Basic Pitch for initial transcription with optimized settings."""
         try:
-            from basic_pitch.inference import predict_and_save, predict
+            from basic_pitch.inference import predict
 
             # Get model outputs for more control
             model_output, midi_data, note_events = predict(
@@ -367,7 +367,7 @@ class EnhancedTranscriber:
         try:
             tempo, _ = librosa.beat.beat_track(y=y, sr=self.sr)
             return float(tempo) if tempo > 0 else 120.0
-        except:
+        except Exception:
             return 120.0
 
     def _quantize_midi(self, midi: 'pretty_midi.PrettyMIDI', tempo: float,

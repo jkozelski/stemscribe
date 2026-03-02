@@ -5,7 +5,7 @@ Optimized for Apple Silicon M3 Max and NVIDIA GPUs
 
 import logging
 import asyncio
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, Optional, Callable, Any
 from dataclasses import dataclass
 from enum import Enum
 
@@ -133,7 +133,7 @@ class GPUManager:
                     'reserved_gb': used,
                     'free_gb': available
                 }
-            except:
+            except Exception:
                 return {
                     'allocated_gb': 0,
                     'reserved_gb': 0,

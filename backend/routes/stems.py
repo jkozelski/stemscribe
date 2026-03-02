@@ -4,7 +4,7 @@ Stem manipulation routes — split-stem, analyze-stereo, split-vocals.
 
 import logging
 from pathlib import Path
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 
 from models.job import get_job, save_job_to_disk, OUTPUT_DIR
 
@@ -136,11 +136,11 @@ def split_vocals_endpoint(job_id):
 
     # Find vocals stem
     vocals_path = None
-    vocals_key = None
+    vocals_key = None  # noqa: F841
     for key in ['vocals', 'Vocals', 'vocal', 'Vocal']:
         if key in job.stems:
             vocals_path = job.stems[key]
-            vocals_key = key
+            _vocals_key = key
             break
 
     if not vocals_path:

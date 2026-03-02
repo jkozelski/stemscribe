@@ -38,8 +38,8 @@ def find_tabs(job_id):
         text = re.sub(r'[\s_]+', '-', text)
         return text.strip('-')
 
-    title_slug = slugify(title)
-    artist_slug = slugify(artist) if artist else ''
+    _title_slug = slugify(title)
+    _artist_slug = slugify(artist) if artist else ''
     search_query = f"{title} {artist}".strip().replace(' ', '+')
 
     tabs = {

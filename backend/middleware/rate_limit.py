@@ -103,7 +103,6 @@ def enforce_plan_limits(fn):
             get_current_user,
             get_client_ip_hash,
             check_rate_limit,
-            check_duration_limit,
             get_plan_limits,
             RateLimitExceeded,
             PLAN_LIMITS,
@@ -123,7 +122,7 @@ def enforce_plan_limits(fn):
             usage_count = check_rate_limit(user=user, ip_hash=ip_hash)
             g.usage_count = usage_count
         except RateLimitExceeded as e:
-            limits = PLAN_LIMITS[e.plan]
+            _limits = PLAN_LIMITS[e.plan]
             return jsonify({
                 'error': str(e),
                 'usage': e.usage_count,
@@ -147,7 +146,7 @@ def enforce_duration_limit(duration_seconds):
         if error:
             return error
     """
-    from auth.decorators import check_duration_limit, get_current_user, PLAN_LIMITS
+    from auth.decorators import check_duration_limit, get_current_user
 
     user = getattr(g, 'current_user', None) or get_current_user()
     allowed, max_sec = check_duration_limit(duration_seconds, user=user)

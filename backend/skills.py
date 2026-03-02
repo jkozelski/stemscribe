@@ -19,7 +19,7 @@ from scipy import signal
 from scipy.io import wavfile
 import os
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Callable
+from typing import List, Dict, Optional
 from enum import Enum
 
 

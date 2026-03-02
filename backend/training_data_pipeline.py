@@ -13,14 +13,13 @@ Usage:
     python training_data_pipeline.py --real-book /path/to/REALBK1.PDF --output-dir /path/to/output
 """
 
-import os
 import sys
 import json
 import logging
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import hashlib
@@ -29,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 # Import our modules
 try:
-    from pdf_music_parser import PDFMusicParser, ParsedScore, TrainingDataGenerator
+    from pdf_music_parser import PDFMusicParser, ParsedScore, TrainingDataGenerator  # noqa: F401
     PDF_PARSER_AVAILABLE = True
 except ImportError:
     PDF_PARSER_AVAILABLE = False
@@ -287,7 +286,7 @@ class TrainingDataPipeline:
             import wave
             with wave.open(audio_path, 'r') as w:
                 return w.getnframes() / w.getframerate()
-        except:
+        except Exception:
             return 0.0
 
     def _create_midi_from_notation(self, notation_path: str, midi_path: str):
@@ -512,7 +511,7 @@ class TrainingDataPipeline:
         self._create_colab_package()
 
         logger.info(f"\n{'='*60}")
-        logger.info(f"📦 Dataset saved!")
+        logger.info("📦 Dataset saved!")
         logger.info(f"   Examples: {len(self.examples)}")
         logger.info(f"   Duration: {total_duration:.2f} hours")
         logger.info(f"   Instruments: {list(instruments)}")
@@ -545,8 +544,8 @@ class TrainingDataPipeline:
             # Note: Audio/stems are too large for zip - upload separately
 
         logger.info(f"   ✅ Created: {zip_path}")
-        logger.info(f"   ⚠️ Note: Audio files not included (too large)")
-        logger.info(f"   Upload audio separately to Google Drive")
+        logger.info("   ⚠️ Note: Audio files not included (too large)")
+        logger.info("   Upload audio separately to Google Drive")
 
 
 # ============================================================================

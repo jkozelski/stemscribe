@@ -4,7 +4,7 @@ SNR, cross-correlation, spectral analysis for stem quality assessment
 """
 
 import numpy as np
-from typing import Dict, List, Tuple
+from typing import Dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -211,7 +211,7 @@ class QualityMetrics:
             'stems': {}
         }
 
-        stem_names = list(stems.keys())
+        _stem_names = list(stems.keys())
 
         for stem_name, stem in stems.items():
             # Get other stems for cross-correlation

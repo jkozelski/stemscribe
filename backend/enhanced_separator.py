@@ -9,10 +9,9 @@ Features:
 - Drop-in replacement for demucs-based separation
 """
 
-import os
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -401,12 +400,12 @@ if __name__ == '__main__':
     audio_path = sys.argv[1]
     output_dir = sys.argv[2] if len(sys.argv) > 2 else None
 
-    print(f"\n🎵 Enhanced Separator Test")
+    print("\n🎵 Enhanced Separator Test")
     print(f"   Input: {audio_path}")
     print(f"   Output: {output_dir or 'same directory'}")
 
     stems = separate_full_song(audio_path, output_dir, split_vocals=True)
 
-    print(f"\n✅ Separation complete!")
+    print("\n✅ Separation complete!")
     for name, path in stems.items():
         print(f"   {name}: {path}")

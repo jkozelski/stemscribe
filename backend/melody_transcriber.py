@@ -18,8 +18,8 @@ Falls back to existing EnhancedTranscriber/Basic Pitch if quality < 0.4.
 import numpy as np
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-from dataclasses import dataclass, field
+from typing import List, Tuple, Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -474,7 +474,7 @@ class MelodyExtractor:
             # Get f0 contour within this note
             seg_mask = (times >= note.start_time) & (times < note.end_time)
             seg_f0 = f0[seg_mask]
-            seg_conf = confidence[seg_mask]
+            _seg_conf = confidence[seg_mask]
             seg_times = times[seg_mask]
 
             if len(seg_f0) < 3:

@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 
 # Try to import audio processing libraries
 try:
-    import pedalboard
+    import pedalboard  # noqa: F401
     from pedalboard import (
         Pedalboard,
         Compressor,
         Gain,
         HighpassFilter,
         LowpassFilter,
-        HighShelfFilter,
+        HighShelfFilter,  # noqa: F401
         LowShelfFilter,
         PeakFilter,
         NoiseGate,

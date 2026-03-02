@@ -14,7 +14,6 @@ from models.job import ProcessingJob, OUTPUT_DIR
 from processing.utils import convert_wavs_to_mp3
 from processing.separation import (
     _active_runners, _active_runners_lock,
-    ENSEMBLE_SEPARATOR_AVAILABLE,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ except ImportError:
     pass
 
 try:
-    from skills import apply_skill, analyze_stems_for_skills
+    from skills import apply_skill, analyze_stems_for_skills  # noqa: F401
     SKILLS_AVAILABLE = True
 except ImportError:
     SKILLS_AVAILABLE = False
@@ -235,7 +234,7 @@ def smart_separate(job: ProcessingJob):
         return False
 
     other_ratio = other_energy / total_energy
-    logger.info(f"🧠 Energy distribution:")
+    logger.info("🧠 Energy distribution:")
     for name, energy in sorted(stem_energies.items(), key=lambda x: -x[1]):
         pct = (energy / total_energy * 100) if total_energy > 0 else 0
         logger.info(f"   {name}: {pct:.1f}% (rms={energy:.4f})")

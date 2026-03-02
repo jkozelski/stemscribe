@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from basic_pitch.inference import predict
-    from basic_pitch import ICASSP_2022_MODEL_PATH
+    from basic_pitch import ICASSP_2022_MODEL_PATH  # noqa: F401
     BASIC_PITCH_AVAILABLE = True
 except ImportError:
     BASIC_PITCH_AVAILABLE = False
@@ -303,7 +303,6 @@ def _octave_correct(notes: List) -> List:
         elif note.pitch > BASS_OCTAVE_BOUNDARY and (note.pitch - 12) >= BASS_MIN_MIDI:
             # In the boundary zone -- use harmonic evidence
             pc_original = note.pitch % 12
-            pc_shifted = (note.pitch - 12) % 12  # Same pitch class for octave shift
 
             if total_low > 0:
                 # Check if this pitch class is common among the reliable low notes

@@ -21,9 +21,8 @@ which flow directly into the existing midi_to_gp.py Guitar Pro pipeline.
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Optional, Tuple, List, Dict, Set
+from typing import Optional, Tuple, List, Set
 from dataclasses import dataclass
-from collections import Counter
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from basic_pitch.inference import predict
-    from basic_pitch import ICASSP_2022_MODEL_PATH
+    from basic_pitch import ICASSP_2022_MODEL_PATH  # noqa: F401
     BASIC_PITCH_AVAILABLE = True
 except ImportError:
     BASIC_PITCH_AVAILABLE = False

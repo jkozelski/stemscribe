@@ -22,7 +22,7 @@ Falls back to Basic Pitch guitar_tab_transcriber when no v3 model exists.
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import Optional
 from dataclasses import dataclass
 
 import torch

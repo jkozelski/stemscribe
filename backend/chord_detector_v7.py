@@ -172,7 +172,7 @@ class ChordDetector:
                 logger.error(f"Failed to load V7 model: {e}")
                 self.model = None
         else:
-            logger.warning(f"V7 model not found. Falling back to template matching.")
+            logger.warning("V7 model not found. Falling back to template matching.")
             self.model = None
 
     def detect(self, audio_path: str) -> ChordProgression:

@@ -3,7 +3,6 @@ StemScribe v2.0 Configuration
 Centralized settings for ensemble separation system
 """
 
-import os
 from pathlib import Path
 
 # Base paths
@@ -150,7 +149,7 @@ def get_hardware_profile():
                 return HARDWARE_PROFILES['apple_m3_max_48gb']
             else:
                 return HARDWARE_PROFILES['apple_m1_16gb']
-        except:
+        except Exception:
             return HARDWARE_PROFILES['apple_m1_16gb']
 
     # Check for CUDA

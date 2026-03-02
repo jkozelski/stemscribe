@@ -11,10 +11,9 @@ actual OMR rather than text extraction.
 """
 
 import logging
-import tempfile
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import json
 
 logger = logging.getLogger(__name__)
@@ -29,8 +28,8 @@ except ImportError:
 
 PIL_AVAILABLE = False
 try:
-    from PIL import Image
-    import numpy as np
+    from PIL import Image  # noqa: F401
+    import numpy as np  # noqa: F401
     PIL_AVAILABLE = True
 except ImportError:
     pass
@@ -38,7 +37,7 @@ except ImportError:
 # Check for oemer (deep learning OMR)
 OEMER_AVAILABLE = False
 try:
-    import oemer
+    import oemer  # noqa: F401
     OEMER_AVAILABLE = True
     logger.info("✅ oemer OMR available")
 except ImportError:
@@ -65,7 +64,7 @@ class OMRProcessor:
     def _check_audiveris(self) -> bool:
         """Check if Audiveris is installed."""
         try:
-            result = subprocess.run(
+            _result = subprocess.run(
                 ['audiveris', '-help'],
                 capture_output=True,
                 timeout=5

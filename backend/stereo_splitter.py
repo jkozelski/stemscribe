@@ -141,8 +141,8 @@ def analyze_stereo_field(left: np.ndarray, right: np.ndarray) -> dict:
 
     # Detect if left and right seem like distinct sources
     # Compare spectral content between left-only and right-only portions
-    left_dominant = left - np.minimum(np.abs(left), np.abs(right)) * np.sign(left)
-    right_dominant = right - np.minimum(np.abs(left), np.abs(right)) * np.sign(right)
+    _left_dominant = left - np.minimum(np.abs(left), np.abs(right)) * np.sign(left)
+    _right_dominant = right - np.minimum(np.abs(left), np.abs(right)) * np.sign(right)
 
     # Lower threshold - even slight stereo separation can have distinct sources
     distinct_sources = side_ratio > 0.08 and width > 0.15
@@ -260,8 +260,8 @@ def split_enhanced(left: np.ndarray, right: np.ndarray, sr: int,
     # Calculate magnitude and phase
     left_mag = np.abs(left_stft)
     right_mag = np.abs(right_stft)
-    left_phase = np.angle(left_stft)
-    right_phase = np.angle(right_stft)
+    _left_phase = np.angle(left_stft)
+    _right_phase = np.angle(right_stft)
 
     # Create masks based on which channel is dominant at each time-freq bin
     # This helps separate content that's panned left vs right

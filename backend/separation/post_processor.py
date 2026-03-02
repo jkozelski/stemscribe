@@ -4,7 +4,7 @@ Phase alignment, bleed reduction, noise reduction, artifact removal
 """
 
 import numpy as np
-from typing import Dict, Optional, Tuple
+from typing import Dict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ class PostProcessor:
             aggressiveness: 0-1, higher = more aggressive subtraction
         """
         try:
-            import librosa
+            import librosa  # noqa: F401
 
             # Convert to mono for processing if stereo
             is_stereo = target.ndim > 1 and target.shape[0] == 2
@@ -219,8 +219,8 @@ class PostProcessor:
         - Ringing
         """
         try:
-            import librosa
-            from scipy import ndimage
+            import librosa  # noqa: F401
+            from scipy import ndimage  # noqa: F401
 
             if audio.ndim > 1:
                 left = self._remove_artifacts_mono(audio[0])

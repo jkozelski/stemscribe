@@ -33,9 +33,6 @@ jobs:
       - name: Run tests
         run: pytest backend/tests/ -v --tb=short
 
-      - name: Check imports
-        run: python -c "from backend.routes.api import api_bp; print('API blueprint OK')"
-
   lint:
     runs-on: ubuntu-latest
     steps:

@@ -47,7 +47,7 @@ _chord_theory_engine = None
 
 # Google Drive integration
 try:
-    from drive_service import upload_job_to_drive, cleanup_old_stems, get_drive_stats, get_drive_service
+    from drive_service import upload_job_to_drive, cleanup_old_stems, get_drive_stats, get_drive_service  # noqa: F401
     DRIVE_AVAILABLE = True
     logger.info("Google Drive integration available")
 except ImportError as e:
@@ -56,7 +56,7 @@ except ImportError as e:
 
 # Skills system for enhanced stem processing
 try:
-    from skills import get_skill, get_all_skills, apply_skill, SKILL_REGISTRY, analyze_stems_for_skills
+    from skills import get_skill, get_all_skills, apply_skill, SKILL_REGISTRY, analyze_stems_for_skills  # noqa: F401
     SKILLS_AVAILABLE = True
     logger.info(f"Skills system available with {len(SKILL_REGISTRY)} skills")
 except ImportError as e:
@@ -65,7 +65,7 @@ except ImportError as e:
 
 # Stem enhancement for natural sound
 try:
-    from enhancer import enhance_stem, enhance_all_stems, PEDALBOARD_AVAILABLE, NOISEREDUCE_AVAILABLE
+    from enhancer import enhance_stem, enhance_all_stems, PEDALBOARD_AVAILABLE, NOISEREDUCE_AVAILABLE  # noqa: F401
     ENHANCER_AVAILABLE = PEDALBOARD_AVAILABLE
     logger.info(f"Stem enhancer available (pedalboard={PEDALBOARD_AVAILABLE}, noisereduce={NOISEREDUCE_AVAILABLE})")
 except ImportError as e:
@@ -74,7 +74,7 @@ except ImportError as e:
 
 # Drum transcription (separate from Basic Pitch)
 try:
-    from drum_transcriber import transcribe_drums_to_midi
+    from drum_transcriber import transcribe_drums_to_midi  # noqa: F401
     DRUM_TRANSCRIBER_AVAILABLE = True
     logger.info("Drum transcriber available")
 except ImportError as e:
@@ -83,7 +83,7 @@ except ImportError as e:
 
 # Stereo splitting for panned instruments
 try:
-    from stereo_splitter import split_stereo, split_all_stems_by_panning, check_if_splittable
+    from stereo_splitter import split_stereo, split_all_stems_by_panning, check_if_splittable  # noqa: F401
     STEREO_SPLITTER_AVAILABLE = True
     logger.info("Stereo splitter available")
 except ImportError as e:
@@ -93,8 +93,8 @@ except ImportError as e:
 # Enhanced separator with audio-separator (BS-Roformer, UVR models)
 try:
     from enhanced_separator import (
-        EnhancedSeparator, AUDIO_SEPARATOR_AVAILABLE,
-        separate_audio, separate_full_song, split_vocals, MODELS as SEPARATOR_MODELS
+        EnhancedSeparator, AUDIO_SEPARATOR_AVAILABLE,  # noqa: F401
+        separate_audio, separate_full_song, split_vocals, MODELS as SEPARATOR_MODELS  # noqa: F401
     )
     ENHANCED_SEPARATOR_AVAILABLE = AUDIO_SEPARATOR_AVAILABLE
     if ENHANCED_SEPARATOR_AVAILABLE:
@@ -106,8 +106,8 @@ except ImportError as e:
 # Guitar lead/rhythm separator (trained MelBand-RoFormer)
 try:
     from guitar_separator import (
-        GuitarSeparator, separate_guitar,
-        GUITAR_SEPARATOR_AVAILABLE as _gsa, is_available as guitar_separator_is_available
+        GuitarSeparator, separate_guitar,  # noqa: F401
+        GUITAR_SEPARATOR_AVAILABLE as _gsa, is_available as guitar_separator_is_available  # noqa: F401
     )
     GUITAR_SEPARATOR_AVAILABLE = _gsa
     if GUITAR_SEPARATOR_AVAILABLE:
@@ -118,7 +118,7 @@ except ImportError as e:
 
 # Track info fetcher for context and learning tips
 try:
-    from track_info import fetch_track_info, extract_artist_from_title, get_instrument_tips, LOCAL_KNOWLEDGE, should_stereo_split
+    from track_info import fetch_track_info, extract_artist_from_title, get_instrument_tips, LOCAL_KNOWLEDGE, should_stereo_split  # noqa: F401
     TRACK_INFO_AVAILABLE = True
     logger.info(f"Track info available (local knowledge: {len(LOCAL_KNOWLEDGE)} artists)")
 except ImportError as e:
@@ -127,7 +127,7 @@ except ImportError as e:
 
 # Enhanced transcriber with articulation detection (bends, slides, hammer-ons)
 try:
-    from transcriber_enhanced import EnhancedTranscriber, transcribe_with_enhanced
+    from transcriber_enhanced import EnhancedTranscriber, transcribe_with_enhanced  # noqa: F401
     ENHANCED_TRANSCRIBER_AVAILABLE = True
     logger.info("Enhanced transcriber available (articulations, polyphony)")
 except ImportError as e:
@@ -136,7 +136,7 @@ except ImportError as e:
 
 # Improved drum transcription v2 (ghost notes, cymbal differentiation)
 try:
-    from drum_transcriber_v2 import EnhancedDrumTranscriber, transcribe_drums_to_midi as transcribe_drums_v2
+    from drum_transcriber_v2 import EnhancedDrumTranscriber, transcribe_drums_to_midi as transcribe_drums_v2  # noqa: F401
     DRUM_TRANSCRIBER_V2_AVAILABLE = True
     logger.info("Drum transcriber v2 available (ghost notes, hi-hat states)")
 except ImportError as e:
@@ -145,7 +145,7 @@ except ImportError as e:
 
 # OaF-based drum transcription (neural network)
 try:
-    from oaf_drum_transcriber import OaFDrumTranscriber, transcribe_drums, OAF_AVAILABLE as _oaf
+    from oaf_drum_transcriber import OaFDrumTranscriber, transcribe_drums, OAF_AVAILABLE as _oaf  # noqa: F401
     OAF_DRUM_TRANSCRIBER_AVAILABLE = True
     OAF_AVAILABLE = _oaf
     logger.info(f"OaF Drum transcriber available (neural: {OAF_AVAILABLE})")
@@ -157,8 +157,8 @@ except ImportError as e:
 # Neural drum transcription model (CRNN trained on E-GMD, 8 classes)
 try:
     from drum_nn_transcriber import (
-        NeuralDrumTranscriber, transcribe_drums_nn,
-        DRUM_NN_MODEL_AVAILABLE as _dnn, is_available as drum_nn_is_available
+        NeuralDrumTranscriber, transcribe_drums_nn,  # noqa: F401
+        DRUM_NN_MODEL_AVAILABLE as _dnn, is_available as drum_nn_is_available  # noqa: F401
     )
     DRUM_NN_MODEL_AVAILABLE = _dnn
     if DRUM_NN_MODEL_AVAILABLE:
@@ -169,7 +169,7 @@ except ImportError as e:
 
 # Model manager for pretrained models
 try:
-    from models.model_manager import ModelManager, ensure_model, list_available_models
+    from models.model_manager import ModelManager, ensure_model, list_available_models  # noqa: F401
     MODEL_MANAGER_AVAILABLE = True
     logger.info("Model manager available")
 except ImportError as e:
@@ -190,7 +190,7 @@ except ImportError:
         logger.info("Chord detector V7 available (25 classes)")
     except ImportError:
         try:
-            from chord_detector import ChordDetector, detect_chords
+            from chord_detector import ChordDetector, detect_chords  # noqa: F401
             CHORD_DETECTOR_AVAILABLE = True
             CHORD_DETECTOR_VERSION = 'basic'
             logger.info("Basic chord detector available (template matching)")
@@ -201,7 +201,7 @@ except ImportError:
 
 # Chord theory engine (scale suggestions, Beato-style chord-over-bass analysis)
 try:
-    from chord_theory import ChordTheoryEngine, get_scale_suggestion, get_progression_analysis
+    from chord_theory import ChordTheoryEngine, get_scale_suggestion, get_progression_analysis  # noqa: F401
     CHORD_THEORY_AVAILABLE = True
     _chord_theory_engine = ChordTheoryEngine()
     logger.info("Chord theory engine available (scale suggestions, polychord analysis)")
@@ -212,7 +212,7 @@ except ImportError as e:
 
 # Monophonic melody/lead transcriber (clean lead lines, articulations)
 try:
-    from melody_transcriber import MelodyExtractor, transcribe_melody
+    from melody_transcriber import MelodyExtractor, transcribe_melody  # noqa: F401
     MELODY_TRANSCRIBER_AVAILABLE = True
     logger.info("Melody transcriber available (monophonic lead extraction, vibrato, bends)")
 except ImportError as e:
@@ -222,8 +222,8 @@ except ImportError as e:
 # Guitar tab model (CRNN neural network for string/fret prediction)
 try:
     from guitar_tab_transcriber import (
-        GuitarTabTranscriber, transcribe_guitar_tab,
-        GUITAR_TAB_MODEL_AVAILABLE as _gtm, is_available as guitar_tab_is_available
+        GuitarTabTranscriber, transcribe_guitar_tab,  # noqa: F401
+        GUITAR_TAB_MODEL_AVAILABLE as _gtm, is_available as guitar_tab_is_available  # noqa: F401
     )
     GUITAR_TAB_MODEL_AVAILABLE = _gtm
     if GUITAR_TAB_MODEL_AVAILABLE:
@@ -235,8 +235,8 @@ except ImportError as e:
 # Neural bass transcription model (CRNN trained on Slakh2100, 4-string x 24-fret)
 try:
     from bass_transcriber import (
-        BassTranscriber, transcribe_bass,
-        BASS_MODEL_AVAILABLE as _bma, is_available as bass_nn_is_available
+        BassTranscriber, transcribe_bass,  # noqa: F401
+        BASS_MODEL_AVAILABLE as _bma, is_available as bass_nn_is_available  # noqa: F401
     )
     BASS_MODEL_AVAILABLE = _bma
     if BASS_MODEL_AVAILABLE:
@@ -248,8 +248,8 @@ except ImportError as e:
 # Neural piano transcription model (CRNN trained on MAESTRO, 88 keys)
 try:
     from piano_transcriber import (
-        PianoTranscriber, transcribe_piano,
-        PIANO_MODEL_AVAILABLE as _pma, is_available as piano_nn_is_available
+        PianoTranscriber, transcribe_piano,  # noqa: F401
+        PIANO_MODEL_AVAILABLE as _pma, is_available as piano_nn_is_available  # noqa: F401
     )
     PIANO_MODEL_AVAILABLE = _pma
     if PIANO_MODEL_AVAILABLE:
@@ -260,7 +260,7 @@ except ImportError as e:
 
 # Internet Archive Live Music pipeline (search/browse/batch)
 try:
-    from archive_pipeline import ArchivePipeline, search_archive, get_show_info, get_pipeline as get_archive_pipeline
+    from archive_pipeline import ArchivePipeline, search_archive, get_show_info, get_pipeline as get_archive_pipeline  # noqa: F401
     ARCHIVE_PIPELINE_AVAILABLE = True
     logger.info("Archive.org Live Music pipeline available (250k+ free concert recordings)")
 except ImportError as e:
@@ -269,7 +269,7 @@ except ImportError as e:
 
 # MIDI to Guitar Pro conversion
 try:
-    from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp
+    from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp  # noqa: F401
     GP_CONVERTER_AVAILABLE = True
     logger.info("Guitar Pro converter available")
 except ImportError as e:
@@ -278,7 +278,7 @@ except ImportError as e:
 
 # MIDI to MusicXML notation conversion (articulations, melody mode, dynamics)
 try:
-    from midi_to_notation import midi_to_musicxml as _notation_convert, MUSIC21_AVAILABLE as _m21
+    from midi_to_notation import midi_to_musicxml as _notation_convert, MUSIC21_AVAILABLE as _m21  # noqa: F401
     NOTATION_CONVERTER_AVAILABLE = True
     MUSIC21_AVAILABLE = _m21
     logger.info("Notation converter available (articulations, dynamics, triplet quantization)")
@@ -289,9 +289,8 @@ except ImportError as e:
 
 # Ensemble separation system (Moises.ai-quality multi-model approach)
 try:
-    from separation import EnsembleSeparator, GPUManager
+    from separation import GPUManager
     _gpu_manager = GPUManager()
-    from demucs_runner import DemucsRunner, DemucsProgress
     ENSEMBLE_SEPARATOR_AVAILABLE = True
     logger.info(f"Ensemble separator available ({_gpu_manager.device_info.device_name}, {_gpu_manager.device_info.total_memory_gb:.1f}GB)")
 except Exception as e:
@@ -302,10 +301,10 @@ except Exception as e:
 # Extended band database (Phish, Allman Brothers, 70+ bands)
 try:
     from band_config import (
-        should_stereo_split as extended_should_stereo_split,
-        get_player_positions as get_extended_positions,
-        has_dual_drummers,
-        get_learning_tips as get_extended_tips,
+        should_stereo_split as extended_should_stereo_split,  # noqa: F401
+        get_player_positions as get_extended_positions,  # noqa: F401
+        has_dual_drummers,  # noqa: F401
+        get_learning_tips as get_extended_tips,  # noqa: F401
         STEREO_SPLIT_BANDS
     )
     EXTENDED_BAND_CONFIG_AVAILABLE = True

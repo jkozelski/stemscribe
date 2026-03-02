@@ -8,7 +8,7 @@ import threading
 import logging
 from flask import Blueprint, request, jsonify
 
-from models.job import ProcessingJob, jobs, OUTPUT_DIR
+from models.job import ProcessingJob, jobs
 from processing.pipeline import process_url
 from services.url_resolver import validate_url_no_ssrf as _validate_url_no_ssrf
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Conditional imports
 try:
     from archive_pipeline import (
-        ArchivePipeline, search_archive, get_show_info,
+        ArchivePipeline, search_archive, get_show_info,  # noqa: F401
         get_pipeline as get_archive_pipeline
     )
     ARCHIVE_PIPELINE_AVAILABLE = True
@@ -121,7 +121,7 @@ def archive_show_details(identifier):
     if not ARCHIVE_PIPELINE_AVAILABLE:
         return jsonify({'error': 'Archive.org pipeline not available', 'available': False}), 500
 
-    prefer_format = request.args.get('format', 'mp3')
+    _prefer_format = request.args.get('format', 'mp3')
 
     try:
         result = get_show_info(identifier)

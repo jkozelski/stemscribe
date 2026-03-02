@@ -26,7 +26,6 @@ Estimated time: ~30 minutes on any GPU.
 Output: /workspace/guitar_v3_data/probe_results.json
 """
 
-import os
 import sys
 import json
 import time
@@ -74,9 +73,9 @@ def preflight():
     if missing:
         print(f"  [FIX] Installing: {', '.join(missing)}")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + missing)
-        print(f"  [OK] Installed")
+        print("  [OK] Installed")
     else:
-        print(f"  [OK] Python deps present")
+        print("  [OK] Python deps present")
 
     # Piano checkpoint
     piano_ckpt = Path("/workspace/best_piano_model.pt")
@@ -126,16 +125,14 @@ preflight()
 # IMPORTS
 # ============================================================================
 
-import glob
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-import librosa
-import jams
-from tqdm import tqdm
-import warnings
+import numpy as np  # noqa: E402
+import torch  # noqa: E402
+import torch.nn as nn  # noqa: E402
+from torch.utils.data import Dataset, DataLoader  # noqa: E402
+import librosa  # noqa: E402
+import jams  # noqa: E402
+from tqdm import tqdm  # noqa: E402
+import warnings  # noqa: E402
 warnings.filterwarnings("ignore")
 
 
@@ -454,7 +451,7 @@ class GuitarProbeDataset(Dataset):
                     for f in range(max(0, onset_frame), min(num_frames, offset_frame)):
                         frame_target[key_idx, f] = 1.0
 
-        except Exception as e:
+        except Exception:
             pass  # Return zero targets on error
 
         # Pad/truncate to fixed size
@@ -611,7 +608,7 @@ def main():
     frame_criterion = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([5.0]).to(device))
 
     print(f"Onset loss: BCEWithLogitsLoss(pos_weight={POS_WEIGHT})")
-    print(f"Frame loss: BCEWithLogitsLoss(pos_weight=5.0)")
+    print("Frame loss: BCEWithLogitsLoss(pos_weight=5.0)")
     print(f"Optimizer: AdamW(lr={LEARNING_RATE})")
     print(f"Epochs: {NUM_EPOCHS}")
     print()

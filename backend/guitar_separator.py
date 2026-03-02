@@ -10,12 +10,11 @@ Architecture: MelBand-RoFormer (dim=192, depth=8, stereo, 2 stems)
 Checkpoint: train_guitar_model/models/last_mel_band_roformer.ckpt
 """
 
-import os
 import sys
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 import torch
 import soundfile as sf

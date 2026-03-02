@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 # Import our GP converter
-from midi_to_gp import convert_midi_to_gp
+from midi_to_gp import convert_midi_to_gp  # noqa: E402
 
 OUTPUTS_DIR = Path(__file__).parent.parent / 'outputs'
 

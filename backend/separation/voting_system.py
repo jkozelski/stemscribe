@@ -4,7 +4,7 @@ Select best stems from multiple model outputs using quality metrics
 """
 
 import numpy as np
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 import logging
 
 from .quality_metrics import QualityMetrics

@@ -29,7 +29,7 @@ from auth.models import (
     clear_payment_failed,
 )
 from billing.plans import plan_from_price_id
-from db import query_one, execute
+from db import query_one
 
 logger = logging.getLogger(__name__)
 

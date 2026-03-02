@@ -69,11 +69,11 @@ def preflight():
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + missing)
         print(f"  [OK] Installed {', '.join(missing)}")
     else:
-        print(f"  [OK] Python deps present")
+        print("  [OK] Python deps present")
 
     # Check for lxml (needed for IDMT XML parsing)
     try:
-        import xml.etree.ElementTree
+        import xml.etree.ElementTree  # noqa: F401
         print("  [OK] XML parser available")
     except ImportError:
         errors.append("xml.etree not available")
@@ -92,10 +92,10 @@ def preflight():
 
 preflight()
 
-import numpy as np
-import librosa
-import jams
-from tqdm import tqdm
+import numpy as np  # noqa: E402
+import librosa  # noqa: E402
+import jams  # noqa: E402
+from tqdm import tqdm  # noqa: E402
 
 # ============================================================================
 # CONFIG
@@ -414,7 +414,7 @@ def parse_idmt_xml(xml_path):
     try:
         tree = ET.parse(str(xml_path))
         root = tree.getroot()
-    except Exception as e:
+    except Exception:
         return []
 
     notes = []

@@ -16,15 +16,15 @@ Features:
 
 import logging
 from pathlib import Path
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass, asdict
 import json
 
 logger = logging.getLogger(__name__)
 
 try:
-    from music21 import converter, stream, chord as m21_chord, harmony, key, meter
-    from music21 import note as m21_note
+    from music21 import converter, stream, chord as m21_chord, harmony, key, meter  # noqa: F401
+    from music21 import note as m21_note  # noqa: F401
     MUSIC21_AVAILABLE = True
 except ImportError:
     MUSIC21_AVAILABLE = False
@@ -177,7 +177,7 @@ def _get_chord_quality(c: 'm21_chord.Chord') -> str:
             return 'half-diminished-seventh'
         else:
             return c.quality if hasattr(c, 'quality') else 'major'
-    except:
+    except Exception:
         return 'major'
 
 

@@ -14,7 +14,7 @@ import stripe
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from auth.models import get_user_by_id, update_user_plan
+from auth.models import get_user_by_id
 from billing.plans import PLANS, get_price_id
 
 logger = logging.getLogger(__name__)

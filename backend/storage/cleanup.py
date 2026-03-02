@@ -15,7 +15,6 @@ Usage:
     python -m storage.cleanup --dry-run    # Preview what would be deleted
 """
 
-import os
 import sys
 import logging
 from datetime import datetime, timezone, timedelta
@@ -55,7 +54,7 @@ def cleanup_old_jobs(days_free: int = 7, days_paid: int = 30,
         Dict with counts: {'source_deleted', 'jobs_deleted', 'files_deleted'}.
     """
     from db import query_all
-    from storage.r2 import delete_file, delete_job_files, source_key, list_job_files
+    from storage.r2 import delete_file, delete_job_files, list_job_files
 
     stats = {'source_deleted': 0, 'jobs_deleted': 0, 'files_deleted': 0}
     now = datetime.now(timezone.utc)

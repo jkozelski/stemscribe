@@ -5,7 +5,6 @@ Covers note-to-fret mapping, chord voicing, lead mode, and GP file generation.
 
 import sys
 import os
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -280,7 +279,7 @@ class TestGPFileGeneration:
 
     def test_convert_bass(self, simple_midi, tmp_path):
         try:
-            import guitarpro
+            import guitarpro  # noqa: F401
         except ImportError:
             pytest.skip("pyguitarpro not installed")
 
@@ -322,7 +321,7 @@ class TestGPFileGeneration:
 
     def test_auto_adds_gp5_extension(self, simple_midi, tmp_path):
         try:
-            import guitarpro
+            import guitarpro  # noqa: F401
         except ImportError:
             pytest.skip("pyguitarpro not installed")
 

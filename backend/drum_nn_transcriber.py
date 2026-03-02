@@ -431,7 +431,7 @@ class NeuralDrumTranscriber:
     # ----------------------------------------------------------------
 
     def _hits_to_midi(self, hits: List[dict],
-                      tempo: float = 120.0) -> 'pretty_midi.PrettyMIDI':
+                      tempo: float = 120.0) -> 'pretty_midi.PrettyMIDI':  # noqa: F821
         """
         Convert drum hits to MIDI.
 

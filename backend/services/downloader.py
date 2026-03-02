@@ -2,7 +2,6 @@
 Audio downloading from URLs via yt-dlp.
 """
 
-import os
 import re
 import json
 import subprocess

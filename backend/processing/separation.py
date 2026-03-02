@@ -12,7 +12,6 @@ import threading
 import logging
 from pathlib import Path
 
-import numpy as np
 
 from models.job import ProcessingJob, OUTPUT_DIR, save_job_checkpoint
 from processing.utils import convert_wavs_to_mp3
@@ -188,7 +187,6 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
     This beats pure Demucs by ~3 dB SDR on vocals and produces cleaner
     instrument stems by keeping vocal bleed out of the Demucs pass.
     """
-    import gc
 
     # Wait for GPU availability (only one separation at a time)
     if not _separation_semaphore.acquire(blocking=False):
@@ -289,7 +287,7 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
 
         if vocals_mp3.exists():
             job.stems['vocals'] = str(vocals_mp3)
-            logger.info(f"  ✅ vocals (RoFormer SDR 12.9)")
+            logger.info("  ✅ vocals (RoFormer SDR 12.9)")
         else:
             # Fallback: use the WAV directly
             job.stems['vocals'] = vocals_path
@@ -303,7 +301,7 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
             # Skip Demucs "vocals" — RoFormer's is better
             for stem_name, stem_path in demucs_mp3s.items():
                 if stem_name == 'vocals':
-                    logger.info(f"  ⏭️ Skipping Demucs vocals (using RoFormer instead)")
+                    logger.info("  ⏭️ Skipping Demucs vocals (using RoFormer instead)")
                     continue
                 job.stems[stem_name] = stem_path
                 logger.info(f"  ✅ {stem_name} (Demucs)")
@@ -312,7 +310,7 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
             raise Exception("Ensemble separation produced too few stems")
 
         logger.info(f"RoFormer+Demucs ensemble complete: {len(job.stems)} stems")
-        logger.info(f"   Vocals: BS-RoFormer (SDR 12.9) | Instruments: Demucs htdemucs_6s")
+        logger.info("   Vocals: BS-RoFormer (SDR 12.9) | Instruments: Demucs htdemucs_6s")
         save_job_checkpoint(job)
         return True
 
@@ -354,7 +352,6 @@ def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar
         logger.error("audio-separator not installed. Install with: pip install audio-separator")
         return False
 
-    import gc
 
     # Wait for GPU availability (only one separation at a time)
     if not _separation_semaphore.acquire(blocking=False):
@@ -368,7 +365,7 @@ def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar
         job.stage = 'HYBRID: Starting multi-model separation'
         job.progress = 10
         logger.info(f"Starting HYBRID stem separation for {audio_path}")
-        logger.info(f"   Strategy: MDX23C (vocals) -> htdemucs_6s (all instruments)")
+        logger.info("   Strategy: MDX23C (vocals) -> htdemucs_6s (all instruments)")
 
         output_path = OUTPUT_DIR / job.job_id / 'stems' / 'hybrid'
         output_path.mkdir(parents=True, exist_ok=True)
@@ -474,7 +471,7 @@ def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar
         if len(job.stems) < 3:
             raise Exception("Not enough stems were generated")
 
-        logger.info(f"✅ HYBRID separation complete!")
+        logger.info("✅ HYBRID separation complete!")
         logger.info(f"   Final stems: {list(job.stems.keys())}")
         return True
 

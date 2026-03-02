@@ -4,9 +4,7 @@ User model — CRUD operations against Supabase/Postgres.
 No ORM; plain SQL via db.py helpers.
 """
 
-import uuid
 import logging
-from datetime import datetime, timezone
 
 from passlib.hash import bcrypt
 

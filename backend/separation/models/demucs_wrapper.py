@@ -5,8 +5,7 @@ Unified interface for all Demucs model variants
 
 import logging
 import numpy as np
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 import asyncio
 
 logger = logging.getLogger(__name__)
@@ -102,7 +101,7 @@ class DemucsWrapper:
             return
 
         try:
-            import torch
+            import torch  # noqa: F401
             from demucs.pretrained import get_model
             from demucs.apply import apply_model
 

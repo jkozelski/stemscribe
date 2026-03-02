@@ -146,7 +146,7 @@ def main():
                         with open(job_file) as f:
                             data = json.load(f)
                             has_chords = bool(data.get('chord_progression'))
-                    except:
+                    except Exception:
                         pass
                 status = "✅ has chords" if has_chords else "❌ no chords"
                 print(f"  {job_dir.name} - {status}")

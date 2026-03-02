@@ -20,8 +20,7 @@ General MIDI Drum Map (Standard):
 
 import numpy as np
 import logging
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -508,7 +507,7 @@ class EnhancedDrumTranscriber:
             quality_score=quality
         )
 
-        logger.info(f"✅ Drum transcription complete:")
+        logger.info("✅ Drum transcription complete:")
         logger.info(f"   Total: {stats.total_hits} hits")
         logger.info(f"   Ghost notes: {stats.ghost_notes}")
         logger.info(f"   By type: {stats.hits_by_type}")

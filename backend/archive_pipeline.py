@@ -28,8 +28,8 @@ Usage:
 import logging
 import time
 import re
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -318,7 +318,6 @@ class ArchivePipeline:
 
         files = data['result']
         tracks = []
-        seen_titles = set()
 
         for f in files:
             filename = f.get('name', '')

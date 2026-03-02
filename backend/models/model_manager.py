@@ -9,12 +9,10 @@ Handles downloading, caching, and loading pretrained models for:
 Models are downloaded automatically on first use and cached locally.
 """
 
-import os
 import logging
 from pathlib import Path
 from typing import Dict, Optional, Any
 import urllib.request
-import hashlib
 import zipfile
 import tarfile
 

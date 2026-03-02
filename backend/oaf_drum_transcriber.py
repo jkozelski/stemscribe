@@ -15,7 +15,7 @@ The OaF Drums model achieves state-of-the-art drum transcription by:
 
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Tuple, List
+from typing import Dict, Optional
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ except ImportError:
 BASIC_PITCH_AVAILABLE = False
 try:
     from basic_pitch.inference import predict
-    from basic_pitch import ICASSP_2022_MODEL_PATH
+    from basic_pitch import ICASSP_2022_MODEL_PATH  # noqa: F401
     BASIC_PITCH_AVAILABLE = True
     logger.info("✅ basic-pitch available")
 except ImportError:
@@ -56,8 +56,8 @@ except ImportError:
 try:
     from drum_transcriber_v2 import (
         EnhancedDrumTranscriber,
-        transcribe_drums_to_midi,
-        GM_DRUMS
+        transcribe_drums_to_midi,  # noqa: F401
+        GM_DRUMS  # noqa: F401
     )
     SPECTRAL_AVAILABLE = True
 except ImportError:

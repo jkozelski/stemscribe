@@ -5,12 +5,11 @@ Contains process_audio (the main pipeline) and process_url (URL wrapper).
 """
 
 import os
-import subprocess
 import logging
 from pathlib import Path
 
 from models.job import (
-    ProcessingJob, jobs, save_job_to_disk, save_job_checkpoint,
+    ProcessingJob, save_job_to_disk, save_job_checkpoint,
     OUTPUT_DIR, UPLOAD_DIR,
 )
 from processing.separation import (
@@ -19,8 +18,7 @@ from processing.separation import (
 )
 from processing.smart_extract import smart_separate
 from processing.transcription import (
-    transcribe_to_midi, detect_chords_for_job, convert_midi_to_musicxml, quantize_midi,
-    CHORD_DETECTOR_AVAILABLE, GP_CONVERTER_AVAILABLE,
+    transcribe_to_midi, detect_chords_for_job, convert_midi_to_musicxml, CHORD_DETECTOR_AVAILABLE, GP_CONVERTER_AVAILABLE,
 )
 from services.downloader import download_from_url
 
@@ -45,13 +43,13 @@ except ImportError:
     ENHANCER_AVAILABLE = False
 
 try:
-    from skills import get_skill, get_all_skills, apply_skill, SKILL_REGISTRY, analyze_stems_for_skills
+    from skills import get_skill, get_all_skills, apply_skill, SKILL_REGISTRY, analyze_stems_for_skills  # noqa: F401
     SKILLS_AVAILABLE = True
 except ImportError:
     SKILLS_AVAILABLE = False
 
 try:
-    from track_info import fetch_track_info, extract_artist_from_title, should_stereo_split
+    from track_info import fetch_track_info, extract_artist_from_title, should_stereo_split  # noqa: F401
     TRACK_INFO_AVAILABLE = True
 except ImportError:
     TRACK_INFO_AVAILABLE = False

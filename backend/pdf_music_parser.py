@@ -20,7 +20,7 @@ import tempfile
 import json
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -43,7 +43,7 @@ except ImportError:
 
 PIL_AVAILABLE = False
 try:
-    from PIL import Image
+    from PIL import Image  # noqa: F401
     PIL_AVAILABLE = True
 except ImportError:
     logger.warning("Pillow not installed: pip install Pillow")
@@ -177,7 +177,7 @@ class PDFMusicParser:
     def _check_omr_available(self) -> bool:
         """Check if Audiveris OMR is available."""
         try:
-            result = subprocess.run(
+            _result = subprocess.run(
                 ['audiveris', '-help'],
                 capture_output=True,
                 timeout=5
@@ -518,7 +518,7 @@ class PDFMusicParser:
     def _find_first_song_page(self, doc) -> int:
         """Find the first actual song page (skip TOC)."""
         for i in range(min(10, len(doc))):
-            text = doc[i].get_text().lower()
+            _text = doc[i].get_text().lower()
             # Look for musical content indicators
             if self.CHORD_PATTERN.search(doc[i].get_text()):
                 return i
@@ -621,7 +621,6 @@ class TrainingDataGenerator:
 # ============================================================================
 
 if __name__ == '__main__':
-    import sys
     import argparse
 
     logging.basicConfig(

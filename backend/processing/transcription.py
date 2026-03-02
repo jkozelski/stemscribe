@@ -5,13 +5,10 @@ Contains the main transcribe_to_midi routing function which dispatches to the
 appropriate transcriber (neural, Basic Pitch, melody, etc.) per stem type.
 """
 
-import os
-import json
 import logging
 from pathlib import Path
 
-from models.job import ProcessingJob, OUTPUT_DIR, save_job_to_disk, save_job_checkpoint
-from processing.utils import check_stem_has_content
+from models.job import ProcessingJob, OUTPUT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -24,19 +21,19 @@ except ImportError:
     DRUM_TRANSCRIBER_AVAILABLE = False
 
 try:
-    from transcriber_enhanced import EnhancedTranscriber, transcribe_with_enhanced
+    from transcriber_enhanced import EnhancedTranscriber, transcribe_with_enhanced  # noqa: F401
     ENHANCED_TRANSCRIBER_AVAILABLE = True
 except ImportError:
     ENHANCED_TRANSCRIBER_AVAILABLE = False
 
 try:
-    from drum_transcriber_v2 import EnhancedDrumTranscriber, transcribe_drums_to_midi as transcribe_drums_v2
+    from drum_transcriber_v2 import EnhancedDrumTranscriber, transcribe_drums_to_midi as transcribe_drums_v2  # noqa: F401
     DRUM_TRANSCRIBER_V2_AVAILABLE = True
 except ImportError:
     DRUM_TRANSCRIBER_V2_AVAILABLE = False
 
 try:
-    from oaf_drum_transcriber import OaFDrumTranscriber, transcribe_drums, OAF_AVAILABLE
+    from oaf_drum_transcriber import OaFDrumTranscriber, transcribe_drums, OAF_AVAILABLE  # noqa: F401
     OAF_DRUM_TRANSCRIBER_AVAILABLE = True
 except ImportError:
     OAF_DRUM_TRANSCRIBER_AVAILABLE = False
@@ -44,54 +41,54 @@ except ImportError:
 
 try:
     from drum_nn_transcriber import (
-        NeuralDrumTranscriber, transcribe_drums_nn,
-        DRUM_NN_MODEL_AVAILABLE, is_available as drum_nn_is_available
+        NeuralDrumTranscriber, transcribe_drums_nn,  # noqa: F401
+        DRUM_NN_MODEL_AVAILABLE, is_available as drum_nn_is_available  # noqa: F401
     )
 except ImportError:
     DRUM_NN_MODEL_AVAILABLE = False
 
 try:
-    from melody_transcriber import MelodyExtractor, transcribe_melody
+    from melody_transcriber import MelodyExtractor, transcribe_melody  # noqa: F401
     MELODY_TRANSCRIBER_AVAILABLE = True
 except ImportError:
     MELODY_TRANSCRIBER_AVAILABLE = False
 
 try:
     from guitar_nn_transcriber import (
-        GuitarNNTranscriber, transcribe_guitar_nn,
-        GUITAR_NN_MODEL_AVAILABLE, is_available as guitar_nn_is_available
+        GuitarNNTranscriber, transcribe_guitar_nn,  # noqa: F401
+        GUITAR_NN_MODEL_AVAILABLE, is_available as guitar_nn_is_available  # noqa: F401
     )
 except ImportError:
     GUITAR_NN_MODEL_AVAILABLE = False
 
 try:
     from bass_nn_transcriber import (
-        BassNNTranscriber, transcribe_bass_nn,
-        BASS_NN_MODEL_AVAILABLE, is_available as bass_nn_v3_is_available
+        BassNNTranscriber, transcribe_bass_nn,  # noqa: F401
+        BASS_NN_MODEL_AVAILABLE, is_available as bass_nn_v3_is_available  # noqa: F401
     )
 except ImportError:
     BASS_NN_MODEL_AVAILABLE = False
 
 try:
     from guitar_tab_transcriber import (
-        GuitarTabTranscriber, transcribe_guitar_tab,
-        GUITAR_TAB_MODEL_AVAILABLE, is_available as guitar_tab_is_available
+        GuitarTabTranscriber, transcribe_guitar_tab,  # noqa: F401
+        GUITAR_TAB_MODEL_AVAILABLE, is_available as guitar_tab_is_available  # noqa: F401
     )
 except ImportError:
     GUITAR_TAB_MODEL_AVAILABLE = False
 
 try:
     from bass_transcriber import (
-        BassTranscriber, transcribe_bass,
-        BASS_MODEL_AVAILABLE, is_available as bass_nn_is_available
+        BassTranscriber, transcribe_bass,  # noqa: F401
+        BASS_MODEL_AVAILABLE, is_available as bass_nn_is_available  # noqa: F401
     )
 except ImportError:
     BASS_MODEL_AVAILABLE = False
 
 try:
     from piano_transcriber import (
-        PianoTranscriber, transcribe_piano,
-        PIANO_MODEL_AVAILABLE, is_available as piano_nn_is_available
+        PianoTranscriber, transcribe_piano,  # noqa: F401
+        PIANO_MODEL_AVAILABLE, is_available as piano_nn_is_available  # noqa: F401
     )
 except ImportError:
     PIANO_MODEL_AVAILABLE = False
@@ -108,14 +105,14 @@ except ImportError:
         CHORD_DETECTOR_VERSION = "v7"
     except ImportError:
         try:
-            from chord_detector import ChordDetector, detect_chords
+            from chord_detector import ChordDetector, detect_chords  # noqa: F401
             CHORD_DETECTOR_AVAILABLE = True
             CHORD_DETECTOR_VERSION = "basic"
         except ImportError:
             CHORD_DETECTOR_AVAILABLE = False
 
 try:
-    from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp
+    from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp  # noqa: F401
     GP_CONVERTER_AVAILABLE = True
 except ImportError:
     GP_CONVERTER_AVAILABLE = False
@@ -328,7 +325,7 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                             successful += 1
                             continue
                         else:
-                            logger.warning(f"OaF returned no hits, trying v2")
+                            logger.warning("OaF returned no hits, trying v2")
                     except Exception as e:
                         logger.warning(f"OaF drum transcriber failed: {e}")
 

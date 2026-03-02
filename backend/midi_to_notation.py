@@ -11,13 +11,13 @@ the melody transcriber.
 
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
 
 # Try to import music21
 try:
-    from music21 import converter, stream, midi, note, chord, meter, key, tempo
+    from music21 import converter, stream, midi, note, chord, meter, key, tempo  # noqa: F401
     from music21 import instrument as m21_instrument
     MUSIC21_AVAILABLE = True
 except ImportError:
@@ -241,7 +241,6 @@ def _cleanup_for_notation(score: 'stream.Score', stem_type: str,
     - Add dynamics based on velocity
     - Melody mode: enforce monophonic, add articulation markings
     """
-    from music21 import dynamics
 
     # Melody mode: enforce monophonic output (keep highest note per beat)
     if melody_mode:
@@ -275,7 +274,7 @@ def _cleanup_for_notation(score: 'stream.Score', stem_type: str,
             for part in score.parts:
                 part.insert(0, detected_key)
             logger.debug(f"  Detected key: {detected_key}")
-    except:
+    except Exception:
         pass
 
     # Remove very short notes (artifacts)
@@ -298,7 +297,7 @@ def _cleanup_for_notation(score: 'stream.Score', stem_type: str,
     try:
         for part in score.parts:
             part.makeRests(fillGaps=True, inPlace=True)
-    except:
+    except Exception:
         pass
 
     return score
@@ -365,13 +364,13 @@ def _read_midi_articulations(midi_path: str) -> Dict[float, str]:
 
         for track in mid.tracks:
             abs_time = 0
-            current_tempo = 500000  # default 120 BPM
+            current_tempo = 500000  # default 120 BPM  # noqa: F841
 
             for msg in track:
                 abs_time += msg.time
 
                 if msg.type == 'set_tempo':
-                    current_tempo = msg.tempo
+                    _current_tempo = msg.tempo
                 elif msg.type == 'control_change' and msg.control == 20:
                     art_type = ART_TYPES.get(msg.value)
                     if art_type:

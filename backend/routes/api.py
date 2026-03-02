@@ -12,9 +12,7 @@ from pathlib import Path
 from flask import Blueprint, request, jsonify, send_file
 
 from models.job import (
-    ProcessingJob, jobs, get_job, save_job_to_disk,
-    OUTPUT_DIR, UPLOAD_DIR,
-    convert_numpy_types,
+    ProcessingJob, jobs, get_job, OUTPUT_DIR, UPLOAD_DIR,
 )
 from processing.pipeline import process_audio, process_url
 from services.url_resolver import (

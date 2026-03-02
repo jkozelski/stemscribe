@@ -6,10 +6,8 @@ run without external services.
 """
 
 import os
-import json
 from unittest.mock import patch, MagicMock
 
-import pytest
 
 # Set test env vars before any billing imports
 os.environ.setdefault('STRIPE_PRICE_PREMIUM_MONTHLY', 'price_test_pm')
