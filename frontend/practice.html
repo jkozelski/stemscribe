@@ -4143,11 +4143,15 @@
             // --- Step 3 & 4: Try manual/auto chord chart (always — even when Songsterr has tabs but no chords) ---
             if (currentJob && currentJob.job_id) {
                 try {
-                    var chartResp = await fetchWithTimeout(API_BASE + '/chord-chart/' + currentJob.job_id);
+                    var chartResp = await fetchWithTimeout(API_BASE + '/chord-sheet/job/' + currentJob.job_id);
                     if (chartResp.ok) {
                         var chartData = await chartResp.json();
                         if (chartData.sections && chartData.sections.length > 0) {
                             renderManualChordChart(chartData);
+                        } else if (chartData.chord_events && chartData.chord_events.length > 0) {
+                            // chord_sheet endpoint returned chord_events + content but no sections
+                            // Render the content as a simple chord sheet with lyrics
+                            renderChordSheetContent(chartData);
                             return;
                         }
                     }
@@ -4995,7 +4999,7 @@
                 currentManualChart.sections[sectionIdx].lines[lineIdx].chords = val;
                 // Save back to server
                 if (currentJob) {
-                    fetch(API_BASE + '/chord-chart/' + currentJob.job_id, {
+                    fetch(API_BASE + '/chord-sheet/job/' + currentJob.job_id, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(currentManualChart)
@@ -5009,7 +5013,7 @@
             showChordInput('Edit lyrics', lyricText, function(val) {
                 currentManualChart.sections[sectionIdx].lines[lineIdx].lyrics = val;
                 if (currentJob) {
-                    fetch(API_BASE + '/chord-chart/' + currentJob.job_id, {
+                    fetch(API_BASE + '/chord-sheet/job/' + currentJob.job_id, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(currentManualChart)
@@ -5017,6 +5021,45 @@
                 }
                 renderManualChordChart(currentManualChart);
             });
+        }
+
+
+        function renderChordSheetContent(data) {
+            var chordChart = document.getElementById("chordChart");
+            if (!chordChart) return;
+            chordChart.classList.add("visible");
+
+            var html = "<div style="padding:1.5rem; font-family:Fira Code,monospace; font-size:0.9rem; line-height:1.8;">";
+            html += "<div style="font-family:Righteous,cursive; font-size:1.4rem; margin-bottom:0.25rem;">" + (data.title || "") + "</div>";
+            html += "<div style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.5rem;">" + (data.artist || "") + " &bull; Key: " + (data.key || "?") + " &bull; Source: " + (data.source || "AI") + "</div>";
+            
+            // Parse the content field - replace [ch]X[/ch] with styled chord spans
+            var raw = data.content || "";
+            var lines = raw.split("\n");
+            
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if (!line) { html += "<br>"; continue; }
+                
+                // Replace [ch]X[/ch] with colored chord spans
+                var rendered = line.replace(/\[ch\](.*?)\[\/ch\]/g, 
+                    "<span style=\"color:var(--yellow); font-weight:600; padding:0 0.3rem;\">$1</span>");
+                
+                html += "<div style=\"margin:0.15rem 0;\">" + rendered + "</div>";
+            }
+            
+            // Also show lyrics if available from LRCLIB
+            if (data.synced_lyrics && data.synced_lyrics.length > 0) {
+                html += "<div style=\"margin-top:1.5rem; border-top:1px solid var(--border); padding-top:1rem;\">";
+                html += "<div style=\"color:var(--orange); font-weight:600; margin-bottom:0.5rem;\">[Lyrics]</div>";
+                data.synced_lyrics.forEach(function(l) {
+                    html += "<div>" + (l.text || "") + "</div>";
+                });
+                html += "</div>";
+            }
+            
+            html += "</div>";
+            chordChart.innerHTML = html;
         }
 
         function renderManualChordChart(data) {
