@@ -1,4 +1,4 @@
-# StemScribe Deployment Guide
+# StemScriberr Deployment Guide
 
 ## Architecture Overview
 
@@ -145,10 +145,10 @@ print(output)
 ```
 1. Create Stripe account at stripe.com
 2. Create Products:
-   - StemScribe Premium ($4.99/mo)
-   - StemScribe Pro ($14.99/mo)
-   - StemScribe Premium Annual ($39.99/yr) -- save 33%
-   - StemScribe Pro Annual ($119.99/yr) -- save 33%
+   - StemScriberr Premium ($4.99/mo)
+   - StemScriberr Pro ($14.99/mo)
+   - StemScriberr Premium Annual ($39.99/yr) -- save 33%
+   - StemScriberr Pro Annual ($119.99/yr) -- save 33%
 3. Set up webhook endpoint: https://api.stemscribe.app/webhooks/stripe
 4. Listen for events:
    - checkout.session.completed

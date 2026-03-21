@@ -1,5 +1,5 @@
 """
-StemScribe Skills System
+StemScriber Skills System
 ========================
 Skills are specialized processing chains that can:
 1. Post-process existing stems (EQ, filtering, enhancement)

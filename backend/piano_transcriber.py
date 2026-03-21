@@ -1,5 +1,5 @@
 """
-Neural Piano Transcriber for StemScribe
+Neural Piano Transcriber for StemScriber
 =======================================
 Uses a trained CRNN (Mel -> Conv2d -> BiLSTM -> onset/frame/velocity)
 to transcribe piano audio into MIDI with 88-key polyphonic output.

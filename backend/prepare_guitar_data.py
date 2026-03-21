@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Guitar Dataset Preparation for StemScribe v3
+Guitar Dataset Preparation for StemScriber v3
 =============================================
 Downloads GuitarSet (Zenodo) + IDMT-SMT-Guitar, parses JAMS/XML annotations
 into a common JSON manifest format, and creates stratified train/val/test splits.
@@ -638,7 +638,7 @@ def assign_splits(entries):
 
 def main():
     print("=" * 60)
-    print("Guitar Data Preparation for StemScribe v3")
+    print("Guitar Data Preparation for StemScriber v3")
     print("=" * 60)
     print()
 

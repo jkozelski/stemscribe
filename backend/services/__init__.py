@@ -1,1 +1,1 @@
-"""StemScribe services — URL resolution, downloading, etc."""
+"""StemScriber services — URL resolution, downloading, etc."""

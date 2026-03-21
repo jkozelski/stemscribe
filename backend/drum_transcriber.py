@@ -1,5 +1,5 @@
 """
-Drum Transcription Module for StemScribe - Improved Version
+Drum Transcription Module for StemScriber - Improved Version
 
 Uses onset detection + multi-band frequency analysis to transcribe drums to MIDI.
 Detects: kick, snare, hi-hat (closed/open), toms, crash, ride

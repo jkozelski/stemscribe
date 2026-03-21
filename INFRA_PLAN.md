@@ -1,4 +1,4 @@
-# StemScribe Infrastructure Plan
+# StemScriberr Infrastructure Plan
 ## Auth, Billing, Rate Limiting & Deployment
 
 **Author:** Dev agent
@@ -143,7 +143,7 @@ These routes remain open (no JWT needed):
 | Pro | $14.99/mo | $119.99/yr (save 33%) | stemscribe_pro |
 
 ### Setup Steps (Stripe Dashboard)
-1. Create 2 Products: `StemScribe Premium`, `StemScribe Pro`
+1. Create 2 Products: `StemScriberr Premium`, `StemScriberr Pro`
 2. Each product gets 2 Prices: monthly recurring + annual recurring
 3. Store the 4 Price IDs as env vars
 4. Register webhook endpoint: `https://api.stemscribe.app/webhooks/stripe`
@@ -751,7 +751,7 @@ GPU costs dominate. At ~2,000 users, consider:
 
 6. **Redis:** Railway offers a Redis plugin ($5/mo). Useful for Flask-Limiter and job queuing. For MVP, in-memory rate limiting + threading is sufficient. Add Redis when we need Celery for job queues.
 
-7. **Email Provider:** Resend is already set up for Tidepool. Reuse it for StemScribe? Or set up a separate Resend domain for `stemscribe.app`? Recommend: separate domain, same Resend account.
+7. **Email Provider:** Resend is already set up for Tidepool. Reuse it for StemScriberr? Or set up a separate Resend domain for `stemscribe.app`? Recommend: separate domain, same Resend account.
 
 8. **Monitoring:** Sentry (free tier) for error tracking, UptimeRobot for health checks. Add during Phase E deployment.
 

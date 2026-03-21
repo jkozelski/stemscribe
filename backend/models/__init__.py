@@ -1,5 +1,5 @@
 """
-StemScribe Models Module
+StemScriber Models Module
 ========================
 Handles ML model management, downloading, and inference.
 """

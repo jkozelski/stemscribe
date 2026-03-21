@@ -1,5 +1,5 @@
-// StemScribe — Upload / File Handling / URL Input
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Upload / File Handling / URL Input
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -122,4 +122,4 @@ window.StemScribe = window.StemScribe || {};
         }
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

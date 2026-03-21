@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StemScribe — Tear The Sound Apart</title>
+    <title>StemScriber — Tear The Sound Apart</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff7b54">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="StemScribe">
+    <meta name="apple-mobile-web-app-title" content="StemScriber">
     <link rel="apple-touch-icon" href="/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
     <meta name="description" content="Upload any song. Get separated stems, Guitar Pro tabs, chord detection, and practice tools for every instrument. The only end-to-end audio-to-tab platform.">
-    <meta property="og:title" content="StemScribe — Tear The Sound Apart">
+    <meta property="og:title" content="StemScriber — Tear The Sound Apart">
     <meta property="og:description" content="Upload any song. Get stems, tabs, and Guitar Pro files for every instrument.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://stemscribe.io">
@@ -35,8 +35,8 @@
     <!-- Nav -->
     <nav class="landing-nav">
         <a href="/" class="logo">
-            <img src="/images/logomark.png" alt="StemScribe logo" class="logo-img" width="36" height="36">
-            <span class="logo-text">StemScribe</span>
+            <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="36" height="36">
+            <span class="logo-text">StemScriber</span>
         </a>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">&#9776;</button>
         <div class="nav-links-landing" id="navLinksLanding">
@@ -50,7 +50,7 @@
             </button>
             <!-- Auth: Profile Dropdown (shown when logged in) -->
             <div class="auth-profile-dropdown">
-                <button class="auth-profile-btn" onclick="StemScribe.toggleProfileMenu(event)">
+                <button class="auth-profile-btn" onclick="StemScriber.toggleProfileMenu(event)">
                     <img class="auth-profile-avatar" src="" alt="">
                     <span class="auth-profile-name"></span>
                     <span class="auth-profile-chevron">&#9662;</span>
@@ -64,7 +64,7 @@
                     <a href="/app" class="auth-menu-item">My Library</a>
                     <div class="auth-beta-input-row">
                         <input type="text" class="auth-beta-input" placeholder="STEM-XXXX-XXXX" maxlength="14">
-                        <button class="auth-beta-submit" onclick="StemScribe.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
+                        <button class="auth-beta-submit" onclick="StemScriber.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
                     </div>
                     <div class="auth-menu-divider"></div>
                     <button class="auth-menu-item danger" onclick="logout()">Sign Out</button>
@@ -115,7 +115,7 @@
                 <div class="step-number">2</div>
                 <div class="step-icon"><img src="icons/custom/features/48/step-separate.png" width="36" height="36" style="border-radius:6px;"></div>
                 <div class="step-title">Separates &amp; Transcribes</div>
-                <div class="step-desc">StemScribe isolates 6 stems (vocals, guitar, bass, drums, piano, other) and transcribes each instrument to MIDI and Guitar Pro tabs.</div>
+                <div class="step-desc">StemScriber isolates 6 stems (vocals, guitar, bass, drums, piano, other) and transcribes each instrument to MIDI and Guitar Pro tabs.</div>
             </div>
             <div class="step-card">
                 <div class="step-number">3</div>
@@ -175,14 +175,14 @@
 
     <!-- Comparison -->
     <section class="landing-section comparison-section">
-        <div class="section-label">Why StemScribe</div>
+        <div class="section-label">Why StemScriber</div>
         <h2 class="section-title">Stop Paying for Two Tools</h2>
         <p class="section-subtitle" style="margin-left:auto;margin-right:auto;">
-            Every competitor does EITHER stem separation OR tab transcription. StemScribe does both.
+            Every competitor does EITHER stem separation OR tab transcription. StemScriber does both.
         </p>
         <div class="comparison-cards">
             <div class="compare-card them">
-                <div class="compare-label them-label">Without StemScribe</div>
+                <div class="compare-label them-label">Without StemScriber</div>
                 <div class="compare-price">$36.98<span class="price-amount"><span class="period">/mo</span></span></div>
                 <div class="compare-price-note">Moises Pro + Klangio Studio Pro</div>
                 <ul class="compare-list">
@@ -195,7 +195,7 @@
             </div>
             <div class="compare-vs">vs</div>
             <div class="compare-card us">
-                <div class="compare-label us-label">StemScribe Pro</div>
+                <div class="compare-label us-label">StemScriber Pro</div>
                 <div class="compare-price">$10<span class="price-amount"><span class="period">/mo</span></span></div>
                 <div class="compare-price-note">Everything in one upload</div>
                 <ul class="compare-list">
@@ -272,7 +272,7 @@
             <div class="beta-badge-landing">Beta Access</div>
             <h3 class="beta-title">Got an Invite Code?</h3>
             <p class="beta-desc">
-                StemScribe is currently in private beta. If you have an invite code, redeem it to unlock full access.
+                StemScriber is currently in private beta. If you have an invite code, redeem it to unlock full access.
             </p>
             <div class="beta-form">
                 <input type="text" class="beta-input" id="betaCodeInput" placeholder="STEM-XXXX-XXXX" maxlength="14">
@@ -288,8 +288,8 @@
     <footer class="landing-footer">
         <div class="footer-inner">
             <div class="footer-brand">
-                <img src="/images/logomark.png" alt="StemScribe logo" class="logo-img" width="28" height="28">
-                <span class="logo-text">StemScribe</span>
+                <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="28" height="28">
+                <span class="logo-text">StemScriber</span>
             </div>
             <div class="footer-links">
                 <a href="mailto:stemscribe.io@gmail.com">Contact</a>
@@ -307,7 +307,7 @@
                 <a href="/billing-faq.html">Billing FAQ</a>
             </div>
             <div class="footer-copy">
-                &copy; 2026 StemScribe
+                &copy; 2026 StemScriber
             </div>
         </div>
     </footer>
@@ -316,7 +316,7 @@
     <script src="js/auth.js"></script>
     <script>
         // Initialize auth
-        StemScribe.initAuth();
+        StemScriber.initAuth();
 
         // Mobile menu toggle
         document.getElementById('mobileMenuToggle').addEventListener('click', function() {

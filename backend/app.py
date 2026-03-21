@@ -1,5 +1,5 @@
 """
-StemScribe - Audio Stem Separation & Transcription API
+StemScriber - Audio Stem Separation & Transcription API
 
 Thin app factory — all logic lives in routes/, processing/, models/, services/.
 """
@@ -141,7 +141,7 @@ app = create_app()
 
 if __name__ == '__main__':
     import shutil
-    logger.info("Starting StemScribe API server...")
+    logger.info("Starting StemScriber API server...")
     logger.info(f"yt-dlp available: {shutil.which('yt-dlp') is not None}")
 
     port = int(os.environ.get('PORT', 5555))

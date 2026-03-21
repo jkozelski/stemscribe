@@ -1,5 +1,5 @@
 """
-StemScribe Advanced Audio Separation System
+StemScriber Advanced Audio Separation System
 Moises.ai-quality separation using open-source ensemble models
 """
 

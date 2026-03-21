@@ -1,5 +1,5 @@
 """
-Model Manager for StemScribe
+Model Manager for StemScriber
 ============================
 Handles downloading, caching, and loading pretrained models for:
 - BS-RoFormer / MelBand-RoFormer (vocals separation)
@@ -116,7 +116,7 @@ MODELS = {
 
 class ModelManager:
     """
-    Manages downloading, caching, and loading of ML models for StemScribe.
+    Manages downloading, caching, and loading of ML models for StemScriber.
     """
 
     def __init__(self, model_dir: Optional[str] = None):

@@ -1,5 +1,5 @@
 """
-GPU/MPS Memory Manager for StemScribe
+GPU/MPS Memory Manager for StemScriber
 Optimized for Apple Silicon M3 Max and NVIDIA GPUs
 """
 

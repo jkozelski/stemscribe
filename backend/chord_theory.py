@@ -1,5 +1,5 @@
 """
-Chord Theory Engine for StemScribe
+Chord Theory Engine for StemScriber
 ===================================
 Maps chords to scales, modes, and practice suggestions.
 Based on standard music theory (triads/7ths over bass notes, polychords).
@@ -359,7 +359,7 @@ CHORD_FUNCTION_MAP = {
 class ChordTheoryEngine:
     """
     Analyzes chords and provides scale suggestions, practice tips,
-    and music theory context for StemScribe's practice mode.
+    and music theory context for StemScriber's practice mode.
     """
 
     def __init__(self):

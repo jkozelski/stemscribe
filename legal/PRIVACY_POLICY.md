@@ -1,11 +1,11 @@
-# StemScribe - Privacy Policy
+# StemScriberr - Privacy Policy
 
 **Effective Date:** [INSERT DATE]
 **Last Updated:** February 2026
 
 ## 1. Introduction
 
-StemScribe ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and share information when you use our audio processing service.
+StemScriberr ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and share information when you use our audio processing service.
 
 ## 2. Information We Collect
 
@@ -113,7 +113,7 @@ If you are in the EU/EEA, our legal basis for processing is:
 
 ## 10. Children's Privacy
 
-StemScribe is not intended for children under 13. We do not knowingly collect information from children under 13. If we discover we have collected such information, we will delete it promptly.
+StemScriberr is not intended for children under 13. We do not knowingly collect information from children under 13. If we discover we have collected such information, we will delete it promptly.
 
 ## 11. International Data Transfers
 

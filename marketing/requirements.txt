@@ -1,4 +1,4 @@
-# StemScribe AI Marketing & Research Team
+# StemScriberr AI Marketing & Research Team
 # CrewAI Agent Framework
 crewai[tools]>=0.80.0
 crewai-tools>=0.14.0

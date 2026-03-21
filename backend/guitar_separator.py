@@ -1,5 +1,5 @@
 """
-Guitar Lead/Rhythm Separator for StemScribe
+Guitar Lead/Rhythm Separator for StemScriber
 
 Uses a trained MelBand-RoFormer model to separate a guitar stem into
 lead guitar and rhythm guitar. This is a custom model trained on

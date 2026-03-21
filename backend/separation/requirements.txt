@@ -1,4 +1,4 @@
-# StemScribe Ensemble Separation System
+# StemScriberr Ensemble Separation System
 # Moises.ai-quality audio separation using open-source models
 
 # Core ML frameworks

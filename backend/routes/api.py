@@ -67,7 +67,7 @@ def health():
 
     return jsonify({
         'status': 'ok',
-        'service': 'StemScribe API',
+        'service': 'StemScriber API',
         'yt_dlp_available': ytdlp_available,
         'ensemble_separator': ensemble_info,
         'separation_modes': ['standard', 'mdx'] + (['ensemble'] if ENSEMBLE_SEPARATOR_AVAILABLE else [])

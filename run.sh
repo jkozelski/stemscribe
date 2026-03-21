@@ -1,5 +1,5 @@
 #!/bin/bash
-# StemScribe Launcher
+# StemScriberr Launcher
 # Starts both the backend API and serves the frontend
 # Includes caffeinate mode to prevent Mac from sleeping during long jobs
 
@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 
 echo ""
 echo -e "${PURPLE}  ╔═══════════════════════════════════════╗${NC}"
-echo -e "${PURPLE}  ║         ${CYAN}🎵 StemScribe 🎵${PURPLE}              ║${NC}"
+echo -e "${PURPLE}  ║         ${CYAN}🎵 StemScriberr 🎵${PURPLE}              ║${NC}"
 echo -e "${PURPLE}  ║   ${NC}Stem Separation & Transcription${PURPLE}     ║${NC}"
 echo -e "${PURPLE}  ╚═══════════════════════════════════════╝${NC}"
 echo ""
@@ -83,7 +83,7 @@ cd ..
 
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════${NC}"
-echo -e "${GREEN}  ✅ StemScribe is running!${NC}"
+echo -e "${GREEN}  ✅ StemScriberr is running!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════${NC}"
 echo ""
 echo -e "  ${CYAN}🌐 Open in browser:${NC}  http://localhost:3000"

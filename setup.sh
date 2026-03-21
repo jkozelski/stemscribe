@@ -1,10 +1,10 @@
 #!/bin/bash
-# StemScribe Setup Script
+# StemScriberr Setup Script
 # Installs all required dependencies
 
 set -e
 
-echo "🎵 StemScribe Setup"
+echo "🎵 StemScriberr Setup"
 echo "==================="
 echo ""
 
@@ -33,4 +33,4 @@ pip3 install --user music21
 echo ""
 echo "✅ Setup complete!"
 echo ""
-echo "Run ./run.sh to start StemScribe"
+echo "Run ./run.sh to start StemScriberr"

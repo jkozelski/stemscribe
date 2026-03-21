@@ -1,5 +1,5 @@
-// StemScribe — Playback Speed Control
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Playback Speed Control
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -83,4 +83,4 @@ window.StemScribe = window.StemScribe || {};
         currentPresetIndex = closest;
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

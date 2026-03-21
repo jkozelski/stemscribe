@@ -1,5 +1,5 @@
 """
-Neural Drum Transcriber for StemScribe
+Neural Drum Transcriber for StemScriber
 ======================================
 Uses a trained OaF-style CRNN (Mel -> Conv2d -> BiLSTM -> onset/frame/velocity)
 to transcribe drum audio into MIDI with 8 drum classes and velocity dynamics.

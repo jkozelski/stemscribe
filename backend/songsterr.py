@@ -1,5 +1,5 @@
 """
-Songsterr Integration for StemScribe
+Songsterr Integration for StemScriber
 
 Fetches real, human-curated guitar tabs from Songsterr.
 Works by scraping the embedded JSON state from Songsterr pages.

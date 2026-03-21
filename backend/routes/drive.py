@@ -37,7 +37,7 @@ def drive_auth():
 
 @drive_bp.route('/api/drive/stats', methods=['GET'])
 def drive_stats():
-    """Get Google Drive storage stats for StemScribe"""
+    """Get Google Drive storage stats for StemScriber"""
     if not DRIVE_AVAILABLE:
         return jsonify({'error': 'Drive integration not available'}), 500
 

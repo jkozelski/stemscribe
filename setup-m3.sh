@@ -1,14 +1,14 @@
 #!/bin/bash
 # =============================================================================
-# StemScribe Setup Script for Apple Silicon (M1/M2/M3)
+# StemScriberr Setup Script for Apple Silicon (M1/M2/M3)
 # =============================================================================
-# This script installs all dependencies for StemScribe on your Mac.
+# This script installs all dependencies for StemScriberr on your Mac.
 # Run with: chmod +x setup-m3.sh && ./setup-m3.sh
 # =============================================================================
 
 set -e  # Exit on any error
 
-echo "🎵 StemScribe Setup for Apple Silicon"
+echo "🎵 StemScriberr Setup for Apple Silicon"
 echo "======================================"
 echo ""
 
@@ -112,15 +112,15 @@ EOF
 
 echo ""
 echo -e "${GREEN}======================================"
-echo "🎉 StemScribe Setup Complete!"
+echo "🎉 StemScriberr Setup Complete!"
 echo "======================================${NC}"
 echo ""
-echo "To start StemScribe:"
+echo "To start StemScriberr:"
 echo ""
 echo "  1. Activate the environment:"
 echo "     source ~/.stemscribe-venv/bin/activate"
 echo ""
-echo "  2. Navigate to StemScribe folder and run:"
+echo "  2. Navigate to StemScriberr folder and run:"
 echo "     python backend/app.py"
 echo ""
 echo "  3. Open frontend/index.html in your browser"

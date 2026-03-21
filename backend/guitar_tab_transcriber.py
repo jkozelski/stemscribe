@@ -1,5 +1,5 @@
 """
-Guitar Tab Transcriber for StemScribe
+Guitar Tab Transcriber for StemScriber
 =====================================
 Uses Basic Pitch (Google/Spotify) for polyphonic pitch detection, then applies
 guitar-specific post-processing to produce high-quality guitar tablature MIDI.

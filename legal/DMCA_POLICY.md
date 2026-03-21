@@ -1,14 +1,14 @@
-# StemScribe - DMCA Policy
+# StemScriberr - DMCA Policy
 
 **Effective Date:** [INSERT DATE]
 
 ## Overview
 
-StemScribe respects the intellectual property rights of others and complies with the Digital Millennium Copyright Act ("DMCA"), 17 U.S.C. 512. We respond promptly to valid notices of alleged copyright infringement.
+StemScriberr respects the intellectual property rights of others and complies with the Digital Millennium Copyright Act ("DMCA"), 17 U.S.C. 512. We respond promptly to valid notices of alleged copyright infringement.
 
 ## Important Note About Our Service
 
-StemScribe is an audio processing tool. Users upload their own audio files for stem separation, transcription, and analysis. StemScribe does not host, distribute, or stream copyrighted music. We are a tool provider, similar to audio editing software.
+StemScriberr is an audio processing tool. Users upload their own audio files for stem separation, transcription, and analysis. StemScriberr does not host, distribute, or stream copyrighted music. We are a tool provider, similar to audio editing software.
 
 However, if copyrighted content is processed through or temporarily stored on our Service in violation of copyright law, we will respond to valid DMCA notices.
 
@@ -61,7 +61,7 @@ If you believe your content was removed by mistake or misidentification, you may
 
 ## Repeat Infringer Policy
 
-StemScribe maintains a policy of terminating accounts of users who are repeat copyright infringers, in appropriate circumstances.
+StemScriberr maintains a policy of terminating accounts of users who are repeat copyright infringers, in appropriate circumstances.
 
 ## Misrepresentation Warning
 

@@ -1,5 +1,5 @@
-// StemScribe — Light/Dark Theme Toggle
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Light/Dark Theme Toggle
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -8,7 +8,7 @@ window.StemScribe = window.StemScribe || {};
 
     SS.initTheme = function() {
         // Load saved preference
-        var saved = localStorage.getItem('stemscribe-theme');
+        var saved = localStorage.getItem('stemscriber-theme');
         if (saved === 'light') {
             SS.setTheme('light');
         }
@@ -37,12 +37,12 @@ window.StemScribe = window.StemScribe || {};
             body.classList.add('light-mode');
             SS.isDarkMode = false;
             if (toggleBtn) toggleBtn.textContent = '\u2600\uFE0F';
-            localStorage.setItem('stemscribe-theme', 'light');
+            localStorage.setItem('stemscriber-theme', 'light');
         } else {
             body.classList.remove('light-mode');
             SS.isDarkMode = true;
             if (toggleBtn) toggleBtn.textContent = '\u{1F319}';
-            localStorage.setItem('stemscribe-theme', 'dark');
+            localStorage.setItem('stemscriber-theme', 'dark');
         }
 
         // Update waveform colors
@@ -51,4 +51,4 @@ window.StemScribe = window.StemScribe || {};
         }
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

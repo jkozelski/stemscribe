@@ -1,4 +1,4 @@
-# StemScribe Enhancement Plan
+# StemScriberr Enhancement Plan
 ## Comprehensive Feature Roadmap
 
 ---

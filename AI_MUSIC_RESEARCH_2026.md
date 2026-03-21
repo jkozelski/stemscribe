@@ -1,8 +1,8 @@
-# StemScribe AI Music Research - February 2026
+# StemScriberr AI Music Research - February 2026
 
 ## Executive Summary
 
-The AI music landscape has evolved dramatically. What seemed like "years away" is now available through various tools and models. This document outlines findings and a practical integration roadmap for StemScribe.
+The AI music landscape has evolved dramatically. What seemed like "years away" is now available through various tools and models. This document outlines findings and a practical integration roadmap for StemScriberr.
 
 ---
 
@@ -57,7 +57,7 @@ pip install PolUVR
 - Then HP-Karaoke-UVR model
 - Outputs lead and backing separately
 
-#### Implementation for StemScribe:
+#### Implementation for StemScriberr:
 ```python
 from audio_separator.separator import Separator
 
@@ -83,7 +83,7 @@ lead, backing = separator.separate(vocals)
 - Also separates acoustic/electric guitar
 - Pricing: API access required (paid)
 
-**B. Stereo Panning (Already in StemScribe)**
+**B. Stereo Panning (Already in StemScriberr)**
 - Works for classic rock (guitars panned L/R)
 - Free, local processing
 - Limited to panned recordings
@@ -314,7 +314,7 @@ def transcribe_with_omnizart(audio_path, output_dir):
 2. Implement two-pass vocal splitting
 3. Test Omnizart on Intel Mac or Linux
 4. Evaluate Moises.ai API pricing for lead/rhythm guitar
-5. Update StemScribe backend to use new models
+5. Update StemScriberr backend to use new models
 
 ---
 

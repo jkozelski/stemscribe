@@ -1,5 +1,5 @@
-// StemScribe — Settings Panel, Library Panel, Google Drive, Layout Toggles
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Settings Panel, Library Panel, Google Drive, Layout Toggles
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -224,7 +224,7 @@ window.StemScribe = window.StemScribe || {};
 
             if (data.library && data.library.length > 0) {
                 libraryList.innerHTML = data.library.map(function(item) {
-                    return '<div class="library-item" onclick="StemScribe.loadFromLibrary(\'' + SS.escapeJsString(item.job_id) + '\')">' +
+                    return '<div class="library-item" onclick="StemScriber.loadFromLibrary(\'' + SS.escapeJsString(item.job_id) + '\')">' +
                         '<div class="library-item-header">' +
                             (item.thumbnail
                                 ? '<img src="' + SS.escapeHtml(item.thumbnail) + '" class="library-item-thumb" alt="">'
@@ -234,7 +234,7 @@ window.StemScribe = window.StemScribe || {};
                                 '<div class="library-item-title">' + SS.escapeHtml(item.title || 'Unknown Track') + '</div>' +
                                 '<div class="library-item-artist">' + SS.escapeHtml(item.artist || 'Unknown Artist') + '</div>' +
                             '</div>' +
-                            '<button class="library-item-delete" onclick="event.stopPropagation(); StemScribe.deleteFromLibrary(\'' + SS.escapeJsString(item.job_id) + '\')" title="Remove from library">\u{1F5D1}\uFE0F</button>' +
+                            '<button class="library-item-delete" onclick="event.stopPropagation(); StemScriber.deleteFromLibrary(\'' + SS.escapeJsString(item.job_id) + '\')" title="Remove from library">\u{1F5D1}\uFE0F</button>' +
                         '</div>' +
                         '<div class="library-item-meta">' +
                             '<span>\u{1F39A}\uFE0F ' + item.stem_count + ' stems</span>' +
@@ -320,4 +320,4 @@ window.StemScribe = window.StemScribe || {};
         }
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

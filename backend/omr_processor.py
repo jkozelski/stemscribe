@@ -1,5 +1,5 @@
 """
-OMR (Optical Music Recognition) Processor for StemScribe
+OMR (Optical Music Recognition) Processor for StemScriber
 =========================================================
 Handles image-based sheet music using multiple strategies:
 1. Audiveris (local, if installed)
@@ -328,7 +328,7 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-    print("🎼 OMR Processor for StemScribe")
+    print("🎼 OMR Processor for StemScriber")
     print(f"   oemer available: {OEMER_AVAILABLE}")
     print(f"   PyMuPDF available: {FITZ_AVAILABLE}")
 

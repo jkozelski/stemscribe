@@ -1,4 +1,4 @@
--- StemScribe Initial Schema
+-- StemScriberr Initial Schema
 -- Migration 001: Users, jobs, usage tracking, token blacklist
 
 -- Users table

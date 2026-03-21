@@ -1,4 +1,4 @@
-"""StemScribe middleware — rate limiting and request guards."""
+"""StemScriber middleware — rate limiting and request guards."""
 
 from middleware.rate_limit import init_limiter, limiter
 

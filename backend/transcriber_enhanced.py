@@ -1,5 +1,5 @@
 """
-Enhanced Transcription Module for StemScribe
+Enhanced Transcription Module for StemScriber
 =============================================
 Improved MIDI transcription with:
 - Better polyphonic accuracy (double-stops, chord voicings)

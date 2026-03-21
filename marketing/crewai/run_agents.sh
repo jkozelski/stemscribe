@@ -1,6 +1,6 @@
 #!/bin/bash
 # ================================================
-# StemScribe AI Agent Teams - Runner Script
+# StemScriberr AI Agent Teams - Runner Script
 # ================================================
 # Usage:
 #   ./run_agents.sh research    # Run research team only
@@ -16,7 +16,7 @@ cd "$SCRIPT_DIR"
 
 case "${1:-both}" in
     setup)
-        echo ">>> Setting up StemScribe AI Agent Teams..."
+        echo ">>> Setting up StemScriberr AI Agent Teams..."
 
         # Create virtual environment
         python3 -m venv venv

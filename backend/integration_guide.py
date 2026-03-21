@@ -1,5 +1,5 @@
 """
-StemScribe Enhancement Integration Guide
+StemScriber Enhancement Integration Guide
 =========================================
 This file shows how to integrate the new modules into app.py.
 
@@ -403,7 +403,7 @@ def fetch_track_info(track_name: str, artist: str = None, source_url: str = None
 
 print("""
 ╔══════════════════════════════════════════════════════════════════════╗
-║              STEMSCRIBE ENHANCEMENT INTEGRATION GUIDE                 ║
+║              STEMSCRIBER ENHANCEMENT INTEGRATION GUIDE                 ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║                                                                       ║
 ║  New modules created:                                                 ║

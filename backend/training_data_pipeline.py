@@ -1,10 +1,10 @@
 """
-Training Data Pipeline for StemScribe
+Training Data Pipeline for StemScriber
 ======================================
 Orchestrates the complete process of preparing training data:
 1. Parse PDFs to extract notation
 2. Download/locate matching audio
-3. Run audio through StemScribe for stems
+3. Run audio through StemScriber for stems
 4. Align audio with notation
 5. Package for Colab training
 
@@ -97,7 +97,7 @@ class TrainingDataPipeline:
 
         Args:
             output_dir: Directory to save all training data
-            stemscribe_dir: Path to StemScribe installation (for stem separation)
+            stemscribe_dir: Path to StemScriber installation (for stem separation)
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -111,7 +111,7 @@ class TrainingDataPipeline:
         for d in [self.audio_dir, self.stems_dir, self.notation_dir, self.midi_dir]:
             d.mkdir(exist_ok=True)
 
-        # StemScribe location
+        # StemScriber location
         if stemscribe_dir:
             self.stemscribe_dir = Path(stemscribe_dir)
         else:
@@ -202,7 +202,7 @@ class TrainingDataPipeline:
             logger.error(f"   ❌ Audio processing failed: {e}")
             return None
 
-        # Step 3: Separate stems using StemScribe
+        # Step 3: Separate stems using StemScriber
         logger.info("🎛️ Step 3: Separating stems...")
         stem_paths = self._separate_stems(processed_audio, example_id)
 

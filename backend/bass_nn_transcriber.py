@@ -1,5 +1,5 @@
 """
-Neural Bass Transcriber v3 for StemScribe
+Neural Bass Transcriber v3 for StemScriber
 ==========================================
 Uses a trained transfer-learning model (Piano CNN + Adapter + BiLSTM)
 to transcribe bass audio into MIDI with 40-key output.

@@ -1,4 +1,4 @@
-# StemScribe Dependencies
+# StemScriberr Dependencies
 # Install with: pip install -r requirements.txt
 
 # =============================================================================

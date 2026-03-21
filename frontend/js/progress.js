@@ -1,5 +1,5 @@
-// StemScribe — Progress Animation & Polling
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Progress Animation & Polling
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -122,4 +122,4 @@ window.StemScribe = window.StemScribe || {};
         }
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

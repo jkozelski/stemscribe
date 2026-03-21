@@ -1,10 +1,10 @@
 #!/bin/bash
-# StemScribe Ensemble Separation System Setup
+# StemScriberr Ensemble Separation System Setup
 # Installs dependencies for Moises.ai-quality audio separation
 
 set -e
 
-echo "🎵 StemScribe Ensemble Separator Setup"
+echo "🎵 StemScriberr Ensemble Separator Setup"
 echo "========================================"
 echo ""
 
@@ -65,7 +65,7 @@ print('✅ Librosa:', librosa.__version__)
 echo ""
 echo "✅ Installation complete!"
 echo ""
-echo "To use the ensemble separator, start StemScribe and select 'Ensemble' mode:"
+echo "To use the ensemble separator, start StemScriberr and select 'Ensemble' mode:"
 echo "  - Via API: POST /api/url with {\"url\": \"...\", \"ensemble\": true}"
 echo "  - Or in the UI: Check the 'Ensemble (HQ)' option"
 echo ""

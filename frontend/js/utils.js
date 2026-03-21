@@ -1,5 +1,5 @@
-// StemScribe — Utility Functions
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Utility Functions
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -87,4 +87,4 @@ window.StemScribe = window.StemScribe || {};
         document.getElementById('submitBtn').disabled = true;
     };
 
-})(window.StemScribe);
+})(window.StemScriber);
