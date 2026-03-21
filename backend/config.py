@@ -1,5 +1,5 @@
 """
-StemScribe v2.0 Configuration
+StemScriber v2.0 Configuration
 Centralized settings for ensemble separation system
 """
 

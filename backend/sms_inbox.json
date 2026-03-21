@@ -1,0 +1,280 @@
+[
+  {
+    "id": "test_abc123",
+    "from": "+18034149454",
+    "body": "Hello from test",
+    "timestamp": "2026-03-16T18:02:56.351628+00:00",
+    "read": true
+  },
+  {
+    "id": "tunnel_test_456",
+    "from": "+18034149454",
+    "body": "Tunnel test",
+    "timestamp": "2026-03-16T18:03:01.698808+00:00",
+    "read": true
+  },
+  {
+    "id": "SMe133bb5d5803a0928c8e928cdd19db73",
+    "from": "+18034149454",
+    "body": "Hello",
+    "timestamp": "2026-03-16T18:09:55.147257+00:00",
+    "read": true
+  },
+  {
+    "id": "SM61bb7cff01f3c96805209ab747265a2a",
+    "from": "+18034149454",
+    "body": "Can you hear me)",
+    "timestamp": "2026-03-16T18:16:50.870689+00:00",
+    "read": true
+  },
+  {
+    "id": "SM8eb6e5d28dc29498b42e99cf371b471c",
+    "from": "+18034149454",
+    "body": "Did you get this?",
+    "timestamp": "2026-03-16T18:18:33.812123+00:00",
+    "read": true
+  },
+  {
+    "id": "SMcc9d649d652a6921dd79605c8ccaeeac",
+    "from": "+18034149454",
+    "body": "Okay good work, is this gonna be smooth?",
+    "timestamp": "2026-03-16T18:19:58.684781+00:00",
+    "read": true
+  },
+  {
+    "id": "SM30e332d8fcb92f0d4825b6eecf73403b",
+    "from": "+18034149454",
+    "body": "Also which terminal will this go to?",
+    "timestamp": "2026-03-16T18:20:30.179269+00:00",
+    "read": true
+  },
+  {
+    "id": "SM128ef5636b97fb2082b250366eddc773",
+    "from": "+18034149454",
+    "body": "How's it going?",
+    "timestamp": "2026-03-16T19:16:49.509229+00:00",
+    "read": true
+  },
+  {
+    "id": "SMf6555220c6ca0e94debec3982c93192c",
+    "from": "+18034149454",
+    "body": "How's it going?",
+    "timestamp": "2026-03-16T21:52:34.491521+00:00",
+    "read": true
+  },
+  {
+    "id": "SMc22203e20be0006e6fe69f9b50690d9e",
+    "from": "+18034149454",
+    "body": "Hello",
+    "timestamp": "2026-03-17T23:09:23.726871+00:00",
+    "read": true
+  },
+  {
+    "id": "SM8b5a552a8eb2b31c15d3a86f14fab3ec",
+    "from": "+18034149454",
+    "body": "You getting this?",
+    "timestamp": "2026-03-19T16:44:09.279950+00:00",
+    "read": true
+  },
+  {
+    "id": "SMadeb87d2ce9b9fcca05584404c3d006f",
+    "from": "+18034149454",
+    "body": "Liked \u201cYep! Got it. Still waiting on Wish You Were Here to finish processing, then I'll restart with Modal and test cloud GPU. Will text you when ready.\u201d",
+    "timestamp": "2026-03-19T16:45:42.399566+00:00",
+    "read": true
+  },
+  {
+    "id": "SM2b0a9f869cae6846014807cf21f32791",
+    "from": "+18034149454",
+    "body": "Take your time",
+    "timestamp": "2026-03-19T16:47:52.324941+00:00",
+    "read": true
+  },
+  {
+    "id": "SMac66ca620a1f794f44dff6e8f434f260",
+    "from": "+18034149454",
+    "body": "What's up?",
+    "timestamp": "2026-03-19T17:06:02.074836+00:00",
+    "read": true
+  },
+  {
+    "id": "SMe4e5cbeb13157b714bb87dd88e2020de",
+    "from": "+18034149454",
+    "body": "It's 1:06 pm we've got lots of work to do",
+    "timestamp": "2026-03-19T17:07:07.976598+00:00",
+    "read": true
+  },
+  {
+    "id": "SM2c34734dd0c570da62ddbcf1ea23c536",
+    "from": "+18034149454",
+    "body": "Put together a team to figure the Modal thing out ",
+    "timestamp": "2026-03-19T17:07:35.536994+00:00",
+    "read": true
+  },
+  {
+    "id": "SM06d97aca338af76bb15b9b305ea07453",
+    "from": "+18034149454",
+    "body": "Can I just text you?",
+    "timestamp": "2026-03-19T17:08:10.656691+00:00",
+    "read": true
+  },
+  {
+    "id": "SM1cef5e3a629c566fa620e3751886eaed",
+    "from": "+18034149454",
+    "body": "Hello ",
+    "timestamp": "2026-03-19T23:21:05.968344+00:00",
+    "read": false
+  },
+  {
+    "id": "SM92653a9a016dd754c2a34871f5cb8bbb",
+    "from": "+18034149454",
+    "body": "Can you get texts back?",
+    "timestamp": "2026-03-20T16:27:17.380852+00:00",
+    "read": false
+  },
+  {
+    "id": "SM8d838ab26cf26fcba92853ba607aecff",
+    "from": "+18034149454",
+    "body": "Good work, Basil!",
+    "timestamp": "2026-03-20T19:15:41.329169+00:00",
+    "read": false
+  },
+  {
+    "id": "SM_TEST_ROUNDTRIP_001",
+    "from": "+18034149454",
+    "body": "Testing two-way SMS from Jeff",
+    "timestamp": "2026-03-20T19:20:04.657499+00:00",
+    "read": false
+  },
+  {
+    "id": "SM_TEST_E2E_002",
+    "from": "+18034149454",
+    "body": "Hey Basil can you hear me now?",
+    "timestamp": "2026-03-20T19:25:29.212841+00:00",
+    "read": false
+  },
+  {
+    "id": "SM_TEST_E2E_003",
+    "from": "+18034149454",
+    "body": "Hey Basil whats good?",
+    "timestamp": "2026-03-20T19:26:56.109292+00:00",
+    "read": false
+  },
+  {
+    "id": "SM_test_vision_001",
+    "from": "+18034149454",
+    "body": "Test vision flow",
+    "timestamp": "2026-03-20T19:44:49.679120+00:00",
+    "read": false
+  },
+  {
+    "id": "SM_test_text_002",
+    "from": "+18034149454",
+    "body": "Hey Basil quick test",
+    "timestamp": "2026-03-20T19:46:18.055570+00:00",
+    "read": false
+  },
+  {
+    "id": "SM96d4790c3af04794a5a5b235049de34f",
+    "from": "+18034149454",
+    "body": "Can you get my text?",
+    "timestamp": "2026-03-20T19:55:38.139805+00:00",
+    "read": false
+  },
+  {
+    "id": "MM75f8be50954434e3f57a43cd105635d2",
+    "from": "+18034149454",
+    "body": "",
+    "timestamp": "2026-03-20T19:56:24.682371+00:00",
+    "read": false,
+    "media": [
+      {
+        "url": "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d98655261161b/Messages/MM75f8be50954434e3f57a43cd105635d2/Media/MEb4bf1470ea5237b7cd9fb0dba2a4d9fb",
+        "content_type": "image/jpeg"
+      }
+    ]
+  },
+  {
+    "id": "MM74ce938eb4d526f68b25800ed50a16be",
+    "from": "+18034149454",
+    "body": "",
+    "timestamp": "2026-03-20T20:02:45.493870+00:00",
+    "read": false,
+    "media": [
+      {
+        "url": "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d98655261161b/Messages/MM74ce938eb4d526f68b25800ed50a16be/Media/ME9ac0c18422eaf519c7cd959fe2e587f7",
+        "content_type": "image/jpeg"
+      }
+    ]
+  },
+  {
+    "id": "SMf0d1c300325a6c5e193ead0415473e3c",
+    "from": "+18034149454",
+    "body": "Nice ",
+    "timestamp": "2026-03-20T20:06:54.510579+00:00",
+    "read": false
+  },
+  {
+    "id": "SMbee5d7f2558de34910ef389150e1ef8a",
+    "from": "+18034149454",
+    "body": "Again I'm getting added json ",
+    "timestamp": "2026-03-20T20:07:13.679466+00:00",
+    "read": false
+  },
+  {
+    "id": "SMb8647883f8f07b27a680dbed6566e5f4",
+    "from": "+18034149454",
+    "body": "From you",
+    "timestamp": "2026-03-20T20:07:22.463434+00:00",
+    "read": false
+  },
+  {
+    "id": "SM4494445b0f8c150cd2871e176ef8b729",
+    "from": "+18034149454",
+    "body": "Are you getting that?",
+    "timestamp": "2026-03-20T20:10:04.776978+00:00",
+    "read": false
+  },
+  {
+    "id": "SM4e7361b93a4a5f24554ee2efeea05c78",
+    "from": "+18034149454",
+    "body": "You send the reply twice, once in json ",
+    "timestamp": "2026-03-20T20:11:29.840535+00:00",
+    "read": false
+  },
+  {
+    "id": "SM95b3747ae10fd5025f4fc2bae03851b1",
+    "from": "+18034149454",
+    "body": "You already did send it twice, or maybe you didn't send it twice it was just written twice ",
+    "timestamp": "2026-03-20T20:12:14.941636+00:00",
+    "read": false
+  },
+  {
+    "id": "SMe4c232c863397fde74d39a2cfe3fa4b6",
+    "from": "+18034149454",
+    "body": "See",
+    "timestamp": "2026-03-20T20:12:35.594720+00:00",
+    "read": false
+  },
+  {
+    "id": "SM1cc65a5e2d4d1f8e9a3e1d3cd11dcbae",
+    "from": "+18035861515",
+    "body": "\ud83d\udc4d",
+    "timestamp": "2026-03-21T14:36:48.881763+00:00",
+    "read": false
+  },
+  {
+    "id": "SM6822e02f058509f3336fe589613777be",
+    "from": "+18034149454",
+    "body": "Didn't get a text",
+    "timestamp": "2026-03-21T18:32:11.415156+00:00",
+    "read": false
+  },
+  {
+    "id": "SM9d056493aab329369b2efc6f6a7c4802",
+    "from": "+18034149454",
+    "body": "Where did the trademark info go?",
+    "timestamp": "2026-03-21T18:33:55.615448+00:00",
+    "read": false
+  }
+]

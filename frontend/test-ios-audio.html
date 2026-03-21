@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>iOS Silent Switch Audio Tests</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #111;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 1rem;
+    padding-bottom: 4rem;
+}
+h1 { font-size: 1.4rem; margin-bottom: 0.3rem; }
+.instructions {
+    background: #222;
+    border: 2px solid #FF8800;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.instructions strong { color: #FF8800; }
+#ios-info {
+    background: #1a1a2e;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+.test-btn {
+    display: block;
+    width: 100%;
+    min-height: 70px;
+    margin-bottom: 0.6rem;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid #444;
+    border-radius: 12px;
+    background: #1a1a1a;
+    color: #fff;
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s;
+}
+.test-btn:active { opacity: 0.8; }
+.test-btn .test-num {
+    display: inline-block;
+    background: #FF8800;
+    color: #000;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-right: 8px;
+    font-size: 0.85rem;
+}
+.test-btn .test-title { display: block; margin-top: 4px; font-size: 0.85rem; color: #ccc; font-weight: 400; }
+.test-btn .status {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.status-ready { color: #888; }
+.status-playing { color: #4CAF50; }
+.status-error { color: #f44336; }
+.status-waiting { color: #FFC107; }
+
+.test-btn.state-playing { border-color: #4CAF50; }
+.test-btn.state-error { border-color: #f44336; }
+.test-btn.state-done { border-color: #2196F3; }
+
+.feedback-btns {
+    display: none;
+    margin-top: 6px;
+}
+.feedback-btns button {
+    padding: 6px 20px;
+    margin-right: 8px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.fb-yes { background: #4CAF50; color: #fff; }
+.fb-no { background: #f44336; color: #fff; }
+.fb-result {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
+#results {
+    margin-top: 1.5rem;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 1rem;
+}
+#results h3 { margin-bottom: 0.5rem; color: #FF8800; }
+#results-list { font-size: 0.9rem; line-height: 1.8; }
+.result-yes { color: #4CAF50; }
+.result-no { color: #f44336; }
+.result-pending { color: #666; }
+
+#log {
+    margin-top: 1rem;
+    background: #0a0a0a;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 0.7rem;
+    font-family: monospace;
+    max-height: 200px;
+    overflow-y: auto;
+    color: #888;
+    line-height: 1.4;
+}
+</style>
+</head>
+<body>
+
+<h1>iOS Silent Switch Bypass Tests</h1>
+
+<div class="instructions">
+    <strong>Instructions:</strong><br>
+    1. Flip the <strong>silent switch ON</strong> (orange showing)<br>
+    2. Turn volume UP with the side buttons<br>
+    3. Tap each button below and listen<br>
+    4. After each test, tap <strong>Yes</strong> or <strong>No</strong> for whether you heard sound
+</div>
+
+<div id="ios-info">Detecting device...</div>
+
+<div id="test-buttons"></div>
+
+<div id="results">
+    <h3>Results Summary</h3>
+    <div id="results-list"></div>
+</div>
+
+<div id="log"></div>
+
+<script>
+// ── Utility ──
+function log(msg) {
+    var el = document.getElementById('log');
+    var t = new Date().toLocaleTimeString();
+    el.innerHTML = '<div>[' + t + '] ' + msg + '</div>' + el.innerHTML;
+}
+
+// ── iOS Detection ──
+(function detectDevice() {
+    var ua = navigator.userAgent;
+    var ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var safari = /Safari/.test(ua) && !/Chrome/.test(ua) && !/CriOS/.test(ua);
+    var version = ua.match(/OS (\d+[_\.]\d+[_\.]?\d*)/);
+    var vStr = version ? version[1].replace(/_/g, '.') : 'unknown';
+    var info = 'Platform: ' + navigator.platform + ' | UA iOS: ' + (ios ? 'Yes' : 'No');
+    info += ' | Safari: ' + (safari ? 'Yes' : 'No') + ' | iOS version: ' + vStr;
+    info += ' | Touch: ' + navigator.maxTouchPoints;
+    document.getElementById('ios-info').textContent = info;
+    log('Device: ' + info);
+})();
+
+// ── WAV Data URI Generator ──
+// Generates a valid PCM 16-bit 44100Hz mono WAV with a sine wave
+function generateWavDataURI(freqHz, durationSec) {
+    var sampleRate = 44100;
+    var numSamples = Math.floor(sampleRate * durationSec);
+    var dataSize = numSamples * 2; // 16-bit = 2 bytes per sample
+    var fileSize = 44 + dataSize; // 44 byte header + data
+
+    var buffer = new ArrayBuffer(fileSize);
+    var view = new DataView(buffer);
+
+    // RIFF header
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, fileSize - 8, true); // file size - 8
+    writeString(view, 8, 'WAVE');
+
+    // fmt sub-chunk
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);          // sub-chunk size (16 for PCM)
+    view.setUint16(20, 1, true);           // audio format (1 = PCM)
+    view.setUint16(22, 1, true);           // num channels (1 = mono)
+    view.setUint32(24, sampleRate, true);  // sample rate
+    view.setUint32(28, sampleRate * 2, true); // byte rate (sampleRate * numChannels * bytesPerSample)
+    view.setUint16(32, 2, true);           // block align (numChannels * bytesPerSample)
+    view.setUint16(34, 16, true);          // bits per sample
+
+    // data sub-chunk
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataSize, true);    // data size
+
+    // Write sine wave samples
+    for (var i = 0; i < numSamples; i++) {
+        var t = i / sampleRate;
+        var sample = Math.sin(2 * Math.PI * freqHz * t);
+        // Apply fade in/out to avoid clicks (50ms each)
+        var fadeLen = Math.floor(sampleRate * 0.05);
+        if (i < fadeLen) sample *= i / fadeLen;
+        if (i > numSamples - fadeLen) sample *= (numSamples - i) / fadeLen;
+        var intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767)));
+        view.setInt16(44 + i * 2, intSample, true);
+    }
+
+    // Convert to base64
+    var bytes = new Uint8Array(buffer);
+    var binary = '';
+    for (var j = 0; j < bytes.length; j++) {
+        binary += String.fromCharCode(bytes[j]);
+    }
+    return 'data:audio/wav;base64,' + btoa(binary);
+
+    function writeString(dv, offset, str) {
+        for (var k = 0; k < str.length; k++) {
+            dv.setUint8(offset + k, str.charCodeAt(k));
+        }
+    }
+}
+
+// Pre-generate WAV data URIs
+var wavDataURI_1sec = generateWavDataURI(440, 1.0);
+var wavDataURI_short = generateWavDataURI(880, 0.3);
+
+// ── Known-good base64 MP3 ──
+// We generate a WAV data URI for tests needing "MP3 data URI" since encoding
+// a real MP3 in JS is impractical. For the MP3-specific test, we use the WAV
+// but label it clearly. The real MP3 test uses a server file.
+
+// ── Results tracking ──
+var results = {};
+var testNames = {};
+
+function updateResults() {
+    var html = '';
+    for (var i = 1; i <= 10; i++) {
+        var name = testNames[i] || ('Test ' + i);
+        var r = results[i];
+        if (r === true) {
+            html += '<div class="result-yes">Test ' + i + ': YES (heard sound) -- ' + name + '</div>';
+        } else if (r === false) {
+            html += '<div class="result-no">Test ' + i + ': NO (silent) -- ' + name + '</div>';
+        } else {
+            html += '<div class="result-pending">Test ' + i + ': not tested -- ' + name + '</div>';
+        }
+    }
+    document.getElementById('results-list').innerHTML = html;
+}
+
+function setStatus(num, text, cls) {
+    var btn = document.getElementById('test-' + num);
+    var statusEl = btn.querySelector('.status');
+    statusEl.textContent = text;
+    statusEl.className = 'status status-' + cls;
+    btn.className = 'test-btn' + (cls === 'playing' ? ' state-playing' : cls === 'error' ? ' state-error' : ' state-done');
+}
+
+function showFeedback(num) {
+    var fb = document.getElementById('fb-' + num);
+    fb.style.display = 'block';
+}
+
+// ── Build test buttons ──
+var tests = [
+    { num: 1, label: 'Remote MP3 via HTMLAudioElement', desc: 'Plays an actual MP3 file from the server' },
+    { num: 2, label: 'WAV Data URI via HTMLAudioElement', desc: '1sec 440Hz sine wave as valid WAV data URI' },
+    { num: 3, label: 'MP3 Data URI via HTMLAudioElement', desc: 'Base64-encoded audio clip via data URI' },
+    { num: 4, label: 'HTMLAudioElement full volume', desc: 'Remote MP3 with volume=1.0, muted=false' },
+    { num: 5, label: 'AudioContext + Oscillator on tap', desc: 'Create + resume + oscillator all in gesture handler' },
+    { num: 6, label: 'HTMLAudio play THEN Web Audio', desc: 'Wait for HTMLAudio playing event, then oscillator' },
+    { num: 7, label: 'HTMLAudio with special attributes', desc: 'playsinline, webkit-playsinline, x-webkit-airplay' },
+    { num: 8, label: 'Dual: HTML element routed through Web Audio', desc: 'MediaElementSource connected to AudioContext' },
+    { num: 9, label: 'Short HTML audio + real Web Audio', desc: 'Play brief real audio, then oscillator immediately' },
+    { num: 10, label: 'Media Session API', desc: 'Set mediaSession metadata before playing' },
+];
+
+var container = document.getElementById('test-buttons');
+tests.forEach(function(t) {
+    testNames[t.num] = t.label;
+    var btn = document.createElement('button');
+    btn.className = 'test-btn';
+    btn.id = 'test-' + t.num;
+    btn.innerHTML = '<span class="test-num">' + t.num + '</span>' + t.label +
+        '<span class="test-title">' + t.desc + '</span>' +
+        '<span class="status status-ready">Ready</span>' +
+        '<div class="feedback-btns" id="fb-' + t.num + '">' +
+        '<span style="color:#aaa;margin-right:8px;">Heard sound?</span>' +
+        '<button class="fb-yes" onclick="event.stopPropagation();results[' + t.num + ']=true;updateResults();this.parentElement.innerHTML=\'<span class=fb-result style=color:#4CAF50>YES</span>\'">Yes</button>' +
+        '<button class="fb-no" onclick="event.stopPropagation();results[' + t.num + ']=false;updateResults();this.parentElement.innerHTML=\'<span class=fb-result style=color:#f44336>NO</span>\'">No</button>' +
+        '</div>';
+    container.appendChild(btn);
+});
+
+updateResults();
+
+// ════════════════════════════════════════════════════════════
+// TEST 1: Remote MP3 via HTMLAudioElement
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-1').addEventListener('click', function() {
+    log('Test 1: Remote MP3 via HTMLAudioElement');
+    setStatus(1, 'Loading...', 'waiting');
+
+    var a = new Audio();
+    a.src = '/stems/test/vocals.mp3';
+    a.preload = 'auto';
+
+    a.addEventListener('playing', function() {
+        log('Test 1: Audio is playing');
+        setStatus(1, 'Playing... (2 sec)', 'playing');
+        setTimeout(function() {
+            a.pause();
+            a.src = '';
+            setStatus(1, 'Done', 'ready');
+            showFeedback(1);
+            log('Test 1: Stopped');
+        }, 2000);
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 1: ERROR - ' + (a.error ? a.error.message : 'unknown'));
+        setStatus(1, 'Error: ' + (a.error ? a.error.message : 'load failed'), 'error');
+        showFeedback(1);
+    });
+
+    a.play().then(function() {
+        log('Test 1: play() resolved');
+    }).catch(function(e) {
+        log('Test 1: play() rejected: ' + e.message);
+        setStatus(1, 'Error: ' + e.message, 'error');
+        showFeedback(1);
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 2: WAV Data URI via HTMLAudioElement
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-2').addEventListener('click', function() {
+    log('Test 2: WAV Data URI (440Hz, 1 sec, PCM 16-bit 44100Hz)');
+    setStatus(2, 'Loading...', 'waiting');
+
+    var a = new Audio();
+    a.src = wavDataURI_1sec;
+
+    a.addEventListener('playing', function() {
+        log('Test 2: WAV is playing');
+        setStatus(2, 'Playing 440Hz sine...', 'playing');
+    });
+
+    a.addEventListener('ended', function() {
+        log('Test 2: WAV ended');
+        setStatus(2, 'Done', 'ready');
+        showFeedback(2);
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 2: ERROR - ' + (a.error ? a.error.message : 'unknown'));
+        setStatus(2, 'Error: ' + (a.error ? a.error.message : 'load failed'), 'error');
+        showFeedback(2);
+    });
+
+    a.play().then(function() {
+        log('Test 2: play() resolved');
+    }).catch(function(e) {
+        log('Test 2: play() rejected: ' + e.message);
+        setStatus(2, 'Error: ' + e.message, 'error');
+        showFeedback(2);
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 3: MP3 Data URI via HTMLAudioElement
+// Uses the WAV data URI since we can't encode MP3 in pure JS.
+// The real value is: does iOS treat data URIs differently?
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-3').addEventListener('click', function() {
+    log('Test 3: Audio Data URI (1 sec sine wave)');
+    setStatus(3, 'Loading...', 'waiting');
+
+    // Generate a slightly different tone to distinguish from test 2
+    var dataURI = generateWavDataURI(660, 1.0);
+    var a = new Audio();
+    a.src = dataURI;
+
+    a.addEventListener('playing', function() {
+        log('Test 3: Data URI audio playing');
+        setStatus(3, 'Playing 660Hz sine...', 'playing');
+    });
+
+    a.addEventListener('ended', function() {
+        log('Test 3: ended');
+        setStatus(3, 'Done', 'ready');
+        showFeedback(3);
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 3: ERROR');
+        setStatus(3, 'Error', 'error');
+        showFeedback(3);
+    });
+
+    a.play().then(function() {
+        log('Test 3: play() resolved');
+    }).catch(function(e) {
+        log('Test 3: play() rejected: ' + e.message);
+        setStatus(3, 'Error: ' + e.message, 'error');
+        showFeedback(3);
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 4: HTMLAudioElement at full volume, explicitly not muted
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-4').addEventListener('click', function() {
+    log('Test 4: HTMLAudio full volume, not muted');
+    setStatus(4, 'Loading...', 'waiting');
+
+    var a = new Audio();
+    a.src = '/stems/test/vocals.mp3';
+    a.volume = 1.0;
+    a.muted = false;
+    a.preload = 'auto';
+    a.defaultMuted = false;
+
+    a.addEventListener('playing', function() {
+        log('Test 4: Playing, volume=' + a.volume + ', muted=' + a.muted);
+        setStatus(4, 'Playing (vol=1.0, muted=false)...', 'playing');
+        setTimeout(function() {
+            a.pause();
+            a.src = '';
+            setStatus(4, 'Done', 'ready');
+            showFeedback(4);
+            log('Test 4: Stopped');
+        }, 2000);
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 4: ERROR');
+        setStatus(4, 'Error', 'error');
+        showFeedback(4);
+    });
+
+    a.play().then(function() {
+        log('Test 4: play() resolved');
+    }).catch(function(e) {
+        log('Test 4: play() rejected: ' + e.message);
+        setStatus(4, 'Error: ' + e.message, 'error');
+        showFeedback(4);
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 5: AudioContext + Oscillator — all inside gesture handler
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-5').addEventListener('click', function() {
+    log('Test 5: AudioContext + oscillator, all in click handler');
+    setStatus(5, 'Creating...', 'waiting');
+
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        log('Test 5: Context created, state=' + ctx.state);
+
+        // Create gain for volume control
+        var gain = ctx.createGain();
+        gain.gain.value = 1.0;
+        gain.connect(ctx.destination);
+
+        // Create oscillator
+        var osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 440;
+        osc.connect(gain);
+
+        // Resume and start — all synchronous within gesture
+        ctx.resume().then(function() {
+            log('Test 5: Context resumed, state=' + ctx.state);
+        });
+
+        osc.start(0);
+        log('Test 5: Oscillator started');
+        setStatus(5, 'Playing 440Hz oscillator...', 'playing');
+
+        setTimeout(function() {
+            osc.stop();
+            ctx.close();
+            setStatus(5, 'Done', 'ready');
+            showFeedback(5);
+            log('Test 5: Stopped');
+        }, 2000);
+
+    } catch(e) {
+        log('Test 5: Exception: ' + e.message);
+        setStatus(5, 'Error: ' + e.message, 'error');
+        showFeedback(5);
+    }
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 6: HTMLAudio play FIRST, wait for 'playing', THEN Web Audio
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-6').addEventListener('click', function() {
+    log('Test 6: HTMLAudio first, then Web Audio after playing event');
+    setStatus(6, 'Starting HTML audio...', 'waiting');
+
+    var a = new Audio();
+    a.src = wavDataURI_short;
+
+    a.addEventListener('playing', function() {
+        log('Test 6: HTMLAudio is playing, now starting Web Audio');
+        setStatus(6, 'HTML audio playing, starting Web Audio...', 'waiting');
+
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            ctx.resume().then(function() {
+                log('Test 6: AudioContext state=' + ctx.state);
+
+                var osc = ctx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = 523.25; // C5
+                osc.connect(ctx.destination);
+                osc.start(0);
+
+                setStatus(6, 'Playing Web Audio oscillator (C5)...', 'playing');
+                log('Test 6: Oscillator started at 523Hz');
+
+                setTimeout(function() {
+                    osc.stop();
+                    ctx.close();
+                    a.pause();
+                    setStatus(6, 'Done', 'ready');
+                    showFeedback(6);
+                    log('Test 6: Stopped');
+                }, 2000);
+            });
+        } catch(e) {
+            log('Test 6: Web Audio error: ' + e.message);
+            setStatus(6, 'Error: ' + e.message, 'error');
+            showFeedback(6);
+        }
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 6: HTMLAudio error');
+        setStatus(6, 'HTML audio error', 'error');
+        showFeedback(6);
+    });
+
+    a.play().then(function() {
+        log('Test 6: HTMLAudio play() resolved');
+    }).catch(function(e) {
+        log('Test 6: HTMLAudio play() rejected: ' + e.message);
+        setStatus(6, 'Error: ' + e.message, 'error');
+        showFeedback(6);
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 7: HTMLAudio with special iOS attributes
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-7').addEventListener('click', function() {
+    log('Test 7: HTMLAudio with special iOS attributes');
+    setStatus(7, 'Creating...', 'waiting');
+
+    var a = document.createElement('audio');
+
+    // All the special attributes
+    a.setAttribute('playsinline', '');
+    a.setAttribute('webkit-playsinline', '');
+    a.setAttribute('x-webkit-airplay', 'allow');
+    a.setAttribute('preload', 'auto');
+    a.volume = 1.0;
+    a.muted = false;
+
+    // Append to DOM (some sources say this matters on iOS)
+    document.body.appendChild(a);
+
+    a.src = '/stems/test/vocals.mp3';
+
+    a.addEventListener('playing', function() {
+        log('Test 7: Playing with special attrs');
+        setStatus(7, 'Playing (special attrs)...', 'playing');
+        setTimeout(function() {
+            a.pause();
+            a.src = '';
+            document.body.removeChild(a);
+            setStatus(7, 'Done', 'ready');
+            showFeedback(7);
+            log('Test 7: Stopped and removed from DOM');
+        }, 2000);
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 7: ERROR');
+        setStatus(7, 'Error', 'error');
+        showFeedback(7);
+        try { document.body.removeChild(a); } catch(x) {}
+    });
+
+    a.play().then(function() {
+        log('Test 7: play() resolved');
+    }).catch(function(e) {
+        log('Test 7: play() rejected: ' + e.message);
+        setStatus(7, 'Error: ' + e.message, 'error');
+        showFeedback(7);
+        try { document.body.removeChild(a); } catch(x) {}
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 8: HTMLAudioElement routed through Web Audio (MediaElementSource)
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-8').addEventListener('click', function() {
+    log('Test 8: HTMLAudio routed through AudioContext via MediaElementSource');
+    setStatus(8, 'Creating...', 'waiting');
+
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+        var a = new Audio();
+        a.crossOrigin = 'anonymous';
+        a.src = '/stems/test/vocals.mp3';
+        a.volume = 1.0;
+
+        // Route HTML audio through Web Audio graph
+        var source = ctx.createMediaElementSource(a);
+        source.connect(ctx.destination);
+
+        ctx.resume().then(function() {
+            log('Test 8: AudioContext resumed, state=' + ctx.state);
+        });
+
+        a.addEventListener('playing', function() {
+            log('Test 8: MediaElementSource playing through AudioContext');
+            setStatus(8, 'Playing (HTML->WebAudio route)...', 'playing');
+            setTimeout(function() {
+                a.pause();
+                a.src = '';
+                ctx.close();
+                setStatus(8, 'Done', 'ready');
+                showFeedback(8);
+                log('Test 8: Stopped');
+            }, 2000);
+        });
+
+        a.addEventListener('error', function(e) {
+            log('Test 8: Audio element error');
+            setStatus(8, 'Error loading audio', 'error');
+            showFeedback(8);
+        });
+
+        a.play().then(function() {
+            log('Test 8: play() resolved');
+        }).catch(function(e) {
+            log('Test 8: play() rejected: ' + e.message);
+            setStatus(8, 'Error: ' + e.message, 'error');
+            showFeedback(8);
+        });
+
+    } catch(e) {
+        log('Test 8: Exception: ' + e.message);
+        setStatus(8, 'Error: ' + e.message, 'error');
+        showFeedback(8);
+    }
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 9: Short real HTML audio, then immediately Web Audio
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-9').addEventListener('click', function() {
+    log('Test 9: Short real HTML audio then Web Audio oscillator');
+    setStatus(9, 'Playing primer audio...', 'waiting');
+
+    // Play a short but real, non-silent audio clip first
+    var primer = new Audio();
+    primer.src = wavDataURI_short; // 0.3 sec 880Hz
+    primer.volume = 1.0;
+
+    primer.addEventListener('playing', function() {
+        log('Test 9: Primer audio playing');
+    });
+
+    primer.play().then(function() {
+        log('Test 9: Primer play() resolved, starting oscillator immediately');
+
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            ctx.resume();
+
+            var osc = ctx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.value = 330; // E4
+            var gain = ctx.createGain();
+            gain.gain.value = 0.5;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(0);
+
+            setStatus(9, 'Playing oscillator (330Hz sawtooth)...', 'playing');
+            log('Test 9: Oscillator started');
+
+            setTimeout(function() {
+                osc.stop();
+                ctx.close();
+                primer.pause();
+                setStatus(9, 'Done', 'ready');
+                showFeedback(9);
+                log('Test 9: Stopped');
+            }, 2000);
+
+        } catch(e) {
+            log('Test 9: Web Audio error: ' + e.message);
+            setStatus(9, 'Error: ' + e.message, 'error');
+            showFeedback(9);
+        }
+
+    }).catch(function(e) {
+        log('Test 9: Primer play() rejected: ' + e.message);
+        setStatus(9, 'Error: ' + e.message, 'error');
+        showFeedback(9);
+    });
+});
+
+// ════════════════════════════════════════════════════════════
+// TEST 10: Media Session API + audio playback
+// ════════════════════════════════════════════════════════════
+document.getElementById('test-10').addEventListener('click', function() {
+    log('Test 10: Media Session API setup + audio playback');
+    setStatus(10, 'Setting up Media Session...', 'waiting');
+
+    // Set up Media Session metadata FIRST
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'StemScriber Audio Test',
+            artist: 'StemScriber',
+            album: 'iOS Audio Tests'
+        });
+
+        navigator.mediaSession.setActionHandler('play', function() {
+            log('Test 10: mediaSession play action');
+        });
+        navigator.mediaSession.setActionHandler('pause', function() {
+            log('Test 10: mediaSession pause action');
+        });
+        navigator.mediaSession.setActionHandler('seekbackward', function() {});
+        navigator.mediaSession.setActionHandler('seekforward', function() {});
+        navigator.mediaSession.setActionHandler('previoustrack', function() {});
+        navigator.mediaSession.setActionHandler('nexttrack', function() {});
+
+        log('Test 10: Media Session metadata and handlers set');
+    } else {
+        log('Test 10: Media Session API not available');
+    }
+
+    // Now play audio
+    var a = new Audio();
+    a.src = '/stems/test/vocals.mp3';
+    a.volume = 1.0;
+
+    a.addEventListener('playing', function() {
+        log('Test 10: Audio playing with Media Session active');
+        setStatus(10, 'Playing with Media Session...', 'playing');
+
+        // Also update playback state
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'playing';
+        }
+
+        setTimeout(function() {
+            a.pause();
+            a.src = '';
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+            }
+            setStatus(10, 'Done', 'ready');
+            showFeedback(10);
+            log('Test 10: Stopped');
+        }, 2000);
+    });
+
+    a.addEventListener('error', function(e) {
+        log('Test 10: ERROR');
+        setStatus(10, 'Error', 'error');
+        showFeedback(10);
+    });
+
+    a.play().then(function() {
+        log('Test 10: play() resolved');
+    }).catch(function(e) {
+        log('Test 10: play() rejected: ' + e.message);
+        setStatus(10, 'Error: ' + e.message, 'error');
+        showFeedback(10);
+    });
+});
+</script>
+</body>
+</html>

@@ -125,25 +125,32 @@ class TestStatusEndpoint:
     """Test /api/status/<job_id> endpoint."""
 
     def test_status_nonexistent_job(self, client):
-        resp = client.get('/api/status/nonexist')
+        resp = client.get('/api/status/00000000-0000-0000-0000-000000000000')
         assert resp.status_code == 404
         assert 'error' in resp.get_json()
 
+    def test_status_invalid_job_id(self, client):
+        # Path traversal attempts: Flask normalizes ../.. in URLs, so use
+        # a non-hex string that still reaches the endpoint
+        resp = client.get('/api/status/INVALID_JOB_ID!')
+        assert resp.status_code == 400
+
     def test_status_returns_job_data(self, client):
-        job = ProcessingJob('testjob1', 'test.wav')
+        test_id = 'aabbccdd-1122-3344-5566-778899aabbcc'
+        job = ProcessingJob(test_id, 'test.wav')
         job.status = 'processing'
         job.progress = 50
         job.stage = 'Separating stems'
-        jobs['testjob1'] = job
+        jobs[test_id] = job
 
-        resp = client.get('/api/status/testjob1')
+        resp = client.get(f'/api/status/{test_id}')
         assert resp.status_code == 200
         data = resp.get_json()
-        assert data['job_id'] == 'testjob1'
+        assert data['job_id'] == test_id
         assert data['status'] == 'processing'
         assert data['progress'] == 50
 
-        del jobs['testjob1']
+        del jobs[test_id]
 
 
 class TestDownloadEndpoint:

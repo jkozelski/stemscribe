@@ -179,7 +179,7 @@ def _load_model(device: torch.device = None):
 
     # Load checkpoint
     logger.info(f"Loading checkpoint from {GUITAR_CHECKPOINT}")
-    checkpoint = torch.load(GUITAR_CHECKPOINT, map_location=device, weights_only=False)
+    checkpoint = torch.load(GUITAR_CHECKPOINT, map_location=device, weights_only=True)
 
     # ZFTurbo saves as {"model_state_dict": ..., "epoch": ..., ...}
     if 'model_state_dict' in checkpoint:

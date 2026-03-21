@@ -9,6 +9,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# Timeout for individual ffmpeg conversion calls (seconds)
+FFMPEG_TIMEOUT = 180
+
 
 def check_stem_has_content(stem_path: str, threshold: float = 0.01) -> bool:
     """Check if a stem has significant audio content worth processing further"""
@@ -53,7 +56,7 @@ def convert_wavs_to_mp3(directory: Path) -> dict:
                 'ffmpeg', '-y', '-i', str(wav_file),
                 '-codec:a', 'libmp3lame', '-b:a', '320k',
                 str(mp3_file)
-            ], capture_output=True, text=True)
+            ], capture_output=True, text=True, timeout=FFMPEG_TIMEOUT)
 
             if mp3_file.exists():
                 wav_file.unlink()  # Remove WAV to save space
@@ -63,6 +66,9 @@ def convert_wavs_to_mp3(directory: Path) -> dict:
                 # Keep WAV if conversion failed
                 converted[wav_file.stem] = str(wav_file)
                 logger.warning(f"MP3 conversion failed for {wav_file.stem}, keeping WAV")
+        except subprocess.TimeoutExpired:
+            logger.warning(f"MP3 conversion timed out for {wav_file.stem} after {FFMPEG_TIMEOUT}s, keeping WAV")
+            converted[wav_file.stem] = str(wav_file)
         except Exception as e:
             converted[wav_file.stem] = str(wav_file)
             logger.warning(f"MP3 conversion error for {wav_file.stem}: {e}")

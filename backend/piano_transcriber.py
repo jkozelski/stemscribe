@@ -193,7 +193,7 @@ class PianoTranscriber:
             'mps' if torch.backends.mps.is_available() else 'cpu'
         )
 
-        checkpoint = torch.load(CHECKPOINT_PATH, map_location=self._device, weights_only=False)
+        checkpoint = torch.load(CHECKPOINT_PATH, map_location=self._device, weights_only=True)
         self._model = PianoTranscriptionModel()
         self._model.load_state_dict(checkpoint['model_state_dict'])
         self._model.to(self._device)

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="canonical" href="https://stemscriber.com/privacy.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — StemScriber</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <meta name="theme-color" content="#ff7b54">
+    <meta name="description" content="StemScriber Privacy Policy — how we handle your data, audio files, and privacy rights.">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-dark: #13131a;
+            --bg-card: #1a1a24;
+            --accent: #ff7b54;
+            --accent-dim: rgba(255, 123, 84, 0.15);
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-dark);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+
+        .logo-img { width: 32px; height: 32px; }
+
+        .logo-text {
+            font-family: 'Righteous', cursive;
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .back-link {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--accent); text-decoration: none; }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem 5rem;
+        }
+
+        h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .effective-date {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 2.5rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 2.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h2 .section-num {
+            color: var(--accent);
+            margin-right: 0.4rem;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p, li {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.98rem;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li { margin-bottom: 0.4rem; }
+
+        .highlight-box {
+            background: var(--accent-dim);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0 1.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.92rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            text-align: left;
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            color: var(--accent);
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .contact-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .contact-box p { margin-bottom: 0.4rem; }
+
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .toc-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+        }
+
+        .toc ol {
+            padding-left: 1.2rem;
+            margin-bottom: 0;
+        }
+
+        .toc li {
+            margin-bottom: 0.3rem;
+            font-size: 0.92rem;
+        }
+
+        .toc a { color: var(--text-dim); }
+        .toc a:hover { color: var(--accent); }
+
+        @media (max-width: 640px) {
+            .container { padding: 2rem 1.25rem 4rem; }
+            h1 { font-size: 1.7rem; }
+            h2 { font-size: 1.15rem; }
+            .data-table { font-size: 0.82rem; }
+            .data-table th, .data-table td { padding: 0.5rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="32" height="32">
+            <span class="logo-text">StemScriber</span>
+        </a>
+        <a href="/" class="back-link">&larr; Back to App</a>
+    </header>
+
+    <main class="container">
+        <h1>Privacy Policy</h1>
+        <p class="effective-date">Effective Date: March 9, 2026 &nbsp;|&nbsp; Last Updated: March 9, 2026</p>
+
+        <div class="highlight-box">
+            <p>StemScriber processes your audio locally on our servers. We do not send your audio files to third-party services, and we do not use your uploads to train machine learning models.</p>
+        </div>
+
+        <nav class="toc">
+            <div class="toc-title">Contents</div>
+            <ol>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#data-collected">Information We Collect</a></li>
+                <li><a href="#audio-processing">How Audio Is Processed</a></li>
+                <li><a href="#use">How We Use Your Information</a></li>
+                <li><a href="#third-party">Third-Party Services</a></li>
+                <li><a href="#retention">Data Retention &amp; Deletion</a></li>
+                <li><a href="#security">Security Measures</a></li>
+                <li><a href="#gdpr">Your Rights Under GDPR (EEA/UK Users)</a></li>
+                <li><a href="#ccpa">Your Rights Under CCPA (California Users)</a></li>
+                <li><a href="#children">Children's Privacy</a></li>
+                <li><a href="#cookies">Cookies &amp; Local Storage</a></li>
+                <li><a href="#international">International Data Transfers</a></li>
+                <li><a href="#changes">Changes to This Policy</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ol>
+        </nav>
+
+        <!-- 1. Overview -->
+        <h2 id="overview"><span class="section-num">1.</span> Overview</h2>
+        <p>StemScriber (<a href="https://stemscriber.com">stemscriber.com</a>) is an audio stem separation and transcription web application operated by <strong>Tidepool Artists</strong>, based in Charleston, South Carolina, United States. This Privacy Policy describes how we collect, use, and protect your information when you use our service.</p>
+        <p>By accessing or using StemScriber, you agree to the practices described in this policy. If you do not agree, please discontinue use of the service.</p>
+
+        <!-- 2. Information We Collect -->
+        <h2 id="data-collected"><span class="section-num">2.</span> Information We Collect</h2>
+
+        <h3>2.1 Information You Provide</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th>Details</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Audio files</td>
+                    <td>Songs you upload for processing</td>
+                    <td>Stem separation and transcription</td>
+                </tr>
+                <tr>
+                    <td>YouTube URLs</td>
+                    <td>Links you submit for audio extraction</td>
+                    <td>Download audio for processing</td>
+                </tr>
+                <tr>
+                    <td>Beta invite codes</td>
+                    <td>Code, associated name, redemption date</td>
+                    <td>Beta access management</td>
+                </tr>
+                <tr>
+                    <td>Google account info</td>
+                    <td>OAuth token (if you connect Google Drive)</td>
+                    <td>Saving results to your Drive</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2.2 Information Collected Automatically</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th>Details</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Browser local storage</td>
+                    <td>Beta status, UI preferences, theme selection</td>
+                    <td>Remember your settings between visits</td>
+                </tr>
+                <tr>
+                    <td>Server logs</td>
+                    <td>IP address, request timestamps, user agent</td>
+                    <td>Security monitoring, debugging</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2.3 Information We Do Not Collect</h3>
+        <ul>
+            <li>We do not require account creation or registration to use StemScriber.</li>
+            <li>We do not use analytics or tracking services (no Google Analytics, no ad pixels).</li>
+            <li>We do not place marketing or advertising cookies.</li>
+            <li>We do not collect payment information (the beta is currently free).</li>
+        </ul>
+
+        <!-- 3. How Audio Is Processed -->
+        <h2 id="audio-processing"><span class="section-num">3.</span> How Audio Is Processed</h2>
+
+        <div class="highlight-box">
+            <p>Your audio never leaves our processing infrastructure. We run our own audio processing models on our own hardware.</p>
+        </div>
+
+        <p>When you upload a song or provide a YouTube URL:</p>
+        <ol>
+            <li><strong>Upload/download:</strong> The audio file is received by our server or downloaded temporarily from the provided URL.</li>
+            <li><strong>Stem separation:</strong> Audio processing models (RoFormer or Demucs) running on our local hardware separate the audio into individual instrument stems (vocals, drums, bass, guitar, piano, other).</li>
+            <li><strong>Transcription:</strong> Separated stems are transcribed into MIDI notation using our own transcription models.</li>
+            <li><strong>Output generation:</strong> MIDI data is converted into Guitar Pro (.gp5) tablature files.</li>
+            <li><strong>Delivery:</strong> Results (stems, MIDI, tablature) are made available for you to download or save to Google Drive.</li>
+        </ol>
+
+        <p><strong>Key privacy safeguards for audio processing:</strong></p>
+        <ul>
+            <li>Audio files are processed on our own servers — they are <strong>not sent to any third-party service</strong> (not OpenAI, not Google, not Amazon).</li>
+            <li>We do <strong>not</strong> use your uploaded audio to train, improve, or fine-tune any machine learning models.</li>
+            <li>We do <strong>not</strong> share your audio files or generated outputs with any third party.</li>
+            <li>Temporary audio files from YouTube URL processing are deleted after processing completes.</li>
+        </ul>
+
+        <!-- 4. How We Use Your Information -->
+        <h2 id="use"><span class="section-num">4.</span> How We Use Your Information</h2>
+        <p>We use the information we collect solely for the following purposes:</p>
+        <ul>
+            <li><strong>Provide the service:</strong> Process your audio files and deliver stem separation, transcription, and tablature results.</li>
+            <li><strong>Maintain and improve:</strong> Monitor server health, debug errors, and improve service reliability.</li>
+            <li><strong>Manage beta access:</strong> Validate invite codes and track beta participation.</li>
+            <li><strong>Security:</strong> Detect and prevent abuse, rate-limit requests, and protect service integrity.</li>
+        </ul>
+        <p>We do <strong>not</strong> sell, rent, or trade your personal information to third parties. We do <strong>not</strong> use your data for advertising purposes.</p>
+
+        <!-- 5. Third-Party Services -->
+        <h2 id="third-party"><span class="section-num">5.</span> Third-Party Services</h2>
+        <p>StemScriber interacts with the following external services in the course of providing its functionality:</p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>What It Does</th>
+                    <th>Data Shared</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>YouTube</strong> (via yt-dlp)</td>
+                    <td>Downloads audio from YouTube URLs you provide</td>
+                    <td>The YouTube URL you submit; standard HTTP request headers</td>
+                </tr>
+                <tr>
+                    <td><strong>LRCLIB</strong></td>
+                    <td>Fetches synchronized lyrics for karaoke mode</td>
+                    <td>Song title and artist name (derived from file metadata)</td>
+                </tr>
+                <tr>
+                    <td><strong>Google Drive</strong> (optional)</td>
+                    <td>Saves your results to your personal Drive</td>
+                    <td>OAuth token and generated files (only when you connect your account)</td>
+                </tr>
+                <tr>
+                    <td><strong>Google Fonts</strong></td>
+                    <td>Delivers web fonts for the user interface</td>
+                    <td>Standard HTTP request headers (IP, user agent)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Each third-party service is governed by its own privacy policy. We encourage you to review them:</p>
+        <ul>
+            <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a> (Google Drive, Google Fonts)</li>
+            <li><a href="https://www.youtube.com/t/privacy" target="_blank" rel="noopener">YouTube Privacy Policy</a></li>
+            <li><a href="https://lrclib.net" target="_blank" rel="noopener">LRCLIB</a> (open-source lyrics API)</li>
+        </ul>
+
+        <!-- 6. Data Retention & Deletion -->
+        <h2 id="retention"><span class="section-num">6.</span> Data Retention &amp; Deletion</h2>
+
+        <h3>Audio Files &amp; Processing Results</h3>
+        <ul>
+            <li><strong>Uploaded audio files</strong> are retained on our server only for the duration necessary to complete processing. Once results are delivered, source audio may be cached temporarily for your convenience and is automatically purged.</li>
+            <li><strong>Generated stems, MIDI, and tablature files</strong> are available for download for a limited period after processing. They are automatically deleted from our servers thereafter.</li>
+            <li><strong>YouTube-sourced audio</strong> is deleted immediately after processing completes.</li>
+        </ul>
+
+        <h3>Beta Invite Data</h3>
+        <ul>
+            <li>Beta codes, associated names, and redemption dates are stored for the duration of the beta program and will be deleted when the beta concludes or when you request deletion.</li>
+        </ul>
+
+        <h3>Server Logs</h3>
+        <ul>
+            <li>Standard server logs (IP addresses, timestamps, request paths) are retained for up to 30 days for security and debugging purposes, then purged.</li>
+        </ul>
+
+        <h3>Requesting Deletion</h3>
+        <p>You may request deletion of any personal data we hold about you at any time by emailing <a href="mailto:stemscriber@gmail.com">stemscriber@gmail.com</a>. We will fulfill your request within 30 days.</p>
+
+        <!-- 7. Security Measures -->
+        <h2 id="security"><span class="section-num">7.</span> Security Measures</h2>
+        <p>We take reasonable technical and organizational measures to protect your data:</p>
+        <ul>
+            <li><strong>Encryption in transit:</strong> All connections to StemScriber are encrypted via HTTPS/TLS.</li>
+            <li><strong>Access control:</strong> Server access is restricted to authorized personnel only.</li>
+            <li><strong>Rate limiting:</strong> API endpoints are rate-limited to prevent abuse.</li>
+            <li><strong>Minimal data collection:</strong> We collect only what is necessary to provide the service.</li>
+            <li><strong>No persistent user data:</strong> Without account creation, there is no persistent user profile to breach.</li>
+        </ul>
+        <p>While we strive to protect your data, no method of electronic transmission or storage is 100% secure. We cannot guarantee absolute security.</p>
+
+        <!-- 8. GDPR -->
+        <h2 id="gdpr"><span class="section-num">8.</span> Your Rights Under GDPR (EEA/UK Users)</h2>
+        <p>If you are located in the European Economic Area (EEA) or the United Kingdom, the General Data Protection Regulation (GDPR) grants you the following rights regarding your personal data:</p>
+        <ul>
+            <li><strong>Right of access:</strong> Request a copy of the personal data we hold about you.</li>
+            <li><strong>Right to rectification:</strong> Request correction of inaccurate personal data.</li>
+            <li><strong>Right to erasure:</strong> Request deletion of your personal data ("right to be forgotten").</li>
+            <li><strong>Right to restrict processing:</strong> Request that we limit how we use your data.</li>
+            <li><strong>Right to data portability:</strong> Request your data in a structured, machine-readable format.</li>
+            <li><strong>Right to object:</strong> Object to processing of your personal data based on legitimate interests.</li>
+            <li><strong>Right to withdraw consent:</strong> Where processing is based on consent, you may withdraw it at any time.</li>
+        </ul>
+
+        <h3>Legal Basis for Processing</h3>
+        <p>We process personal data under the following legal bases:</p>
+        <ul>
+            <li><strong>Contract performance:</strong> Processing your audio files is necessary to provide the service you requested.</li>
+            <li><strong>Legitimate interests:</strong> Server logging for security and service reliability.</li>
+            <li><strong>Consent:</strong> Google Drive integration is initiated only with your explicit consent via OAuth.</li>
+        </ul>
+
+        <p>To exercise any of these rights, contact us at <a href="mailto:stemscriber@gmail.com">stemscriber@gmail.com</a>. We will respond within 30 days. If you believe your rights have been violated, you have the right to lodge a complaint with your local data protection authority.</p>
+
+        <!-- 9. CCPA -->
+        <h2 id="ccpa"><span class="section-num">9.</span> Your Rights Under CCPA (California Users)</h2>
+        <p>If you are a California resident, the California Consumer Privacy Act (CCPA) and the California Privacy Rights Act (CPRA) provide you with specific rights:</p>
+        <ul>
+            <li><strong>Right to know:</strong> You may request that we disclose what personal information we collect, use, and share about you.</li>
+            <li><strong>Right to delete:</strong> You may request deletion of personal information we have collected from you, subject to certain exceptions.</li>
+            <li><strong>Right to correct:</strong> You may request correction of inaccurate personal information.</li>
+            <li><strong>Right to opt out:</strong> You have the right to opt out of the sale or sharing of your personal information. <strong>StemScriber does not sell or share your personal information.</strong></li>
+            <li><strong>Right to non-discrimination:</strong> We will not discriminate against you for exercising any of your CCPA rights.</li>
+        </ul>
+
+        <h3>Categories of Personal Information</h3>
+        <p>In the preceding 12 months, StemScriber has collected the following categories of personal information as defined by the CCPA:</p>
+        <ul>
+            <li><strong>Identifiers:</strong> Name (beta invite), IP address.</li>
+            <li><strong>Internet activity:</strong> Server logs of interactions with the service.</li>
+        </ul>
+        <p>StemScriber has <strong>not sold</strong> personal information in the preceding 12 months. StemScriber does <strong>not</strong> use or disclose sensitive personal information for purposes beyond what is necessary to provide the service.</p>
+        <p>To exercise your rights, email <a href="mailto:stemscriber@gmail.com">stemscriber@gmail.com</a>. We will verify your identity and respond within 45 days.</p>
+
+        <!-- 10. Children -->
+        <h2 id="children"><span class="section-num">10.</span> Children's Privacy</h2>
+        <p>StemScriber is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that a child under 13 has provided us with personal information, we will take steps to delete such information promptly.</p>
+        <p>Users between the ages of 13 and 18 should review this policy with a parent or guardian before using StemScriber.</p>
+        <p>If you are a parent or guardian and believe your child has provided personal information to us, please contact us at <a href="mailto:stemscriber@gmail.com">stemscriber@gmail.com</a>.</p>
+
+        <!-- 11. Cookies & Local Storage -->
+        <h2 id="cookies"><span class="section-num">11.</span> Cookies &amp; Local Storage</h2>
+        <p>StemScriber uses minimal browser storage:</p>
+        <ul>
+            <li><strong>localStorage:</strong> We use your browser's localStorage to save your beta access status, UI preferences (such as theme selection and mixer settings), and processing history. This data stays entirely in your browser and is never transmitted to our servers.</li>
+            <li><strong>Session cookies:</strong> Standard session cookies may be used to maintain your connection during active use. These expire when you close your browser.</li>
+        </ul>
+        <p>We do <strong>not</strong> use third-party tracking cookies, advertising cookies, or analytics cookies. We do <strong>not</strong> use fingerprinting or any other cross-site tracking technology.</p>
+
+        <!-- 12. International -->
+        <h2 id="international"><span class="section-num">12.</span> International Data Transfers</h2>
+        <p>StemScriber is operated from the United States. If you access the service from outside the United States, your information (including audio files and server logs) will be transferred to and processed in the United States.</p>
+        <p>By using StemScriber, you consent to the transfer of your data to the United States. We take steps to ensure your data is treated securely and in accordance with this Privacy Policy regardless of where it is processed.</p>
+
+        <!-- 13. Changes -->
+        <h2 id="changes"><span class="section-num">13.</span> Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technology, or legal requirements. When we make material changes:</p>
+        <ul>
+            <li>We will update the "Last Updated" date at the top of this page.</li>
+            <li>For significant changes, we will provide notice through the StemScriber interface.</li>
+        </ul>
+        <p>Your continued use of StemScriber after changes are posted constitutes your acceptance of the updated policy. We encourage you to review this page periodically.</p>
+
+        <!-- 14. Contact -->
+        <h2 id="contact"><span class="section-num">14.</span> Contact Us</h2>
+        <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:</p>
+
+        <div class="contact-box">
+            <p><strong>StemScriber — Tidepool Artists</strong></p>
+            <p>Charleston, South Carolina, United States</p>
+            <p>Email: <a href="mailto:stemscriber@gmail.com">stemscriber@gmail.com</a></p>
+            <p>Website: <a href="https://stemscriber.com">stemscriber.com</a></p>
+        </div>
+
+        <p style="margin-top: 2rem; color: var(--text-dim); font-size: 0.85rem;">This Privacy Policy was last reviewed on March 9, 2026.</p>
+    </main>
+</body>
+</html>

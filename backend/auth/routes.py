@@ -1,13 +1,10 @@
 """
-Auth Blueprint — JWT authentication endpoints.
+Auth Blueprint — JWT authentication endpoints (Google-only).
 
 Endpoints:
-    POST /auth/register        — Create account
-    POST /auth/login           — Get tokens
+    POST /auth/google          — Authenticate or register via Google Sign-In
     POST /auth/refresh         — Refresh access token
     POST /auth/logout          — Revoke refresh token
-    POST /auth/forgot-password — Send reset email
-    POST /auth/reset-password  — Set new password with token
     GET  /auth/me              — Get current user profile
 """
 
@@ -24,12 +21,14 @@ from flask_jwt_extended import (
     set_refresh_cookies,
     unset_jwt_cookies,
 )
-from email_validator import validate_email, EmailNotValidError
 
 from auth.models import (
     create_user,
     get_user_by_email,
     get_user_by_id,
+    get_user_by_google_id,
+    create_google_user,
+    link_google_account,
     update_user_password,
     get_monthly_usage,
 )
@@ -37,7 +36,10 @@ from auth.email import send_reset_email, verify_reset_token
 from auth.decorators import get_plan_limits
 from db import execute, query_one
 
+import os
+
 logger = logging.getLogger(__name__)
+
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -57,58 +59,10 @@ def _issue_tokens(user):
 
 
 # ---- Endpoints ----
-
-@auth_bp.route('/register', methods=['POST'])
-def register():
-    """Create a new user account."""
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({'error': 'Request body must be JSON'}), 400
-
-    email = data.get('email', '').strip()
-    password = data.get('password', '')
-    display_name = data.get('display_name', '').strip() or None
-
-    # Validate email format
-    try:
-        validated = validate_email(email, check_deliverability=False)
-        email = validated.normalized
-    except EmailNotValidError as e:
-        return jsonify({'error': f'Invalid email: {e}'}), 400
-
-    # Create user (raises ValueError if email taken or bad password)
-    try:
-        user = create_user(email, password, display_name)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 409
-
-    tokens = _issue_tokens(user)
-    response = jsonify(tokens)
-    set_refresh_cookies(response, tokens['refresh_token'])
-    return response, 201
-
-
-@auth_bp.route('/login', methods=['POST'])
-def login():
-    """Authenticate with email + password."""
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({'error': 'Request body must be JSON'}), 400
-
-    email = data.get('email', '').strip().lower()
-    password = data.get('password', '')
-
-    if not email or not password:
-        return jsonify({'error': 'Email and password are required'}), 400
-
-    user = get_user_by_email(email)
-    if not user or not user.check_password(password):
-        return jsonify({'error': 'Invalid email or password'}), 401
-
-    tokens = _issue_tokens(user)
-    response = jsonify(tokens)
-    set_refresh_cookies(response, tokens['refresh_token'])
-    return response, 200
+# NOTE: /auth/register, /auth/login, /auth/forgot-password, /auth/reset-password
+# have been removed. Authentication is now Google-only.
+# Existing email+password users can sign in via Google with the same email
+# (the google_login endpoint handles account linking automatically — see Case 2).
 
 
 @auth_bp.route('/refresh', methods=['POST'])
@@ -145,50 +99,6 @@ def logout():
     return response, 200
 
 
-@auth_bp.route('/forgot-password', methods=['POST'])
-def forgot_password():
-    """Send a password reset email."""
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({'error': 'Request body must be JSON'}), 400
-
-    email = data.get('email', '').strip().lower()
-    if not email:
-        return jsonify({'error': 'Email is required'}), 400
-
-    # Always return success to prevent email enumeration
-    user = get_user_by_email(email)
-    if user:
-        send_reset_email(email, str(user.id))
-
-    return jsonify({'message': 'If that email exists, a reset link has been sent'}), 200
-
-
-@auth_bp.route('/reset-password', methods=['POST'])
-def reset_password():
-    """Reset password using a token from the reset email."""
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({'error': 'Request body must be JSON'}), 400
-
-    token = data.get('token', '')
-    new_password = data.get('password', '')
-
-    if not token:
-        return jsonify({'error': 'Reset token is required'}), 400
-
-    user_id = verify_reset_token(token)
-    if not user_id:
-        return jsonify({'error': 'Invalid or expired reset token'}), 400
-
-    try:
-        update_user_password(user_id, new_password)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-
-    return jsonify({'message': 'Password updated successfully'}), 200
-
-
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def me():
@@ -209,6 +119,81 @@ def me():
             'plan_limits': limits,
         },
     }), 200
+
+
+# ---- Google OAuth ----
+
+@auth_bp.route('/google', methods=['POST'])
+def google_login():
+    """Authenticate or register via Google Sign-In ID token."""
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'error': 'Request body must be JSON'}), 400
+
+    credential = data.get('credential', '')
+    if not credential:
+        return jsonify({'error': 'Google credential token is required'}), 400
+
+    google_client_id = os.environ.get('GOOGLE_CLIENT_ID')
+    if not google_client_id:
+        logger.error("GOOGLE_CLIENT_ID not configured")
+        return jsonify({'error': 'Google Sign-In is not configured'}), 500
+
+    # Verify the Google ID token
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests as google_requests
+
+        idinfo = google_id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            google_client_id,
+        )
+    except ValueError as e:
+        logger.warning(f"Google token verification failed: {e}")
+        return jsonify({'error': 'Invalid Google token'}), 401
+
+    # Extract user info from verified token
+    google_id = idinfo['sub']
+    email = idinfo.get('email', '').lower().strip()
+    name = idinfo.get('name', '')
+    picture = idinfo.get('picture')
+
+    if not email:
+        return jsonify({'error': 'Google account has no email'}), 400
+
+    # Case 1: User exists with this google_id — just log in
+    user = get_user_by_google_id(google_id)
+    if user:
+        tokens = _issue_tokens(user)
+        response = jsonify(tokens)
+        set_refresh_cookies(response, tokens['refresh_token'])
+        logger.info(f"Google login: existing user {user.id} ({email})")
+        return response, 200
+
+    # Case 2: User exists with this email but no google_id — link & log in
+    user = get_user_by_email(email)
+    if user:
+        link_google_account(str(user.id), google_id, picture)
+        # Re-fetch to get updated fields
+        user = get_user_by_id(str(user.id))
+        tokens = _issue_tokens(user)
+        response = jsonify(tokens)
+        set_refresh_cookies(response, tokens['refresh_token'])
+        logger.info(f"Google login: linked Google to existing user {user.id} ({email})")
+        return response, 200
+
+    # Case 3: New user — create account with Google info (no password)
+    try:
+        user = create_google_user(email, name, google_id, picture)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 409
+
+    tokens = _issue_tokens(user)
+    response = jsonify(tokens)
+    set_refresh_cookies(response, tokens['refresh_token'])
+    logger.info(f"Google login: created new user {user.id} ({email})")
+    return response, 201
 
 
 # ---- JWT Token Blacklist Check ----

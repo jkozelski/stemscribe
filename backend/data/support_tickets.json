@@ -1,0 +1,14 @@
+[
+  {
+    "id": "2f255f2f-685a-40ca-a7e0-7b3b9591545b",
+    "timestamp": "2026-03-19T13:07:38.873965+00:00",
+    "name": "&lt;script&gt;alert(1)&lt;/script&gt;",
+    "email": "test@test.com",
+    "subject": "General",
+    "message": "&lt;img src=x onerror=alert(1)&gt;",
+    "status": "open",
+    "priority": "normal",
+    "responses": [],
+    "resolved_date": null
+  }
+]

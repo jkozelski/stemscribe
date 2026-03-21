@@ -6,50 +6,58 @@ window.StemScribe = window.StemScribe || {};
 
     SS.initPanels = function() {
         // Settings Panel
-        var settingsBtn = document.getElementById('settingsBtn');
-        var settingsPanel = document.getElementById('settingsPanel');
-        var settingsOverlay = document.getElementById('settingsOverlay');
-        var closeSettings = document.getElementById('closeSettings');
+        try {
+            var settingsBtn = document.getElementById('settingsBtn');
+            var settingsPanel = document.getElementById('settingsPanel');
+            var settingsOverlay = document.getElementById('settingsOverlay');
+            var closeSettings = document.getElementById('closeSettings');
 
-        settingsBtn.addEventListener('click', function() {
-            settingsPanel.classList.add('open');
-            settingsOverlay.classList.add('open');
-            SS.checkDriveStatus();
-            SS.loadLocalStats();
-        });
+            if (settingsBtn) settingsBtn.addEventListener('click', function() {
+                if (settingsPanel) settingsPanel.classList.add('open');
+                if (settingsOverlay) settingsOverlay.classList.add('open');
+                SS.checkDriveStatus();
+                SS.loadLocalStats();
+            });
 
-        closeSettings.addEventListener('click', SS.closeSettingsPanel);
-        settingsOverlay.addEventListener('click', SS.closeSettingsPanel);
+            if (closeSettings) closeSettings.addEventListener('click', SS.closeSettingsPanel);
+            if (settingsOverlay) settingsOverlay.addEventListener('click', SS.closeSettingsPanel);
+        } catch (e) { console.error('Settings panel setup failed:', e); }
 
         // Library Panel
-        var libraryBtn = document.getElementById('libraryBtn');
-        var libraryPanel = document.getElementById('libraryPanel');
-        var libraryOverlay = document.getElementById('libraryOverlay');
-        var closeLibrary = document.getElementById('closeLibrary');
+        try {
+            var libraryBtn = document.getElementById('libraryBtn');
+            var libraryPanel = document.getElementById('libraryPanel');
+            var libraryOverlay = document.getElementById('libraryOverlay');
+            var closeLibrary = document.getElementById('closeLibrary');
 
-        libraryBtn.addEventListener('click', function() {
-            libraryPanel.classList.add('open');
-            libraryOverlay.classList.add('open');
-            SS.loadLibrary();
-        });
+            if (libraryBtn) libraryBtn.addEventListener('click', function() {
+                if (libraryPanel) libraryPanel.classList.add('open');
+                if (libraryOverlay) libraryOverlay.classList.add('open');
+                SS.loadLibrary();
+            });
 
-        closeLibrary.addEventListener('click', SS.closeLibraryPanel);
-        libraryOverlay.addEventListener('click', SS.closeLibraryPanel);
+            if (closeLibrary) closeLibrary.addEventListener('click', SS.closeLibraryPanel);
+            if (libraryOverlay) libraryOverlay.addEventListener('click', SS.closeLibraryPanel);
+        } catch (e) { console.error('Library panel setup failed:', e); }
 
         // Mixer Layout Toggle
-        var mixerLayoutToggle = document.getElementById('mixerLayoutToggle');
-        var optionA = document.getElementById('optionA');
-        var optionB = document.getElementById('optionB');
+        try {
+            var mixerLayoutToggle = document.getElementById('mixerLayoutToggle');
 
-        mixerLayoutToggle.checked = SS.useHierarchicalLayout;
-        SS.updateLayoutOptionDisplay();
+            if (mixerLayoutToggle) {
+                mixerLayoutToggle.checked = SS.useHierarchicalLayout;
+                SS.updateLayoutOptionDisplay();
 
-        mixerLayoutToggle.addEventListener('change', function() {
-            SS.useHierarchicalLayout = mixerLayoutToggle.checked;
-            localStorage.setItem('mixerLayout', SS.useHierarchicalLayout ? 'hierarchical' : 'dynamic');
-            SS.updateLayoutOptionDisplay();
-            SS.showToast(SS.useHierarchicalLayout ? '\u2713 Hierarchical layout enabled' : '\u2713 Dynamic layout enabled');
-        });
+                mixerLayoutToggle.addEventListener('change', function() {
+                    SS.useHierarchicalLayout = mixerLayoutToggle.checked;
+                    localStorage.setItem('mixerLayout', SS.useHierarchicalLayout ? 'hierarchical' : 'dynamic');
+                    SS.updateLayoutOptionDisplay();
+                    SS.showToast(SS.useHierarchicalLayout ? '\u2713 Hierarchical layout enabled' : '\u2713 Dynamic layout enabled');
+                });
+            } else {
+                SS.updateLayoutOptionDisplay();
+            }
+        } catch (e) { console.error('Mixer layout toggle setup failed:', e); }
 
         // Guitar Pro Tabs Toggle
         var gpTabsToggle = document.getElementById('gpTabsToggle');
@@ -92,7 +100,8 @@ window.StemScribe = window.StemScribe || {};
         }
 
         // Google Drive connect button
-        document.getElementById('connectDriveBtn').addEventListener('click', async function() {
+        var connectDriveBtn = document.getElementById('connectDriveBtn');
+        if (connectDriveBtn) connectDriveBtn.addEventListener('click', async function() {
             var btn = document.getElementById('connectDriveBtn');
             btn.textContent = '\u23F3 Authenticating...';
             btn.disabled = true;
@@ -105,9 +114,9 @@ window.StemScribe = window.StemScribe || {};
                     SS.showToast('\u2713 Connected to Google Drive!');
                     SS.checkDriveStatus();
                 } else {
-                    SS.showToast('Check terminal for auth link', true);
-                    btn.textContent = '\u{1F517} Complete auth in browser...';
-                    setTimeout(SS.checkDriveStatus, 5000);
+                    SS.showToast('Google Drive connection coming soon', true);
+                    btn.textContent = '\u{1F517} Connect Google Drive';
+                    btn.disabled = false;
                 }
             } catch (error) {
                 SS.showToast('Connection failed: ' + error.message, true);
@@ -117,7 +126,8 @@ window.StemScribe = window.StemScribe || {};
         });
 
         // Cleanup button
-        document.getElementById('cleanupBtn').addEventListener('click', async function() {
+        var cleanupBtn = document.getElementById('cleanupBtn');
+        if (cleanupBtn) cleanupBtn.addEventListener('click', async function() {
             var btn = document.getElementById('cleanupBtn');
             var originalText = btn.textContent;
             btn.textContent = '\u{1F504} Cleaning up...';
@@ -147,18 +157,24 @@ window.StemScribe = window.StemScribe || {};
     };
 
     SS.closeSettingsPanel = function() {
-        document.getElementById('settingsPanel').classList.remove('open');
-        document.getElementById('settingsOverlay').classList.remove('open');
+        var sp = document.getElementById('settingsPanel');
+        if (sp) sp.classList.remove('open');
+        var so = document.getElementById('settingsOverlay');
+        if (so) so.classList.remove('open');
     };
 
     SS.closeLibraryPanel = function() {
-        document.getElementById('libraryPanel').classList.remove('open');
-        document.getElementById('libraryOverlay').classList.remove('open');
+        var lp = document.getElementById('libraryPanel');
+        if (lp) lp.classList.remove('open');
+        var lo = document.getElementById('libraryOverlay');
+        if (lo) lo.classList.remove('open');
     };
 
     SS.updateLayoutOptionDisplay = function() {
-        document.getElementById('optionA').classList.toggle('active', !SS.useHierarchicalLayout);
-        document.getElementById('optionB').classList.toggle('active', SS.useHierarchicalLayout);
+        var optA = document.getElementById('optionA');
+        if (optA) optA.classList.toggle('active', !SS.useHierarchicalLayout);
+        var optB = document.getElementById('optionB');
+        if (optB) optB.classList.toggle('active', SS.useHierarchicalLayout);
     };
 
     SS.checkDriveStatus = async function() {
@@ -172,28 +188,26 @@ window.StemScribe = window.StemScribe || {};
             var data = await response.json();
 
             if (data.status === 'authenticated') {
-                statusText.textContent = 'Connected';
-                statusDot.className = 'status-dot green';
-                connectBtn.textContent = '\u2713 Connected to Google Drive';
-                connectBtn.disabled = true;
+                if (statusText) statusText.textContent = 'Connected';
+                if (statusDot) statusDot.className = 'status-dot green';
+                if (connectBtn) { connectBtn.textContent = '\u2713 Connected to Google Drive'; connectBtn.disabled = true; }
 
                 var statsResponse = await fetch(SS.API_BASE + '/drive/stats');
                 var stats = await statsResponse.json();
                 if (stats.exists) {
-                    statsRow.style.display = 'flex';
-                    document.getElementById('driveFileCount').textContent = stats.folder_count + ' songs';
+                    if (statsRow) statsRow.style.display = 'flex';
+                    var dfc = document.getElementById('driveFileCount');
+                    if (dfc) dfc.textContent = stats.folder_count + ' songs';
                 }
             } else {
-                statusText.textContent = 'Not connected';
-                statusDot.className = 'status-dot red';
-                connectBtn.textContent = '\u{1F517} Connect Google Drive';
-                connectBtn.disabled = false;
+                if (statusText) statusText.textContent = 'Not connected';
+                if (statusDot) statusDot.className = 'status-dot red';
+                if (connectBtn) { connectBtn.textContent = '\u{1F517} Connect Google Drive'; connectBtn.disabled = false; }
             }
         } catch (error) {
-            statusText.textContent = 'Unavailable';
-            statusDot.className = 'status-dot red';
-            connectBtn.textContent = '\u26A0\uFE0F Install Drive libraries first';
-            connectBtn.disabled = true;
+            if (statusText) statusText.textContent = 'Unavailable';
+            if (statusDot) statusDot.className = 'status-dot red';
+            if (connectBtn) { connectBtn.textContent = '\u26A0\uFE0F Install Drive libraries first'; connectBtn.disabled = true; }
         }
     };
 
@@ -202,15 +216,19 @@ window.StemScribe = window.StemScribe || {};
             var response = await fetch(SS.API_BASE + '/jobs');
             var data = await response.json();
             var jobCount = data.jobs?.length || 0;
-            document.getElementById('localJobCount').textContent = jobCount + ' jobs';
+            var ljc = document.getElementById('localJobCount');
+            if (ljc) ljc.textContent = jobCount + ' jobs';
 
             var estimatedMB = jobCount * 25;
             var maxMB = 1000;
             var percent = Math.min((estimatedMB / maxMB) * 100, 100);
-            document.getElementById('diskFill').style.width = percent + '%';
-            document.getElementById('diskUsed').textContent = '~' + estimatedMB + ' MB used';
+            var df = document.getElementById('diskFill');
+            if (df) df.style.width = percent + '%';
+            var du = document.getElementById('diskUsed');
+            if (du) du.textContent = '~' + estimatedMB + ' MB used';
         } catch (error) {
-            document.getElementById('localJobCount').textContent = 'Unable to fetch';
+            var ljc2 = document.getElementById('localJobCount');
+            if (ljc2) ljc2.textContent = 'Unable to fetch';
         }
     };
 
@@ -224,6 +242,14 @@ window.StemScribe = window.StemScribe || {};
 
             if (data.library && data.library.length > 0) {
                 libraryList.innerHTML = data.library.map(function(item) {
+                    // Parse artist from title ("Artist - Song") since YT metadata has uploader name
+                    var libTitle = item.title || 'Unknown Track';
+                    var libArtist = '';
+                    var libDash = libTitle.indexOf(' - ');
+                    if (libDash > 0) {
+                        libArtist = libTitle.substring(0, libDash).trim();
+                        libTitle = libTitle.substring(libDash + 3).trim();
+                    }
                     return '<div class="library-item" onclick="StemScribe.loadFromLibrary(\'' + SS.escapeJsString(item.job_id) + '\')">' +
                         '<div class="library-item-header">' +
                             (item.thumbnail
@@ -231,8 +257,8 @@ window.StemScribe = window.StemScribe || {};
                                 : '<div class="library-item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem;">\u{1F3B5}</div>'
                             ) +
                             '<div class="library-item-info">' +
-                                '<div class="library-item-title">' + SS.escapeHtml(item.title || 'Unknown Track') + '</div>' +
-                                '<div class="library-item-artist">' + SS.escapeHtml(item.artist || 'Unknown Artist') + '</div>' +
+                                '<div class="library-item-title">' + SS.escapeHtml(libTitle) + '</div>' +
+                                (libArtist ? '<div class="library-item-artist">' + SS.escapeHtml(libArtist) + '</div>' : '') +
                             '</div>' +
                             '<button class="library-item-delete" onclick="event.stopPropagation(); StemScribe.deleteFromLibrary(\'' + SS.escapeJsString(item.job_id) + '\')" title="Remove from library">\u{1F5D1}\uFE0F</button>' +
                         '</div>' +

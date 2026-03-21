@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="canonical" href="https://stemscriber.com/contact.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemScriber — Contact Support</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ff7b54">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="StemScriber">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <meta name="description" content="Contact StemScriber support. Report bugs, request features, or get help with your account.">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/landing-styles.css">
+    <style>
+        .contact-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .contact-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 1.5rem 4rem;
+        }
+        .contact-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 520px;
+            width: 100%;
+        }
+        .contact-card h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--psych-orange), var(--psych-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .contact-card .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--psych-orange);
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-dim);
+        }
+        .form-group select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a7a85' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            cursor: pointer;
+        }
+        .form-group select option {
+            background: var(--bg-dark);
+            color: var(--text);
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--psych-orange), #ff6b3a);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .text-help {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+        .text-help a {
+            color: var(--psych-orange);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .success-message .check-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .success-message h2 {
+            font-family: 'Righteous', cursive;
+            font-size: 1.5rem;
+            color: var(--psych-green);
+            margin-bottom: 0.5rem;
+        }
+        .success-message p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        .success-message a {
+            color: var(--psych-orange);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .error-message {
+            display: none;
+            background: rgba(255, 70, 70, 0.1);
+            border: 1px solid rgba(255, 70, 70, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            color: #ff6b6b;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 600px) {
+            .contact-section {
+                padding: 6rem 1rem 2rem;
+            }
+            .contact-card {
+                padding: 1.5rem;
+            }
+            .contact-card h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="landing-body">
+
+    <!-- Background -->
+    <div class="landing-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="landing-nav">
+        <a href="/" class="logo">
+            <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="36" height="36">
+            <span class="logo-text">StemScriber</span>
+        </a>
+        <div class="nav-links-landing">
+            <a href="/">Home</a>
+            <a href="/app" class="nav-cta">Launch App</a>
+        </div>
+    </nav>
+
+    <div class="contact-wrapper">
+        <section class="contact-section">
+            <div class="contact-card">
+                <div id="contactForm">
+                    <h1>Contact Support</h1>
+                    <p class="subtitle">We typically respond within 24 hours.</p>
+
+                    <div class="error-message" id="errorMessage"></div>
+
+                    <form id="supportForm" novalidate>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject" required>
+                                <option value="" disabled selected>Select a topic</option>
+                                <option value="General">General</option>
+                                <option value="Bug Report">Bug Report</option>
+                                <option value="Feature Request">Feature Request</option>
+                                <option value="Billing/Refund">Billing / Refund</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" placeholder="How can we help?" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+                    </form>
+
+                    <div class="text-help">
+                        Need quick help? Text us at <a href="sms:+18438748999">(843) 874-8999</a>
+                    </div>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    <div class="check-icon">&#10003;</div>
+                    <h2>Message Sent</h2>
+                    <p>Thanks! We'll get back to you within 24 hours.</p>
+                    <a href="/">Back to Home</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="28" height="28">
+                    <span class="logo-text">StemScriber</span>
+                </div>
+                <div class="footer-links">
+                    <a href="mailto:stemscriber@gmail.com">Email</a>
+                    <a href="/contact.html">Support</a>
+                    <a href="/app">Launch App</a>
+                </div>
+                <div class="footer-links" style="margin-top:0.5rem;">
+                    <a href="/terms.html">Terms of Service</a>
+                    <a href="/privacy.html">Privacy Policy</a>
+                    <a href="/dmca.html">DMCA</a>
+                </div>
+                <div class="footer-copy">
+                    &copy; 2026 StemScriber
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            var form = document.getElementById('supportForm');
+            var submitBtn = document.getElementById('submitBtn');
+            var contactForm = document.getElementById('contactForm');
+            var successMessage = document.getElementById('successMessage');
+            var errorMessage = document.getElementById('errorMessage');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                errorMessage.style.display = 'none';
+
+                var name = document.getElementById('name').value.trim();
+                var email = document.getElementById('email').value.trim();
+                var subject = document.getElementById('subject').value;
+                var message = document.getElementById('message').value.trim();
+
+                if (!name || !email || !subject || !message) {
+                    errorMessage.textContent = 'Please fill in all fields.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                // Basic email validation
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    errorMessage.textContent = 'Please enter a valid email address.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+
+                fetch('/api/support/ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        subject: subject,
+                        message: message
+                    })
+                })
+                .then(function(res) {
+                    if (!res.ok) throw new Error('Server error');
+                    return res.json();
+                })
+                .then(function() {
+                    contactForm.style.display = 'none';
+                    successMessage.style.display = 'block';
+                })
+                .catch(function() {
+                    errorMessage.textContent = 'Something went wrong. Please try again or text us at (843) 874-8999.';
+                    errorMessage.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Message';
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

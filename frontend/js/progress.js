@@ -5,14 +5,21 @@ window.StemScribe = window.StemScribe || {};
     'use strict';
 
     SS.updateProgressDisplay = function(progress) {
-        document.getElementById('progressFill').style.width = progress + '%';
-        document.getElementById('busTrail').style.width = progress + '%';
-        document.getElementById('tourBus').style.left = progress + '%';
-        document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        var pf = document.getElementById('progressFill');
+        if (pf) pf.style.width = progress + '%';
+        var bt = document.getElementById('busTrail');
+        if (bt) bt.style.width = progress + '%';
+        var tb = document.getElementById('tourBus');
+        if (tb) tb.style.left = progress + '%';
+        var pt = document.getElementById('progressText');
+        if (pt) pt.textContent = Math.round(progress) + '%';
 
-        document.getElementById('city-denver').classList.toggle('visited', progress >= 25);
-        document.getElementById('city-chicago').classList.toggle('visited', progress >= 55);
-        document.getElementById('city-nyc').classList.toggle('visited', progress >= 90);
+        var cd = document.getElementById('city-denver');
+        if (cd) cd.classList.toggle('visited', progress >= 25);
+        var cc = document.getElementById('city-chicago');
+        if (cc) cc.classList.toggle('visited', progress >= 55);
+        var cn = document.getElementById('city-nyc');
+        if (cn) cn.classList.toggle('visited', progress >= 90);
     };
 
     function animateProgress() {
@@ -72,7 +79,8 @@ window.StemScribe = window.StemScribe || {};
             var slim = await response.json();
             SS.lastPollEtag = response.headers.get('ETag');
 
-            document.getElementById('stageText').textContent = slim.stage || 'Processing...';
+            var stEl = document.getElementById('stageText');
+            if (stEl) stEl.textContent = slim.stage || 'Processing...';
 
             var progress = slim.progress || 0;
             if (progress > SS.targetProgress) {
@@ -93,7 +101,12 @@ window.StemScribe = window.StemScribe || {};
                 SS.showResults(job);
             } else if (slim.status === 'failed') {
                 SS.stopProgressAnimation();
-                alert('Failed: ' + (slim.error || 'Unknown error'));
+                var errMsg = slim.error || 'Unknown error';
+                if (errMsg.indexOf('plan') !== -1 && errMsg.indexOf('minutes') !== -1) {
+                    SS.showDurationLimitModal(errMsg);
+                } else {
+                    alert('Failed: ' + errMsg);
+                }
                 SS.resetUI();
             } else {
                 var interval = progress > 0 && progress < 100 ? 500 : 1000;
@@ -120,6 +133,21 @@ window.StemScribe = window.StemScribe || {};
                 }
             }
         }
+    };
+
+    SS.showDurationLimitModal = function(message) {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        var modal = document.createElement('div');
+        modal.style.cssText = 'background:#1a1a24;border:1px solid #2a2a35;border-radius:16px;padding:2.5rem;max-width:440px;width:90%;text-align:center;color:#e8e4df;font-family:Space Grotesk,sans-serif;';
+        modal.innerHTML = '<div style="font-size:2.5rem;margin-bottom:1rem;">⏱️</div>' +
+            '<h3 style="font-size:1.3rem;margin-bottom:1rem;background:linear-gradient(135deg,#ff7b54,#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Song Too Long</h3>' +
+            '<p style="color:#7a7a85;font-size:0.95rem;line-height:1.6;margin-bottom:1.5rem;">' + message + '</p>' +
+            '<a href="/#pricing" style="display:inline-block;padding:0.8rem 2rem;background:linear-gradient(135deg,#ff7b54,#ff6b9d);border:none;border-radius:10px;color:white;font-weight:600;text-decoration:none;font-size:1rem;margin-bottom:0.75rem;">View Plans</a>' +
+            '<br><button style="background:none;border:none;color:#7a7a85;cursor:pointer;margin-top:0.5rem;font-size:0.9rem;" onclick="this.closest(\'div[style*=fixed]\').remove()">Maybe later</button>';
+        overlay.appendChild(modal);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        document.body.appendChild(overlay);
     };
 
 })(window.StemScribe);

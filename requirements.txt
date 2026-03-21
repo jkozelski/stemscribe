@@ -1,42 +1,42 @@
-# StemScribe Dependencies
+# StemScribe Dependencies (pinned versions from venv311, 2026-03-04)
 # Install with: pip install -r requirements.txt
 
 # =============================================================================
 # Core Web Framework
 # =============================================================================
-flask
-flask-cors
+flask==3.1.3
+flask-cors==6.0.2
 
 # =============================================================================
 # Audio Separation & Processing
 # =============================================================================
-demucs                      # Stem separation (htdemucs_6s model)
-librosa                     # Audio analysis, chroma features, beat detection
-soundfile                   # Audio I/O
-numpy
-scipy
-pydub                       # Audio format conversion
+demucs==4.0.1                   # Stem separation (htdemucs_6s model)
+librosa==0.11.0                 # Audio analysis, chroma features, beat detection
+soundfile==0.13.1               # Audio I/O
+numpy==2.4.2
+scipy==1.17.1
+# pydub                         # Audio format conversion (not currently installed)
 
 # =============================================================================
 # ML / Deep Learning
 # =============================================================================
-torch                       # Neural networks (chord detection, transcription)
-torchaudio                  # Audio transforms
-onnxruntime                 # ONNX model inference
+torch==2.10.0                   # Neural networks (chord detection, transcription)
+torchaudio==2.10.0              # Audio transforms
+onnxruntime==1.24.2             # ONNX model inference
 
 # =============================================================================
 # Music Transcription & Notation
 # =============================================================================
-basic-pitch                 # MIDI transcription (Spotify)
-music21                     # MusicXML generation, key detection, notation
-mido                        # MIDI file handling
-pretty-midi                 # MIDI analysis
-pyguitarpro                 # Guitar Pro (.gp5) export
+basic-pitch==0.4.0              # MIDI transcription (Spotify)
+music21==9.9.1                  # MusicXML generation, key detection, notation
+mido==1.3.3                     # MIDI file handling
+pretty-midi==0.2.11             # MIDI analysis
+pyguitarpro==0.10.1             # Guitar Pro (.gp5) export
 
 # =============================================================================
 # YouTube / URL Downloads
 # =============================================================================
-yt-dlp                      # YouTube, Spotify, SoundCloud, Bandcamp
+yt-dlp                          # YouTube, Spotify, SoundCloud, Bandcamp (unpinned — updates frequently)
 
 # =============================================================================
 # Google Drive Integration
@@ -46,59 +46,50 @@ google-api-python-client
 google-auth-httplib2
 
 # =============================================================================
-# PDF / OMR Processing
-# =============================================================================
-PyMuPDF                     # PDF parsing (fitz)
-
-# =============================================================================
 # Optional - Enhanced Features (graceful fallback if missing)
 # =============================================================================
-# pedalboard                # Stem audio enhancement (Spotify)
-# noisereduce               # Noise reduction for stems
-# pyloudnorm                # LUFS loudness normalization
-# audio-separator           # BS-Roformer vocal separation
-# psutil                    # System memory monitoring for GPU manager
-# oemer                     # Deep learning OMR (sheet music recognition)
+# pedalboard                    # Stem audio enhancement (Spotify)
+# noisereduce                   # Noise reduction for stems
+# pyloudnorm                    # LUFS loudness normalization
+# audio-separator               # BS-Roformer vocal separation
+# psutil                        # System memory monitoring for GPU manager
+# oemer                         # Deep learning OMR (sheet music recognition)
 
 # =============================================================================
 # HTTP & API
 # =============================================================================
-requests                    # MusicBrainz, Wikipedia API calls
+requests==2.32.5                # MusicBrainz, Wikipedia API calls
 
 # =============================================================================
 # Authentication & Security
 # =============================================================================
-flask-jwt-extended          # JWT token management
-passlib[bcrypt]             # Password hashing (bcrypt)
-email-validator             # Email format validation
-flask-limiter               # Request rate limiting by IP/tier
+flask-jwt-extended==4.7.1       # JWT token management
+passlib[bcrypt]==1.7.4           # Password hashing (bcrypt)
+email-validator==2.3.0          # Email format validation
+flask-limiter==4.1.1            # Request rate limiting by IP/tier
+google-auth                     # Google OAuth ID token verification
 
 # =============================================================================
 # Database (Supabase/Postgres)
 # =============================================================================
-psycopg2-binary             # Postgres driver
+psycopg2-binary==2.9.11         # Postgres driver
 
 # =============================================================================
 # Billing (Stripe) — needed for Phase B
 # =============================================================================
-stripe                      # Stripe API client
+stripe==14.4.0                  # Stripe API client
 
 # =============================================================================
 # File Storage (Cloudflare R2) — needed for Phase C
 # =============================================================================
-boto3                       # S3-compatible R2 client
-
-# =============================================================================
-# GPU Processing — needed for Phase D
-# =============================================================================
-replicate                   # Replicate API (Demucs on GPU)
+boto3                           # S3-compatible R2 client
 
 # =============================================================================
 # Email (password resets, notifications)
 # =============================================================================
-resend                      # Resend email API
+resend==2.23.0                  # Resend email API
 
 # =============================================================================
 # Production Server
 # =============================================================================
-gunicorn                    # WSGI server for Railway deployment
+gunicorn                        # WSGI server for Railway deployment

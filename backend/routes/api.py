@@ -3,13 +3,17 @@ Core API routes — upload, url, status, health, download, jobs, cleanup, skills
 """
 
 import os
+from urllib.parse import quote as _url_quote
 import re
+import io
 import uuid
 import shutil
+import zipfile
+import subprocess
 import threading
 import logging
 from pathlib import Path
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, g, make_response
 
 from models.job import (
     ProcessingJob, jobs, get_job, OUTPUT_DIR, UPLOAD_DIR,
@@ -21,6 +25,13 @@ from services.url_resolver import (
     validate_url_no_ssrf as _validate_url_no_ssrf,
 )
 
+from auth.middleware import auth_required
+from middleware.validation import (
+    validate_job_id as _validate_job_id_v2,
+    validate_file_upload,
+    sanitize_text,
+)
+
 logger = logging.getLogger(__name__)
 
 api_bp = Blueprint("api", __name__)
@@ -30,7 +41,7 @@ api_bp = Blueprint("api", __name__)
 
 def _validate_job_id(job_id: str) -> bool:
     """Validate job_id is a safe hex string (UUID prefix)."""
-    return bool(job_id) and len(job_id) <= 36 and re.match(r'^[a-f0-9\\-]+$', job_id)
+    return _validate_job_id_v2(job_id)
 
 
 def _safe_path(base_dir: Path, untrusted_path: str) -> Path:
@@ -42,6 +53,14 @@ def _safe_path(base_dir: Path, untrusted_path: str) -> Path:
 
 
 # ============ HEALTH ============
+
+@api_bp.route('/api/config', methods=['GET'])
+def get_config():
+    """Public config endpoint — exposes non-secret settings to the frontend."""
+    return jsonify({
+        'google_client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
+    })
+
 
 @api_bp.route('/api/health', methods=['GET'])
 def health():
@@ -67,7 +86,7 @@ def health():
 
     return jsonify({
         'status': 'ok',
-        'service': 'StemScribe API',
+        'service': 'StemScriber API',
         'yt_dlp_available': ytdlp_available,
         'ensemble_separator': ensemble_info,
         'separation_modes': ['standard', 'mdx'] + (['ensemble'] if ENSEMBLE_SEPARATOR_AVAILABLE else [])
@@ -101,6 +120,7 @@ def list_skills():
 # ============ UPLOAD ============
 
 @api_bp.route('/api/upload', methods=['POST'])
+@auth_required(optional=True)
 def upload_audio():
     """Upload an audio file for processing"""
     if 'file' not in request.files:
@@ -110,11 +130,10 @@ def upload_audio():
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
 
-    # Validate file type
-    allowed_extensions = {'.mp3', '.wav', '.flac', '.m4a', '.ogg', '.aiff', '.webm', '.opus'}
-    ext = Path(file.filename).suffix.lower()
-    if ext not in allowed_extensions:
-        return jsonify({'error': f'Invalid file type. Allowed: {allowed_extensions}'}), 400
+    # Validate file (type, size, MIME, filename)
+    is_valid, file_error = validate_file_upload(file)
+    if not is_valid:
+        return jsonify({'error': file_error}), 400
 
     # Get selected skills from form data
     skills = request.form.getlist('skills')
@@ -129,9 +148,19 @@ def upload_audio():
     mdx_model = request.form.get('mdx_model', 'false').lower() == 'true'
     ensemble_mode = request.form.get('ensemble', 'false').lower() == 'true'
 
+    # Determine user plan
+    plan = request.form.get('plan', 'free')
+
     # Create job with skills
-    job_id = str(uuid.uuid4())[:8]
+    job_id = str(uuid.uuid4())
     job = ProcessingJob(job_id, file.filename, skills=skills)
+    job.metadata['plan'] = plan
+
+    # Tag job with owner
+    job.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
+    session_id = request.cookies.get('session_id') or str(uuid.uuid4())
+    job.session_id = session_id
+
     jobs[job_id] = job
 
     # Save uploaded file (sanitize filename to prevent path traversal)
@@ -143,24 +172,28 @@ def upload_audio():
     file.save(str(audio_path))
 
     mode_str = 'ENSEMBLE' if ensemble_mode else ('MDX' if mdx_model else 'standard')
-    logger.info(f"Created job {job_id} for file {file.filename} - mode: {mode_str}, gp_tabs: {gp_tabs}, chord_detection: {chord_detection}")
+    logger.info(f"Created job {job_id} for file {file.filename} - mode: {mode_str}, gp_tabs: {gp_tabs}, chord_detection: {chord_detection}, plan: {plan}")
 
     # Start processing in background thread
     thread = threading.Thread(target=process_audio, args=(job, audio_path, enhance_stems, stereo_split, gp_tabs, chord_detection, mdx_model, ensemble_mode))
     thread.daemon = True
     thread.start()
 
-    return jsonify({
+    resp = make_response(jsonify({
         'job_id': job_id,
         'message': 'Processing started',
         'filename': file.filename,
         'skills': skills
-    })
+    }))
+    if not request.cookies.get('session_id'):
+        resp.set_cookie('session_id', session_id, httponly=True, max_age=86400, samesite='Lax')
+    return resp
 
 
 # ============ URL PROCESSING ============
 
 @api_bp.route('/api/url', methods=['POST'])
+@auth_required(optional=True)
 def process_url_endpoint():
     """Process audio from a URL (YouTube, Spotify, Apple Music, etc.)"""
     data = request.get_json()
@@ -229,9 +262,19 @@ def process_url_endpoint():
     mdx_model = data.get('mdx_model', False)
     ensemble_mode = data.get('ensemble', False)
 
+    # Determine user plan
+    plan = data.get('plan', 'free')
+
     # Create job with skills
-    job_id = str(uuid.uuid4())[:8]
+    job_id = str(uuid.uuid4())
     job = ProcessingJob(job_id, 'Downloading...', source_url=original_url, skills=skills)
+    job.metadata['plan'] = plan
+
+    # Tag job with owner
+    job.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
+    session_id = request.cookies.get('session_id') or str(uuid.uuid4())
+    job.session_id = session_id
+
     jobs[job_id] = job
 
     # Store streaming service info if applicable
@@ -250,13 +293,16 @@ def process_url_endpoint():
     thread.daemon = True
     thread.start()
 
-    return jsonify({
+    resp = make_response(jsonify({
         'job_id': job_id,
         'message': 'Download and processing started',
         'url': url,
         'source': streaming_service or 'direct',
         'track_info': track_info
-    })
+    }))
+    if not request.cookies.get('session_id'):
+        resp.set_cookie('session_id', session_id, httponly=True, max_age=86400, samesite='Lax')
+    return resp
 
 
 # ============ STATUS ============
@@ -270,6 +316,8 @@ def get_status(job_id):
                 instead of the full job dict (~5-10KB). Use this for polling
                 during processing; fetch full status once when status='completed'.
     """
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
@@ -292,7 +340,12 @@ def get_status(job_id):
 
     # Full status (used when job completes or for initial load)
     logger.debug(f"Full status request for {job_id}: stems={list(job.stems.keys()) if job.stems else 'NONE'}")
-    return jsonify(job.to_dict())
+    data = job.to_dict()
+    # Proxy YouTube thumbnails to avoid hotlink-protection 403s
+    meta = data.get("metadata", {})
+    if meta.get("thumbnail") and "ytimg.com" in meta["thumbnail"]:
+        meta["thumbnail"] = "/api/thumbnail?url=" + _url_quote(meta["thumbnail"], safe="")
+    return jsonify(data)
 
 
 # ============ AVAILABLE MODELS ============
@@ -380,6 +433,8 @@ def get_available_models():
 @api_bp.route('/api/quality/<job_id>', methods=['GET'])
 def get_transcription_quality(job_id):
     """Get transcription quality metrics for a job."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     from dependencies import ENHANCED_TRANSCRIBER_AVAILABLE, DRUM_TRANSCRIBER_V2_AVAILABLE
 
     job = get_job(job_id)
@@ -423,7 +478,7 @@ def download_file(job_id, file_type, filename):
             file_path = job.stems[filename]
             if not Path(file_path).exists():
                 return jsonify({'error': f'Stem file missing from disk: {file_path}'}), 404
-            return send_file(file_path, as_attachment=True)
+            return send_file(file_path, mimetype='audio/wav', conditional=True)
 
         elif file_type == 'enhanced':
             if filename not in job.enhanced_stems:
@@ -432,7 +487,7 @@ def download_file(job_id, file_type, filename):
             file_path = job.enhanced_stems[filename]
             if not Path(file_path).exists():
                 return jsonify({'error': f'Enhanced stem file missing from disk: {file_path}'}), 404
-            return send_file(file_path, as_attachment=True)
+            return send_file(file_path, mimetype='audio/wav', conditional=True)
 
         elif file_type == 'midi':
             if filename not in job.midi_files:
@@ -504,9 +559,212 @@ def download_substem(job_id, skill_id, filename):
     return jsonify({'error': 'Sub-stem file not found'}), 404
 
 
+# ============ ZIP DOWNLOAD ============
+
+@api_bp.route('/api/download/<job_id>/zip', methods=['GET'])
+@auth_required(optional=True)
+def download_zip(job_id):
+    """Download all stems, MIDI, GP, and chord chart as a single ZIP file."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if job.status != 'completed':
+        return jsonify({'error': 'Job is not completed yet'}), 400
+
+    # Build a safe download filename from metadata
+    artist = job.metadata.get('artist', '').strip()
+    title = job.metadata.get('title', '').strip()
+    if not title:
+        # Try to parse "Artist - Title" from the raw title or filename
+        raw = job.metadata.get('title', '') or job.filename or 'StemScriber Export'
+        if ' - ' in raw:
+            parts = raw.split(' - ', 1)
+            artist = parts[0].strip()
+            title = parts[1].strip()
+        else:
+            title = raw
+    safe_title = re.sub(r'[^\w\s\-]', '', f"{artist} - {title}" if artist else title).strip()
+    if not safe_title:
+        safe_title = 'StemScriber Export'
+    zip_filename = f"{safe_title} ( StemScriber).zip"
+
+    # Create ZIP in memory
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        # Stems (WAV)
+        for stem_name, stem_path in job.stems.items():
+            p = Path(stem_path)
+            if p.exists():
+                zf.write(str(p), f"stems/{stem_name}.wav")
+
+        # Enhanced stems
+        for stem_name, stem_path in (job.enhanced_stems or {}).items():
+            p = Path(stem_path)
+            if p.exists():
+                zf.write(str(p), f"stems_enhanced/{stem_name}.wav")
+
+        # MIDI files
+        for midi_name, midi_path in (job.midi_files or {}).items():
+            p = Path(midi_path)
+            if p.exists():
+                ext = p.suffix or '.mid'
+                zf.write(str(p), f"midi/{midi_name}{ext}")
+
+        # Guitar Pro files
+        for gp_name, gp_path in (job.gp_files or {}).items():
+            p = Path(gp_path)
+            if p.exists():
+                ext = p.suffix or '.gp5'
+                zf.write(str(p), f"guitarpro/{gp_name}{ext}")
+
+        # MusicXML files
+        for mx_name, mx_path in (job.musicxml_files or {}).items():
+            p = Path(mx_path)
+            if p.exists():
+                ext = p.suffix or '.musicxml'
+                zf.write(str(p), f"musicxml/{mx_name}{ext}")
+
+        # Chord chart JSON
+        chart_path = OUTPUT_DIR / job_id / 'chord_chart.json'
+        if chart_path.exists():
+            zf.write(str(chart_path), 'chord_chart.json')
+
+    buffer.seek(0)
+    logger.info(f"ZIP download for job {job_id}: {zip_filename} ({buffer.getbuffer().nbytes} bytes)")
+
+    return send_file(
+        buffer,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=zip_filename,
+    )
+
+
+# ============ MP3 STEM DOWNLOAD ============
+
+@api_bp.route('/api/download/<job_id>/stem/<stem_name>/mp3', methods=['GET'])
+@auth_required(optional=True)
+def download_stem_mp3(job_id, stem_name):
+    """Download a stem converted to MP3 (cached on disk next to WAV)."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    if '..' in stem_name or '/' in stem_name:
+        return jsonify({'error': 'Invalid stem name'}), 400
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+
+    # Check enhanced stems first, then regular
+    wav_path = None
+    if stem_name in (job.enhanced_stems or {}):
+        wav_path = job.enhanced_stems[stem_name]
+    elif stem_name in (job.stems or {}):
+        wav_path = job.stems[stem_name]
+
+    if not wav_path or not Path(wav_path).exists():
+        return jsonify({'error': 'Stem not found'}), 404
+
+    # Determine bitrate based on user plan
+    bitrate = '128k'  # default for free
+    user = getattr(g, 'current_user', None)
+    if user:
+        plan = getattr(user, 'plan', None) or (user.get('plan') if isinstance(user, dict) else None)
+        if plan in ('pro', 'premium'):
+            bitrate = '320k'
+
+    # Check for cached MP3
+    mp3_path = Path(wav_path).with_suffix(f'.{bitrate.replace("k","")}.mp3')
+    if not mp3_path.exists():
+        # Convert WAV → MP3 using ffmpeg
+        if not shutil.which('ffmpeg'):
+            return jsonify({'error': 'ffmpeg not available on server'}), 500
+        try:
+            result = subprocess.run(
+                ['ffmpeg', '-y', '-i', str(wav_path), '-codec:a', 'libmp3lame', '-b:a', bitrate, str(mp3_path)],
+                capture_output=True, timeout=120,
+            )
+            if result.returncode != 0:
+                logger.error(f"ffmpeg failed: {result.stderr.decode(errors='replace')[:500]}")
+                return jsonify({'error': 'MP3 conversion failed'}), 500
+        except subprocess.TimeoutExpired:
+            return jsonify({'error': 'MP3 conversion timed out'}), 500
+
+    # Build a nice download name
+    artist = job.metadata.get('artist', '').strip()
+    title = job.metadata.get('title', '').strip() or job.filename or 'stem'
+    display = f"{artist} - {title}" if artist else title
+    safe_display = re.sub(r'[^\w\s\-]', '', display).strip() or 'stem'
+    download_name = f"{safe_display} ({stem_name}).mp3"
+
+    return send_file(
+        str(mp3_path),
+        mimetype='audio/mpeg',
+        as_attachment=True,
+        download_name=download_name,
+    )
+
+
 # ============ JOBS LIST ============
 
+@api_bp.route('/api/peaks/<job_id>/<stem_name>', methods=['GET'])
+def get_peaks(job_id, stem_name):
+    """Return waveform peaks for a stem (used for visual rendering without loading audio)."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+
+    # Find the stem file
+    file_path = None
+    if stem_name in (job.enhanced_stems or {}):
+        file_path = job.enhanced_stems[stem_name]
+    elif stem_name in (job.stems or {}):
+        file_path = job.stems[stem_name]
+
+    if not file_path or not Path(file_path).exists():
+        return jsonify({'error': 'Stem not found'}), 404
+
+    # Check for cached peaks
+    peaks_path = Path(file_path).with_suffix('.peaks.json')
+    if peaks_path.exists():
+        return send_file(peaks_path, mimetype='application/json')
+
+    # Generate peaks
+    try:
+        import soundfile as sf
+        import numpy as np
+
+        data, sr = sf.read(str(file_path), dtype='float32')
+        if data.ndim > 1:
+            data = data.mean(axis=1)  # Mix to mono
+
+        num_peaks = 200
+        chunk_size = max(1, len(data) // num_peaks)
+        peaks = []
+        for i in range(0, len(data), chunk_size):
+            chunk = data[i:i + chunk_size]
+            peaks.append(float(np.max(np.abs(chunk))))
+
+        result = {'peaks': peaks, 'duration': len(data) / sr}
+
+        # Cache peaks
+        import json
+        peaks_path.write_text(json.dumps(result))
+
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Peaks generation failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @api_bp.route('/api/jobs', methods=['GET'])
+@auth_required(optional=True)
 def list_jobs():
     """List all jobs"""
     return jsonify({
@@ -514,9 +772,38 @@ def list_jobs():
     })
 
 
+# ============ MANUAL CHORD CHART ============
+
+@api_bp.route('/api/chord-chart/<job_id>', methods=['GET', 'PUT'])
+def get_chord_chart(job_id):
+    """Serve or update manual chord chart JSON for a job."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    import json
+    chart_path = OUTPUT_DIR / job_id / 'chord_chart.json'
+    if request.method == 'PUT':
+        data = request.get_json(force=True)
+        if not data:
+            return jsonify({'error': 'No data'}), 400
+        chart_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(chart_path, 'w') as f:
+            json.dump(data, f, indent=2)
+        return jsonify({'status': 'saved'})
+    if chart_path.exists():
+        with open(chart_path) as f:
+            return jsonify(json.load(f))
+    # Fall back to auto-generated chart (saved when a manual chart already existed)
+    auto_path = OUTPUT_DIR / job_id / 'chord_chart_auto.json'
+    if auto_path.exists():
+        with open(auto_path) as f:
+            return jsonify(json.load(f))
+    return jsonify({'error': 'No chord chart found'}), 404
+
+
 # ============ CLEANUP ============
 
 @api_bp.route('/api/cleanup', methods=['POST'])
+@auth_required
 def cleanup_old_files():
     """Clean up old stem files to save disk space"""
     from dependencies import DRIVE_AVAILABLE

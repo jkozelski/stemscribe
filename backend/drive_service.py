@@ -26,13 +26,13 @@ except ImportError:
 # Scopes for Google Drive
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
-# Paths
-SCRIPT_DIR = Path(__file__).parent.parent.absolute()
-CREDENTIALS_FILE = SCRIPT_DIR / 'credentials.json'
-TOKEN_FILE = SCRIPT_DIR / 'token.json'
+# Paths — credentials stored outside repo for security
+_CONFIG_DIR = Path(os.environ.get('STEMSCRIBE_CONFIG_DIR', Path.home() / '.config' / 'stemscribe'))
+CREDENTIALS_FILE = _CONFIG_DIR / 'credentials.json'
+TOKEN_FILE = _CONFIG_DIR / 'token.json'
 
 # StemScribe folder name in Google Drive
-DRIVE_FOLDER_NAME = 'StemScribe Transcriptions'
+DRIVE_FOLDER_NAME = 'StemScriber Transcriptions'
 
 
 def get_drive_service():

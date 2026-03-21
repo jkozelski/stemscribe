@@ -278,7 +278,7 @@ class BassNNTranscriber:
 
         # Load piano CNN from piano checkpoint
         piano_checkpoint = torch.load(
-            PIANO_CHECKPOINT_PATH, map_location=self._device, weights_only=False
+            PIANO_CHECKPOINT_PATH, map_location=self._device, weights_only=True
         )
         piano_model = PianoTranscriptionModel()
         piano_model.load_state_dict(piano_checkpoint['model_state_dict'])
@@ -289,7 +289,7 @@ class BassNNTranscriber:
 
         # Load bass v3 model
         bass_checkpoint = torch.load(
-            CHECKPOINT_PATH, map_location=self._device, weights_only=False
+            CHECKPOINT_PATH, map_location=self._device, weights_only=True
         )
 
         self._model = BassTranscriptionModel_v3(num_keys=NUM_KEYS)

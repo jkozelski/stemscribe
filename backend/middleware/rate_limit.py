@@ -37,7 +37,6 @@ from flask_limiter.util import get_remote_address
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
 # Flask-Limiter instance (request-level rate limiting)
 # ---------------------------------------------------------------------------
@@ -45,16 +44,19 @@ logger = logging.getLogger(__name__)
 def _get_key():
     """Extract client IP for Flask-Limiter keying.
 
-    Uses X-Forwarded-For when behind a reverse proxy (Railway, Cloudflare),
-    falls back to request.remote_addr.
+    Priority: CF-Connecting-IP (Cloudflare Tunnel) > X-Forwarded-For > remote_addr.
     """
+    # Cloudflare Tunnel sets this to the real visitor IP
+    cf_ip = request.headers.get('CF-Connecting-IP', '').strip()
+    if cf_ip:
+        return cf_ip
     forwarded = request.headers.get('X-Forwarded-For', '')
     if forwarded:
         return forwarded.split(',')[0].strip()
     return get_remote_address()
 
-
 limiter = Limiter(
+    
     key_func=_get_key,
     default_limits=["60 per minute"],
     storage_uri="memory://",
@@ -65,7 +67,11 @@ limiter = Limiter(
 AUTH_LIMIT = "5 per minute"
 WEBHOOK_LIMIT = "30 per minute"
 PROCESSING_LIMIT = "10 per minute"
-
+UPLOAD_LIMIT = "5 per minute"         # /api/url, /api/upload — expensive GPU work
+SONGSTERR_LIMIT = "30 per minute"     # /api/songsterr/*
+LIBRARY_LIMIT = "60 per minute"       # /api/library
+BETA_LIMIT = "10 per minute"          # /api/beta/*
+SMS_LIMIT = "10 per minute"           # /api/sms/*
 
 def init_limiter(app):
     """Attach Flask-Limiter to the Flask app.
@@ -78,12 +84,11 @@ def init_limiter(app):
     @app.errorhandler(429)
     def rate_limit_exceeded(e):
         return jsonify({
-            'error': 'Too many requests. Please slow down.',
+            'error': 'Rate limit exceeded. Please try again in a moment.',
             'retry_after': e.description,
         }), 429
 
     logger.info("Flask-Limiter initialized (60 req/min default)")
-
 
 # ---------------------------------------------------------------------------
 # Plan-based enforcement decorator
@@ -134,7 +139,6 @@ def enforce_plan_limits(fn):
         return fn(*args, **kwargs)
     return wrapper
 
-
 def enforce_duration_limit(duration_seconds):
     """Check audio duration against the current user's plan.
 
@@ -164,7 +168,6 @@ def enforce_duration_limit(duration_seconds):
         }), 413
 
     return None
-
 
 def record_usage_event(user=None, ip_hash=None, job_id=None, action='separation'):
     """Record a usage event after successful processing.

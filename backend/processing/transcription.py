@@ -6,123 +6,69 @@ appropriate transcriber (neural, Basic Pitch, melody, etc.) per stem type.
 """
 
 import logging
+import numpy as np
 from pathlib import Path
 
 from models.job import ProcessingJob, OUTPUT_DIR
 
 logger = logging.getLogger(__name__)
 
-# ============ CONDITIONAL IMPORTS ============
+# ============ CONDITIONAL IMPORTS (single source of truth: dependencies.py) ============
 
-try:
+from dependencies import (
+    DRUM_TRANSCRIBER_AVAILABLE, ENHANCED_TRANSCRIBER_AVAILABLE,
+    DRUM_TRANSCRIBER_V2_AVAILABLE, OAF_DRUM_TRANSCRIBER_AVAILABLE, OAF_AVAILABLE,
+    DRUM_NN_MODEL_AVAILABLE, MELODY_TRANSCRIBER_AVAILABLE,
+    GUITAR_TAB_MODEL_AVAILABLE, BASS_MODEL_AVAILABLE, PIANO_MODEL_AVAILABLE,
+    CHORD_DETECTOR_AVAILABLE, CHORD_DETECTOR_VERSION,
+    GP_CONVERTER_AVAILABLE, NOTATION_CONVERTER_AVAILABLE, MUSIC21_AVAILABLE,
+)
+
+# Import callable objects only when available (these are used directly in this module)
+if DRUM_TRANSCRIBER_AVAILABLE:
     from drum_transcriber import transcribe_drums_to_midi
-    DRUM_TRANSCRIBER_AVAILABLE = True
-except ImportError:
-    DRUM_TRANSCRIBER_AVAILABLE = False
-
-try:
+if DRUM_TRANSCRIBER_V2_AVAILABLE:
+    from drum_transcriber_v2 import transcribe_drums_to_midi as transcribe_drums_v2  # noqa: F401
+if OAF_DRUM_TRANSCRIBER_AVAILABLE:
+    from oaf_drum_transcriber import OaFDrumTranscriber, transcribe_drums  # noqa: F401
+if DRUM_NN_MODEL_AVAILABLE:
+    from drum_nn_transcriber import NeuralDrumTranscriber, transcribe_drums_nn  # noqa: F401
+if ENHANCED_TRANSCRIBER_AVAILABLE:
     from transcriber_enhanced import EnhancedTranscriber, transcribe_with_enhanced  # noqa: F401
-    ENHANCED_TRANSCRIBER_AVAILABLE = True
-except ImportError:
-    ENHANCED_TRANSCRIBER_AVAILABLE = False
-
-try:
-    from drum_transcriber_v2 import EnhancedDrumTranscriber, transcribe_drums_to_midi as transcribe_drums_v2  # noqa: F401
-    DRUM_TRANSCRIBER_V2_AVAILABLE = True
-except ImportError:
-    DRUM_TRANSCRIBER_V2_AVAILABLE = False
-
-try:
-    from oaf_drum_transcriber import OaFDrumTranscriber, transcribe_drums, OAF_AVAILABLE  # noqa: F401
-    OAF_DRUM_TRANSCRIBER_AVAILABLE = True
-except ImportError:
-    OAF_DRUM_TRANSCRIBER_AVAILABLE = False
-    OAF_AVAILABLE = False
-
-try:
-    from drum_nn_transcriber import (
-        NeuralDrumTranscriber, transcribe_drums_nn,  # noqa: F401
-        DRUM_NN_MODEL_AVAILABLE, is_available as drum_nn_is_available  # noqa: F401
-    )
-except ImportError:
-    DRUM_NN_MODEL_AVAILABLE = False
-
-try:
+if MELODY_TRANSCRIBER_AVAILABLE:
     from melody_transcriber import MelodyExtractor, transcribe_melody  # noqa: F401
-    MELODY_TRANSCRIBER_AVAILABLE = True
-except ImportError:
-    MELODY_TRANSCRIBER_AVAILABLE = False
+if GUITAR_TAB_MODEL_AVAILABLE:
+    from guitar_tab_transcriber import GuitarTabTranscriber, transcribe_guitar_tab  # noqa: F401
+if BASS_MODEL_AVAILABLE:
+    from bass_transcriber import BassTranscriber, transcribe_bass  # noqa: F401
+if PIANO_MODEL_AVAILABLE:
+    from piano_transcriber import PianoTranscriber, transcribe_piano  # noqa: F401
+if CHORD_DETECTOR_AVAILABLE:
+    from dependencies import detect_chords, ChordDetector  # noqa: F401
+if GP_CONVERTER_AVAILABLE:
+    from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp  # noqa: F401
+if NOTATION_CONVERTER_AVAILABLE:
+    from midi_to_notation import midi_to_musicxml as _notation_convert
 
+# Guitar NN model (imported separately since it has its own availability flag)
+GUITAR_NN_MODEL_AVAILABLE = False
 try:
     from guitar_nn_transcriber import (
         GuitarNNTranscriber, transcribe_guitar_nn,  # noqa: F401
         GUITAR_NN_MODEL_AVAILABLE, is_available as guitar_nn_is_available  # noqa: F401
     )
 except ImportError:
-    GUITAR_NN_MODEL_AVAILABLE = False
+    pass
 
+# Bass NN model (v3, imported separately)
+BASS_NN_MODEL_AVAILABLE = False
 try:
     from bass_nn_transcriber import (
         BassNNTranscriber, transcribe_bass_nn,  # noqa: F401
         BASS_NN_MODEL_AVAILABLE, is_available as bass_nn_v3_is_available  # noqa: F401
     )
 except ImportError:
-    BASS_NN_MODEL_AVAILABLE = False
-
-try:
-    from guitar_tab_transcriber import (
-        GuitarTabTranscriber, transcribe_guitar_tab,  # noqa: F401
-        GUITAR_TAB_MODEL_AVAILABLE, is_available as guitar_tab_is_available  # noqa: F401
-    )
-except ImportError:
-    GUITAR_TAB_MODEL_AVAILABLE = False
-
-try:
-    from bass_transcriber import (
-        BassTranscriber, transcribe_bass,  # noqa: F401
-        BASS_MODEL_AVAILABLE, is_available as bass_nn_is_available  # noqa: F401
-    )
-except ImportError:
-    BASS_MODEL_AVAILABLE = False
-
-try:
-    from piano_transcriber import (
-        PianoTranscriber, transcribe_piano,  # noqa: F401
-        PIANO_MODEL_AVAILABLE, is_available as piano_nn_is_available  # noqa: F401
-    )
-except ImportError:
-    PIANO_MODEL_AVAILABLE = False
-
-CHORD_DETECTOR_VERSION = None
-try:
-    from chord_detector_v8 import ChordDetector, detect_chords
-    CHORD_DETECTOR_AVAILABLE = True
-    CHORD_DETECTOR_VERSION = "v8"
-except ImportError:
-    try:
-        from chord_detector_v7 import ChordDetector, detect_chords
-        CHORD_DETECTOR_AVAILABLE = True
-        CHORD_DETECTOR_VERSION = "v7"
-    except ImportError:
-        try:
-            from chord_detector import ChordDetector, detect_chords  # noqa: F401
-            CHORD_DETECTOR_AVAILABLE = True
-            CHORD_DETECTOR_VERSION = "basic"
-        except ImportError:
-            CHORD_DETECTOR_AVAILABLE = False
-
-try:
-    from midi_to_gp import convert_midi_to_gp, convert_job_midis_to_gp  # noqa: F401
-    GP_CONVERTER_AVAILABLE = True
-except ImportError:
-    GP_CONVERTER_AVAILABLE = False
-
-try:
-    from midi_to_notation import midi_to_musicxml as _notation_convert, MUSIC21_AVAILABLE
-    NOTATION_CONVERTER_AVAILABLE = True
-except ImportError:
-    NOTATION_CONVERTER_AVAILABLE = False
-    MUSIC21_AVAILABLE = False
+    pass
 
 
 # ============ TRANSCRIPTION FUNCTIONS ============
@@ -424,10 +370,14 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
 
                 try:
                     tab_transcriber = GuitarTabTranscriber()
+                    # Pass chord progression for chord-informed note filtering
+                    # (reduces hallucinations from lower Basic Pitch thresholds)
+                    chord_prog = getattr(job, 'chord_progression', None) or None
                     tab_result = tab_transcriber.transcribe(
                         audio_path=stem_path,
                         output_dir=str(midi_output_dir),
                         tempo_hint=job.metadata.get('tempo'),
+                        chord_progression=chord_prog,
                     )
 
                     if (tab_result.midi_path
@@ -451,8 +401,41 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                         quality = tab_result.quality_score if tab_result else 0
                         logger.info(
                             f"  Tab model quality too low ({quality:.2f}), "
-                            f"falling back to melody/enhanced transcriber"
+                            f"trying chord-to-tab fallback"
                         )
+
+                        # Chord-to-tab fallback: use detected chords + onset detection
+                        chord_prog = getattr(job, 'chord_progression', None) or None
+                        if chord_prog:
+                            try:
+                                from guitar_tab_transcriber import ChordToTabGenerator
+                                chord_gen = ChordToTabGenerator()
+                                chord_result = chord_gen.generate(
+                                    audio_path=stem_path,
+                                    output_dir=str(midi_output_dir),
+                                    chord_progression=chord_prog,
+                                    tempo_hint=job.metadata.get('tempo'),
+                                )
+                                if (chord_result.midi_path
+                                        and Path(chord_result.midi_path).exists()
+                                        and chord_result.quality_score > 0.2):
+                                    job.midi_files[stem_name] = chord_result.midi_path
+                                    job.transcription_quality[stem_name] = chord_result.quality_score
+                                    job.transcription_mode[stem_name] = 'chord_to_tab'
+
+                                    logger.info(
+                                        f"Chord-to-tab MIDI for {stem_name}: "
+                                        f"{chord_result.num_notes} notes, "
+                                        f"{chord_result.num_strings_used} strings, "
+                                        f"quality: {chord_result.quality_score:.2f}"
+                                    )
+                                    successful += 1
+                                    job.progress = 60 + int((idx + 1) / total_stems * 35)
+                                    continue
+                            except Exception as e2:
+                                logger.warning(f"Chord-to-tab fallback failed for {stem_name}: {e2}")
+
+                        logger.info(f"  Falling back to melody/enhanced transcriber")
                 except Exception as e:
                     logger.warning(f"Guitar tab model failed for {stem_name}: {e}")
                     # Fall through to melody extractor / enhanced transcriber
@@ -723,24 +706,63 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
     try:
         detector = ChordDetector()
 
-        # Prefer to analyze the original audio if we have it
-        analyze_path = str(audio_path) if audio_path.exists() else None
+        # Prefer harmonic stems over full mix — drums/vocals confuse chord detection
+        harmonic_stems = []
+        # Note: 'other' stem excluded — it contains noise/effects that confuse chord detection
+        for stem_key in ('guitar', 'guitar_left', 'piano', 'bass'):
+            if stem_key in job.stems and Path(job.stems[stem_key]).exists():
+                harmonic_stems.append(job.stems[stem_key])
 
-        # If original not available, try guitar or piano stem
-        if not analyze_path or not Path(analyze_path).exists():
-            if 'guitar' in job.stems:
-                analyze_path = job.stems['guitar']
-                logger.info("Using guitar stem for chord detection")
-            elif 'guitar_left' in job.stems:
-                analyze_path = job.stems['guitar_left']
-            elif 'piano' in job.stems:
-                analyze_path = job.stems['piano']
-                logger.info("Using piano stem for chord detection")
+        analyze_path = None
+        if harmonic_stems:
+            # Mix harmonic stems together for cleaner chord signal
+            try:
+                import librosa
+                import soundfile as sf
+                mixed = None
+                target_sr = 22050
+                for stem_path in harmonic_stems:
+                    y, sr = librosa.load(stem_path, sr=target_sr, mono=True)
+                    if mixed is None:
+                        mixed = y
+                    else:
+                        # Pad to same length
+                        max_len = max(len(mixed), len(y))
+                        if len(mixed) < max_len:
+                            mixed = np.pad(mixed, (0, max_len - len(mixed)))
+                        if len(y) < max_len:
+                            y = np.pad(y, (0, max_len - len(y)))
+                        mixed = mixed + y
+                # Normalize
+                peak = np.max(np.abs(mixed))
+                if peak > 0:
+                    mixed = mixed / peak * 0.9
+                # Write temp file
+                mix_path = Path(job.stems[harmonic_stems[0]]).parent / 'harmonic_mix.wav'
+                sf.write(str(mix_path), mixed, target_sr)
+                analyze_path = str(mix_path)
+                logger.info(f"Mixed {len(harmonic_stems)} harmonic stems for chord detection: {[Path(s).stem for s in harmonic_stems]}")
+            except Exception as e:
+                logger.warning(f"Harmonic stem mixing failed, falling back to original: {e}")
+
+        # Fallback to original audio
+        if not analyze_path:
+            if audio_path.exists():
+                analyze_path = str(audio_path)
+                logger.info("Using original audio for chord detection (no stems available)")
             else:
                 logger.info("No suitable source for chord detection")
                 return
 
-        progression = detector.detect(analyze_path)
+        # Pass artist/title for vocabulary-constrained detection
+        artist = job.metadata.get('artist', '') if job.metadata else ''
+        title = job.metadata.get('title', '') if job.metadata else ''
+        progression = detector.detect(analyze_path, artist=artist, title=title)
+
+        # Tuning detection & correction is now handled inside ChordDetector.detect()
+        # so any caller gets corrected chords automatically. Extract tuning_info
+        # from the result for job metadata.
+        tuning_info = progression.tuning_info
 
         # Store results - V8 includes bass note for inversions, older versions don't
         job.chord_progression = []
@@ -757,9 +779,20 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
             if hasattr(c, 'bass'):
                 chord_data['bass'] = c.bass
             chord_data['detector_version'] = CHORD_DETECTOR_VERSION
+            # Store tuning info if detected
+            if tuning_info and tuning_info.get('tuning_offset_semitones', 0) != 0:
+                chord_data['tuning_offset'] = tuning_info['tuning_offset_semitones']
             job.chord_progression.append(chord_data)
 
         job.detected_key = progression.key
+        # Store tuning metadata on the job
+        if tuning_info:
+            job.tuning_info = {
+                'offset_semitones': tuning_info.get('tuning_offset_semitones', 0),
+                'tuning_name': tuning_info.get('tuning_name', 'Standard (E)'),
+                'detection_method': tuning_info.get('detection_method', 'none'),
+                'effective_a4': tuning_info.get('effective_a4', 440.0),
+            }
 
         logger.info(f"✅ Detected {len(job.chord_progression)} chord changes, key: {progression.key} (model: {CHORD_DETECTOR_VERSION})")
 

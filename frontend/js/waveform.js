@@ -66,9 +66,7 @@ window.StemScribe = window.StemScribe || {};
         // Sync waveform seeks with mixer
         SS.masterWavesurfer.on('seeking', function(progress) {
             var seekTime = progress * SS.duration;
-            Object.values(SS.stemAudios).forEach(function(s) {
-                s.audio.currentTime = seekTime;
-            });
+            SS.seekTo(seekTime);
             SS.updateTimeline();
         });
 
@@ -90,10 +88,13 @@ window.StemScribe = window.StemScribe || {};
                 SS.createLoopRegion(start, end);
                 SS.loopState = 'active';
                 var loopBtn2 = document.getElementById('loopBtn');
-                loopBtn2.textContent = 'A-B';
-                loopBtn2.classList.remove('setting');
-                loopBtn2.classList.add('active');
-                document.getElementById('loopClearBtn').style.display = 'inline-block';
+                if (loopBtn2) {
+                    loopBtn2.textContent = 'A-B';
+                    loopBtn2.classList.remove('setting');
+                    loopBtn2.classList.add('active');
+                }
+                var lcb = document.getElementById('loopClearBtn');
+                if (lcb) lcb.style.display = 'inline-block';
             }
         });
 
@@ -144,13 +145,9 @@ window.StemScribe = window.StemScribe || {};
         SS.stopLoopCheck();
         loopCheckInterval = setInterval(function() {
             if (!SS.loopRegion || !SS.isPlaying) return;
-            var firstAudio = Object.values(SS.stemAudios)[0];
-            if (!firstAudio) return;
-            var currentTime = firstAudio.audio.currentTime;
+            var currentTime = SS.getPlaybackTime();
             if (currentTime >= SS.loopRegion.end) {
-                Object.values(SS.stemAudios).forEach(function(s) {
-                    s.audio.currentTime = SS.loopRegion.start;
-                });
+                SS.seekTo(SS.loopRegion.start);
             }
         }, 50);
     };
@@ -164,9 +161,7 @@ window.StemScribe = window.StemScribe || {};
 
     SS.updateWaveformProgress = function() {
         if (!SS.duration) return;
-        var firstAudio = Object.values(SS.stemAudios)[0];
-        if (!firstAudio) return;
-        var progress = firstAudio.audio.currentTime / SS.duration;
+        var progress = SS.getPlaybackTime() / SS.duration;
         var clampedProgress = Math.min(1, Math.max(0, progress));
 
         // Update master waveform cursor
@@ -264,6 +259,55 @@ window.StemScribe = window.StemScribe || {};
             });
 
             SS.stemWavesurfers[name] = ws;
+        });
+    };
+
+    /**
+     * Initialize stem waveforms using pre-computed peaks from the backend.
+     * No audio loading = no AudioContext = no playback conflicts.
+     */
+    SS.initStemWaveformsFromPeaks = function(job, sortedStems) {
+        if (!window.WaveSurfer) return;
+        SS.destroyStemWaveforms();
+
+        var isDark = !document.body.classList.contains('light-mode');
+
+        sortedStems.forEach(function(entry) {
+            var name = entry[0];
+            var container = document.getElementById('stem-waveform-' + name);
+            if (!container) return;
+
+            var cfg = SS.stemConfig[name] || { color: '#888' };
+            var color = cfg.color || '#888';
+
+            var ws = WaveSurfer.create({
+                container: container,
+                waveColor: isDark ? SS._hexToRgba(color, 0.4) : SS._hexToRgba(color, 0.5),
+                progressColor: color,
+                cursorColor: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+                cursorWidth: 1,
+                barWidth: 1,
+                barGap: 1,
+                barRadius: 1,
+                height: 40,
+                normalize: true,
+                interact: false,
+                hideScrollbar: true
+            });
+
+            SS.stemWavesurfers[name] = ws;
+
+            // Fetch pre-computed peaks from backend (no audio decoding needed)
+            fetch(SS.API_BASE + '/peaks/' + job.job_id + '/' + name)
+                .then(function(resp) { return resp.ok ? resp.json() : null; })
+                .then(function(data) {
+                    if (data && data.peaks) {
+                        ws.load('', [data.peaks], data.duration);
+                    }
+                })
+                .catch(function(err) {
+                    console.log('Peaks load failed for ' + name + ':', err.message);
+                });
         });
     };
 

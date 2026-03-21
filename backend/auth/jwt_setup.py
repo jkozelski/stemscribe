@@ -14,9 +14,18 @@ def init_jwt(app):
     """Configure and initialize Flask-JWT-Extended on the Flask app."""
 
     # Secret key for signing tokens
-    app.config['JWT_SECRET_KEY'] = os.environ.get(
-        'JWT_SECRET_KEY', 'dev-secret-change-in-production'
-    )
+    jwt_secret = os.environ.get('JWT_SECRET_KEY', '')
+    if not jwt_secret or jwt_secret in ('dev-secret-change-in-production', 'CHANGE_ME_generate_a_64_char_random_string'):
+        if os.environ.get('FLASK_ENV') == 'production':
+            raise RuntimeError(
+                "FATAL: JWT_SECRET_KEY is not set or uses a default value. "
+                "Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
+            )
+        # Dev mode: use a random secret per-run (tokens won't persist across restarts)
+        import secrets
+        jwt_secret = secrets.token_urlsafe(64)
+        app.logger.warning("JWT_SECRET_KEY not set — using random secret (dev mode only)")
+    app.config['JWT_SECRET_KEY'] = jwt_secret
 
     # Token lifetimes
     access_expires = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES', 900))  # 15 min

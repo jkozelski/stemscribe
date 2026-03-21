@@ -12,21 +12,38 @@ logger = logging.getLogger(__name__)
 
 
 def validate_url_no_ssrf(url: str) -> bool:
-    """Block obviously dangerous URLs (local network, file://, etc.)."""
+    """Block dangerous URLs (local network, file://, DNS rebinding, etc.)."""
+    import ipaddress
+    import socket
+
     parsed = urlparse(url)
     if parsed.scheme not in ('http', 'https'):
         return False
     hostname = parsed.hostname or ''
-    # Block local/private network addresses
-    blocked = ('localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254.',
-               '10.', '172.16.', '172.17.', '172.18.', '172.19.',
-               '172.20.', '172.21.', '172.22.', '172.23.', '172.24.',
-               '172.25.', '172.26.', '172.27.', '172.28.', '172.29.',
-               '172.30.', '172.31.', '192.168.', 'metadata.google.',
-               'metadata.aws.', '[fd')
-    for b in blocked:
-        if hostname.startswith(b) or hostname == b:
+    if not hostname:
+        return False
+
+    # Resolve DNS to check the actual IP (prevents DNS rebinding)
+    try:
+        resolved_ips = socket.getaddrinfo(hostname, parsed.port or 443, proto=socket.IPPROTO_TCP)
+    except (socket.gaierror, OSError):
+        return False  # Can't resolve = don't allow
+
+    for family, _, _, _, sockaddr in resolved_ips:
+        ip_str = sockaddr[0]
+        try:
+            ip = ipaddress.ip_address(ip_str)
+            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+                return False
+        except ValueError:
             return False
+
+    # Block cloud metadata endpoints by hostname
+    blocked_hosts = ('metadata.google.internal', 'metadata.aws.', '169.254.169.254')
+    for b in blocked_hosts:
+        if hostname == b or hostname.startswith(b):
+            return False
+
     return True
 
 

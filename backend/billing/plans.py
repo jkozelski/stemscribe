@@ -19,24 +19,24 @@ PLANS = {
         'stems': 4,
         'features': ['Basic 4-stem separation', 'MP3 output (128kbps)'],
     },
-    'premium': {
-        'name': 'Premium',
-        'monthly_price': 4.99,
-        'annual_price': 39.99,
-        'songs_per_month': 50,
+    'pro': {
+        'name': 'Pro',
+        'monthly_price': 10,
+        'annual_price': 100,
+        'songs_per_month': 25,
         'max_duration_sec': 900,       # 15 minutes
         'stems': 6,
         'features': [
             '6-stem separation (+ guitar, piano)',
-            'Chord recognition',
-            'MIDI export',
-            '320kbps MP3 output',
+            'Chord detection + key analysis',
+            'Guitar Pro tab export',
+            'Priority processing',
         ],
     },
-    'pro': {
-        'name': 'Pro',
-        'monthly_price': 14.99,
-        'annual_price': 119.99,
+    'premium': {
+        'name': 'Premium',
+        'monthly_price': 20,
+        'annual_price': 200,
         'songs_per_month': -1,         # unlimited
         'max_duration_sec': 1800,      # 30 minutes
         'stems': 6,
@@ -47,6 +47,21 @@ PLANS = {
             'WAV lossless output',
             'Priority processing queue',
             'Stereo split (dual guitars)',
+        ],
+    },
+    'beta': {
+        'name': 'Beta',
+        'monthly_price': 0,
+        'annual_price': 0,
+        'songs_per_month': -1,         # unlimited (matches pro)
+        'max_duration_sec': 1800,      # 30 minutes
+        'stems': 6,
+        'features': [
+            '6-stem separation (+ guitar, piano)',
+            'Chord detection + key analysis',
+            'Guitar Pro tab export',
+            'Priority processing',
+            'WAV lossless output',
         ],
     },
 }

@@ -1,0 +1,200 @@
+{
+  "Bohemian Rhapsody": {
+    "artist": "Queen",
+    "chords": [
+      "Bb6",
+      "C7",
+      "F7",
+      "Bb7",
+      "Gm7",
+      "Eb",
+      "Ab/Eb",
+      "Cm7",
+      "B",
+      "Bb",
+      "A",
+      "Bb/D",
+      "C#dim",
+      "Gm",
+      "Cm",
+      "Gaug/B",
+      "Cm7/Bb",
+      "Am7b5",
+      "Abmaj7",
+      "Eb/G",
+      "Fm",
+      "Fm/E",
+      "Fm7/Eb",
+      "Dm7b5",
+      "Abm",
+      "Cdim7",
+      "Db",
+      "Db/C",
+      "Db/Cb",
+      "Db/Bb",
+      "D/A",
+      "Adim",
+      "Db/Ab",
+      "Ab",
+      "C/G",
+      "E7",
+      "Ebdim",
+      "F",
+      "Bb7sus4",
+      "D",
+      "Gb",
+      "D7",
+      "F#",
+      "G7/B",
+      "Ab/Bb",
+      "Db/D",
+      "Dbmaj13",
+      "C",
+      "Fdim",
+      "C7sus4"
+    ]
+  },
+  "Comfortably Numb": {
+    "artist": "Pink Floyd",
+    "chords": [
+      "Bm",
+      "Bsus2",
+      "Asus2",
+      "G",
+      "G/F#",
+      "Em7",
+      "Asus4",
+      "A",
+      "D",
+      "Dsus2",
+      "G/B",
+      "Cadd9",
+      "D4",
+      "A/B",
+      "A/C#",
+      "C",
+      "B5",
+      "A5",
+      "G5",
+      "F#5",
+      "E5"
+    ]
+  },
+  "Hotel California": {
+    "artist": "Eagles",
+    "chords": [
+      "Am",
+      "E7",
+      "G",
+      "D",
+      "F",
+      "C",
+      "Dm",
+      "E",
+      "D7"
+    ]
+  },
+  "Let It Be": {
+    "artist": "The Beatles",
+    "chords": [
+      "C",
+      "G",
+      "Am",
+      "F",
+      "C/E",
+      "Dm",
+      "C/G",
+      "D",
+      "Em",
+      "B7"
+    ]
+  },
+  "More Than A Feeling": {
+    "artist": "Boston",
+    "chords": [
+      "D",
+      "G/C",
+      "G/B",
+      "G",
+      "Am",
+      "Am/G",
+      "C",
+      "Em",
+      "Eb",
+      "Em7",
+      "Asus4",
+      "A",
+      "G/E",
+      "Bm",
+      "Bm/A",
+      "G/F#"
+    ]
+  },
+  "Reelin In The Years": {
+    "artist": "Steely Dan",
+    "chords": [
+      "C",
+      "G6",
+      "Am7",
+      "Dm",
+      "Dsus2",
+      "G",
+      "F",
+      "Am",
+      "Bm"
+    ]
+  },
+  "Stairway To Heaven": {
+    "artist": "Led Zeppelin",
+    "chords": [
+      "Am",
+      "Eaug",
+      "C/E",
+      "D",
+      "Fmaj7",
+      "G",
+      "C",
+      "Dsus4",
+      "Am7",
+      "Em/D",
+      "C/D",
+      "G/B",
+      "Dsus2",
+      "Cadd9",
+      "Gmaj7sus/C",
+      "Gmaj7/B",
+      "G6/B",
+      "G6",
+      "F"
+    ]
+  },
+  "Sultans Of Swing": {
+    "artist": "Dire Straits",
+    "chords": [
+      "Dm",
+      "Dm/C",
+      "C",
+      "Bb",
+      "A",
+      "F",
+      "A7"
+    ]
+  },
+  "The Chain": {
+    "artist": "Fleetwood Mac",
+    "chords": [
+      "D7sus2",
+      "D5",
+      "G",
+      "G7",
+      "Cadd9",
+      "Bb6",
+      "G5",
+      "Bb",
+      "C",
+      "Daug",
+      "Gm",
+      "F"
+    ]
+  }
+}

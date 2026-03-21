@@ -11,8 +11,13 @@ from flask import Blueprint, request, jsonify
 from models.job import ProcessingJob, jobs
 from processing.pipeline import process_url
 from services.url_resolver import validate_url_no_ssrf as _validate_url_no_ssrf
+from auth.middleware import auth_required
 
 logger = logging.getLogger(__name__)
+
+# Maximum concurrent batch processing threads
+MAX_BATCH_THREADS = 5
+_batch_semaphore = threading.Semaphore(MAX_BATCH_THREADS)
 
 # Conditional imports
 try:
@@ -135,6 +140,7 @@ def archive_show_details(identifier):
 
 
 @archive_bp.route('/api/archive/process', methods=['POST'])
+@auth_required
 def archive_process_track():
     """
     Process an Archive.org track through StemScribe's full pipeline.
@@ -192,9 +198,16 @@ def archive_process_track():
     mdx_model = data.get('mdx_model', False)
     ensemble_mode = data.get('ensemble', False)
 
-    # Create job
-    job_id = str(uuid.uuid4())[:8]
-    display_name = filename or identifier or 'Archive.org track'
+    # Create job — clean up archive filenames for display
+    job_id = str(uuid.uuid4())
+    raw_name = filename or identifier or 'Archive.org track'
+    # Strip file extension
+    display_name = re.sub(r'\.(mp3|flac|ogg|wav|shn|m4a)$', '', raw_name, flags=re.IGNORECASE)
+    # Strip date/track prefixes like "gd69-05-23 t03 " or "gd1972-08-21s1t08"
+    display_name = re.sub(r'^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s*[st]\d+[st]?\d*\s*', '', display_name, flags=re.IGNORECASE)
+    display_name = re.sub(r'^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s+', '', display_name, flags=re.IGNORECASE)
+    display_name = re.sub(r'^t\d+\s+', '', display_name, flags=re.IGNORECASE)
+    display_name = display_name.strip() or raw_name
     job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
     jobs[job_id] = job
 
@@ -231,6 +244,7 @@ def archive_process_track():
 
 
 @archive_bp.route('/api/archive/batch', methods=['POST'])
+@auth_required
 def archive_batch_process():
     """
     Batch-process multiple tracks from an Archive.org show.
@@ -276,7 +290,7 @@ def archive_batch_process():
         job_ids = []
         for track in all_tracks:
             url = track.download_url
-            job_id = str(uuid.uuid4())[:8]
+            job_id = str(uuid.uuid4())
             display_name = track.title or track.filename
             job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
             jobs[job_id] = job
@@ -285,13 +299,19 @@ def archive_batch_process():
             job.metadata['archive_filename'] = track.filename
             job.metadata['archive_track_number'] = track.track_number
 
+            def _batch_worker(j, u, kw):
+                _batch_semaphore.acquire()
+                try:
+                    process_url(j, u, **kw)
+                finally:
+                    _batch_semaphore.release()
+
             thread = threading.Thread(
-                target=process_url,
-                args=(job, url),
-                kwargs={
+                target=_batch_worker,
+                args=(job, url, {
                     'gp_tabs': data.get('gp_tabs', True),
                     'chord_detection': data.get('chord_detection', True),
-                }
+                })
             )
             thread.daemon = True
             thread.start()

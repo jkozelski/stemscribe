@@ -1,0 +1,556 @@
+[
+  {
+    "timestamp": 1773768958.16693,
+    "event": "stall_detected",
+    "job_id": "54d475f4-3936-4947-9126-7d187ecd6457",
+    "details": {
+      "stalled_at_progress": 40,
+      "stalled_at_stage": "Converting stems to MP3",
+      "stalled_for_seconds": 301
+    }
+  },
+  {
+    "timestamp": 1773768958.1695812,
+    "event": "retry",
+    "job_id": "54d475f4-3936-4947-9126-7d187ecd6457",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 40,
+      "stalled_at_stage": "Converting stems to MP3"
+    }
+  },
+  {
+    "timestamp": 1773769457.859787,
+    "event": "stall_detected",
+    "job_id": "54d475f4-3936-4947-9126-7d187ecd6457",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 300
+    }
+  },
+  {
+    "timestamp": 1773769457.8618429,
+    "event": "retry",
+    "job_id": "54d475f4-3936-4947-9126-7d187ecd6457",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773845402.6805189,
+    "event": "stall_detected",
+    "job_id": "a1f70a0c-ae0d-48f1-834b-9520d1355e96",
+    "details": {
+      "stalled_at_progress": 15,
+      "stalled_at_stage": "Separating stems with AI (6-stem model)",
+      "stalled_for_seconds": 300
+    }
+  },
+  {
+    "timestamp": 1773845402.681699,
+    "event": "retry",
+    "job_id": "a1f70a0c-ae0d-48f1-834b-9520d1355e96",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 15,
+      "stalled_at_stage": "Separating stems with AI (6-stem model)"
+    }
+  },
+  {
+    "timestamp": 1773845713.648661,
+    "event": "stall_detected",
+    "job_id": "3216dfda-4440-4d92-9abb-007560068455",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 311
+    }
+  },
+  {
+    "timestamp": 1773845713.649639,
+    "event": "retry",
+    "job_id": "3216dfda-4440-4d92-9abb-007560068455",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773845928.367525,
+    "event": "stall_detected",
+    "job_id": "a1f70a0c-ae0d-48f1-834b-9520d1355e96",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 335
+    }
+  },
+  {
+    "timestamp": 1773845929.510695,
+    "event": "retry",
+    "job_id": "a1f70a0c-ae0d-48f1-834b-9520d1355e96",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773846042.063526,
+    "event": "stall_detected",
+    "job_id": "36626298-03ac-4782-8d5b-c16659a8cfc6",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 388
+    }
+  },
+  {
+    "timestamp": 1773846042.090805,
+    "event": "retry",
+    "job_id": "36626298-03ac-4782-8d5b-c16659a8cfc6",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773859212.07747,
+    "event": "stall_detected",
+    "job_id": "a2ba2b26-12c6-4c28-9211-fe8410bef5cd",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 301
+    }
+  },
+  {
+    "timestamp": 1773859212.079983,
+    "event": "retry",
+    "job_id": "a2ba2b26-12c6-4c28-9211-fe8410bef5cd",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773873773.9433239,
+    "event": "stall_detected",
+    "job_id": "4f76c5f5-30c0-4c00-bdeb-c4aa1d8f05e0",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 301
+    }
+  },
+  {
+    "timestamp": 1773873773.944298,
+    "event": "retry",
+    "job_id": "4f76c5f5-30c0-4c00-bdeb-c4aa1d8f05e0",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773883256.107317,
+    "event": "stall_detected",
+    "job_id": "8c816919-314c-4906-8dfc-7b84ce73ae3a",
+    "details": {
+      "stalled_at_progress": 40,
+      "stalled_at_stage": "Converting stems to MP3",
+      "stalled_for_seconds": 300
+    }
+  },
+  {
+    "timestamp": 1773883256.109942,
+    "event": "retry",
+    "job_id": "8c816919-314c-4906-8dfc-7b84ce73ae3a",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 40,
+      "stalled_at_stage": "Converting stems to MP3"
+    }
+  },
+  {
+    "timestamp": 1773931454.924255,
+    "time": "2026-03-19 14:44:14 UTC",
+    "event": "stall_detected",
+    "job_id": "a91ace05-56f8-44bb-9b0b-d1bc9a7321bc",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773931454.925919,
+    "time": "2026-03-19 14:44:14 UTC",
+    "event": "retry",
+    "job_id": "a91ace05-56f8-44bb-9b0b-d1bc9a7321bc",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773935806.531292,
+    "time": "2026-03-19 15:56:46 UTC",
+    "event": "stall_detected",
+    "job_id": "3140b86a-fc44-461d-96ee-4b4f0084012e",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773935806.532919,
+    "time": "2026-03-19 15:56:46 UTC",
+    "event": "retry",
+    "job_id": "3140b86a-fc44-461d-96ee-4b4f0084012e",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773935927.074019,
+    "time": "2026-03-19 15:58:47 UTC",
+    "event": "stall_detected",
+    "job_id": "825df4f5-a8a6-492a-ab45-6e05420d491d",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 121
+    }
+  },
+  {
+    "timestamp": 1773935927.074997,
+    "time": "2026-03-19 15:58:47 UTC",
+    "event": "retry",
+    "job_id": "825df4f5-a8a6-492a-ab45-6e05420d491d",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773936411.128654,
+    "time": "2026-03-19 16:06:51 UTC",
+    "event": "stall_detected",
+    "job_id": "ee37da3b-39d1-42b3-aad0-a7d8f2586c99",
+    "details": {
+      "stalled_at_progress": 52,
+      "stalled_at_stage": "Analyzing stems for deep extraction",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773936411.129612,
+    "time": "2026-03-19 16:06:51 UTC",
+    "event": "retry",
+    "job_id": "ee37da3b-39d1-42b3-aad0-a7d8f2586c99",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 52,
+      "stalled_at_stage": "Analyzing stems for deep extraction"
+    }
+  },
+  {
+    "timestamp": 1773936821.771893,
+    "time": "2026-03-19 16:13:41 UTC",
+    "event": "stall_detected",
+    "job_id": "ee37da3b-39d1-42b3-aad0-a7d8f2586c99",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 121
+    }
+  },
+  {
+    "timestamp": 1773936821.7729359,
+    "time": "2026-03-19 16:13:41 UTC",
+    "event": "retry",
+    "job_id": "ee37da3b-39d1-42b3-aad0-a7d8f2586c99",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773938611.651765,
+    "time": "2026-03-19 16:43:31 UTC",
+    "event": "stall_detected",
+    "job_id": "51f1d949-91cd-47f6-b768-8051c7a18891",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773938611.65291,
+    "time": "2026-03-19 16:43:31 UTC",
+    "event": "retry",
+    "job_id": "51f1d949-91cd-47f6-b768-8051c7a18891",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773939346.158738,
+    "time": "2026-03-19 16:55:46 UTC",
+    "event": "stall_detected",
+    "job_id": "50cfcff6-bf85-46c2-bf71-00f57c26d9dc",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 121
+    }
+  },
+  {
+    "timestamp": 1773939346.160809,
+    "time": "2026-03-19 16:55:46 UTC",
+    "event": "retry",
+    "job_id": "50cfcff6-bf85-46c2-bf71-00f57c26d9dc",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773939823.3988008,
+    "time": "2026-03-19 17:03:43 UTC",
+    "event": "stall_detected",
+    "job_id": "1b1a9d0d-c85a-4211-9242-1ff9c0694438",
+    "details": {
+      "stalled_at_progress": 52,
+      "stalled_at_stage": "Analyzing stems for deep extraction",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773939823.4007192,
+    "time": "2026-03-19 17:03:43 UTC",
+    "event": "retry",
+    "job_id": "1b1a9d0d-c85a-4211-9242-1ff9c0694438",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 52,
+      "stalled_at_stage": "Analyzing stems for deep extraction"
+    }
+  },
+  {
+    "timestamp": 1773940530.25969,
+    "time": "2026-03-19 17:15:30 UTC",
+    "event": "stall_detected",
+    "job_id": "1b1a9d0d-c85a-4211-9242-1ff9c0694438",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 179
+    }
+  },
+  {
+    "timestamp": 1773940530.286609,
+    "time": "2026-03-19 17:15:30 UTC",
+    "event": "retry",
+    "job_id": "1b1a9d0d-c85a-4211-9242-1ff9c0694438",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 60,
+      "stalled_at_stage": "Transcribing to MIDI (enhanced)"
+    }
+  },
+  {
+    "timestamp": 1773949053.302897,
+    "time": "2026-03-19 19:37:33 UTC",
+    "event": "stall_detected",
+    "job_id": "4eec51fa-3442-4edf-9b31-cad41c5c1f87",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773949053.3056712,
+    "time": "2026-03-19 19:37:33 UTC",
+    "event": "retry",
+    "job_id": "4eec51fa-3442-4edf-9b31-cad41c5c1f87",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773949306.4933462,
+    "time": "2026-03-19 19:41:46 UTC",
+    "event": "stall_detected",
+    "job_id": "4eec51fa-3442-4edf-9b31-cad41c5c1f87",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773949306.4963887,
+    "time": "2026-03-19 19:41:46 UTC",
+    "event": "retry",
+    "job_id": "4eec51fa-3442-4edf-9b31-cad41c5c1f87",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773962882.8916545,
+    "time": "2026-03-19 23:28:02 UTC",
+    "event": "stall_detected",
+    "job_id": "0b560917-5ac9-4941-bbbd-0ad7cc05a966",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773962882.8944576,
+    "time": "2026-03-19 23:28:02 UTC",
+    "event": "retry",
+    "job_id": "0b560917-5ac9-4941-bbbd-0ad7cc05a966",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773963179.391938,
+    "time": "2026-03-19 23:32:59 UTC",
+    "event": "stall_detected",
+    "job_id": "0b560917-5ac9-4941-bbbd-0ad7cc05a966",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773963179.3947608,
+    "time": "2026-03-19 23:32:59 UTC",
+    "event": "retry",
+    "job_id": "0b560917-5ac9-4941-bbbd-0ad7cc05a966",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1773963468.5260766,
+    "time": "2026-03-19 23:37:48 UTC",
+    "event": "stall_detected",
+    "job_id": "0b560917-5ac9-4941-bbbd-0ad7cc05a966",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1773963468.5321553,
+    "time": "2026-03-19 23:37:48 UTC",
+    "event": "failed_permanently",
+    "job_id": "0b560917-5ac9-4941-bbbd-0ad7cc05a966",
+    "details": {
+      "retries_exhausted": true,
+      "last_progress": 59,
+      "last_stage": "Failed (watchdog)"
+    }
+  },
+  {
+    "timestamp": 1774005341.693252,
+    "time": "2026-03-20 11:15:41 UTC",
+    "event": "stall_detected",
+    "job_id": "9dcf9467-0978-4d36-b5bb-73cd550708da",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1774005341.6966512,
+    "time": "2026-03-20 11:15:41 UTC",
+    "event": "retry",
+    "job_id": "9dcf9467-0978-4d36-b5bb-73cd550708da",
+    "details": {
+      "retry_number": 1,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1774005591.188775,
+    "time": "2026-03-20 11:19:51 UTC",
+    "event": "stall_detected",
+    "job_id": "9dcf9467-0978-4d36-b5bb-73cd550708da",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1774005591.1927242,
+    "time": "2026-03-20 11:19:51 UTC",
+    "event": "retry",
+    "job_id": "9dcf9467-0978-4d36-b5bb-73cd550708da",
+    "details": {
+      "retry_number": 2,
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart"
+    }
+  },
+  {
+    "timestamp": 1774005841.0921612,
+    "time": "2026-03-20 11:24:01 UTC",
+    "event": "stall_detected",
+    "job_id": "9dcf9467-0978-4d36-b5bb-73cd550708da",
+    "details": {
+      "stalled_at_progress": 59,
+      "stalled_at_stage": "Generating chord chart",
+      "stalled_for_seconds": 120
+    }
+  },
+  {
+    "timestamp": 1774005841.0975778,
+    "time": "2026-03-20 11:24:01 UTC",
+    "event": "failed_permanently",
+    "job_id": "9dcf9467-0978-4d36-b5bb-73cd550708da",
+    "details": {
+      "retries_exhausted": true,
+      "last_progress": 59,
+      "last_stage": "Failed (watchdog)"
+    }
+  }
+]

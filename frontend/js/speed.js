@@ -57,10 +57,10 @@ window.StemScribe = window.StemScribe || {};
     SS.setPlaybackRate = function(rate) {
         SS.playbackRate = rate;
 
-        // Update all stem audio elements
-        Object.values(SS.stemAudios).forEach(function(stemData) {
-            stemData.audio.playbackRate = rate;
-        });
+        // Update Web Audio engine playback rate
+        if (SS.audioEngine && SS.audioEngine.isLoaded()) {
+            SS.audioEngine.setPlaybackRate(rate);
+        }
 
         // Update button text
         var speedBtn = document.getElementById('speedBtn');

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="canonical" href="https://stemscriber.com/beta.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemScriber — Beta Access</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ff7b54">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-card: #1a1a24;
+            --orange: #ff7b54;
+            --pink: #ff6b9d;
+            --green: #00ff88;
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: #2a2a35;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .beta-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 460px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-family: 'Righteous', cursive;
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .beta-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            color: var(--green);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--orange);
+        }
+
+        .input-group input::placeholder {
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--text-dim);
+        }
+
+        .name-input {
+            font-size: 0.95rem !important;
+            letter-spacing: normal !important;
+            text-transform: none !important;
+        }
+
+        .redeem-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 0.5rem;
+        }
+
+        .redeem-btn:hover { opacity: 0.9; }
+        .redeem-btn:active { transform: scale(0.98); }
+        .redeem-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--green);
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(255, 107, 84, 0.1);
+            border: 1px solid rgba(255, 107, 84, 0.3);
+            color: var(--orange);
+        }
+
+        .features {
+            margin-top: 1.5rem;
+            text-align: left;
+            display: none;
+        }
+
+        .features.visible { display: block; }
+
+        .features h3 {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .feature-check {
+            color: var(--green);
+            font-size: 1rem;
+        }
+
+        .enter-btn {
+            display: none;
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #00ff88, #00ccff);
+            border: none;
+            border-radius: 10px;
+            color: #0d0d12;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .enter-btn.visible { display: block; }
+        .enter-btn:hover { opacity: 0.9; }
+
+        .footer-text {
+            margin-top: 2rem;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        .footer-text a {
+            color: var(--orange);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="beta-card">
+        <div class="logo">StemScriber</div>
+        <div class="beta-badge">Beta Access</div>
+        <p class="subtitle">Enter your invite code to unlock StemScriber</p>
+
+        <div class="input-group">
+            <input type="text" id="codeInput" placeholder="STEM-XXXX-XXXX" maxlength="14" autofocus>
+        </div>
+        <div class="input-group">
+            <input type="text" id="nameInput" class="name-input" placeholder="Your name (optional)">
+        </div>
+
+        <button class="redeem-btn" id="redeemBtn" onclick="redeemCode()">Redeem Code</button>
+
+        <div class="message" id="message"></div>
+
+        <div class="features" id="features">
+            <h3>Unlocked for you</h3>
+            <div class="feature-item"><span class="feature-check">&#10003;</span> 50 songs per month</div>
+            <div class="feature-item"><span class="feature-check">&#10003;</span> 6-stem separation</div>
+            <div class="feature-item"><span class="feature-check">&#10003;</span> Karaoke mode with synced lyrics</div>
+            <div class="feature-item"><span class="feature-check">&#10003;</span> Chord detection</div>
+            <div class="feature-item"><span class="feature-check">&#10003;</span> Guitar Pro tab export</div>
+            <div class="feature-item"><span class="feature-check">&#10003;</span> Ensemble separation mode</div>
+        </div>
+
+        <a class="enter-btn" id="enterBtn" href="/">Enter StemScriber</a>
+    </div>
+
+    <p class="footer-text">Don't have a code? <a href="mailto:stemscriber@gmail.com">Request access</a></p>
+
+    <script>
+        var API_BASE = (window.location.port === '' || window.location.port === '80' || window.location.port === '443')
+            ? window.location.origin + '/api'
+            : window.location.protocol + '//' + window.location.hostname + ':5555/api';
+
+        // Auto-format code input
+        document.getElementById('codeInput').addEventListener('input', function(e) {
+            var val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (val.length > 4 && val.indexOf('-') < 0) {
+                val = val.slice(0, 4) + '-' + val.slice(4);
+            }
+            if (val.length > 9 && val.lastIndexOf('-') < 5) {
+                val = val.slice(0, 9) + '-' + val.slice(9);
+            }
+            e.target.value = val.slice(0, 14);
+        });
+
+        // Enter key to submit
+        document.getElementById('codeInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') redeemCode();
+        });
+
+        function redeemCode() {
+            var code = document.getElementById('codeInput').value.trim();
+            var name = document.getElementById('nameInput').value.trim();
+            var msg = document.getElementById('message');
+            var btn = document.getElementById('redeemBtn');
+
+            if (!code) {
+                msg.className = 'message error';
+                msg.textContent = 'Please enter an invite code.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+
+            fetch(API_BASE + '/beta/redeem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, name: name })
+            })
+            .then(function(resp) { return resp.json().then(function(d) { return { ok: resp.ok, data: d }; }); })
+            .then(function(result) {
+                btn.disabled = false;
+                btn.textContent = 'Redeem Code';
+
+                if (result.ok && result.data.valid) {
+                    msg.className = 'message success';
+                    msg.textContent = result.data.message;
+                    document.getElementById('features').classList.add('visible');
+                    document.getElementById('enterBtn').classList.add('visible');
+
+                    // Save beta status in localStorage
+                    localStorage.setItem('stemscribe-beta', JSON.stringify({
+                        code: code,
+                        name: name,
+                        plan: 'beta',
+                        redeemed: new Date().toISOString()
+                    }));
+                } else {
+                    msg.className = 'message error';
+                    msg.textContent = result.data.error || 'Invalid code. Check and try again.';
+                }
+            })
+            .catch(function(err) {
+                btn.disabled = false;
+                btn.textContent = 'Redeem Code';
+                msg.className = 'message error';
+                msg.textContent = 'Connection error. Try again.';
+            });
+        }
+    </script>
+</body>
+</html>

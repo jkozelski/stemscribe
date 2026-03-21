@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemScriber ✦ Fretboard Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@300;400;500;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-dark: #13131a;
+            --bg-card: #1a1a24;
+            --orange: #ff7b54;
+            --pink: #ff6b9d;
+            --green: #00ff88;
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: #2a2a35;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-deep) 0%, var(--bg-dark) 50%, var(--bg-deep) 100%);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating orb background animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(255, 123, 84, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(255, 107, 157, 0.08) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(30px, -30px) scale(1.05);
+            }
+            50% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
+            75% {
+                transform: translate(10px, 30px) scale(1.02);
+            }
+        }
+
+        /* Navigation */
+        .nav-bar {
+            position: relative;
+            z-index: 10;
+            background: rgba(19, 19, 26, 0.95);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-brand {
+            font-family: 'Righteous', cursive;
+            font-size: 1.5rem;
+            color: var(--orange);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--orange);
+        }
+
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 2.5rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* Control panels */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-label {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        select {
+            background: var(--bg-dark);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        select:hover, select:focus {
+            border-color: var(--orange);
+            outline: none;
+        }
+
+        option {
+            background: var(--bg-dark);
+            color: var(--text);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            background: var(--bg-dark);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .btn.active {
+            background: var(--orange);
+            color: var(--bg-deep);
+            border-color: var(--orange);
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: var(--bg-deep);
+            border-color: var(--orange);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #ff9370;
+        }
+
+        /* Slider styling */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--orange);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--orange);
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-value {
+            min-width: 45px;
+            text-align: right;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            color: var(--orange);
+        }
+
+        /* Fretboard section */
+        .fretboard-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .fretboard-container {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        svg.fretboard {
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+        }
+
+        .fret-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 10px;
+            fill: var(--text-dim);
+        }
+
+        .string-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 11px;
+            fill: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .note-dot {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .note-dot:hover {
+            filter: brightness(1.3);
+        }
+
+        .note-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 9px;
+            font-weight: 600;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .capo-bar {
+            pointer-events: none;
+        }
+
+        /* CAGED shapes display */
+        .caged-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 123, 84, 0.1);
+            border: 1px solid rgba(255, 123, 84, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* Controls section */
+        .controls-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .control-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            width: 40px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--text);
+            border-radius: 10px;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        input[type="checkbox"]:checked + .toggle-switch {
+            background: var(--green);
+        }
+
+        input[type="checkbox"]:checked + .toggle-switch::after {
+            transform: translateX(16px);
+        }
+
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fretboard-section {
+                padding: 1rem;
+                overflow-x: auto;
+            }
+
+            .nav-bar {
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-bar">
+        <a href="/" class="nav-brand">StemScriber ✦</a>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/tuner.html">Tuner</a></li>
+            <li><a href="/fretboard.html" style="color: var(--orange);">Fretboard</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main container -->
+    <div class="container">
+        <div class="header">
+            <h1>Fretboard Visualizer</h1>
+            <p>Interactive guitar fretboard with scales, CAGED positions, and playable notes</p>
+        </div>
+
+        <!-- Control panels -->
+        <div class="controls-grid">
+            <!-- Key selector -->
+            <div class="control-panel">
+                <label class="control-label">Key</label>
+                <div class="select-group">
+                    <select id="keySelect">
+                        <option value="C">C</option>
+                        <option value="C#">C# / Db</option>
+                        <option value="D">D</option>
+                        <option value="D#">D# / Eb</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="F#">F# / Gb</option>
+                        <option value="G">G</option>
+                        <option value="G#">G# / Ab</option>
+                        <option value="A">A</option>
+                        <option value="A#">A# / Bb</option>
+                        <option value="B">B</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Scale selector -->
+            <div class="control-panel">
+                <label class="control-label">Scale / Mode</label>
+                <div class="select-group">
+                    <select id="scaleSelect">
+                        <option value="major">Major</option>
+                        <option value="minor">Minor (Natural)</option>
+                        <option value="minor-pentatonic">Minor Pentatonic</option>
+                        <option value="major-pentatonic">Major Pentatonic</option>
+                        <option value="blues">Blues</option>
+                        <option value="dorian">Dorian</option>
+                        <option value="mixolydian">Mixolydian</option>
+                        <option value="harmonic-minor">Harmonic Minor</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tuning selector -->
+            <div class="control-panel">
+                <label class="control-label">Tuning</label>
+                <div class="select-group">
+                    <select id="tuningSelect">
+                        <option value="standard">Standard (EADGBE)</option>
+                        <option value="drop-d">Drop D (DADGBE)</option>
+                        <option value="open-g">Open G (DGDGBD)</option>
+                        <option value="open-d">Open D (DADGAD)</option>
+                        <option value="dadgad">DADGAD</option>
+                        <option value="half-step-down">Half Step Down</option>
+                        <option value="whole-step-down">Whole Step Down</option>
+                        <option value="bass">Bass (4-string)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Capo selector -->
+            <div class="control-panel">
+                <label class="control-label">Capo Position</label>
+                <div class="select-group">
+                    <select id="capoSelect">
+                        <option value="0">No Capo</option>
+                        <option value="1">Fret 1</option>
+                        <option value="2">Fret 2</option>
+                        <option value="3">Fret 3</option>
+                        <option value="4">Fret 4</option>
+                        <option value="5">Fret 5</option>
+                        <option value="6">Fret 6</option>
+                        <option value="7">Fret 7</option>
+                        <option value="8">Fret 8</option>
+                        <option value="9">Fret 9</option>
+                        <option value="10">Fret 10</option>
+                        <option value="11">Fret 11</option>
+                        <option value="12">Fret 12</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- CAGED shapes -->
+            <div class="control-panel">
+                <label class="control-label">CAGED Shape</label>
+                <div class="button-group">
+                    <button class="btn active" data-caged="all">All</button>
+                    <button class="btn" data-caged="c">C</button>
+                    <button class="btn" data-caged="a">A</button>
+                    <button class="btn" data-caged="g">G</button>
+                    <button class="btn" data-caged="e">E</button>
+                    <button class="btn" data-caged="d">D</button>
+                </div>
+            </div>
+
+            <!-- Display options -->
+            <div class="control-panel">
+                <label class="control-label">Display Options</label>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="noteLabelsToggle" checked>
+                        <span class="toggle-switch"></span>
+                        <span>Note Labels</span>
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="intervalLabelsToggle">
+                        <span class="toggle-switch"></span>
+                        <span>Interval Names</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fretboard section -->
+        <div class="fretboard-section">
+            <div class="fretboard-container">
+                <svg class="fretboard" id="fretboard" width="1000" height="300"></svg>
+            </div>
+            <div class="caged-info" id="cagedInfo">
+                Select a CAGED shape to highlight its position on the fretboard.
+            </div>
+
+            <!-- Controls -->
+            <div class="controls-section">
+                <button class="btn btn-primary" id="playScaleBtn">▶ Play Scale</button>
+                <button class="btn" id="stopPlayBtn" style="display: none;">⏹ Stop</button>
+                
+                <label class="toggle-label" style="margin: 0; justify-content: flex-start;">
+                    <input type="checkbox" id="droneToggle">
+                    <span class="toggle-switch"></span>
+                    <span>Drone (Root)</span>
+                </label>
+
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="control-label" style="margin: 0; min-width: 60px;">Metronome</span>
+                    <div class="slider-container" style="flex: 1;">
+                        <input type="range" id="bpmSlider" min="40" max="220" value="120">
+                        <span class="slider-value" id="bpmValue">120</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="metronomeBtn">♩ Start</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        
+        const SCALES = {
+            major: [0, 2, 4, 5, 7, 9, 11],
+            minor: [0, 2, 3, 5, 7, 8, 10],
+            'minor-pentatonic': [0, 3, 5, 7, 10],
+            'major-pentatonic': [0, 2, 4, 7, 9],
+            blues: [0, 3, 5, 6, 7, 10],
+            dorian: [0, 2, 3, 5, 7, 9, 10],
+            mixolydian: [0, 2, 4, 5, 7, 9, 10],
+            'harmonic-minor': [0, 2, 3, 5, 7, 8, 11]
+        };
+
+        const INTERVALS = {
+            0: 'R', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7'
+        };
+
+        const TUNINGS = {
+            standard: ['E', 'A', 'D', 'G', 'B', 'E'],
+            'drop-d': ['D', 'A', 'D', 'G', 'B', 'E'],
+            'open-g': ['D', 'G', 'D', 'G', 'B', 'D'],
+            'open-d': ['D', 'A', 'D', 'F#', 'A', 'D'],
+            dadgad: ['D', 'A', 'D', 'G', 'A', 'D'],
+            'half-step-down': ['D#', 'G#', 'C#', 'F#', 'A#', 'D#'],
+            'whole-step-down': ['D', 'G', 'C', 'F', 'A', 'D'],
+            bass: ['E', 'A', 'D', 'G']
+        };
+
+        const CAGED_POSITIONS = {
+            c: { frets: [0, 3, 2, 0, 0, 0], name: 'C Shape' },
+            a: { frets: [0, 0, 2, 2, 2, 0], name: 'A Shape' },
+            g: { frets: [3, 2, 0, 0, 0, 3], name: 'G Shape' },
+            e: { frets: [0, 2, 2, 1, 0, 0], name: 'E Shape' },
+            d: { frets: [2, 3, 2, 0, 0, 0], name: 'D Shape' }
+        };
+
+        const COLORS = {
+            root: '#ff7b54',
+            scale: '#00ff88',
+            other: '#404550'
+        };
+
+        let state = {
+            key: 'C',
+            scale: 'major',
+            tuning: 'standard',
+            capo: 0,
+            cagedShape: 'all',
+            showNoteLabels: true,
+            showIntervals: false,
+            isPlaying: false,
+            droneOscillator: null,
+            metronomeRunning: false,
+            bpm: 120
+        };
+
+        function getNoteIndex(noteName) {
+            return NOTES.indexOf(noteName);
+        }
+
+        function noteIndexToFrequency(noteIndex) {
+            const A4 = 440;
+            const semitones = noteIndex - 9;
+            return A4 * Math.pow(2, semitones / 12);
+        }
+
+        function getScaleNotes() {
+            const keyIndex = getNoteIndex(state.key);
+            const scaleOffsets = SCALES[state.scale];
+            return scaleOffsets.map(offset => (keyIndex + offset) % 12);
+        }
+
+        function getTuningNotes() {
+            const baseNotes = TUNINGS[state.tuning];
+            return baseNotes.map(note => {
+                const noteIndex = getNoteIndex(note);
+                return (noteIndex + state.capo) % 12;
+            });
+        }
+
+        function getColorForNote(noteIndex) {
+            const scaleNotes = getScaleNotes();
+            const keyIndex = getNoteIndex(state.key);
+
+            if ((noteIndex - keyIndex + 12) % 12 === 0) {
+                return COLORS.root;
+            }
+            if (scaleNotes.includes(noteIndex)) {
+                return COLORS.scale;
+            }
+            return COLORS.other;
+        }
+
+        function playNote(noteIndex, duration = 0.3) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.cr%ateGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            const frequency = noteIndexToFrequency(noteIndex);
+            osc.frequency.value = frequency;
+            osc.type = 'sine';
+
+            gain.gain.setValueAtTime(0.4, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + duration);
+        }
+
+        function startDrone() {
+            if (state.droneOscillator) stopDrone();
+
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            const keyIndex = getNoteIndex(state.key);
+            const frequency = noteIndexToFrequency(keyIndex);
+            osc.frequency.value = frequency;
+            osc.type = 'sine';
+
+            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+
+            osc.start();
+            state.droneOscillator = osc;
+            state.droneGain = gain;
+        }
+
+        function stopDrone() {
+            if (state.droneOscillator) {
+                state.droneOscillator.stop();
+                state.droneOscillator = null;
+                state.droneGain = null;
+            }
+        }
+
+        function playScale() {
+            if (state.isPlaying) return;
+            state.isPlaying = true;
+
+            document.getElementById('playScaleBtn').style.display = 'none';
+            document.getElementById('stopPlayBtn').style.display = 'block';
+
+            const scaleNotes = getScaleNotes();
+            const tuningNotes = getTuningNotes();
+            const notesToPlay = [];
+
+            for (let stringIndex = 0; stringIndex < tuningNotes.length; stringIndex++) {
+                const stringNote = tuningNotes[stringIndex];
+                for (let fret = state.capo; fret <= 22; fret++) {
+                    const noteIndex = (stringNote + fret) % 12;
+                    if (scaleNotes.includes(noteIndex)) {
+                        notesToPlay.push(noteIndexToFrequency(noteIndex));
+                    }
+                }
+            }
+
+            const uniqueFreqs = [...new Set(notesToPlay)].sort((a, b) => a - b);
+
+            let index = 0;
+            function playNext() {
+                if (index >= uniqueFreqs.length || !state.isPlaying) {
+                    state.isPlaying = false;
+                    document.getElementById('playScaleBtn').style.display = 'block';
+                    document.getElementById('stopPlayBtn').style.display = 'none';
+                    return;
+                }
+
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.value = uniqueFreqs[index];
+                osc.type = 'sine';
+
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+                osc.start(audioContext.currentTime);
+                osc.stop(audioContext.currentTime + 0.4);
+
+                index++;
+                setTimeout(playNext, 500);
+            }
+
+            playNext();
+        }
+
+        function metronomeClick() {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.frequency.value = 800;
+            osc.type = 'sine';
+
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0, audioContext.currentTime + 0.05);
+
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.05);
+        }
+
+        function startMetronome() {
+            if (state.metronomeRunning) return;
+            state.metronomeRunning = true;
+            document.getElementById('metronomeBtn').textContent = '⏹ Stop';
+
+            function tick() {
+                if (!state.metronomeRunning) {
+                    document.getElementById('metronomeBtn').textContent = '♩ Start';
+                    return;
+                }
+                metronomeClick();
+                setTimeout(tick, (60 / state.bpm) * 1000);
+            }
+
+            tick();
+        }
+
+        function stopMetronome() {
+            state.metronomeRunning = false;
+            document.getElementById('metronomeBtn').textContent = '♩ Start';
+        }
+
+        function drawFretboard() {
+            const svg = document.getElementById('fretboard');
+            svg.innerHTML = '';
+
+            const stringCount = TUNINGS[state.tuning].length;
+            const fretCount = 22;
+            const stringSpacing = 40;
+            const fretSpacing = 50;
+            const startX = 80;
+            const startY = 50;
+
+            svg.setAttribute('width', startX + fretSpacing * (fretCount + 0.5));
+            svg.setAttribute('height', startY * 2 + stringSpacing * (stringCount - 1));
+
+            for (let fret = 0; fret <= fretCount; fret++) {
+                let x;
+                if (fret === 0) {
+                    x = startX;
+                } else {
+                    x = startX + fretSpacing * Math.log(fret + 1) / Math.log(fretCount + 1) * fretCount;
+                }
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', startY);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', startY + stringSpacing * (stringCount - 1));
+                line.setAttribute('stroke', fret === 0 ? COLORS.root : '#3a3a45');
+                line.setAttribute('stroke-width', fret === 0 ? 3 : 1);
+                svg.appendChild(line);
+
+                if (fret > 0) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', startY - 20);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('class', 'fret-label');
+                    text.textContent = fret;
+                    svg.appendChild(text);
+                }
+            }
+
+            if (state.capo > 0) {
+                let capoX;
+                if (state.capo === 0) {
+                    capoX = startX;
+                } else {
+                    capoX = startX + fretSpacing * Math.log(state.capo + 1) / Math.log(fretCount + 1) * fretCount;
+                }
+
+                const capoBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                capoBar.setAttribute('x', capoX - 8);
+                capoBar.setAttribute('y', startY - 8);
+                capoBar.setAttribute('width', 16);
+                capoBar.setAttribute('height', stringSpacing * (stringCount - 1) + 16);
+                capoBar.setAttribute('fill', 'rgba(255, 107, 157, 0.3)');
+                capoBar.setAttribute('stroke', COLORS.root);
+                capoBar.setAttribute('stroke-width', 2);
+                capoBar.setAttribute('rx', 3);
+                capoBar.setAttribute('class', 'capo-bar');
+                svg.appendChild(capoBar);
+            }
+
+            const tuningNotes = getTuningNotes();
+            for (let string = 0; string < stringCount; string++) {
+                const y = startY + stringSpacing * (stringCount - 1 - string);
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', startX);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', startX + fretSpacing * Math.log(fretCount + 1) / Math.log(fretCount + 1) * fretCount);
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', '#5a5a65');
+                line.setAttribute('stroke-width', 2);
+                svg.appendChild(line);
+
+                const stringLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                stringLabel.setAttribute('x', startX - 30);
+                stringLabel.setAttribute('y', y + 5);
+                stringLabel.setAttribute('text-anchor', 'end');
+                stringLabel.setAttribute('class', 'string-label');
+                stringLabel.textContent = NOTES[tuningNotes[string]];
+                svg.appendChild(stringLabel);
+            }
+
+            const scaleNotes = getScaleNotes();
+            const cagedShape = state.cagedShape;
+
+            for (let string = 0; string < stringCount; string++) {
+                const stringNote = tuningNotes[string];
+                const y = startY + stringSpacing * (stringCount - 1 - string);
+
+                for (let fret = 0; fret <= fretCount; fret++) {
+                    const noteIndex = (stringNote + fret) % 12;
+                    let x;
+
+                    if (fret === 0) {
+                        x = startX;
+                    } else {
+                        x = startX + fretSpacing * Math.log(fret + 1) / Math.log(fretCount + 1) * fretCount;
+                    }
+
+                    const isInScale = scaleNotes.includes(noteIndex);
+
+                    if (!isInScale) continue;
+
+                    let showDot = true;
+                    if (cagedShape !== 'all') {
+                        const position = CAGED_POSITIONS[cagedShape];
+                        if (position.frets[string] !== undefined) {
+                            const shapeRootFret = position.frets[string];
+                            const fretRange = 5;
+                            showDot = fret >= shapeRootFret && fret <= shapeRootFret + fretRange;
+                        }
+                    }
+
+                    if (!showDot) continue;
+
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', 12);
+                    circle.setAttribute('fill', getColorForNote(noteIndex));
+                    circle.setAttribute('class', 'note-dot');
+                    circle.setAttribute('data-fret', fret);
+                    circle.setAttribute('data-string', string);
+                    circle.setAttribute('data-note-index', noteIndex);
+                    circle.style.cursor = 'pointer';
+
+                    circle.addEventListener('click', () => {
+                        playNote(noteIndex);
+                    });
+
+                    svg.appendChild(circle);
+
+                    if (state.showNoteLabels || state.showIntervals) {
+                        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        label.setAttribute('x', x);
+                        label.setAttribute('y', y + 4);
+                        label.setAttribute('text-anchor', 'middle');
+                        label.setAttribute('class', 'note-label');
+                        label.setAttribute('fill', '#000');
+
+                        if (state.showIntervals) {
+                            label.textContent = INTERVALS[noteIndex] || '';
+                        } else {
+                            label.textContent = NOTES[noteIndex];
+                        }
+
+                        svg.appendChild(label);
+                    }
+                }
+            }
+
+            updateCAGEDInfo();
+        }
+
+        function updateCAGEDInfo() {
+            const info = document.getElementById('cagedInfo');
+            if (state.cagedShape === 'all') {
+                info.textContent = 'Showing all scale positions on the fretboard.';
+            } else {
+                const shape = CAGED_POSITIONS[state.cagedShape];
+                info.textContent = `${shape.name} highlighted. Root position varies by tuning. Explore different keys to master this shape across the fretboard.`;
+            }
+        }
+
+        document.getElementById('keySelect').addEventListener('change', (e) => {
+            state.key = e.target.value;
+            if (state.droneOscillator) {
+                stopDrone();
+                startDrone();
+            }
+            drawFretboard();
+        });
+
+        document.getElementById('scaleSelect').addEventListener('change', (e) => {
+            state.scale = e.target.value;
+            drawFretboard();
+        });
+
+        document.getElementById('tuningSelect').addEventListener('change', (e) => {
+            state.tuning = e.target.value;
+            drawFretboard();
+        });
+
+        document.getElementById('capoSelect').addEventListener('change', (e) => {
+            state.capo = parseInt(e.target.value);
+            drawFretboard();
+        });
+
+        document.querySelectorAll('[data-caged]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('[data-caged]').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                state.cagedShape = e.target.dataset.caged;
+                drawFretboard();
+            });
+        });
+
+        document.getElementById('noteLabelsToggle').addEventListener('change', (e) => {
+            state.showNoteLabels = e.target.checked;
+            drawFretboard();
+        });
+
+        document.getElementById('intervalLabelsToggle').addEventListener('change', (e) => {
+            state.showIntervals = e.target.checked;
+            drawFretboard();
+        });
+
+        document.getElementById('playScaleBtn').addEventListener('click', playScale);
+
+        document.getElementById('stopPlayBtn').addEventListener('click', () => {
+            state.isPlaying = false;
+            document.getElementById('playScaleBtn').style.display = 'block';
+            document.getElementById('stopPlayBtn').style.display = 'none';
+        });
+
+        document.getElementById('droneToggle').addEventListener('change', (e) => {
+            if (e.target.checked) {
+                startDrone();
+            } else {
+                stopDrone();
+            }
+        });
+
+        document.getElementById('bpmSlider').addEventListener('input', (e) => {
+            state.bpm = parseInt(e.target.value);
+            document.getElementById('bpmValue').textContent = state.bpm;
+        });
+
+        document.getElementById('metronomeBtn').addEventListener('click', () => {
+            if (state.metronomeRunning) {
+                stopMetronome();
+            } else {
+                startMetronome();
+            }
+        });
+
+        drawFretboard();
+
+        document.addEventListener('click', () => {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>

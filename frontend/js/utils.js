@@ -34,9 +34,10 @@ window.StemScribe = window.StemScribe || {};
         var toast = document.getElementById('toast');
         var toastIcon = document.getElementById('toastIcon');
         var toastMessage = document.getElementById('toastMessage');
+        if (!toast) return;
 
-        toastIcon.textContent = isError ? '\u26A0\uFE0F' : '\u2713';
-        toastMessage.textContent = message;
+        if (toastIcon) toastIcon.textContent = isError ? '\u26A0\uFE0F' : '\u2713';
+        if (toastMessage) toastMessage.textContent = message;
         toast.classList.toggle('error', isError);
         toast.classList.add('show');
 
@@ -64,27 +65,31 @@ window.StemScribe = window.StemScribe || {};
         // Clear loop
         if (SS.clearLoopRegion) SS.clearLoopRegion();
 
-        // Stop any playing audio
-        Object.values(SS.stemAudios).forEach(function(s) { s.audio.pause(); });
+        // Stop any playing audio — dispose Web Audio engine
+        if (SS.audioEngine) {
+            SS.audioEngine.dispose();
+            SS.audioEngine = null;
+        }
         SS.stemAudios = {};
         SS.analyserBuffers = {};
         SS.meterLevels = {};
-        // Close shared audio context
-        if (SS.mixerAudioCtx && SS.mixerAudioCtx.state !== 'closed') {
-            SS.mixerAudioCtx.close().catch(function() {});
-            SS.mixerAudioCtx = null;
-        }
-        SS.audioContexts = {};
         SS.isPlaying = false;
 
-        document.getElementById('uploadSection').style.display = 'block';
-        document.getElementById('processingSection').classList.remove('active');
-        document.getElementById('resultsSection').classList.remove('active');
+        var us = document.getElementById('uploadSection');
+        if (us) us.style.display = 'block';
+        var ps = document.getElementById('processingSection');
+        if (ps) ps.classList.remove('active');
+        var rs = document.getElementById('resultsSection');
+        if (rs) rs.classList.remove('active');
         SS.selectedFile = null;
-        document.querySelector('.drop-title').textContent = 'Drop your track here';
-        document.querySelector('.drop-icon').textContent = '\u{1F3A7}';
-        document.getElementById('urlInput').value = '';
-        document.getElementById('submitBtn').disabled = true;
+        var dt = document.querySelector('.drop-title');
+        if (dt) dt.textContent = 'Drop your track here';
+        var di = document.querySelector('.drop-icon');
+        if (di) di.textContent = '\u{1F3A7}';
+        var ui = document.getElementById('urlInput');
+        if (ui) ui.value = '';
+        var sb = document.getElementById('submitBtn');
+        if (sb) sb.disabled = true;
     };
 
 })(window.StemScribe);

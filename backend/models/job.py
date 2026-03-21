@@ -23,7 +23,8 @@ OUTPUT_DIR = SCRIPT_DIR / 'outputs'
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# In-memory job registry
+# In-memory job registry (evicts oldest completed jobs when exceeding MAX_CACHED_JOBS)
+MAX_CACHED_JOBS = 100
 jobs = {}
 
 
@@ -73,6 +74,8 @@ class ProcessingJob:
         self.transcription_quality = {}  # Quality scores per stem
         self.pro_tabs = {}           # Professional tabs from Songsterr/UG
         self.transcription_mode = {}  # Per-stem: 'melody', 'enhanced', 'basic_pitch'
+        self.user_id = None       # Owner's user ID (for logged-in users)
+        self.session_id = None    # Anonymous session tracking cookie
 
     def to_dict(self):
         """Convert job to dict with numpy types converted for JSON serialization"""
@@ -97,6 +100,8 @@ class ProcessingJob:
             'transcription_quality': self.transcription_quality,
             'pro_tabs': self.pro_tabs,
             'transcription_mode': self.transcription_mode,
+            'user_id': self.user_id,
+            'session_id': self.session_id,
         }
         return convert_numpy_types(data)
 
@@ -170,6 +175,8 @@ def load_job_from_disk(job_dir: Path):
         job.detected_key = data.get('detected_key')
         job.transcription_quality = data.get('transcription_quality', {})
         job.pro_tabs = data.get('pro_tabs', {})
+        job.user_id = data.get('user_id')
+        job.session_id = data.get('session_id')
 
         # Verify that stem files still exist
         valid_stems = {}
@@ -214,6 +221,21 @@ def load_all_jobs_from_disk():
     return loaded_count
 
 
+def _evict_old_jobs():
+    """Remove oldest completed jobs from memory when cache is full."""
+    if len(jobs) < MAX_CACHED_JOBS:
+        return
+    completed = [(jid, j) for jid, j in jobs.items() if j.status == 'completed']
+    if not completed:
+        return
+    # Sort by created_at (oldest first) and evict half
+    completed.sort(key=lambda x: getattr(x[1], 'created_at', 0))
+    evict_count = max(1, len(completed) // 2)
+    for jid, _ in completed[:evict_count]:
+        del jobs[jid]
+    logger.info(f"Evicted {evict_count} completed jobs from memory cache")
+
+
 def get_job(job_id: str):
     """Get a job from memory, or auto-load from disk if not found"""
     job = None
@@ -227,6 +249,7 @@ def get_job(job_id: str):
         if job_dir.exists():
             job = load_job_from_disk(job_dir)
             if job:
+                _evict_old_jobs()
                 jobs[job_id] = job  # Cache it in memory
                 logger.info(f"Auto-loaded job {job_id} from disk")
 

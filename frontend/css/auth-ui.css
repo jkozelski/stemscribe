@@ -1,0 +1,363 @@
+/* ===========================================
+   StemScribe — Auth UI (Sign-In Button, Profile Dropdown, Save Prompt)
+   =========================================== */
+
+/* ---- Sign-In Button ---- */
+.auth-signin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid rgba(255, 123, 84, 0.4);
+    border-radius: 8px;
+    color: var(--psych-orange, #ff7b54);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.auth-signin-btn:hover {
+    border-color: var(--psych-orange, #ff7b54);
+    background: rgba(255, 123, 84, 0.08);
+    color: #fff;
+}
+
+.auth-signin-btn:active {
+    transform: scale(0.97);
+}
+
+/* Google "G" icon inside sign-in button */
+.auth-signin-btn .auth-google-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* ---- Profile Dropdown ---- */
+.auth-profile-dropdown {
+    position: relative;
+    display: none; /* shown via JS when logged in */
+    align-items: center;
+}
+
+.auth-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text, #e8e4df);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+}
+
+.auth-profile-btn:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.auth-profile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.auth-profile-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.auth-profile-chevron {
+    font-size: 0.6rem;
+    opacity: 0.5;
+    transition: transform 0.2s;
+}
+
+/* ---- Profile Menu (Dropdown) ---- */
+.auth-profile-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: all 0.15s ease;
+    z-index: 1000;
+}
+
+.auth-profile-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.auth-profile-info {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-profile-email {
+    font-size: 0.8rem;
+    color: var(--text-dim, #7a7a85);
+    margin-bottom: 0.25rem;
+}
+
+.auth-profile-plan {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+
+.auth-profile-plan.plan-free {
+    background: rgba(122, 122, 133, 0.2);
+    color: var(--text-dim, #7a7a85);
+}
+
+.auth-profile-plan.plan-pro {
+    background: rgba(255, 123, 84, 0.15);
+    color: var(--psych-orange, #ff7b54);
+}
+
+.auth-profile-plan.plan-premium {
+    background: rgba(198, 120, 221, 0.15);
+    color: var(--psych-purple, #c678dd);
+}
+
+.auth-profile-plan.plan-beta {
+    background: rgba(152, 195, 121, 0.15);
+    color: var(--psych-green, #98c379);
+}
+
+.auth-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0.25rem 0;
+}
+
+.auth-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text, #e8e4df);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+}
+
+.auth-menu-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-menu-item.danger {
+    color: #ff6b6b;
+}
+
+.auth-menu-item.danger:hover {
+    background: rgba(255, 107, 107, 0.08);
+}
+
+/* ---- Save Prompt Modal ---- */
+.save-prompt-modal {
+    display: none; /* toggled via JS */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.save-prompt-content {
+    background: rgba(26, 26, 36, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.save-prompt-content h3 {
+    font-family: 'Righteous', cursive;
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--psych-orange, #ff7b54), var(--psych-pink, #ff6b9d));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.save-prompt-content p {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-dim, #7a7a85);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.save-prompt-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.save-prompt-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background: linear-gradient(135deg, var(--psych-orange, #ff7b54), var(--psych-pink, #ff6b9d));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.save-prompt-primary:hover {
+    opacity: 0.9;
+}
+
+.save-prompt-primary:active {
+    transform: scale(0.97);
+}
+
+.save-prompt-secondary {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    color: var(--text-dim, #7a7a85);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-prompt-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text, #e8e4df);
+}
+
+/* ---- Beta Code Entry (in profile menu) ---- */
+.auth-beta-input-row {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.auth-beta-input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: var(--text, #e8e4df);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.auth-beta-input::placeholder {
+    color: var(--text-dim, #7a7a85);
+}
+
+.auth-beta-input:focus {
+    border-color: var(--psych-orange, #ff7b54);
+}
+
+.auth-beta-submit {
+    padding: 0.4rem 0.6rem;
+    background: var(--psych-orange, #ff7b54);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: opacity 0.2s;
+}
+
+.auth-beta-submit:hover {
+    opacity: 0.85;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .auth-profile-name {
+        display: none;
+    }
+
+    .auth-profile-chevron {
+        display: none;
+    }
+
+    .auth-signin-btn {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .auth-profile-menu {
+        right: -1rem;
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-signin-btn span {
+        display: none; /* hide "Sign In" text, show only icon */
+    }
+
+    .auth-signin-btn .auth-google-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .save-prompt-content {
+        padding: 1.5rem;
+        margin: 0 1rem;
+    }
+}

@@ -18,23 +18,59 @@ def download_from_url(job, url: str, output_dir: Path):
     logger.info(f"Downloading from URL: {url}")
 
     try:
+        # YouTube cookies file (needed for VPS/cloud to avoid bot detection)
+        cookies_file = Path(__file__).parent.parent.parent / 'youtube-cookies.txt'
+        extra_args = []
+        if cookies_file.exists():
+            extra_args += ['--cookies', str(cookies_file)]
+        extra_args += ['--extractor-args', 'youtube:player_client=web']
+
         # First, get metadata
-        # Use browser cookies + Deno JS solver to bypass YouTube bot detection
         metadata_cmd = [
             'yt-dlp',
-            '--cookies-from-browser', 'chrome',
-            '--remote-components', 'ejs:github',
             '--dump-json',
             '--no-download',
+            *extra_args,
             url
         ]
 
         result = subprocess.run(metadata_cmd, capture_output=True, text=True, timeout=60)
         if result.returncode == 0:
             metadata = json.loads(result.stdout)
+
+            # Determine best artist: prefer YouTube Music "artist" field (from music metadata),
+            # then try parsing "Artist - Title" from the video title,
+            # fall back to uploader (channel name) as last resort.
+            raw_artist = metadata.get('artist') or ''
+            raw_title = metadata.get('title', 'Unknown')
+            raw_track = metadata.get('track') or ''  # YouTube Music track name
+
+            # Use YouTube Music track/artist if available (these come from official metadata)
+            best_title = raw_track if raw_track else raw_title
+            best_artist = raw_artist
+
+            # If artist is empty or looks like a YouTube channel name, parse from title
+            if not best_artist or best_artist == metadata.get('uploader', ''):
+                # Try common title patterns: "Artist - Title", "Artist | Title", "Artist: Title"
+                for sep in [' - ', ' — ', ' – ', ' | ', ': ']:
+                    if sep in raw_title:
+                        parts = raw_title.split(sep, 1)
+                        parsed_artist = parts[0].strip()
+                        parsed_title = parts[1].strip()
+                        if parsed_artist and parsed_title:
+                            best_artist = parsed_artist
+                            # Only override title if we didn't get a track name from YT Music
+                            if not raw_track:
+                                best_title = parsed_title
+                            break
+
+            # Final fallback to uploader
+            if not best_artist:
+                best_artist = metadata.get('uploader', 'Unknown')
+
             job.metadata = {
-                'title': metadata.get('title', 'Unknown'),
-                'artist': metadata.get('artist') or metadata.get('uploader', 'Unknown'),
+                'title': best_title,
+                'artist': best_artist,
                 'duration': metadata.get('duration', 0),
                 'thumbnail': metadata.get('thumbnail', ''),
                 'webpage_url': metadata.get('webpage_url', url)
@@ -47,16 +83,14 @@ def download_from_url(job, url: str, output_dir: Path):
         output_template = str(output_dir / f"{safe_title}.%(ext)s")
 
         # Download audio
-        # Use browser cookies + Deno JS solver to bypass YouTube bot detection
         download_cmd = [
             'yt-dlp',
-            '--cookies-from-browser', 'chrome',
-            '--remote-components', 'ejs:github',
             '-x',                          # Extract audio only
             '--audio-format', 'wav',       # Best quality for processing
             '--audio-quality', '0',        # Highest quality
             '--no-playlist',               # Don't download playlists
             '--max-filesize', '500M',      # Limit file size
+            *extra_args,
             '-o', output_template,
             url
         ]

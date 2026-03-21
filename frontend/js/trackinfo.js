@@ -112,12 +112,33 @@ window.StemScribe = window.StemScribe || {};
         var bioEl = document.getElementById('artistBio');
         var wikiLink = document.getElementById('wikiLink');
 
+        var websiteLink = document.getElementById('artistWebsiteLink');
+        var wikiSearchLink = document.getElementById('wikiSearchLink');
+
         if (info.bio) {
             bioEl.textContent = info.bio;
             bioSection.style.display = 'block';
             if (info.wikipedia_url) {
                 wikiLink.href = info.wikipedia_url;
                 wikiLink.style.display = 'inline-block';
+            } else {
+                wikiLink.style.display = 'none';
+            }
+            if (wikiSearchLink) {
+                if (info.artist) {
+                    wikiSearchLink.href = 'https://en.wikipedia.org/w/index.php?search=' + encodeURIComponent(info.artist);
+                    wikiSearchLink.style.display = info.wikipedia_url ? 'none' : 'inline-block';
+                } else {
+                    wikiSearchLink.style.display = 'none';
+                }
+            }
+            if (websiteLink) {
+                if (info.website_url) {
+                    websiteLink.href = info.website_url;
+                    websiteLink.style.display = 'inline-block';
+                } else {
+                    websiteLink.style.display = 'none';
+                }
             }
         } else {
             bioSection.style.display = 'none';

@@ -6,6 +6,8 @@ Contains process_audio (the main pipeline) and process_url (URL wrapper).
 
 import os
 import logging
+import threading
+import librosa
 from pathlib import Path
 
 from models.job import (
@@ -14,56 +16,82 @@ from models.job import (
 )
 from processing.separation import (
     separate_stems, separate_stems_roformer, separate_stems_mdx, separate_stems_ensemble,
+    separate_stems_modal, is_modal_enabled, MODAL_AVAILABLE,
     ENHANCED_SEPARATOR_AVAILABLE, ENSEMBLE_SEPARATOR_AVAILABLE,
 )
 from processing.smart_extract import smart_separate
 from processing.transcription import (
-    transcribe_to_midi, detect_chords_for_job, convert_midi_to_musicxml, CHORD_DETECTOR_AVAILABLE, GP_CONVERTER_AVAILABLE,
+    transcribe_to_midi, detect_chords_for_job, convert_midi_to_musicxml, CHORD_DETECTOR_AVAILABLE,
 )
 from services.downloader import download_from_url
 
 logger = logging.getLogger(__name__)
 
-# ============ CONDITIONAL IMPORTS ============
+# ============ CONDITIONAL IMPORTS (single source of truth: dependencies.py) ============
 
-try:
-    from enhanced_separator import EnhancedSeparator
-except ImportError:
-    pass
+from dependencies import (
+    GUITAR_SEPARATOR_AVAILABLE, ENHANCER_AVAILABLE, SKILLS_AVAILABLE,
+    TRACK_INFO_AVAILABLE, DRIVE_AVAILABLE, GP_CONVERTER_AVAILABLE,
+    ENHANCED_SEPARATOR_AVAILABLE as _ESA,
+)
 
-try:
-    from guitar_separator import GuitarSeparator, GUITAR_SEPARATOR_AVAILABLE
-except ImportError:
-    GUITAR_SEPARATOR_AVAILABLE = False
-
-try:
-    from enhancer import enhance_all_stems, PEDALBOARD_AVAILABLE
-    ENHANCER_AVAILABLE = PEDALBOARD_AVAILABLE
-except ImportError:
-    ENHANCER_AVAILABLE = False
-
-try:
+if _ESA:
+    from enhanced_separator import EnhancedSeparator  # noqa: F401
+if GUITAR_SEPARATOR_AVAILABLE:
+    from guitar_separator import GuitarSeparator  # noqa: F401
+if ENHANCER_AVAILABLE:
+    from enhancer import enhance_all_stems  # noqa: F401
+if SKILLS_AVAILABLE:
     from skills import get_skill, get_all_skills, apply_skill, SKILL_REGISTRY, analyze_stems_for_skills  # noqa: F401
-    SKILLS_AVAILABLE = True
-except ImportError:
-    SKILLS_AVAILABLE = False
-
-try:
+if TRACK_INFO_AVAILABLE:
     from track_info import fetch_track_info, extract_artist_from_title, should_stereo_split  # noqa: F401
-    TRACK_INFO_AVAILABLE = True
-except ImportError:
-    TRACK_INFO_AVAILABLE = False
+if DRIVE_AVAILABLE:
+    from drive_service import upload_job_to_drive  # noqa: F401
+if GP_CONVERTER_AVAILABLE:
+    from midi_to_gp import convert_job_midis_to_gp  # noqa: F401
 
-try:
-    from drive_service import upload_job_to_drive
-    DRIVE_AVAILABLE = True
-except ImportError:
-    DRIVE_AVAILABLE = False
 
-try:
-    from midi_to_gp import convert_job_midis_to_gp
-except ImportError:
-    pass
+# ============ DURATION LIMITS (seconds) ============
+
+PLAN_DURATION_LIMITS = {
+    'free': 30 * 60,      # 30 minutes (no restrictions during beta)
+    'premium': 30 * 60,   # 30 minutes
+    'pro': 30 * 60,       # 30 minutes
+    'beta': 30 * 60,      # 30 minutes
+}
+
+PLAN_UPGRADE_MSG = {
+    'free': 'Upgrade to Pro ($10/mo) for songs up to 10 minutes, or Premium ($20/mo) for up to 20 minutes.',
+    'pro': 'Upgrade to Premium ($20/mo) for songs up to 20 minutes.',
+    'beta': 'Beta plan supports songs up to 10 minutes.',
+    'pro': 'Pro plan supports songs up to 20 minutes.',
+}
+
+
+class DurationLimitExceeded(Exception):
+    """Raised when audio exceeds the plan's duration limit."""
+    def __init__(self, duration_sec, limit_sec, plan):
+        self.duration_sec = duration_sec
+        self.limit_sec = limit_sec
+        self.plan = plan
+        dur_min = duration_sec / 60
+        lim_min = limit_sec / 60
+        upgrade_msg = PLAN_UPGRADE_MSG.get(plan, '')
+        super().__init__(
+            f"This song is {dur_min:.1f} minutes long, but your {plan} plan "
+            f"supports up to {lim_min:.0f} minutes. {upgrade_msg}"
+        )
+
+
+def check_duration_limit(audio_path, plan='free'):
+    """Check if audio duration is within the plan's limit. Raises DurationLimitExceeded if not."""
+    limit = PLAN_DURATION_LIMITS.get(plan, PLAN_DURATION_LIMITS['free'])
+    try:
+        duration = librosa.get_duration(path=str(audio_path))
+    except Exception:
+        return  # If we can't determine duration, let it through
+    if duration > limit:
+        raise DurationLimitExceeded(duration, limit, plan)
 
 
 # ============ PIPELINE FUNCTIONS ============
@@ -121,11 +149,34 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         job.status = 'processing'
         save_job_checkpoint(job)
 
+        # Check duration against plan limits
+        plan = job.metadata.get('plan', 'free')
+        try:
+            check_duration_limit(audio_path, plan)
+        except DurationLimitExceeded as e:
+            logger.warning(f"Duration limit exceeded for job {job.job_id}: {e}")
+            job.status = 'failed'
+            job.error = str(e)
+            job.metadata['duration_limited'] = True
+            save_job_checkpoint(job)
+            try:
+                from error_tracker import log_error
+                log_error(job.job_id, 'duration_limit', str(e),
+                          song_duration=e.duration_sec, processing_stage='pre-check')
+            except Exception:
+                pass
+            return
+
         # Step 1: Separate stems
-        # Mode selection: explicit user choice overrides default
+        # Mode selection: Modal cloud GPU > explicit user choice > default
         separation_success = False
 
-        if ensemble_mode and ENSEMBLE_SEPARATOR_AVAILABLE:
+        print(f"[MODAL DEBUG] MODAL_AVAILABLE={MODAL_AVAILABLE}, ensemble={ensemble_mode}, mdx={mdx_model}", flush=True)
+        if MODAL_AVAILABLE and not ensemble_mode and not mdx_model:
+            # Modal cloud GPU — default when enabled, skips local GPU entirely
+            logger.info("☁️ Using Modal cloud GPU (T4) for separation")
+            separation_success = separate_stems_modal(job, audio_path)
+        elif ensemble_mode and ENSEMBLE_SEPARATOR_AVAILABLE:
             logger.info("🎯 Using ENSEMBLE mode (multi-model voting)")
             separation_success = separate_stems_ensemble(job, audio_path)
         elif mdx_model and ENHANCED_SEPARATOR_AVAILABLE:
@@ -142,6 +193,14 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
 
         if not separation_success:
             job.status = 'failed'
+            try:
+                from error_tracker import log_error
+                log_error(job.job_id, 'separation_failed', 'Stem separation returned failure',
+                          song_duration=job.metadata.get('duration'),
+                          source='upload' if not job.source_url else 'url',
+                          processing_stage='separation')
+            except Exception:
+                pass
             return
 
         # Optional: Enhance stems (off by default)
@@ -162,6 +221,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
             try:
                 job.stage = 'Splitting lead/backing vocals (BS-Roformer)'
                 job.progress = 45
+                save_job_checkpoint(job)
                 logger.info("🎤 Auto-splitting vocals with BS-Roformer for better quality...")
 
                 vocal_split_dir = OUTPUT_DIR / job.job_id / 'stems' / 'vocal_split'
@@ -187,6 +247,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
             try:
                 job.stage = 'Splitting lead/rhythm guitar (MelBand-RoFormer)'
                 job.progress = 48
+                save_job_checkpoint(job)
                 logger.info("🎸 Auto-splitting guitar into lead/rhythm with trained MelBand-RoFormer...")
 
                 guitar_split_dir = OUTPUT_DIR / job.job_id / 'stems' / 'guitar_split'
@@ -230,6 +291,9 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
 
         # Smart Deep Extraction: Automatically analyze and extract all instruments
         # Replaces manual cascade separation — one button, best result every time
+        job.stage = 'Analyzing stems for deep extraction'
+        job.progress = 52
+        save_job_checkpoint(job)
         try:
             smart_result = smart_separate(job)
             if smart_result:
@@ -249,6 +313,53 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 logger.warning(f"Chord detection failed (non-fatal): {e}")
         elif not chord_detection:
             logger.info("⏭️ Skipping chord detection (disabled)")
+
+        # Step 2b: Generate chord chart (chords + lyrics + structure)
+        # Wrapped in a timeout thread to prevent stalls from Whisper/lyrics extraction
+        if job.chord_progression:
+            CHART_TIMEOUT = 180  # 3 minutes max for chord chart generation
+            chart_result = [None]
+            chart_error = [None]
+
+            def _generate_chart():
+                try:
+                    from chart_assembler import generate_chord_chart_for_job
+                    vocals_stem = job.stems.get('vocals_lead') or job.stems.get('vocals')
+                    title = job.metadata.get('title', job.filename or 'Untitled') if job.metadata else (job.filename or 'Untitled')
+                    artist = job.metadata.get('artist', '') if job.metadata else ''
+                    chart_result[0] = generate_chord_chart_for_job(
+                        job_id=job.job_id,
+                        chords=job.chord_progression,
+                        vocals_path=vocals_stem,
+                        audio_path=str(audio_path),
+                        title=title,
+                        artist=artist,
+                    )
+                except Exception as e:
+                    chart_error[0] = e
+
+            try:
+                job.stage = 'Generating chord chart'
+                job.progress = 59
+                save_job_checkpoint(job)
+
+                chart_thread = threading.Thread(target=_generate_chart, daemon=True)
+                chart_thread.start()
+                chart_thread.join(timeout=CHART_TIMEOUT)
+
+                if chart_thread.is_alive():
+                    logger.warning(f"Chord chart generation timed out after {CHART_TIMEOUT}s — skipping")
+                elif chart_error[0]:
+                    logger.warning(f"Chord chart generation failed (non-fatal): {chart_error[0]}")
+                elif chart_result[0]:
+                    chart = chart_result[0]
+                    num_sections = len(chart.get('sections', []))
+                    num_lines = sum(len(s.get('lines', [])) for s in chart.get('sections', []))
+                    logger.info(f"✓ Auto-generated chord chart: {num_sections} sections, {num_lines} lines")
+                else:
+                    logger.info("Chord chart generation returned no result")
+            except Exception as e:
+                logger.warning(f"Chord chart generation failed (non-fatal): {e}")
 
         # Step 3: Transcribe to MIDI
         job.progress = 60
@@ -288,7 +399,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                     api = SongsterrAPI()
                     tab = api.search(f"{title} {artist}".strip())
                     if tab:
-                        output_dir = Path(job.output_dir)
+                        output_dir = OUTPUT_DIR / job.job_id
                         gp5_path = api.download_gp5(tab, output_dir)
                         if gp5_path:
                             if not hasattr(job, 'pro_tabs') or job.pro_tabs is None:
@@ -333,6 +444,30 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         logger.error(f"Processing failed: {e}")
         job.status = 'failed'
         job.error = str(e)
+        # Log to error tracker
+        try:
+            from error_tracker import log_error
+            source = 'upload'
+            if job.source_url:
+                if 'archive.org' in (job.source_url or ''):
+                    source = 'archive'
+                elif 'youtu' in (job.source_url or ''):
+                    source = 'youtube'
+                elif 'spotify' in (job.source_url or ''):
+                    source = 'spotify'
+                else:
+                    source = 'url'
+            log_error(
+                job_id=job.job_id,
+                error_type=type(e).__name__,
+                error_message=str(e),
+                song_duration=job.metadata.get('duration'),
+                source=source,
+                processing_stage=job.stage,
+                extra={'filename': job.filename},
+            )
+        except Exception:
+            pass  # Error tracking itself must never break the pipeline
 
 
 def process_url(job: ProcessingJob, url: str, enhance_stems: bool = False, stereo_split: bool = False, gp_tabs: bool = True, chord_detection: bool = True, mdx_model: bool = False, ensemble_mode: bool = False):
@@ -363,5 +498,30 @@ def process_url(job: ProcessingJob, url: str, enhance_stems: bool = False, stere
         logger.error(f"URL processing failed: {e}")
         job.status = 'failed'
         job.error = str(e)
+        # Log to error tracker
+        try:
+            from error_tracker import log_error
+            source = 'unknown'
+            if 'archive.org' in (url or ''):
+                source = 'archive'
+            elif 'youtu' in (url or ''):
+                source = 'youtube'
+            elif 'spotify' in (url or ''):
+                source = 'spotify'
+            elif 'soundcloud' in (url or ''):
+                source = 'soundcloud'
+            else:
+                source = 'url'
+            log_error(
+                job_id=job.job_id,
+                error_type=type(e).__name__,
+                error_message=str(e),
+                song_duration=job.metadata.get('duration'),
+                source=source,
+                processing_stage=job.stage,
+                extra={'url': url, 'filename': job.filename},
+            )
+        except Exception:
+            pass  # Error tracking itself must never break the pipeline
 
 

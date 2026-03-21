@@ -176,28 +176,34 @@ except ImportError as e:
     MODEL_MANAGER_AVAILABLE = False
     logger.warning(f"Model manager not available: {e}")
 
-# Chord detection (V8 Transformer model preferred, falls back to V7 then basic template matching)
+# Chord detection (V10 BTC fine-tuned preferred, falls back to V8/V7/basic)
 try:
-    from chord_detector_v8 import ChordDetector, detect_chords
+    from chord_detector_v10 import ChordDetector, detect_chords
     CHORD_DETECTOR_AVAILABLE = True
-    CHORD_DETECTOR_VERSION = 'v8'
-    logger.info("Chord detector V8 available (337 classes, inversions, mMaj7)")
+    CHORD_DETECTOR_VERSION = 'v10'
+    logger.info("Chord detector V10 available (BTC fine-tuned, 170 classes)")
 except ImportError:
     try:
-        from chord_detector_v7 import ChordDetector, detect_chords
+        from chord_detector_v8 import ChordDetector, detect_chords
         CHORD_DETECTOR_AVAILABLE = True
-        CHORD_DETECTOR_VERSION = 'v7'
-        logger.info("Chord detector V7 available (25 classes)")
+        CHORD_DETECTOR_VERSION = 'v8'
+        logger.info("Chord detector V8 available (337 classes, inversions, mMaj7)")
     except ImportError:
         try:
-            from chord_detector import ChordDetector, detect_chords  # noqa: F401
+            from chord_detector_v7 import ChordDetector, detect_chords
             CHORD_DETECTOR_AVAILABLE = True
-            CHORD_DETECTOR_VERSION = 'basic'
-            logger.info("Basic chord detector available (template matching)")
-        except ImportError as e:
-            CHORD_DETECTOR_AVAILABLE = False
-            CHORD_DETECTOR_VERSION = None
-            logger.warning(f"Chord detector not available: {e}")
+            CHORD_DETECTOR_VERSION = 'v7'
+            logger.info("Chord detector V7 available (25 classes)")
+        except ImportError:
+            try:
+                from chord_detector import ChordDetector, detect_chords  # noqa: F401
+                CHORD_DETECTOR_AVAILABLE = True
+                CHORD_DETECTOR_VERSION = 'basic'
+                logger.info("Basic chord detector available (template matching)")
+            except ImportError as e:
+                CHORD_DETECTOR_AVAILABLE = False
+                CHORD_DETECTOR_VERSION = None
+                logger.warning(f"Chord detector not available: {e}")
 
 # Chord theory engine (scale suggestions, Beato-style chord-over-bass analysis)
 try:

@@ -94,14 +94,38 @@
     gap: 1rem;
 }
 
-.logo-symbol {
-    font-size: 2rem;
-    animation: spin-slow 10s linear infinite;
+.waveform-icon {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 22px;
+    flex-shrink: 0;
 }
 
-@keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.waveform-icon .bar {
+    width: 3px;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(to top, var(--psych-orange, #ff7b54), var(--psych-pink, #ff4da6));
+    animation: waveform-pulse 0.8s ease-in-out infinite alternate;
+    transform-origin: bottom center;
+}
+
+.waveform-icon .bar:nth-child(1) { height: 45%; animation-delay: 0s; }
+.waveform-icon .bar:nth-child(2) { height: 85%; animation-delay: 0.15s; }
+.waveform-icon .bar:nth-child(3) { height: 100%; animation-delay: 0.05s; }
+.waveform-icon .bar:nth-child(4) { height: 70%; animation-delay: 0.2s; }
+.waveform-icon .bar:nth-child(5) { height: 40%; animation-delay: 0.1s; }
+
+@keyframes waveform-pulse {
+    0% { transform: scaleY(0.2); }
+    100% { transform: scaleY(1); }
+}
+
+.logo-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: contain;
 }
 
 .logo-text {

@@ -20,6 +20,7 @@ window.StemScribe = window.StemScribe || {};
 
     // Initialize all modules
     SS.loadSkills();
+    if (SS.initAuth) SS.initAuth();
     SS.initUpload();
     SS.initArchive();
     SS.initPanels();

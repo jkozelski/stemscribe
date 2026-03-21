@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemScriber — Clip-On Tuner</title>
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-dark: #13131a;
+            --bg-card: #1a1a24;
+            --bg-card2: #22222e;
+            --orange: #ff7b54;
+            --pink: #ff6b9d;
+            --lavender: #c084fc;
+            --green: #00ff88;
+            --red: #ff4757;
+            --yellow: #ffd700;
+            --blue: #61afef;
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: #2a2a35;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+        .waveform-icon { display: inline-flex; align-items: flex-end; gap: 2px; height: 18px; flex-shrink: 0; }
+        .waveform-icon .bar { width: 3px; border-radius: 2px 2px 0 0; background: linear-gradient(to top, var(--orange), var(--pink)); animation: waveform-pulse 0.8s ease-in-out infinite alternate; transform-origin: bottom center; }
+        .waveform-icon .bar:nth-child(1) { height: 45%; animation-delay: 0s; }
+        .waveform-icon .bar:nth-child(2) { height: 85%; animation-delay: 0.15s; }
+        .waveform-icon .bar:nth-child(3) { height: 100%; animation-delay: 0.05s; }
+        .waveform-icon .bar:nth-child(4) { height: 70%; animation-delay: 0.2s; }
+        .waveform-icon .bar:nth-child(5) { height: 40%; animation-delay: 0.1s; }
+        @keyframes waveform-pulse { 0% { transform: scaleY(0.2); } 100% { transform: scaleY(1); } }
+        .logo-text {
+            font-family: 'Righteous', cursive;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-title {
+            font-family: 'Righteous', cursive;
+            font-size: 1rem;
+            color: var(--lavender);
+            letter-spacing: 0.05em;
+        }
+        .nav-links { display: flex; gap: 0.75rem; align-items: center; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); background: var(--bg-card2); }
+
+        /* ── Main ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            gap: 1.5rem;
+        }
+
+        /* ── Tuner Card ── */
+        .tuner-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        }
+
+        /* ── Note Display ── */
+        .note-display {
+            text-align: center;
+        }
+        .note-name {
+            font-family: 'Righteous', cursive;
+            font-size: 6rem;
+            line-height: 1;
+            color: var(--text);
+            transition: color 0.15s;
+            min-height: 6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .note-name.in-tune { color: var(--green); }
+        .note-name.flat { color: var(--blue); }
+        .note-name.sharp { color: var(--orange); }
+        .note-name.listening {
+            color: var(--text-dim);
+            font-size: 2.5rem;
+        }
+
+        .note-freq {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+            font-family: 'Outfit', sans-serif;
+            min-height: 1.3rem;
+        }
+        .note-octave {
+            font-size: 2rem;
+            color: var(--lavender);
+            font-family: 'Righteous', cursive;
+            vertical-align: super;
+            line-height: 1;
+        }
+
+        /* ── Meter ── */
+        .meter-wrap {
+            width: 100%;
+        }
+        .meter-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.08em;
+        }
+        .meter-track {
+            position: relative;
+            height: 12px;
+            background: var(--bg-card2);
+            border-radius: 6px;
+            overflow: visible;
+            border: 1px solid var(--border);
+        }
+        /* center marker */
+        .meter-track::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: -4px;
+            width: 2px;
+            height: 20px;
+            background: var(--text-dim);
+            border-radius: 1px;
+            transform: translateX(-50%);
+        }
+        .meter-needle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            background: var(--text-dim);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: left 0.08s ease-out, background 0.15s;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+        .meter-needle.in-tune {
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green);
+        }
+        .meter-needle.flat { background: var(--blue); }
+        .meter-needle.sharp { background: var(--orange); }
+
+        .cents-display {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            min-height: 1rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* ── Status bar ── */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            flex-shrink: 0;
+        }
+        .status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .status-dot.error { background: var(--red); }
+
+        /* ── Start Button ── */
+        .start-btn {
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.85rem 2.5rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.04em;
+        }
+        .start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .start-btn:active { transform: translateY(0); }
+        .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .start-btn.stop {
+            background: linear-gradient(135deg, #444, #333);
+        }
+
+        /* ── Reference pitch ── */
+        .ref-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.82rem;
+            color: var(--text-dim);
+        }
+        .ref-row label { white-space: nowrap; }
+        .ref-input {
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.82rem;
+            padding: 0.3rem 0.5rem;
+            width: 70px;
+            text-align: center;
+        }
+        .ref-input:focus { outline: none; border-color: var(--lavender); }
+
+        /* ── Note grid (standard guitar tuning reference) ── */
+        .string-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.4rem;
+            width: 100%;
+        }
+        .string-btn {
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-family: 'Righteous', cursive;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            cursor: default;
+            text-align: center;
+        }
+        .string-btn.highlight {
+            background: rgba(0, 255, 136, 0.12);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .string-btn.close {
+            background: rgba(255, 123, 84, 0.1);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* ── Error message ── */
+        .error-msg {
+            display: none;
+            background: rgba(255, 71, 87, 0.12);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: #ff8a95;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+        }
+        .error-msg.visible { display: block; }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .tuner-card { padding: 1.75rem 1.25rem; }
+            .note-name { font-size: 5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <a href="/" class="logo">
+        <span class="waveform-icon" aria-hidden="true"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
+        <span class="logo-text">StemScriber</span>
+    </a>
+    <span class="page-title">Clip-On Tuner</span>
+    <nav class="nav-links">
+        <a href="/">Home</a>
+        <a href="practice.html">Practice</a>
+        <a href="fretboard.html">Fretboard</a>
+    </nav>
+</header>
+
+<main class="main">
+
+    <div class="tuner-card">
+
+        <!-- Note display -->
+        <div class="note-display">
+            <div class="note-name listening" id="noteName">—</div>
+            <div class="note-freq" id="noteFreq"></div>
+        </div>
+
+        <!-- Meter -->
+        <div class="meter-wrap">
+            <div class="meter-label-row">
+                <span>♭ FLAT</span>
+                <span>IN TUNE</span>
+                <span>SHARP ♯</span>
+            </div>
+            <div class="meter-track">
+                <div class="meter-needle" id="needle"></div>
+            </div>
+            <div class="cents-display" id="centsDisplay"></div>
+        </div>
+
+        <!-- Guitar string reference -->
+        <div class="string-grid" id="stringGrid">
+            <div class="string-btn" data-note="E2">E2</div>
+            <div class="string-btn" data-note="A2">A2</div>
+            <div class="string-btn" data-note="D3">D3</div>
+            <div class="string-btn" data-note="G3">G3</div>
+            <div class="string-btn" data-note="B3">B3</div>
+            <div class="string-btn" data-note="E4">E4</div>
+        </div>
+
+        <!-- Reference pitch -->
+        <div class="ref-row">
+            <label for="refPitch">Reference A4 =</label>
+            <input type="number" id="refPitch" class="ref-input" value="440" min="420" max="460" step="1">
+            <span>Hz</span>
+        </div>
+
+        <!-- Start/Stop -->
+        <button class="start-btn" id="startBtn" onclick="toggleTuner()">Start Tuner</button>
+
+        <!-- Status -->
+        <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">Click Start to enable microphone</span>
+        </div>
+
+    </div>
+
+    <!-- Error message outside card -->
+    <div class="error-msg" id="errorMsg"></div>
+
+</main>
+
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────
+let audioContext = null;
+let analyser = null;
+let mediaStream = null;
+let animFrameId = null;
+let isRunning = false;
+
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+// Standard guitar strings (E2, A2, D3, G3, B3, E4) for highlight
+const GUITAR_NOTES = [
+    { name: 'E2', midi: 40 },
+    { name: 'A2', midi: 45 },
+    { name: 'D3', midi: 50 },
+    { name: 'G3', midi: 55 },
+    { name: 'B3', midi: 59 },
+    { name: 'E4', midi: 64 },
+];
+
+// ── DOM refs ───────────────────────────────────────────────────────
+const noteNameEl   = document.getElementById('noteName');
+const noteFreqEl   = document.getElementById('noteFreq');
+const needleEl     = document.getElementById('needle');
+const centsEl      = document.getElementById('centsDisplay');
+const statusDotEl  = document.getElementById('statusDot');
+const statusTextEl = document.getElementById('statusText');
+const startBtn     = document.getElementById('startBtn');
+const errorMsgEl   = document.getElementById('errorMsg');
+const refPitchEl   = document.getElementById('refPitch');
+const stringBtns   = document.querySelectorAll('.string-btn');
+
+// ── Helpers ────────────────────────────────────────────────────────
+function getA4() {
+    return parseFloat(refPitchEl.value) || 440;
+}
+
+function freqToNoteInfo(freq) {
+    const A4 = getA4();
+    const A4_MIDI = 69;
+    const semitones = 12 * Math.log2(freq / A4);
+    const midi = Math.round(semitones) + A4_MIDI;
+    const octave = Math.floor(midi / 12) - 1;
+    const noteIndex = ((midi % 12) + 12) % 12;
+    const cents = Math.round((semitones - Math.round(semitones)) * 100);
+    const targetFreq = A4 * Math.pow(2, (midi - A4_MIDI) / 12);
+    return { name: NOTE_NAMES[noteIndex], octave, cents, midi, targetFreq };
+}
+
+// ── Pitch detection: autocorrelation ──────────────────────────────
+function detectPitch(buf, sampleRate) {
+    const SIZE = buf.length;
+    const MAX_SAMPLES = Math.floor(SIZE / 2);
+
+    // Find RMS — bail if signal too quiet
+    let rms = 0;
+    for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.01) return -1;
+
+    // Autocorrelation
+    const corr = new Float32Array(MAX_SAMPLES);
+    for (let lag = 0; lag < MAX_SAMPLES; lag++) {
+        let s = 0;
+        for (let i = 0; i < MAX_SAMPLES; i++) {
+            s += buf[i] * buf[i + lag];
+        }
+        corr[lag] = s;
+    }
+
+    // Find first dip, then first peak after it
+    let d = 0;
+    while (d < MAX_SAMPLES && corr[d] > corr[d + 1]) d++;
+
+    let maxVal = -1, maxPos = -1;
+    for (let i = d; i < MAX_SAMPLES; i++) {
+        if (corr[i] > maxVal) { maxVal = corr[i]; maxPos = i; }
+    }
+    if (maxPos === -1 || maxVal < 0.01) return -1;
+
+    // Parabolic interpolation for sub-sample accuracy
+    let x1 = maxPos - 1, x2 = maxPos, x3 = maxPos + 1;
+    if (x1 < 0) x1 = 0;
+    if (x3 >= MAX_SAMPLES) x3 = MAX_SAMPLES - 1;
+    const a = (corr[x1] - 2 * corr[x2] + corr[x3]) / 2;
+    const b = (corr[x3] - corr[x1]) / 2;
+    const refinedPos = a !== 0 ? x2 - b / (2 * a) : x2;
+
+    const freq = sampleRate / refinedPos;
+    // Instrument range sanity check: ~27 Hz (A0) to ~5000 Hz
+    if (freq < 27 || freq > 5000) return -1;
+    return freq;
+}
+
+// ── Smoothing ─────────────────────────────────────────────────────
+let smoothedFreq = -1;
+const SMOOTH = 0.25; // lower = more smoothing
+
+function smoothFreq(raw) {
+    if (raw < 0) return smoothedFreq;
+    if (smoothedFreq < 0) { smoothedFreq = raw; return raw; }
+    smoothedFreq = smoothedFreq * (1 - SMOOTH) + raw * SMOOTH;
+    return smoothedFreq;
+}
+
+// ── UI update ─────────────────────────────────────────────────────
+function updateUI(freq) {
+    if (freq < 0) {
+        noteNameEl.textContent = '—';
+        noteNameEl.className = 'note-name listening';
+        noteFreqEl.textContent = '';
+        needleEl.style.left = '50%';
+        needleEl.className = 'meter-needle';
+        centsEl.textContent = '';
+        clearStringHighlights();
+        return;
+    }
+
+    const { name, octave, cents, midi } = freqToNoteInfo(freq);
+
+    // Note name + octave
+    noteNameEl.innerHTML = name + '<span class="note-octave">' + octave + '</span>';
+    noteFreqEl.textContent = freq.toFixed(1) + ' Hz';
+
+    // Tuning class
+    const absCents = Math.abs(cents);
+    let tuneClass = '';
+    if (absCents <= 5) tuneClass = 'in-tune';
+    else if (cents < 0) tuneClass = 'flat';
+    else tuneClass = 'sharp';
+
+    noteNameEl.className = 'note-name ' + tuneClass;
+    needleEl.className = 'meter-needle ' + tuneClass;
+
+    // Meter needle position — clamp cents to ±50
+    const clampedCents = Math.max(-50, Math.min(50, cents));
+    const pct = ((clampedCents + 50) / 100) * 100;
+    needleEl.style.left = pct + '%';
+
+    // Cents label
+    if (absCents <= 5) {
+        centsEl.textContent = 'In tune';
+    } else {
+        centsEl.textContent = (cents > 0 ? '+' : '') + cents + ' cents ' + (cents < 0 ? '(flat)' : '(sharp)');
+    }
+
+    // Highlight guitar strings
+    highlightStrings(midi, absCents);
+}
+
+function clearStringHighlights() {
+    stringBtns.forEach(b => b.className = 'string-btn');
+}
+
+function highlightStrings(midi, absCents) {
+    stringBtns.forEach(b => {
+        const target = GUITAR_NOTES.find(n => n.name === b.dataset.note);
+        if (!target) return;
+        const diff = Math.abs(midi - target.midi);
+        if (diff === 0 && absCents <= 5) b.className = 'string-btn highlight';
+        else if (diff === 0) b.className = 'string-btn close';
+        else b.className = 'string-btn';
+    });
+}
+
+// ── Audio loop ────────────────────────────────────────────────────
+let silenceCount = 0;
+const SILENCE_THRESHOLD = 8; // frames of silence before clearing display
+
+function loop() {
+    if (!isRunning) return;
+    animFrameId = requestAnimationFrame(loop);
+
+    const buf = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(buf);
+
+    const rawFreq = detectPitch(buf, audioContext.sampleRate);
+
+    if (rawFreq < 0) {
+        silenceCount++;
+        if (silenceCount > SILENCE_THRESHOLD) {
+            smoothedFreq = -1;
+            updateUI(-1);
+        }
+    } else {
+        silenceCount = 0;
+        const freq = smoothFreq(rawFreq);
+        updateUI(freq);
+    }
+}
+
+// ── Start / Stop ──────────────────────────────────────────────────
+async function toggleTuner() {
+    if (isRunning) {
+        stopTuner();
+    } else {
+        await startTuner();
+    }
+}
+
+async function startTuner() {
+    hideError();
+    startBtn.disabled = true;
+    setStatus('Requesting microphone…', false);
+
+    try {
+        // Request mic — must be user gesture
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                autoGainControl: false,
+                noiseSuppression: false,
+                latency: 0,
+            },
+            video: false,
+        });
+    } catch (err) {
+        startBtn.disabled = false;
+        handleMicError(err);
+        return;
+    }
+
+    // Create / resume AudioContext
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+    }
+
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 4096;
+    analyser.smoothingTimeConstant = 0;
+
+    const source = audioContext.createMediaStreamSource(mediaStream);
+    source.connect(analyser);
+
+    isRunning = true;
+    silenceCount = 0;
+    smoothedFreq = -1;
+
+    startBtn.textContent = 'Stop';
+    startBtn.classList.add('stop');
+    startBtn.disabled = false;
+    setStatus('Listening…', true);
+
+    loop();
+}
+
+function stopTuner() {
+    isRunning = false;
+    if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+    if (analyser) { analyser.disconnect(); analyser = null; }
+
+    updateUI(-1);
+    startBtn.textContent = 'Start Tuner';
+    startBtn.classList.remove('stop');
+    setStatus('Click Start to enable microphone', false);
+}
+
+// ── Error handling ────────────────────────────────────────────────
+function handleMicError(err) {
+    let msg = 'Could not access microphone.';
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        msg = 'Microphone permission denied. Please allow microphone access in your browser settings and try again.';
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        msg = 'No microphone found. Please connect a microphone and try again.';
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        msg = 'Microphone is already in use by another app. Close it and try again.';
+    } else if (err.name === 'OverconstrainedError') {
+        msg = 'Microphone constraints not satisfied. Try a different device.';
+    } else if (err.name === 'SecurityError') {
+        msg = 'Microphone access blocked. This page must be served over HTTPS.';
+    }
+    showError(msg);
+    setStatus('Microphone error', false, true);
+}
+
+function showError(msg) {
+    errorMsgEl.textContent = msg;
+    errorMsgEl.classList.add('visible');
+}
+
+function hideError() {
+    errorMsgEl.classList.remove('visible');
+    errorMsgEl.textContent = '';
+}
+
+function setStatus(text, active, error) {
+    statusTextEl.textContent = text;
+    statusDotEl.className = 'status-dot' + (active ? ' active' : '') + (error ? ' error' : '');
+}
+
+// ── Cleanup on page hide ──────────────────────────────────────────
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isRunning) stopTuner();
+});
+</script>
+
+</body>
+</html>

@@ -6,36 +6,55 @@ window.StemScribe = window.StemScribe || {};
 
     var archiveSelectedCollection = null;
 
+    // Clean archive track titles — strip date prefixes like "gd69-05-23 t03 "
+    function cleanTrackTitle(title) {
+        if (!title) return title;
+        // Strip patterns like "gd69-05-23 t03 " or "gd1972-08-21s1t08 "
+        var cleaned = title
+            .replace(/^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s*[st]\d+[st]?\d*\s*/i, '')  // gd69-05-23 t03
+            .replace(/^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s+/i, '')  // gd69-05-23
+            .replace(/^t\d+\s+/i, '')  // leftover "t03 "
+            .replace(/^d\d+t\d+\s*/i, '')  // d1t08
+            .trim();
+        return cleaned || title;
+    }
+
     SS.initArchive = function() {
         var archiveSearchInput = document.getElementById('archiveSearchInput');
         var archiveSearchBtn = document.getElementById('archiveSearchBtn');
         var archiveBackBtn = document.getElementById('archiveBackBtn');
 
         // Collection filter buttons
-        document.querySelectorAll('.archive-filter').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var wasActive = btn.classList.contains('active');
-                document.querySelectorAll('.archive-filter').forEach(function(b) { b.classList.remove('active'); });
-                if (!wasActive) {
-                    btn.classList.add('active');
-                    archiveSelectedCollection = btn.dataset.collection;
-                    var query = archiveSearchInput.value.trim() || btn.textContent.trim().split(' ').slice(1).join(' ');
-                    archiveSearchInput.value = query;
-                    SS.performArchiveSearch();
-                } else {
-                    archiveSelectedCollection = null;
-                }
+        try {
+            document.querySelectorAll('.archive-filter').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var wasActive = btn.classList.contains('active');
+                    document.querySelectorAll('.archive-filter').forEach(function(b) { b.classList.remove('active'); });
+                    if (!wasActive) {
+                        btn.classList.add('active');
+                        archiveSelectedCollection = btn.dataset.collection;
+                        if (archiveSearchInput) {
+                            var query = archiveSearchInput.value.trim() || btn.textContent.trim().split(' ').slice(1).join(' ');
+                            archiveSearchInput.value = query;
+                        }
+                        SS.performArchiveSearch();
+                    } else {
+                        archiveSelectedCollection = null;
+                    }
+                });
             });
-        });
+        } catch (e) { console.error('Archive filter setup failed:', e); }
 
-        archiveSearchBtn.addEventListener('click', SS.performArchiveSearch);
-        archiveSearchInput.addEventListener('keydown', function(e) {
+        if (archiveSearchBtn) archiveSearchBtn.addEventListener('click', SS.performArchiveSearch);
+        if (archiveSearchInput) archiveSearchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') SS.performArchiveSearch();
         });
 
-        archiveBackBtn.addEventListener('click', function() {
-            document.getElementById('archiveShowView').style.display = 'none';
-            document.getElementById('archiveSearchView').style.display = 'block';
+        if (archiveBackBtn) archiveBackBtn.addEventListener('click', function() {
+            var sv = document.getElementById('archiveShowView');
+            if (sv) sv.style.display = 'none';
+            var ssv = document.getElementById('archiveSearchView');
+            if (ssv) ssv.style.display = 'block';
         });
     };
 
@@ -67,7 +86,7 @@ window.StemScribe = window.StemScribe || {};
             }
 
             if (!data.results || data.results.length === 0) {
-                archiveResults.innerHTML = '<div class="archive-empty">No shows found. Try a different search.</div>';
+                archiveResults.innerHTML = '<div class="archive-empty">No shows found for "' + SS.escapeHtml(query) + '". Note: not all bands are on Archive.org. Grateful Dead, Widespread Panic, Umphrey\'s McGee, String Cheese Incident, moe., and thousands of other bands have free live recordings available. Try searching by band name or date.</div>';
                 return;
             }
 
@@ -96,9 +115,9 @@ window.StemScribe = window.StemScribe || {};
         var archiveShowView = document.getElementById('archiveShowView');
         var archiveShowDetails = document.getElementById('archiveShowDetails');
 
-        archiveSearchView.style.display = 'none';
-        archiveShowView.style.display = 'block';
-        archiveShowDetails.innerHTML = '<div class="archive-loading">Loading show details...</div>';
+        if (archiveSearchView) archiveSearchView.style.display = 'none';
+        if (archiveShowView) archiveShowView.style.display = 'block';
+        if (archiveShowDetails) archiveShowDetails.innerHTML = '<div class="archive-loading">Loading show details...</div>';
 
         try {
             var resp = await fetch(SS.API_BASE + '/archive/show/' + encodeURIComponent(identifier));
@@ -130,10 +149,11 @@ window.StemScribe = window.StemScribe || {};
             if (data.tracks && data.tracks.length > 0) {
                 html += '<div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.5rem;">' + data.tracks.length + ' tracks available</div>';
                 html += data.tracks.map(function(track, i) {
+                    var displayTitle = cleanTrackTitle(track.title || track.filename);
                     return '<div class="archive-track-row">' +
                         '<span class="archive-track-num">' + (track.track_number || (i + 1)) + '</span>' +
-                        '<span class="archive-track-title">' + SS.escapeHtml(track.title || track.filename) + '</span>' +
-                        '<button class="archive-track-btn" onclick="StemScribe.processArchiveTrack(\'' + SS.escapeJsString(identifier) + '\', \'' + SS.escapeJsString(track.filename) + '\', \'' + SS.escapeJsString(track.title || track.filename) + '\')">' +
+                        '<span class="archive-track-title">' + SS.escapeHtml(displayTitle) + '</span>' +
+                        '<button class="archive-track-btn" onclick="StemScribe.processArchiveTrack(\'' + SS.escapeJsString(identifier) + '\', \'' + SS.escapeJsString(track.filename) + '\', \'' + SS.escapeJsString(displayTitle) + '\')">' +
                             '\u2726 Process' +
                         '</button>' +
                     '</div>';
@@ -154,18 +174,23 @@ window.StemScribe = window.StemScribe || {};
     };
 
     SS.processArchiveTrack = async function(identifier, filename, title) {
-        document.getElementById('uploadSection').style.display = 'none';
-        document.getElementById('processingSection').classList.add('active');
-        document.getElementById('resultsSection').classList.remove('active');
+        var _us = document.getElementById('uploadSection');
+        if (_us) _us.style.display = 'none';
+        var _ps = document.getElementById('processingSection');
+        if (_ps) _ps.classList.add('active');
+        var _rs = document.getElementById('resultsSection');
+        if (_rs) _rs.classList.remove('active');
 
         SS.displayedProgress = 0;
         SS.targetProgress = 0;
         SS.lastProgressUpdate = Date.now();
         SS.updateProgressDisplay(0);
-        document.getElementById('stageText').textContent = 'Processing: ' + title;
+        var _st = document.getElementById('stageText');
+        if (_st) _st.textContent = 'Processing: ' + title;
         SS.startProgressAnimation();
         document.querySelectorAll('.city').forEach(function(c) { c.classList.remove('visited'); });
-        document.getElementById('city-sf').classList.add('visited');
+        var _sf = document.getElementById('city-sf');
+        if (_sf) _sf.classList.add('visited');
 
         try {
             var resp = await fetch(SS.API_BASE + '/archive/process', {
@@ -184,7 +209,8 @@ window.StemScribe = window.StemScribe || {};
                 SS.pollStatus();
             }
         } catch (err) {
-            document.getElementById('stageText').textContent = 'Error: ' + err.message;
+            var _stErr = document.getElementById('stageText');
+            if (_stErr) _stErr.textContent = 'Error: ' + err.message;
         }
     };
 
@@ -202,17 +228,22 @@ window.StemScribe = window.StemScribe || {};
             var data = await resp.json();
             if (data.jobs && data.jobs.length > 0) {
                 SS.currentJobId = data.jobs[0].job_id;
-                document.getElementById('uploadSection').style.display = 'none';
-                document.getElementById('processingSection').classList.add('active');
-                document.getElementById('resultsSection').classList.remove('active');
+                var _bus = document.getElementById('uploadSection');
+                if (_bus) _bus.style.display = 'none';
+                var _bps = document.getElementById('processingSection');
+                if (_bps) _bps.classList.add('active');
+                var _brs = document.getElementById('resultsSection');
+                if (_brs) _brs.classList.remove('active');
                 SS.displayedProgress = 0;
                 SS.targetProgress = 0;
                 SS.lastProgressUpdate = Date.now();
                 SS.updateProgressDisplay(0);
-                document.getElementById('stageText').textContent = 'Processing: ' + data.jobs[0].title + ' (1 of ' + data.jobs.length + ')';
+                var _bst = document.getElementById('stageText');
+                if (_bst) _bst.textContent = 'Processing: ' + data.jobs[0].title + ' (1 of ' + data.jobs.length + ')';
                 SS.startProgressAnimation();
                 document.querySelectorAll('.city').forEach(function(c) { c.classList.remove('visited'); });
-                document.getElementById('city-sf').classList.add('visited');
+                var _bsf = document.getElementById('city-sf');
+                if (_bsf) _bsf.classList.add('visited');
                 SS.pollStatus();
                 if (data.jobs.length > 1) {
                     SS.showToast('\u{1F3A4} ' + data.jobs.length + ' tracks queued from archive.org');

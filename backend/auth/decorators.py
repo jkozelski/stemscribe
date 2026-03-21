@@ -22,7 +22,7 @@ from auth.models import get_user_by_id, get_monthly_usage, get_anonymous_monthly
 logger = logging.getLogger(__name__)
 
 # Plan hierarchy: higher index = more permissions
-PLAN_HIERARCHY = {'free': 0, 'premium': 1, 'pro': 2}
+PLAN_HIERARCHY = {'free': 0, 'beta': 1, 'premium': 1, 'pro': 2}
 
 PLAN_LIMITS = {
     'free': {
@@ -47,6 +47,16 @@ PLAN_LIMITS = {
     },
     'pro': {
         'songs_per_month': -1,       # unlimited
+        'max_duration_sec': 1800,    # 30 minutes
+        'stems': 6,
+        'chord_analysis': True,
+        'midi_export': True,
+        'tab_export': True,
+        'priority_queue': True,
+        'output_quality': 'wav',
+    },
+    'beta': {
+        'songs_per_month': -1,       # unlimited (same as pro)
         'max_duration_sec': 1800,    # 30 minutes
         'stems': 6,
         'chord_analysis': True,

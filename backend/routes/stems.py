@@ -7,6 +7,8 @@ from pathlib import Path
 from flask import Blueprint, jsonify
 
 from models.job import get_job, save_job_to_disk, OUTPUT_DIR
+from auth.middleware import auth_required
+from middleware.validation import validate_job_id
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +16,11 @@ stems_bp = Blueprint("stems", __name__)
 
 
 @stems_bp.route('/api/split-stem/<job_id>/<stem_name>', methods=['POST'])
+@auth_required
 def split_stem_endpoint(job_id, stem_name):
     """Split a stem into left/right/center components using stereo panning analysis."""
+    if not validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     from dependencies import STEREO_SPLITTER_AVAILABLE
 
     job = get_job(job_id)
@@ -86,6 +91,8 @@ def split_stem_endpoint(job_id, stem_name):
 @stems_bp.route('/api/analyze-stereo/<job_id>/<stem_name>', methods=['GET'])
 def analyze_stereo_endpoint(job_id, stem_name):
     """Analyze a stem's stereo field without splitting it."""
+    if not validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     from dependencies import STEREO_SPLITTER_AVAILABLE
 
     job = get_job(job_id)
@@ -121,8 +128,11 @@ def analyze_stereo_endpoint(job_id, stem_name):
 
 
 @stems_bp.route('/api/split-vocals/<job_id>', methods=['POST'])
+@auth_required
 def split_vocals_endpoint(job_id):
     """Split vocals into lead and backing vocals using AI (two-pass UVR method)."""
+    if not validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     from dependencies import ENHANCED_SEPARATOR_AVAILABLE
 
     job = get_job(job_id)
@@ -136,11 +146,9 @@ def split_vocals_endpoint(job_id):
 
     # Find vocals stem
     vocals_path = None
-    vocals_key = None  # noqa: F841
     for key in ['vocals', 'Vocals', 'vocal', 'Vocal']:
         if key in job.stems:
             vocals_path = job.stems[key]
-            _vocals_key = key
             break
 
     if not vocals_path:

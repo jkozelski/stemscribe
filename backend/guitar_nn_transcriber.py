@@ -260,7 +260,7 @@ class GuitarNNTranscriber:
         )
 
         checkpoint = torch.load(
-            CHECKPOINT_PATH, map_location=self._device, weights_only=False
+            CHECKPOINT_PATH, map_location=self._device, weights_only=True
         )
 
         self._model = GuitarTranscriptionModel(n_pitches=NUM_KEYS)

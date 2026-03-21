@@ -6,6 +6,7 @@ import logging
 from flask import Blueprint, request, jsonify
 
 from models.job import get_job
+from auth.middleware import auth_required
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ drive_bp = Blueprint("drive", __name__)
 
 
 @drive_bp.route('/api/drive/auth', methods=['GET'])
+@auth_required
 def drive_auth():
     """Initiate Google Drive OAuth flow"""
     if not DRIVE_AVAILABLE:
@@ -49,6 +51,7 @@ def drive_stats():
 
 
 @drive_bp.route('/api/drive/upload/<job_id>', methods=['POST'])
+@auth_required
 def drive_upload_job(job_id):
     """Manually upload a job to Google Drive"""
     if not DRIVE_AVAILABLE:

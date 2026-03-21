@@ -41,6 +41,28 @@ except ImportError:
     logger.warning("requests not available - Archive.org pipeline disabled")
 
 
+def _parse_length(val) -> float:
+    """Parse track length from Archive.org — handles both seconds (float) and MM:SS strings."""
+    if not val:
+        return 0.0
+    if isinstance(val, (int, float)):
+        return float(val)
+    s = str(val)
+    if ':' in s:
+        parts = s.split(':')
+        try:
+            if len(parts) == 2:
+                return float(parts[0]) * 60 + float(parts[1])
+            elif len(parts) == 3:
+                return float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+        except ValueError:
+            return 0.0
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
+
+
 # ============================================================================
 # Data Classes
 # ============================================================================
@@ -341,7 +363,7 @@ class ArchivePipeline:
                 track_number=track_num,
                 format=file_format,
                 size=int(f.get('size', 0) or 0),
-                length=float(f.get('length', 0) or 0),
+                length=_parse_length(f.get('length', 0)),
                 source=source,
                 identifier=identifier,
             )

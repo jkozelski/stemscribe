@@ -23,6 +23,7 @@ class User:
         'id', 'email', 'password_hash', 'display_name', 'plan',
         'stripe_customer_id', 'stripe_subscription_id',
         'payment_failed_at', 'created_at', 'updated_at',
+        'google_id', 'avatar_url',
     )
 
     def __init__(self, row: dict):
@@ -37,10 +38,13 @@ class User:
             'display_name': self.display_name,
             'plan': self.plan,
             'stripe_customer_id': self.stripe_customer_id,
+            'avatar_url': self.avatar_url,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
     def check_password(self, password: str) -> bool:
+        if not self.password_hash:
+            return False
         return bcrypt.verify(password, self.password_hash)
 
 
@@ -166,3 +170,43 @@ def record_usage(user_id: str = None, anonymous_ip_hash: str = None,
         """,
         (user_id, anonymous_ip_hash, job_id, action),
     )
+
+
+# ---- Google OAuth helpers ----
+
+def get_user_by_google_id(google_id: str) -> User | None:
+    """Look up a user by their Google sub ID."""
+    row = query_one("SELECT * FROM users WHERE google_id = %s", (google_id,))
+    return User(row) if row else None
+
+
+def create_google_user(email: str, display_name: str, google_id: str,
+                       avatar_url: str = None) -> User:
+    """Create a new user via Google OAuth (no password)."""
+    existing = get_user_by_email(email)
+    if existing:
+        raise ValueError("An account with this email already exists")
+
+    row = execute_returning(
+        """
+        INSERT INTO users (email, display_name, google_id, avatar_url)
+        VALUES (%s, %s, %s, %s)
+        RETURNING *
+        """,
+        (email.lower().strip(), display_name, google_id, avatar_url),
+    )
+    logger.info(f"Created Google user {row['id']} ({email})")
+    return User(row)
+
+
+def link_google_account(user_id: str, google_id: str, avatar_url: str = None):
+    """Link a Google account to an existing user."""
+    execute(
+        """
+        UPDATE users
+        SET google_id = %s, avatar_url = COALESCE(%s, avatar_url), updated_at = NOW()
+        WHERE id = %s
+        """,
+        (google_id, avatar_url, user_id),
+    )
+    logger.info(f"Linked Google account to user {user_id}")

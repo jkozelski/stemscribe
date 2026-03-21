@@ -6,6 +6,14 @@
      375px — iPhone SE / narrow
    =========================================== */
 
+/* ── Global mobile-safe defaults ── */
+
+/* Prevent any image from causing horizontal overflow */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 /* Mobile menu button: hidden by default */
 .mobile-menu-btn {
     display: none;
@@ -18,6 +26,10 @@
     cursor: pointer;
     transition: all 0.2s;
     line-height: 1;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
 }
 
 .mobile-menu-btn:hover {
@@ -33,8 +45,8 @@
         padding: 0.75rem 1rem;
     }
 
-    .logo-symbol {
-        font-size: 1.5rem;
+    .waveform-icon {
+        height: 18px;
     }
 
     .logo-text {
@@ -101,19 +113,25 @@
         font-size: 0.8rem;
     }
 
+    /* Keep URL input at 16px to prevent iOS zoom */
     .url-input {
         padding: 1rem;
-        font-size: 0.9rem;
+        font-size: 16px;
     }
 
     .archive-search {
         padding: 1rem;
-        font-size: 0.9rem;
+        font-size: 16px;
+    }
+
+    .archive-year-input {
+        font-size: 16px;
     }
 
     .submit-btn {
         font-size: 1rem;
         padding: 1rem 2rem;
+        min-height: 48px;
     }
 
     /* Mixer: 3 columns at tablet */
@@ -142,8 +160,8 @@
     }
 
     .skip-btn {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
     }
 
     .volume-slider {
@@ -187,7 +205,7 @@
         width: 320px;
     }
 
-    /* Practice CTA */
+    /* Practice CTA: stack buttons vertically */
     .practice-cta {
         padding: 1.5rem;
         margin-top: 2rem;
@@ -196,6 +214,48 @@
     .practice-btn {
         font-size: 0.95rem;
         padding: 0.85rem 1.75rem;
+        min-height: 48px;
+    }
+
+    #karaokeBtn {
+        margin-left: 0 !important;
+        margin-top: 0.75rem;
+    }
+
+    /* Processing section: scale down cities */
+    .progress-container {
+        max-width: 100%;
+        padding-top: 80px;
+    }
+
+    .city-skyline {
+        height: 75px;
+    }
+
+    .city-sf .skyline {
+        width: 90px;
+        height: 55px;
+    }
+
+    .city-denver .skyline {
+        width: 70px;
+        height: 45px;
+    }
+
+    .city-chicago .skyline {
+        width: 75px;
+        height: 55px;
+    }
+
+    .city-nyc .skyline {
+        width: 65px;
+        height: 55px;
+    }
+
+    .tour-bus {
+        width: 100px;
+        height: 60px;
+        top: -38px;
     }
 
     /* Footer */
@@ -218,7 +278,7 @@
     }
 
     .mobile-menu-btn {
-        display: block;
+        display: flex;
     }
 
     .nav-links {
@@ -237,17 +297,21 @@
 
     .nav-links a {
         font-size: 0.85rem;
-        padding: 0.4rem 0;
+        padding: 0.5rem 0;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 
     .nav-links button {
         width: 100%;
         text-align: left;
         justify-content: flex-start;
+        min-height: 44px;
     }
 
-    .logo-symbol {
-        font-size: 1.2rem;
+    .waveform-icon {
+        height: 16px;
     }
 
     .logo-text {
@@ -294,12 +358,14 @@
 
     .mode-toggle {
         margin-bottom: 1rem;
+        width: 100%;
     }
 
     .mode-btn {
         padding: 0.5rem 0.6rem;
         font-size: 0.75rem;
         gap: 0.25rem;
+        min-height: 44px;
     }
 
     .drop-zone {
@@ -320,10 +386,12 @@
         font-size: 0.75rem;
     }
 
+    /* 16px font on inputs to prevent iOS auto-zoom */
     .url-input {
         padding: 0.85rem;
-        font-size: 0.85rem;
+        font-size: 16px;
         border-radius: 10px;
+        width: 100%;
     }
 
     .platforms {
@@ -338,7 +406,11 @@
 
     .archive-search {
         padding: 0.85rem;
-        font-size: 0.85rem;
+        font-size: 16px;
+    }
+
+    .archive-year-input {
+        font-size: 16px;
     }
 
     .archive-filters {
@@ -348,6 +420,9 @@
     .archive-filter {
         font-size: 0.7rem;
         padding: 0.3rem 0.5rem;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
     }
 
     .submit-btn {
@@ -355,6 +430,7 @@
         padding: 0.85rem 1.5rem;
         margin-top: 1.25rem;
         width: 100%;
+        min-height: 48px;
     }
 
     /* Mixer: 2 columns */
@@ -419,11 +495,13 @@
         height: 40px;
     }
 
-    /* Mixer controls */
+    /* Mixer controls — keep touch-friendly */
     .mute-btn, .solo-btn {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
         font-size: 0.55rem;
+        min-width: 28px;
+        min-height: 28px;
     }
 
     .stem-mixer-controls {
@@ -455,6 +533,7 @@
     .stem-btn {
         font-size: 0.55rem;
         padding: 0.3rem 0.35rem;
+        min-height: 32px;
     }
 
     /* Transport: stacked layout for touch */
@@ -476,8 +555,8 @@
     }
 
     .skip-btn {
-        width: 38px;
-        height: 38px;
+        width: 44px;
+        height: 44px;
         font-size: 0.95rem;
     }
 
@@ -503,11 +582,20 @@
     .speed-control .speed-btn {
         padding: 5px 10px;
         font-size: 0.7rem;
+        min-height: 36px;
+        min-width: 36px;
     }
 
     .loop-control .loop-btn {
         padding: 5px 10px;
         font-size: 0.65rem;
+        min-height: 36px;
+        min-width: 36px;
+    }
+
+    .loop-control .loop-clear-btn {
+        min-height: 36px;
+        min-width: 36px;
     }
 
     .master-volume {
@@ -553,8 +641,8 @@
     }
 
     .info-toggle-btn {
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         font-size: 1rem;
     }
 
@@ -601,7 +689,7 @@
         right: -100%;
     }
 
-    /* Practice CTA */
+    /* Practice CTA: stack buttons vertically */
     .practice-cta {
         padding: 1rem;
         margin-top: 1.5rem;
@@ -612,6 +700,12 @@
         font-size: 0.85rem;
         padding: 0.75rem 1.5rem;
         width: 100%;
+        min-height: 48px;
+    }
+
+    #karaokeBtn {
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
     }
 
     /* Footer */
@@ -625,13 +719,26 @@
         justify-content: center;
     }
 
+    .footer-links a {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .footer p {
         font-size: 0.75rem;
     }
 
-    /* Processing section */
+    /* Processing section: scale down for mobile */
+    .processing-section {
+        padding: 1.5rem 0.5rem;
+    }
+
     .vinyl-spinner {
-        transform: scale(0.8);
+        transform: scale(0.7);
+        margin-bottom: 1rem;
     }
 
     .stage-text {
@@ -640,6 +747,133 @@
 
     .stage-subtitle {
         font-size: 0.8rem;
+    }
+
+    .progress-container {
+        max-width: 100%;
+        padding-top: 70px;
+        margin: 1.5rem auto 1rem;
+    }
+
+    .city-skyline {
+        height: 65px;
+        padding: 0 2px;
+    }
+
+    .city-name {
+        font-size: 0.45rem;
+    }
+
+    .city-sf .skyline {
+        width: 70px;
+        height: 45px;
+    }
+
+    .city-denver .skyline {
+        width: 55px;
+        height: 35px;
+    }
+
+    .city-chicago .skyline {
+        width: 55px;
+        height: 45px;
+    }
+
+    .city-nyc .skyline {
+        width: 50px;
+        height: 45px;
+    }
+
+    .tour-bus {
+        width: 80px;
+        height: 50px;
+        top: -32px;
+    }
+
+    .bus-body {
+        width: 70px;
+        height: 32px;
+    }
+
+    .bus-front {
+        width: 14px;
+        height: 32px;
+    }
+
+    .bus-windows {
+        left: 8px;
+        right: 14px;
+        height: 12px;
+        top: 5px;
+    }
+
+    .bus-wheel {
+        width: 14px;
+        height: 14px;
+        bottom: 6px;
+    }
+
+    .bus-wheel.front { left: 10px; }
+    .bus-wheel.back { left: 55px; }
+
+    .bus-roof {
+        left: 10px;
+        right: 18px;
+    }
+
+    .bus-sign {
+        font-size: 0.3rem;
+        top: 12px;
+        left: 10px;
+    }
+
+    .progress-text {
+        font-size: 1.2rem;
+        margin-top: 1rem;
+    }
+
+    .progress-label {
+        font-size: 0.75rem;
+    }
+
+    /* Archive section mobile */
+    .archive-search-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .archive-search-btn {
+        position: static;
+        transform: none;
+        width: 100%;
+        padding: 0.75rem;
+        min-height: 44px;
+    }
+
+    .archive-search {
+        padding-right: 1rem;
+    }
+
+    .archive-results {
+        max-height: 300px;
+    }
+
+    .archive-show-title {
+        font-size: 0.85rem;
+    }
+
+    .archive-track-row {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .archive-track-btn {
+        min-height: 36px;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .archive-back-btn {
+        min-height: 44px;
     }
 }
 
@@ -651,7 +885,7 @@
     }
 
     .hero p {
-        font-size: 0.8rem;
+        font-size: 0.875rem;
     }
 
     .container {
@@ -662,9 +896,16 @@
         padding: 0.75rem;
     }
 
+    .mode-toggle {
+        flex-wrap: wrap;
+    }
+
     .mode-btn {
         padding: 0.4rem 0.5rem;
         font-size: 0.7rem;
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
     }
 
     .drop-zone {
@@ -789,8 +1030,8 @@
     }
 
     .skip-btn {
-        width: 34px;
-        height: 34px;
+        width: 44px;
+        height: 44px;
         font-size: 0.85rem;
     }
 
@@ -837,6 +1078,31 @@
         font-size: 0.85rem;
         padding: 0.75rem 1rem;
     }
+
+    /* Processing: further scale down */
+    .vinyl-spinner {
+        transform: scale(0.6);
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-container {
+        padding-top: 60px;
+    }
+
+    .city-skyline {
+        height: 55px;
+    }
+
+    .city-sf .skyline { width: 55px; height: 38px; }
+    .city-denver .skyline { width: 45px; height: 30px; }
+    .city-chicago .skyline { width: 45px; height: 38px; }
+    .city-nyc .skyline { width: 40px; height: 38px; }
+
+    .tour-bus {
+        width: 65px;
+        height: 42px;
+        top: -26px;
+    }
 }
 
 /* ── Touch-friendly: coarse pointer devices ── */
@@ -852,12 +1118,12 @@
     }
 
     .mute-btn, .solo-btn {
-        min-width: 28px;
-        min-height: 28px;
+        min-width: 32px;
+        min-height: 32px;
     }
 
     .stem-btn {
-        min-height: 32px;
+        min-height: 36px;
     }
 
     .play-btn {
@@ -866,12 +1132,41 @@
     }
 
     .skip-btn {
-        min-width: 40px;
-        min-height: 40px;
+        min-width: 44px;
+        min-height: 44px;
     }
 
     .speed-btn, .loop-btn, .loop-clear-btn {
-        min-height: 32px;
-        min-width: 32px;
+        min-height: 36px;
+        min-width: 36px;
+    }
+
+    /* All nav/action buttons should be easily tappable */
+    .library-btn, .settings-btn, .theme-toggle-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .info-toggle-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .info-close-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .close-settings, .close-library {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .archive-filter {
+        min-height: 36px;
+    }
+
+    .archive-track-btn {
+        min-height: 36px;
     }
 }

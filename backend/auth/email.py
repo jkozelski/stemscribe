@@ -64,12 +64,12 @@ def send_reset_email(email: str, user_id: str) -> bool:
 
     try:
         resend.Emails.send({
-            'from': 'StemScribe <noreply@stemscribe.app>',
+            'from': 'StemScriber <noreply@stemscribe.app>',
             'to': [email],
-            'subject': 'Reset your StemScribe password',
+            'subject': 'Reset your StemScriber password',
             'html': f"""
                 <h2>Password Reset</h2>
-                <p>You requested a password reset for your StemScribe account.</p>
+                <p>You requested a password reset for your StemScriber account.</p>
                 <p><a href="{reset_url}" style="
                     display: inline-block;
                     padding: 12px 24px;
@@ -80,7 +80,7 @@ def send_reset_email(email: str, user_id: str) -> bool:
                     font-weight: bold;
                 ">Reset Password</a></p>
                 <p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>
-                <p style="color: #888; font-size: 12px;">StemScribe - Audio Stem Separation &amp; Transcription</p>
+                <p style="color: #888; font-size: 12px;">StemScriber - Audio Stem Separation &amp; Transcription</p>
             """,
         })
         logger.info(f"Reset email sent to {email}")

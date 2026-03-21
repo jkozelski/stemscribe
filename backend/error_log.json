@@ -1,0 +1,219 @@
+[
+  {
+    "timestamp": 1773805733.525548,
+    "job_id": "04808778-3e75-4027-b379-301826f4472e",
+    "error_type": "Exception",
+    "error_message": "Download timed out (5 min limit)",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading audio from URL",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=DBdczEp-3To&list=RDDBdczEp-3To&start_radio=1",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773805803.525165,
+    "job_id": "6b20df77-10a5-4826-866e-b37ad4574524",
+    "error_type": "Exception",
+    "error_message": "Download timed out (5 min limit)",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading audio from URL",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=DBdczEp-3To&list=RDDBdczEp-3To&start_radio=1",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773839711.3353658,
+    "job_id": "5095af2d-0786-4667-b4e0-98b178fe4915",
+    "error_type": "Exception",
+    "error_message": "Download timed out (5 min limit)",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading audio from URL",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=USYAE8CpTuU&list=RDUSYAE8CpTuU&start_radio=1",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773840023.661515,
+    "job_id": "01768b05-f048-44d1-ab48-3d1300a4ac3e",
+    "error_type": "Exception",
+    "error_message": "Download timed out (5 min limit)",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading audio from URL",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=NCtzkaL2t_Y&list=RDNCtzkaL2t_Y&start_radio=1",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773840570.432626,
+    "job_id": "9f678f03-0b49-4588-af5f-3f32e7bd0846",
+    "error_type": "Exception",
+    "error_message": "Download timed out (5 min limit)",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading audio from URL",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=NCtzkaL2t_Y&list=RDNCtzkaL2t_Y&start_radio=1",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.3710861,
+    "job_id": "09f49cba-ea42-4945-bfcb-22db4959f36f",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.375467,
+    "job_id": "393ad8a7-24ab-4a5f-ab7f-1a727be3d0f9",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.391089,
+    "job_id": "809ce595-c9e2-4f72-aa7b-5279d1c2fc07",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.3954282,
+    "job_id": "b1f07e0a-07df-4d5d-8983-fc3a2fd9460b",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.3960829,
+    "job_id": "c95bbc06-8512-41b7-ae96-a024647cf705",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.3961442,
+    "job_id": "430d9f4c-7cdb-4494-9ffa-787bf2795133",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.398299,
+    "job_id": "3292969e-7267-4529-bbff-c0721edf17ee",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773925651.4019,
+    "job_id": "99f6d037-2d1f-41d4-9530-3e1304551bf4",
+    "error_type": "Exception",
+    "error_message": "Download failed: ERROR: [youtube:truncated_id] test: Incomplete YouTube ID test. URL https://youtube.com/watch?v=test looks truncated.\n",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://youtube.com/watch?v=test",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773936411.294034,
+    "job_id": "57083b29-462f-452d-8de9-b18eee78b8a1",
+    "error_type": "separation_failed",
+    "error_message": "Stem separation returned failure",
+    "song_duration": 359,
+    "source": "url",
+    "processing_stage": "separation"
+  },
+  {
+    "timestamp": 1773947972.172838,
+    "job_id": "a323f49a-f301-49b4-8e7c-e8eb189080e7",
+    "error_type": "Exception",
+    "error_message": "Download failed: WARNING: [youtube] No supported JavaScript runtime could be found. Only deno is enabled by default; to use another runtime add  --js-runtimes RUNTIME[:PATH]  to your command/config. YouTube extraction",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=TLV4_xaYynY",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773948118.4365363,
+    "job_id": "a22963a2-34a5-4974-96f0-dbf0902e1216",
+    "error_type": "Exception",
+    "error_message": "Download failed: WARNING: [youtube] No supported JavaScript runtime could be found. Only deno is enabled by default; to use another runtime add  --js-runtimes RUNTIME[:PATH]  to your command/config. YouTube extraction",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=TLV4_xaYynY",
+      "filename": "Downloading..."
+    }
+  },
+  {
+    "timestamp": 1773948456.9483285,
+    "job_id": "16fcf32f-e3d8-4e62-9d75-fd34f409298e",
+    "error_type": "Exception",
+    "error_message": "Download failed: WARNING: [youtube] TLV4_xaYynY: Signature solving failed: Some formats may be missing. Ensure you have a supported JavaScript runtime and challenge solver script distribution installed. Review any war",
+    "song_duration": null,
+    "source": "youtube",
+    "processing_stage": "Downloading: audio",
+    "extra": {
+      "url": "https://www.youtube.com/watch?v=TLV4_xaYynY",
+      "filename": "Downloading..."
+    }
+  }
+]

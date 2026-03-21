@@ -231,6 +231,84 @@ def _filter_by_key(notes: List, key: Tuple[str, str],
 
 
 # ============================================================================
+# CHORD-INFORMED FILTERING
+# ============================================================================
+
+def _filter_by_chords(notes: List, chord_progression: list,
+                      velocity_percentile: float = 40) -> List:
+    """
+    Filter notes using detected chord progression. Notes whose pitch class
+    does not belong to the chord active at their timestamp have their velocity
+    penalized. Low-velocity non-chord-tone notes are removed entirely.
+
+    This compensates for the lower Basic Pitch thresholds (onset=0.30, frame=0.15)
+    which catch more real notes but also more hallucinations.
+
+    Only removes notes that are BOTH:
+      - Not a chord tone at their timestamp
+      - Below the velocity threshold (low confidence from Basic Pitch)
+
+    High-velocity non-chord-tones are kept as passing tones / embellishments.
+
+    Args:
+        notes: List of MIDI notes from Basic Pitch
+        chord_progression: List of chord dicts with 'time', 'duration', 'chord'
+        velocity_percentile: Notes below this percentile AND off-chord get removed
+
+    Returns:
+        Filtered note list
+    """
+    if not chord_progression or not notes:
+        return notes
+
+    try:
+        from essentia_chord_detector import chord_to_pitch_classes, get_chord_at_time
+    except ImportError:
+        logger.debug("essentia_chord_detector not available for chord filtering")
+        return notes
+
+    # Precompute velocity threshold
+    velocities = [n.velocity for n in notes]
+    if not velocities:
+        return notes
+    vel_threshold = np.percentile(velocities, velocity_percentile)
+
+    filtered = []
+    removed = 0
+    for n in notes:
+        # Find what chord is playing at this note's onset
+        chord_at_time = get_chord_at_time(chord_progression, n.start)
+        if chord_at_time is None:
+            # No chord info at this time — keep the note
+            filtered.append(n)
+            continue
+
+        chord_name = chord_at_time.get('chord', '') if isinstance(chord_at_time, dict) else getattr(chord_at_time, 'chord', '')
+        pitch_classes = chord_to_pitch_classes(chord_name)
+
+        if not pitch_classes:
+            # Unknown chord — keep the note
+            filtered.append(n)
+            continue
+
+        note_pc = n.pitch % 12
+        if note_pc in pitch_classes:
+            # Note is a chord tone — definitely keep
+            filtered.append(n)
+        elif n.velocity >= vel_threshold:
+            # Off-chord but high velocity — likely intentional (passing tone, etc.)
+            filtered.append(n)
+        else:
+            # Off-chord AND low velocity — likely a hallucination
+            removed += 1
+
+    if removed > 0:
+        logger.info(f"Chord filter: removed {removed} low-confidence non-chord-tone notes")
+
+    return filtered
+
+
+# ============================================================================
 # NOTE GROUPING
 # ============================================================================
 
@@ -581,7 +659,8 @@ class GuitarTabTranscriber:
     """
 
     def transcribe(self, audio_path: str, output_dir: str,
-                   tempo_hint: float = None) -> TabTranscriptionResult:
+                   tempo_hint: float = None,
+                   chord_progression: list = None) -> TabTranscriptionResult:
         """
         Full guitar tab transcription pipeline.
 
@@ -619,20 +698,24 @@ class GuitarTabTranscriber:
         logger.info(f"Guitar tab transcription: {audio_path.name}")
 
         # --- Step 1: Basic Pitch transcription ---
-        # Tuned for guitar: lower onset threshold catches more notes,
-        # narrower frequency range avoids harmonics/noise
+        # Basic Pitch is a piano-centric model. For guitar we raise thresholds
+        # to reduce hallucinated notes, and constrain frequency range tightly.
+        # When chord_progression is available, the chord filter (step 2c) provides
+        # additional cleanup, so we can afford slightly lower thresholds.
         try:
-            # Thresholds tuned for separated guitar stems (cleaner signal
-            # than full mix): lower onset threshold catches more articulations,
-            # lower frame threshold preserves sustain, but minimum_note_length
-            # prevents ghost notes from bleeding residuals.
+            has_chords = bool(chord_progression)
+            # With chord filtering available, we can be more permissive;
+            # without it, use stricter thresholds to avoid garbage output.
+            onset_thresh = 0.40 if has_chords else 0.50
+            frame_thresh = 0.25 if has_chords else 0.35
+
             model_output, midi_data, note_events = predict(
                 str(audio_path),
-                onset_threshold=0.40,       # Lower for separated stems (less noise)
-                frame_threshold=0.25,       # Catch full sustain on clean signal
-                minimum_note_length=50,     # 50ms min -- catches fast picking
-                minimum_frequency=80.0,     # ~E2 (82 Hz)
-                maximum_frequency=1400.0,   # ~F6 -- guitar fundamental range
+                onset_threshold=onset_thresh,   # Higher = fewer ghost notes
+                frame_threshold=frame_thresh,   # Higher = less hallucinated sustain
+                minimum_note_length=80,         # 80ms min -- guitar notes are rarely shorter
+                minimum_frequency=80.0,         # ~E2 (82 Hz)
+                maximum_frequency=1400.0,       # ~F6 -- guitar fundamental range
             )
         except Exception as e:
             logger.error(f"Basic Pitch failed: {e}")
@@ -675,6 +758,14 @@ class GuitarTabTranscriber:
             logger.info(f"Detected key: {detected_key[0]} {detected_key[1]}")
             notes = _filter_by_key(notes, detected_key)
             logger.info(f"After key filter: {len(notes)} notes")
+
+        # --- Step 2c: Chord-informed filtering ---
+        # If chord progression is available, penalize notes that don't belong
+        # to the detected chord at their timestamp. This dramatically reduces
+        # hallucinated notes from the lower Basic Pitch thresholds.
+        if chord_progression and notes:
+            notes = _filter_by_chords(notes, chord_progression)
+            logger.info(f"After chord filter: {len(notes)} notes")
 
         if not notes:
             return TabTranscriptionResult(
@@ -819,6 +910,401 @@ class GuitarTabTranscriber:
 
 
 # ============================================================================
+# CHORD-TO-TAB GENERATION (fallback when Basic Pitch quality is low)
+# ============================================================================
+
+# Standard guitar chord voicings: chord_name -> list of 6 fret values (-1 = muted)
+# Order: [low E, A, D, G, B, high E]  (string index 0-5 matches TUNING)
+CHORD_VOICINGS = {
+    # Major chords
+    'C':    [-1, 3, 2, 0, 1, 0],
+    'D':    [-1, -1, 0, 2, 3, 2],
+    'E':    [0, 2, 2, 1, 0, 0],
+    'F':    [1, 3, 3, 2, 1, 1],
+    'G':    [3, 2, 0, 0, 0, 3],
+    'A':    [-1, 0, 2, 2, 2, 0],
+    'B':    [-1, 2, 4, 4, 4, 2],
+    # Minor chords
+    'Am':   [-1, 0, 2, 2, 1, 0],
+    'Bm':   [-1, 2, 4, 4, 3, 2],
+    'Cm':   [-1, 3, 5, 5, 4, 3],
+    'Dm':   [-1, -1, 0, 2, 3, 1],
+    'Em':   [0, 2, 2, 0, 0, 0],
+    'Fm':   [1, 3, 3, 1, 1, 1],
+    'Gm':   [3, 5, 5, 3, 3, 3],
+    # Dominant 7th
+    'A7':   [-1, 0, 2, 0, 2, 0],
+    'B7':   [-1, 2, 1, 2, 0, 2],
+    'C7':   [-1, 3, 2, 3, 1, 0],
+    'D7':   [-1, -1, 0, 2, 1, 2],
+    'E7':   [0, 2, 0, 1, 0, 0],
+    'G7':   [3, 2, 0, 0, 0, 1],
+    # Minor 7th
+    'Am7':  [-1, 0, 2, 0, 1, 0],
+    'Bm7':  [-1, 2, 0, 2, 0, 2],
+    'Cm7':  [-1, 3, 5, 3, 4, 3],
+    'Em7':  [0, 2, 0, 0, 0, 0],
+    'Dm7':  [-1, -1, 0, 2, 1, 1],
+    'Fm7':  [1, 3, 1, 1, 1, 1],
+    'Gm7':  [3, 5, 3, 3, 3, 3],
+    # Flat/sharp chords
+    'Bb':   [-1, 1, 3, 3, 3, 1],
+    'Eb':   [-1, -1, 1, 3, 4, 3],
+    'Ab':   [4, 6, 6, 5, 4, 4],
+    'Db':   [-1, -1, 3, 1, 2, 1],
+    'Gb':   [2, 4, 4, 3, 2, 2],
+    'F#':   [2, 4, 4, 3, 2, 2],
+    'C#':   [-1, 4, 6, 6, 6, 4],
+    'F#m':  [2, 4, 4, 2, 2, 2],
+    'C#m':  [-1, 4, 6, 6, 5, 4],
+    'G#m':  [4, 6, 6, 4, 4, 4],
+    'Bbm':  [-1, 1, 3, 3, 2, 1],
+    'Ebm':  [-1, -1, 1, 3, 4, 2],
+    # Enharmonic aliases
+    'A#':   [-1, 1, 3, 3, 3, 1],
+    'D#':   [-1, -1, 1, 3, 4, 3],
+    'G#':   [4, 6, 6, 5, 4, 4],
+    'A#m':  [-1, 1, 3, 3, 2, 1],
+    'D#m':  [-1, -1, 1, 3, 4, 2],
+    'Gbm':  [2, 4, 4, 2, 2, 2],
+    'Dbm':  [-1, 4, 6, 6, 5, 4],
+    'Abm':  [4, 6, 6, 4, 4, 4],
+    # 7th variants for sharps/flats
+    'Bb7':  [-1, 1, 3, 1, 3, 1],
+    'Eb7':  [-1, -1, 1, 3, 2, 3],
+    'Ab7':  [4, 6, 4, 5, 4, 4],
+    'F#7':  [2, 4, 2, 3, 2, 2],
+    'C#7':  [-1, 4, 6, 4, 6, 4],
+    'Db7':  [-1, 4, 6, 4, 6, 4],
+    'G#7':  [4, 6, 4, 5, 4, 4],
+    'A#7':  [-1, 1, 3, 1, 3, 1],
+    'D#7':  [-1, -1, 1, 3, 2, 3],
+    'Gb7':  [2, 4, 2, 3, 2, 2],
+    # Minor 7th variants
+    'Bbm7': [-1, 1, 3, 1, 2, 1],
+    'A#m7': [-1, 1, 3, 1, 2, 1],
+    'Ebm7': [-1, -1, 1, 3, 2, 2],
+    'D#m7': [-1, -1, 1, 3, 2, 2],
+    'F#m7': [2, 4, 2, 2, 2, 2],
+    'Gbm7': [2, 4, 2, 2, 2, 2],
+    'C#m7': [-1, 4, 6, 4, 5, 4],
+    'Dbm7': [-1, 4, 6, 4, 5, 4],
+    'G#m7': [4, 6, 4, 4, 4, 4],
+    'Abm7': [4, 6, 4, 4, 4, 4],
+    # Major 7th
+    'Cmaj7': [-1, 3, 2, 0, 0, 0],
+    'Dmaj7': [-1, -1, 0, 2, 2, 2],
+    'Emaj7': [0, 2, 1, 1, 0, 0],
+    'Fmaj7': [1, 3, 3, 2, 1, 0],
+    'Gmaj7': [3, 2, 0, 0, 0, 2],
+    'Amaj7': [-1, 0, 2, 1, 2, 0],
+    'Bmaj7': [-1, 2, 4, 3, 4, -1],
+    'Bbmaj7': [-1, 1, 3, 2, 3, 1],
+    'Ebmaj7': [-1, -1, 1, 3, 3, 3],
+    'Abmaj7': [4, 6, 5, 5, 4, 4],
+    # Sus chords
+    'Asus2': [-1, 0, 2, 2, 0, 0],
+    'Asus4': [-1, 0, 2, 2, 3, 0],
+    'Dsus2': [-1, -1, 0, 2, 3, 0],
+    'Dsus4': [-1, -1, 0, 2, 3, 3],
+    'Esus4': [0, 2, 2, 2, 0, 0],
+}
+
+
+def _voicing_to_midi_notes(voicing: list) -> List[int]:
+    """Convert a chord voicing (fret list) to MIDI note numbers."""
+    notes = []
+    for string_idx, fret in enumerate(voicing):
+        if fret >= 0:
+            midi_note = TUNING[string_idx] + fret
+            notes.append(midi_note)
+    return notes
+
+
+def _get_chord_voicing(chord_name: str) -> Optional[list]:
+    """
+    Look up a chord voicing. Handles common naming variations.
+
+    Returns:
+        List of 6 fret values, or None if chord is unknown.
+    """
+    if not chord_name or chord_name == 'N':
+        return None
+
+    # Direct lookup
+    if chord_name in CHORD_VOICINGS:
+        return CHORD_VOICINGS[chord_name]
+
+    # Try normalizing: remove spaces, handle "min" -> "m" etc.
+    normalized = chord_name.replace('min', 'm').replace('maj', 'maj').replace('major', '').replace('minor', 'm')
+    if normalized in CHORD_VOICINGS:
+        return CHORD_VOICINGS[normalized]
+
+    # Try just the root + basic quality
+    root = chord_name[0]
+    rest = chord_name[1:]
+    if rest and rest[0] in ('#', 'b'):
+        root += rest[0]
+        rest = rest[1:]
+
+    # Map complex chords to simpler versions we know
+    quality = rest.lower()
+    if 'maj7' in quality or 'M7' in rest:
+        simple = root + 'maj7'
+    elif 'min7' in quality or 'm7' in quality:
+        simple = root + 'm7'
+    elif '7' in quality:
+        simple = root + '7'
+    elif 'sus2' in quality:
+        simple = root + 'sus2'
+    elif 'sus4' in quality:
+        simple = root + 'sus4'
+    elif 'dim' in quality or 'o' == quality:
+        # Use minor chord as approximation for dim
+        simple = root + 'm'
+    elif 'aug' in quality or '+' == quality:
+        # Use major chord as approximation for aug
+        simple = root
+    elif 'min' in quality or 'm' == quality:
+        simple = root + 'm'
+    else:
+        simple = root  # Just the major chord
+
+    if simple in CHORD_VOICINGS:
+        return CHORD_VOICINGS[simple]
+
+    return None
+
+
+class ChordToTabGenerator:
+    """
+    Generates guitar tablature MIDI from a chord progression + audio onset detection.
+
+    This is a fallback for when audio-based transcription (Basic Pitch) fails.
+    Instead of trying to detect individual notes from audio, it:
+    1. Uses the already-detected chord progression (BTC/Essentia)
+    2. Detects onset/strum events from the guitar audio
+    3. Maps each onset to the chord active at that time
+    4. Places the full chord voicing at each onset
+
+    The result is a rhythm chart showing chord shapes at the right times --
+    what guitarists actually use for rhythm playing.
+    """
+
+    def generate(self, audio_path: str, output_dir: str,
+                 chord_progression: list,
+                 tempo_hint: float = None) -> TabTranscriptionResult:
+        """
+        Generate chord-based guitar tablature.
+
+        Args:
+            audio_path: Path to guitar stem audio
+            output_dir: Directory for output MIDI
+            chord_progression: List of chord dicts with 'time', 'duration', 'chord'
+            tempo_hint: Known tempo (optional)
+
+        Returns:
+            TabTranscriptionResult
+        """
+        audio_path = Path(audio_path)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        if not audio_path.exists():
+            raise FileNotFoundError(f"Audio not found: {audio_path}")
+
+        if not chord_progression:
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='chord_to_tab', num_strings_used=0, fret_range=(0, 0),
+            )
+
+        logger.info(f"Chord-to-tab generation: {audio_path.name} ({len(chord_progression)} chords)")
+
+        # --- Step 1: Detect onsets from the guitar audio ---
+        try:
+            import librosa
+            audio, sr = librosa.load(str(audio_path), sr=SAMPLE_RATE)
+            onset_frames = librosa.onset.onset_detect(
+                y=audio, sr=sr,
+                hop_length=512,
+                backtrack=True,
+                units='frames',
+            )
+            onset_times = librosa.frames_to_time(onset_frames, sr=sr, hop_length=512)
+            logger.info(f"Detected {len(onset_times)} onsets from audio")
+        except Exception as e:
+            logger.warning(f"Onset detection failed ({e}), using beat positions")
+            onset_times = None
+
+        # --- Step 2: If onset detection failed, use beat positions ---
+        if onset_times is None or len(onset_times) < 4:
+            try:
+                import librosa
+                audio, sr = librosa.load(str(audio_path), sr=SAMPLE_RATE)
+                tempo_result = librosa.beat.beat_track(y=audio, sr=sr)
+                if hasattr(tempo_result[0], '__len__'):
+                    tempo = float(tempo_result[0][0])
+                else:
+                    tempo = float(tempo_result[0])
+                beat_frames = tempo_result[1]
+                onset_times = librosa.frames_to_time(beat_frames, sr=sr)
+                logger.info(f"Using {len(onset_times)} beat positions (tempo={tempo:.0f})")
+            except Exception:
+                # Last resort: place chords at their start times
+                onset_times = np.array([c.get('time', getattr(c, 'time', 0))
+                                       for c in chord_progression])
+                logger.info(f"Using {len(onset_times)} chord start times as onsets")
+
+        # --- Step 3: Determine tempo ---
+        if tempo_hint and 40 < tempo_hint < 300:
+            tempo = tempo_hint
+        else:
+            try:
+                import librosa
+                if 'audio' not in dir() or audio is None:
+                    audio, sr = librosa.load(str(audio_path), sr=SAMPLE_RATE)
+                tempo_result = librosa.beat.beat_track(y=audio, sr=sr)
+                if hasattr(tempo_result[0], '__len__'):
+                    tempo = float(tempo_result[0][0])
+                else:
+                    tempo = float(tempo_result[0])
+                tempo = max(40.0, min(300.0, tempo))
+            except Exception:
+                tempo = 120.0
+
+        # --- Step 4: Map each onset to a chord and generate notes ---
+        tab_notes = []
+        strings_used = set()
+        frets_used = []
+        chords_placed = 0
+        prev_chord_name = None
+
+        # Helper to look up chord at a time
+        def _chord_at_time(t):
+            for c in chord_progression:
+                c_time = c.get('time', getattr(c, 'time', 0))
+                c_dur = c.get('duration', getattr(c, 'duration', 0))
+                if c_time <= t < c_time + c_dur:
+                    return c
+            return None
+
+        # Compute a default note duration based on tempo
+        beat_duration = 60.0 / max(tempo, 60)
+        default_note_duration = beat_duration * 0.9  # Slightly less than a beat
+
+        for onset_t in onset_times:
+            chord_event = _chord_at_time(onset_t)
+            if chord_event is None:
+                continue
+
+            chord_name = chord_event.get('chord', getattr(chord_event, 'chord', ''))
+            if not chord_name or chord_name == 'N':
+                continue
+
+            voicing = _get_chord_voicing(chord_name)
+            if voicing is None:
+                continue
+
+            # Determine note end time: next onset or default duration, whichever is shorter
+            # Find next onset
+            onset_idx = np.searchsorted(onset_times, onset_t)
+            if onset_idx + 1 < len(onset_times):
+                next_onset = onset_times[onset_idx + 1]
+                note_duration = min(default_note_duration, (next_onset - onset_t) * 0.95)
+            else:
+                note_duration = default_note_duration
+
+            note_duration = max(0.05, note_duration)  # At least 50ms
+            note_end = onset_t + note_duration
+
+            # Create notes for each string in the voicing
+            for string_idx, fret in enumerate(voicing):
+                if fret < 0:
+                    continue  # Muted string
+
+                midi_note = TUNING[string_idx] + fret
+                # Add slight strum spread (low strings first, ~5ms between strings)
+                strum_offset = string_idx * 0.005
+
+                tab_notes.append({
+                    'pitch': midi_note,
+                    'string': string_idx,
+                    'fret': fret,
+                    'start': onset_t + strum_offset,
+                    'end': note_end,
+                    'velocity': 80,  # Consistent velocity for chord strums
+                })
+
+                strings_used.add(string_idx)
+                frets_used.append(fret)
+
+            chords_placed += 1
+            prev_chord_name = chord_name
+
+        if not tab_notes:
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='chord_to_tab', num_strings_used=0, fret_range=(0, 0),
+            )
+
+        logger.info(f"Chord-to-tab: {chords_placed} chords placed, {len(tab_notes)} notes")
+
+        # --- Step 5: Write MIDI ---
+        if not PRETTY_MIDI_AVAILABLE:
+            logger.error("pretty_midi not available for MIDI output")
+            return TabTranscriptionResult(
+                midi_path=None, num_notes=0, quality_score=0.0,
+                method='chord_to_tab', num_strings_used=0, fret_range=(0, 0),
+            )
+
+        midi_out = pretty_midi.PrettyMIDI(initial_tempo=tempo)
+        instrument = pretty_midi.Instrument(program=25, name='Guitar')
+
+        for tn in tab_notes:
+            midi_note = pretty_midi.Note(
+                velocity=tn['velocity'],
+                pitch=tn['pitch'],
+                start=tn['start'],
+                end=max(tn['end'], tn['start'] + 0.03),
+            )
+            instrument.notes.append(midi_note)
+
+        midi_out.instruments.append(instrument)
+
+        midi_filename = f"{audio_path.stem}_chord_tab.mid"
+        midi_path = output_dir / midi_filename
+        midi_out.write(str(midi_path))
+
+        # --- Step 6: Quality metrics ---
+        # Chord-to-tab is inherently lower quality than note-level transcription
+        # but is reliable and produces playable output
+        duration = max(tn['end'] for tn in tab_notes) - min(tn['start'] for tn in tab_notes)
+        chord_density = chords_placed / max(duration, 0.1)
+
+        quality = 0.0
+        quality += 0.25 if chords_placed >= 4 else 0.1   # Enough chords
+        quality += 0.20 if len(strings_used) >= 3 else 0.05  # String diversity
+        quality += 0.15 if 0.5 < chord_density < 8.0 else 0.0  # Sane density
+        quality += 0.15 if len(set(c.get('chord', getattr(c, 'chord', ''))
+                                   for c in chord_progression if c.get('chord', getattr(c, 'chord', '')) != 'N')) >= 2 else 0.05
+        quality += 0.10  # Base confidence for chord-based approach
+        quality = min(0.75, quality)  # Cap at 0.75 -- chord-to-tab isn't note-level
+
+        logger.info(f"Chord-to-tab MIDI: {midi_path.name}, {len(tab_notes)} notes, "
+                    f"{chords_placed} chords, tempo={tempo:.0f}, quality={quality:.2f}")
+
+        return TabTranscriptionResult(
+            midi_path=str(midi_path),
+            num_notes=len(tab_notes),
+            quality_score=quality,
+            method='chord_to_tab',
+            num_strings_used=len(strings_used),
+            fret_range=(min(frets_used), max(frets_used)),
+        )
+
+
+# ============================================================================
 # CONVENIENCE FUNCTIONS (matches existing API exactly)
 # ============================================================================
 
@@ -826,9 +1312,14 @@ _transcriber: Optional[GuitarTabTranscriber] = None
 
 
 def transcribe_guitar_tab(audio_path: str, output_dir: str,
-                          tempo_hint: float = None) -> Optional[str]:
+                          tempo_hint: float = None,
+                          chord_progression: list = None) -> Optional[str]:
     """
     Convenience function: transcribe guitar audio to MIDI.
+
+    Tries Basic Pitch first; if quality is too low and chord_progression
+    is available, falls back to chord-to-tab generation.
+
     Returns MIDI file path, or None if transcription failed/low quality.
     """
     global _transcriber
@@ -841,9 +1332,24 @@ def transcribe_guitar_tab(audio_path: str, output_dir: str,
             audio_path=audio_path,
             output_dir=output_dir,
             tempo_hint=tempo_hint,
+            chord_progression=chord_progression,
         )
         if result.midi_path and result.quality_score > 0.3:
             return result.midi_path
+
+        # Basic Pitch failed or quality too low -- try chord-to-tab fallback
+        if chord_progression:
+            logger.info("Basic Pitch quality too low, trying chord-to-tab fallback")
+            chord_gen = ChordToTabGenerator()
+            chord_result = chord_gen.generate(
+                audio_path=audio_path,
+                output_dir=output_dir,
+                chord_progression=chord_progression,
+                tempo_hint=tempo_hint,
+            )
+            if chord_result.midi_path and chord_result.quality_score > 0.2:
+                return chord_result.midi_path
+
         return None
     except Exception as e:
         logger.error(f"Guitar tab transcription failed: {e}")

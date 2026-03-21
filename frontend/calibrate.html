@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CRT Screen Calibrator</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #111; color: #fff; font-family: monospace; overflow: hidden; }
+#container { position: relative; width: 100vw; height: 100vh; }
+#crtImg { width: 100%; height: 100%; object-fit: contain; display: block; }
+#overlay {
+    position: absolute;
+    background: rgba(255, 0, 100, 0.25);
+    border: 2px solid rgba(255, 0, 100, 0.8);
+    pointer-events: none;
+    border-radius: 5% / 6%;
+}
+#controls {
+    position: fixed; top: 10px; left: 10px; z-index: 100;
+    background: rgba(0,0,0,0.85); padding: 15px; border-radius: 8px;
+    font-size: 13px; line-height: 1.8; min-width: 320px;
+}
+#controls select { font-size: 14px; padding: 4px 8px; margin-left: 8px; }
+.val { color: #0f0; font-weight: bold; }
+#output { margin-top: 10px; padding: 8px; background: #222; border-radius: 4px; font-size: 12px; word-break: break-all; }
+kbd { background: #333; padding: 2px 6px; border-radius: 3px; font-size: 11px; }
+.edge-label {
+    position: absolute; background: rgba(255,0,100,0.9); color: #fff;
+    font-size: 11px; padding: 2px 6px; pointer-events: none; white-space: nowrap;
+}
+</style>
+</head>
+<body>
+<div id="container">
+    <img id="crtImg" src="">
+    <div id="overlay"></div>
+    <div class="edge-label" id="labelL">L</div>
+    <div class="edge-label" id="labelR">R</div>
+    <div class="edge-label" id="labelT">T</div>
+    <div class="edge-label" id="labelB">B</div>
+</div>
+<div id="controls">
+    <div>
+        <strong>CRT Calibrator</strong>
+        <select id="themeSelect">
+            <option value="birthday">Birthday</option>
+            <option value="lounge">Lounge</option>
+            <option value="tokyo">Tokyo</option>
+            <option value="dive-bar">Dive Bar</option>
+        </select>
+    </div>
+    <div style="margin-top:8px">
+        <kbd>Arrow keys</kbd> move selected edge &nbsp;
+        <kbd>Shift</kbd> = fine (0.1%)
+    </div>
+    <div style="margin-top:4px">
+        <kbd>1</kbd> Left &nbsp; <kbd>2</kbd> Top &nbsp; <kbd>3</kbd> Right &nbsp; <kbd>4</kbd> Bottom
+    </div>
+    <div style="margin-top:8px">
+        Active edge: <span class="val" id="activeEdge">LEFT</span>
+    </div>
+    <div>
+        Left: <span class="val" id="vL">0</span>% &nbsp;
+        Top: <span class="val" id="vT">0</span>% &nbsp;
+        Right: <span class="val" id="vR">0</span>% &nbsp;
+        Bottom: <span class="val" id="vB">0</span>%
+    </div>
+    <div id="output"></div>
+</div>
+
+<script>
+var themes = {
+    'dive-bar': { img: 'images/crt-divebar-v2.png', left: 24.8, top: 11.8, right: 75.6, bottom: 85.4 },
+    'tokyo':    { img: 'images/crt-tokyo-bg.png',    left: 24.8, top: 14.5, right: 74.5, bottom: 83.3 },
+    'birthday': { img: 'images/crt-birthday-bg.png', left: 34.5, top: 30.5, right: 67.5, bottom: 70.5 },
+    'lounge':   { img: 'images/crt-lounge-bg.png',   left: 25.2, top: 16.1, right: 74.8, bottom: 73.5 }
+};
+
+// Persist calibrations to localStorage
+function saveToStorage() {
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem('crt-calibration') || '{}'); } catch(e) {}
+    saved[sel.value] = { left: current.left, top: current.top, right: current.right, bottom: current.bottom };
+    localStorage.setItem('crt-calibration', JSON.stringify(saved));
+}
+function loadFromStorage(id) {
+    try {
+        var saved = JSON.parse(localStorage.getItem('crt-calibration') || '{}');
+        if (saved[id]) return saved[id];
+    } catch(e) {}
+    return null;
+}
+
+var current = { left: 0, top: 0, right: 0, bottom: 0 };
+var activeEdge = 'left'; // left, top, right, bottom
+var img = document.getElementById('crtImg');
+var overlay = document.getElementById('overlay');
+var sel = document.getElementById('themeSelect');
+
+function loadTheme(id) {
+    var saved = loadFromStorage(id);
+    var t = saved || themes[id];
+    img.src = themes[id].img;
+    current.left = t.left;
+    current.top = t.top;
+    current.right = t.right;
+    current.bottom = t.bottom;
+    updateOverlay();
+}
+
+function getImageRect() {
+    // Calculate where object-fit:contain places the image
+    var cw = window.innerWidth, ch = window.innerHeight;
+    var nw = img.naturalWidth, nh = img.naturalHeight;
+    if (!nw || !nh) return { x: 0, y: 0, w: cw, h: ch };
+    var scale = Math.min(cw / nw, ch / nh);
+    var rw = nw * scale, rh = nh * scale;
+    var rx = (cw - rw) / 2, ry = (ch - rh) / 2;
+    return { x: rx, y: ry, w: rw, h: rh };
+}
+
+function updateOverlay() {
+    var r = getImageRect();
+    var x1 = r.x + (current.left / 100) * r.w;
+    var y1 = r.y + (current.top / 100) * r.h;
+    var x2 = r.x + (current.right / 100) * r.w;
+    var y2 = r.y + (current.bottom / 100) * r.h;
+
+    overlay.style.left = x1 + 'px';
+    overlay.style.top = y1 + 'px';
+    overlay.style.width = (x2 - x1) + 'px';
+    overlay.style.height = (y2 - y1) + 'px';
+
+    // Edge labels
+    var midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+    document.getElementById('labelL').style.left = (x1 - 30) + 'px';
+    document.getElementById('labelL').style.top = midY + 'px';
+    document.getElementById('labelL').textContent = 'L:' + current.left.toFixed(1);
+
+    document.getElementById('labelR').style.left = x2 + 'px';
+    document.getElementById('labelR').style.top = midY + 'px';
+    document.getElementById('labelR').textContent = 'R:' + current.right.toFixed(1);
+
+    document.getElementById('labelT').style.left = midX + 'px';
+    document.getElementById('labelT').style.top = (y1 - 20) + 'px';
+    document.getElementById('labelT').textContent = 'T:' + current.top.toFixed(1);
+
+    document.getElementById('labelB').style.left = midX + 'px';
+    document.getElementById('labelB').style.top = y2 + 'px';
+    document.getElementById('labelB').textContent = 'B:' + current.bottom.toFixed(1);
+
+    // Update readout
+    document.getElementById('vL').textContent = current.left.toFixed(1);
+    document.getElementById('vT').textContent = current.top.toFixed(1);
+    document.getElementById('vR').textContent = current.right.toFixed(1);
+    document.getElementById('vB').textContent = current.bottom.toFixed(1);
+
+    var id = sel.value;
+    document.getElementById('output').textContent =
+        "'" + id + "': { img: '" + themes[id].img + "', left: " + current.left.toFixed(1) +
+        ", top: " + current.top.toFixed(1) + ", right: " + current.right.toFixed(1) +
+        ", bottom: " + current.bottom.toFixed(1) + " }";
+}
+
+document.addEventListener('keydown', function(e) {
+    var step = e.shiftKey ? 0.1 : 0.5;
+
+    if (e.key === '1') { activeEdge = 'left'; }
+    if (e.key === '2') { activeEdge = 'top'; }
+    if (e.key === '3') { activeEdge = 'right'; }
+    if (e.key === '4') { activeEdge = 'bottom'; }
+
+    document.getElementById('activeEdge').textContent = activeEdge.toUpperCase();
+
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        current[activeEdge] = Math.max(0, current[activeEdge] - step);
+        updateOverlay(); saveToStorage();
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        current[activeEdge] = Math.min(100, current[activeEdge] + step);
+        updateOverlay(); saveToStorage();
+    }
+});
+
+sel.addEventListener('change', function() { loadTheme(sel.value); });
+img.addEventListener('load', updateOverlay);
+window.addEventListener('resize', updateOverlay);
+
+loadTheme('birthday');
+</script>
+</body>
+</html>

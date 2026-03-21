@@ -1,0 +1,306 @@
+/* ── Karaoke Mode ── */
+
+.karaoke-container {
+    display: none;
+    flex-direction: column;
+    background: #0a0014;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.karaoke-container.visible {
+    display: flex;
+}
+
+/* CRT scanline overlay */
+.karaoke-container::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.15) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Karaoke header bar */
+.karaoke-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: rgba(10, 0, 20, 0.9);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.15);
+    z-index: 11;
+    flex-shrink: 0;
+}
+
+.karaoke-title {
+    font-family: 'Righteous', cursive;
+    font-size: 1rem;
+    color: #00ff88;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.karaoke-artist {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-left: 0.75rem;
+}
+
+.karaoke-exit-btn {
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid rgba(255, 107, 157, 0.4);
+    color: #ff6b9d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.karaoke-exit-btn:hover {
+    background: rgba(255, 107, 157, 0.15);
+    border-color: #ff6b9d;
+}
+
+/* Lyrics viewport */
+.karaoke-lyrics {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.karaoke-lyrics-scroll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Individual lyric line */
+.karaoke-line {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.12);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(0.9);
+    filter: blur(1.5px);
+    line-height: 1.4;
+    padding: 0.3rem 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.karaoke-line.approaching {
+    color: rgba(255, 255, 255, 0.35);
+    filter: blur(0.5px);
+    transform: scale(0.95);
+}
+
+.karaoke-line.active {
+    color: #00ff88;
+    filter: blur(0);
+    transform: scale(1);
+    text-shadow:
+        0 0 7px rgba(0, 255, 136, 0.6),
+        0 0 20px rgba(0, 255, 136, 0.3),
+        0 0 40px rgba(0, 255, 136, 0.15);
+}
+
+.karaoke-line.past {
+    color: rgba(255, 255, 255, 0.08);
+    filter: blur(2px);
+    transform: scale(0.85);
+}
+
+/* Word-level highlighting within active line */
+.karaoke-word {
+    display: inline;
+    position: relative;
+    transition: color 0.1s;
+}
+
+.karaoke-word.sung {
+    color: #ffffff;
+    text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(0, 255, 136, 0.6),
+        0 0 40px rgba(0, 255, 136, 0.3);
+}
+
+/* Instrumental/waiting state */
+.karaoke-waiting {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 1.2rem;
+}
+
+.karaoke-waiting.visible {
+    display: flex;
+}
+
+.karaoke-dots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.karaoke-dots span {
+    width: 8px;
+    height: 8px;
+    background: rgba(0, 255, 136, 0.4);
+    border-radius: 50%;
+    animation: karaoke-dot-pulse 1.5s ease-in-out infinite;
+}
+
+.karaoke-dots span:nth-child(2) { animation-delay: 0.3s; }
+.karaoke-dots span:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes karaoke-dot-pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* No lyrics message */
+.karaoke-no-lyrics {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1.1rem;
+    padding: 2rem;
+}
+
+.karaoke-no-lyrics p {
+    margin-bottom: 0.5rem;
+}
+
+.karaoke-retry-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1.5rem;
+    background: rgba(0, 255, 136, 0.15);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.karaoke-retry-btn:hover {
+    background: rgba(0, 255, 136, 0.25);
+}
+
+/* Countdown before next line */
+.karaoke-countdown {
+    font-size: 1.5rem;
+    color: rgba(0, 255, 136, 0.5);
+    letter-spacing: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Fullscreen adjustments */
+.karaoke-container:-webkit-full-screen .karaoke-line {
+    font-size: 3rem;
+}
+.karaoke-container:fullscreen .karaoke-line {
+    font-size: 3rem;
+}
+
+/* Karaoke controls in transport */
+.karaoke-transport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(10, 0, 20, 0.9);
+    border-top: 1px solid rgba(0, 255, 136, 0.15);
+    z-index: 11;
+    flex-shrink: 0;
+}
+
+.karaoke-transport button {
+    padding: 0.4rem 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.karaoke-transport button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.karaoke-transport .play-btn {
+    font-size: 1.3rem;
+    padding: 0.5rem 1rem;
+    border-color: rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+}
+
+.karaoke-timeline {
+    flex: 1;
+    max-width: 400px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+}
+
+.karaoke-timeline-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00ccff);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.karaoke-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Fira Code', monospace;
+    min-width: 3.5rem;
+    text-align: center;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .karaoke-line {
+        font-size: 1.4rem;
+    }
+    .karaoke-line.active {
+        font-size: 1.6rem;
+    }
+    .karaoke-lyrics {
+        padding: 1rem;
+    }
+    .karaoke-header {
+        padding: 0.5rem 1rem;
+    }
+}

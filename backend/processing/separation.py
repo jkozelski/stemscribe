@@ -2,6 +2,7 @@
 Stem separation functions — all separate_stems_* variants.
 
 Owns the GPU semaphore, active runner tracking, and shutdown handler.
+Includes Modal cloud GPU support (separate_stems_modal) as an alternative to local GPU.
 """
 
 import os
@@ -10,11 +11,40 @@ import json
 import subprocess
 import threading
 import logging
+import time
 from pathlib import Path
 
 
 from models.job import ProcessingJob, OUTPUT_DIR, save_job_checkpoint
 from processing.utils import convert_wavs_to_mp3
+
+# ============ MODAL CLOUD GPU ============
+
+# Read MODAL_ENABLED from environment — checked at runtime, not import time
+def is_modal_enabled():
+    return os.environ.get('MODAL_ENABLED', 'false').lower() in ('true', '1', 'yes')
+
+MODAL_ENABLED = is_modal_enabled()  # for backward compat at import time
+
+try:
+    import modal
+    MODAL_AVAILABLE = True
+except ImportError:
+    MODAL_AVAILABLE = False
+
+
+def _flush_mps_memory():
+    """Force-flush MPS (Apple Silicon GPU) memory pool to prevent silent OOM hangs."""
+    try:
+        import torch
+        if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            if hasattr(torch.mps, 'empty_cache'):
+                torch.mps.empty_cache()
+            if hasattr(torch.mps, 'synchronize'):
+                torch.mps.synchronize()
+            logger.info("MPS memory cache flushed")
+    except Exception as e:
+        logger.debug(f"MPS memory flush skipped: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +181,10 @@ def separate_stems(job: ProcessingJob, audio_path: Path):
         if not result.success:
             raise Exception(result.error_message)
 
+        # Flush GPU memory after separation completes
+        _flush_mps_memory()
+        gc.collect()
+
         job.progress = 40
 
         # Convert WAV to MP3 using ffmpeg
@@ -212,6 +246,10 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
 
         job.stage = '🧠 RoFormer: Extracting vocals (SDR 12.9)'
         job.progress = 12
+        save_job_checkpoint(job)
+
+        # Flush GPU memory before loading RoFormer
+        _flush_mps_memory()
 
         separator = EnhancedSeparator(output_dir=str(roformer_dir))
         roformer_stems = separator.separate(str(audio_path), model='vocals_best')
@@ -234,8 +272,10 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
         # Free RoFormer memory before loading Demucs
         del separator
         gc.collect()
+        _flush_mps_memory()
 
         job.progress = 22
+        save_job_checkpoint(job)
 
         # ---- Pass 2: Demucs on instrumental for instrument stems ----
         job.stage = '🎸 Separating instruments from instrumental...'
@@ -273,17 +313,25 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
         if not result.success:
             raise Exception(f"Demucs instrument separation failed: {result.error_message}")
 
+        # Flush GPU memory after Demucs pass completes
+        _flush_mps_memory()
+        gc.collect()
+
         job.progress = 40
-        job.stage = 'Converting stems to MP3'
+        job.stage = 'Converting vocals to MP3'
+        save_job_checkpoint(job)
 
         # ---- Collect all stems ----
         # Convert RoFormer vocals WAV to MP3
         vocals_mp3 = output_path / 'vocals.mp3'
-        subprocess.run([
-            'ffmpeg', '-y', '-i', vocals_path,
-            '-codec:a', 'libmp3lame', '-b:a', '320k',
-            str(vocals_mp3)
-        ], capture_output=True, timeout=120)
+        try:
+            subprocess.run([
+                'ffmpeg', '-y', '-i', vocals_path,
+                '-codec:a', 'libmp3lame', '-b:a', '320k',
+                str(vocals_mp3)
+            ], capture_output=True, timeout=180)
+        except subprocess.TimeoutExpired:
+            logger.warning("ffmpeg vocals conversion timed out after 180s")
 
         if vocals_mp3.exists():
             job.stems['vocals'] = str(vocals_mp3)
@@ -292,6 +340,10 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
             # Fallback: use the WAV directly
             job.stems['vocals'] = vocals_path
             logger.warning("  ⚠️ MP3 conversion failed for vocals, using WAV")
+
+        job.progress = 41
+        job.stage = 'Converting instrument stems to MP3'
+        save_job_checkpoint(job)
 
         # Convert Demucs instrument stems WAV to MP3
         if result.output_dir and result.output_dir.exists():
@@ -305,6 +357,9 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
                     continue
                 job.stems[stem_name] = stem_path
                 logger.info(f"  ✅ {stem_name} (Demucs)")
+
+        job.progress = 42
+        save_job_checkpoint(job)
 
         if len(job.stems) < 2:
             raise Exception("Ensemble separation produced too few stems")
@@ -403,6 +458,7 @@ def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar
             raise Exception("MDX23C did not produce instrumental track")
 
         # Clean up memory before loading next model
+        _flush_mps_memory()
         gc.collect()
 
         # ================================================================
@@ -439,6 +495,7 @@ def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar
 
         # Clean up separator to free memory
         del separator
+        _flush_mps_memory()
         gc.collect()
 
         # ================================================================
@@ -563,6 +620,10 @@ def separate_stems_ensemble(job: ProcessingJob, audio_path: Path):
         # Run ensemble separation
         result = separator.separate(audio, sample_rate, post_config)
 
+        # Flush GPU memory after ensemble separation
+        _flush_mps_memory()
+        gc.collect()
+
         job.stage = 'Saving ensemble stems'
         job.progress = 95
 
@@ -580,13 +641,15 @@ def separate_stems_ensemble(job: ProcessingJob, audio_path: Path):
             wav_file = output_path / f'{stem_name}.wav'
             sf.write(str(wav_file), stem_audio_write, sample_rate)
 
-            # Convert to MP3 using ffmpeg
-            import subprocess
-            subprocess.run([
-                'ffmpeg', '-y', '-i', str(wav_file),
-                '-codec:a', 'libmp3lame', '-q:a', '2',
-                str(stem_file)
-            ], capture_output=True)
+            # Convert to MP3 using ffmpeg (with timeout to prevent stalls — 300s per stem)
+            try:
+                subprocess.run([
+                    'ffmpeg', '-y', '-i', str(wav_file),
+                    '-codec:a', 'libmp3lame', '-q:a', '2',
+                    str(stem_file)
+                ], capture_output=True, timeout=300)
+            except subprocess.TimeoutExpired:
+                logger.warning(f"ffmpeg conversion timed out for {stem_name} after 300s")
 
             # Remove temp WAV
             if stem_file.exists():
@@ -623,4 +686,77 @@ def separate_stems_ensemble(job: ProcessingJob, audio_path: Path):
         return False
     finally:
         _separation_semaphore.release()
+
+
+# ============ MODAL CLOUD GPU SEPARATION ============
+
+def separate_stems_modal(job: ProcessingJob, audio_path: Path):
+    """
+    Stem separation via Modal cloud GPU (T4).
+
+    Sends audio bytes to a Modal serverless function running htdemucs_6s,
+    receives MP3 stems back, and saves them locally. Falls back to local
+    GPU separation if Modal is unavailable or fails.
+
+    No semaphore needed — this does not use local GPU resources.
+    """
+    if not MODAL_AVAILABLE:
+        logger.warning("Modal not installed — falling back to local separation")
+        return separate_stems_roformer(job, audio_path)
+
+    try:
+        job.stage = 'Uploading to cloud GPU (Modal)'
+        job.progress = 10
+        save_job_checkpoint(job)
+        logger.info(f"Starting Modal cloud GPU separation for {audio_path}")
+
+        # Read audio file
+        audio_bytes = audio_path.read_bytes()
+        size_mb = len(audio_bytes) / (1024 * 1024)
+        logger.info(f"Uploading {size_mb:.1f} MB to Modal cloud GPU")
+
+        job.stage = 'Separating stems on cloud GPU (T4)'
+        job.progress = 20
+        save_job_checkpoint(job)
+
+        # Look up the DEPLOYED Modal function by app/function name.
+        # Using modal.Function.from_name() connects to the already-deployed
+        # "stemscribe-separator" app on Modal, instead of trying to run the
+        # local function definition (which requires the app to be "running").
+        separate_fn = modal.Function.from_name("stemscribe-separator", "separate_stems_gpu")
+        stems_data = separate_fn.remote(audio_bytes, filename=audio_path.name)
+
+        job.stage = 'Downloading stems from cloud'
+        job.progress = 35
+        save_job_checkpoint(job)
+
+        # Save received stems locally
+        output_path = OUTPUT_DIR / job.job_id / 'stems'
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        for stem_name, stem_bytes in stems_data.items():
+            stem_file = output_path / f'{stem_name}.mp3'
+            stem_file.write_bytes(stem_bytes)
+            job.stems[stem_name] = str(stem_file)
+            size_mb = len(stem_bytes) / (1024 * 1024)
+            logger.info(f"  Saved stem: {stem_name} ({size_mb:.1f} MB)")
+
+        if not job.stems:
+            raise Exception("Modal returned no stems")
+
+        job.progress = 40
+        save_job_checkpoint(job)
+        logger.info(f"Modal cloud separation complete: {len(job.stems)} stems")
+        return True
+
+    except Exception as e:
+        logger.error(f"Modal cloud separation failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+        # Fall back to local GPU
+        logger.info("Falling back to local GPU separation...")
+        job.stems = {}
+        job.error = None
+        return separate_stems_roformer(job, audio_path)
 

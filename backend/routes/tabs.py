@@ -8,20 +8,18 @@ from pathlib import Path
 from flask import Blueprint, jsonify, send_file
 
 from models.job import get_job
+from middleware.validation import validate_job_id as _validate_job_id
 
 logger = logging.getLogger(__name__)
 
 tabs_bp = Blueprint("tabs", __name__)
 
 
-def _validate_job_id(job_id: str) -> bool:
-    """Validate job_id is a safe hex string (UUID prefix)."""
-    return bool(job_id) and len(job_id) <= 36 and re.match(r'^[a-f0-9\\-]+$', job_id)
-
-
 @tabs_bp.route('/api/find-tabs/<job_id>', methods=['GET'])
 def find_tabs(job_id):
     """Find matching tabs on Songsterr and Ultimate Guitar for a job"""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
@@ -83,6 +81,8 @@ def find_tabs(job_id):
 @tabs_bp.route('/api/download-pro-tabs/<job_id>', methods=['POST'])
 def download_pro_tabs(job_id):
     """Download professional tabs from Songsterr for this job."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404

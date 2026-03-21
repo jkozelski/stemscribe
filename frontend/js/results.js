@@ -27,13 +27,22 @@ window.StemScribe = window.StemScribe || {};
             document.getElementById('songCard').style.display = 'flex';
             document.getElementById('songTitle').textContent = job.metadata.title;
             document.getElementById('songArtist').textContent = job.metadata.artist || 'Unknown';
-            if (job.metadata.thumbnail) document.getElementById('songThumb').src = job.metadata.thumbnail;
+            var thumb = document.getElementById('songThumb');
+            if (job.metadata.thumbnail) {
+                thumb.src = job.metadata.thumbnail;
+                thumb.style.display = 'block';
+            } else {
+                thumb.src = '';
+                thumb.style.display = 'none';
+            }
             document.getElementById('infoToggleBtn').style.display = 'block';
         } else {
             document.getElementById('songCard').style.display = 'flex';
             document.getElementById('songTitle').textContent = job.filename || 'Uploaded Track';
             document.getElementById('songArtist').textContent = 'Tap \u2139\uFE0F for track info';
-            document.getElementById('songThumb').src = '';
+            var thumb = document.getElementById('songThumb');
+            thumb.src = '';
+            thumb.style.display = 'none';
             document.getElementById('infoToggleBtn').style.display = 'block';
         }
 

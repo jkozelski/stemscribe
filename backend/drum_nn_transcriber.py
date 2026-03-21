@@ -183,7 +183,7 @@ def _load_model(device: torch.device = None) -> DrumTranscriptionModel:
     model = DrumTranscriptionModel(n_mels=N_MELS, num_classes=NUM_CLASSES)
 
     logger.info(f"Loading drum model from {CHECKPOINT_PATH}")
-    checkpoint = torch.load(CHECKPOINT_PATH, map_location=device, weights_only=False)
+    checkpoint = torch.load(CHECKPOINT_PATH, map_location=device, weights_only=True)
 
     # Handle different checkpoint formats
     if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
