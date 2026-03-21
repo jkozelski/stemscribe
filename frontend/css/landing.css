@@ -197,7 +197,7 @@
 }
 
 .hero-headline {
-    font-family: 'Righteous', cursive;
+    font-family: 'Bebas Neue', 'Space Grotesk', sans-serif;
     font-size: 4rem;
     line-height: 1.1;
     color: var(--text);

@@ -290,13 +290,16 @@ window.StemScribe = window.StemScribe || {};
             signInBtns.forEach(function(btn) { btn.style.display = 'none'; });
             profileDropdowns.forEach(function(dd) {
                 dd.style.display = 'flex';
-                // Update avatar
+                // Update avatar — show Google G icon as fallback when no profile picture
                 var avatar = dd.querySelector('.auth-profile-avatar');
+                var gIcon = dd.querySelector('.auth-google-profile-icon');
                 if (avatar && SS.currentUser.avatar_url) {
                     avatar.src = SS.currentUser.avatar_url;
                     avatar.style.display = 'block';
+                    if (gIcon) gIcon.style.display = 'none';
                 } else if (avatar) {
                     avatar.style.display = 'none';
+                    if (gIcon) gIcon.style.display = 'inline-block';
                 }
                 // Update name
                 var nameEl = dd.querySelector('.auth-profile-name');
