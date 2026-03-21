@@ -112,12 +112,22 @@ window.StemScribe = window.StemScribe || {};
         var bioEl = document.getElementById('artistBio');
         var wikiLink = document.getElementById('wikiLink');
 
+        var websiteLink = document.getElementById('websiteLink');
+
         if (info.bio) {
             bioEl.textContent = info.bio;
             bioSection.style.display = 'block';
             if (info.wikipedia_url) {
                 wikiLink.href = info.wikipedia_url;
                 wikiLink.style.display = 'inline-block';
+            } else {
+                wikiLink.style.display = 'none';
+            }
+            if (info.website_url) {
+                websiteLink.href = info.website_url;
+                websiteLink.style.display = 'inline-block';
+            } else {
+                websiteLink.style.display = 'none';
             }
         } else {
             bioSection.style.display = 'none';

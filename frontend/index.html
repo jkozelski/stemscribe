@@ -532,7 +532,7 @@
             </div>
 
             <div class="song-card" id="songCard" style="display: none;">
-                <img class="song-thumb" id="songThumb" src="" alt="">
+                <img class="song-thumb" id="songThumb" src="" alt="" style="display:none;" onerror="this.style.display='none'">
                 <div class="song-details">
                     <h3 id="songTitle">Song Title</h3>
                     <p id="songArtist">Artist</p>
@@ -574,6 +574,7 @@
                             <h4>🎸 Artist</h4>
                             <p id="artistBio"></p>
                             <a id="wikiLink" href="#" target="_blank" style="display: none;">Read more on Wikipedia →</a>
+                            <a id="websiteLink" href="#" target="_blank" style="display: none; margin-left: 8px;">Official Website →</a>
                         </div>
                         <div class="info-section" id="songInfoSection" style="display: none;">
                             <h4>🎵 About the Song</h4>

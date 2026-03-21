@@ -261,6 +261,7 @@ LOCAL_KNOWLEDGE = {
     'grateful dead': {
         'bio': "The Grateful Dead were an American rock band formed in 1965 in Palo Alto, California. Known for their unique blend of rock, folk, country, jazz, bluegrass, blues, and psychedelic music, they became icons of the counterculture movement.",
         'wikipedia_url': 'https://en.wikipedia.org/wiki/Grateful_Dead',
+        'website_url': 'https://www.dead.net',
         'members': {
             'jerry garcia': 'Lead guitar, vocals. Known for his melodic improvisations and sweet tone. Usually panned LEFT.',
             'bob weir': 'Rhythm guitar, vocals. Master of jazz chords and syncopated rhythms. Usually panned RIGHT.',
@@ -275,6 +276,7 @@ LOCAL_KNOWLEDGE = {
     'phish': {
         'bio': "Phish is an American rock band formed in Burlington, Vermont in 1983. Known for musical improvisation, extended jams, and blending of genres including funk, progressive rock, and jazz fusion.",
         'wikipedia_url': 'https://en.wikipedia.org/wiki/Phish',
+        'website_url': 'https://www.phish.com',
         'members': {
             'trey anastasio': 'Guitar, vocals. Virtuoso player known for composed sections and fiery improv.',
             'mike gordon': 'Bass. Melodic and adventurous bass lines.',
@@ -287,6 +289,7 @@ LOCAL_KNOWLEDGE = {
     'allman brothers': {
         'bio': "The Allman Brothers Band pioneered Southern rock and jam band music. Formed in 1969 in Jacksonville, Florida, known for extended improvisations and twin lead guitar harmonies.",
         'wikipedia_url': 'https://en.wikipedia.org/wiki/The_Allman_Brothers_Band',
+        'website_url': 'https://www.allmanbrothersband.com',
         'members': {
             'duane allman': 'Lead/slide guitar. Legendary slide player, melodic and soulful. Usually panned LEFT.',
             'dickey betts': 'Lead guitar. Country-influenced, wrote many classics. Usually panned RIGHT.',
@@ -326,6 +329,7 @@ def fetch_track_info(track_name: str, artist: str = None,
         'style': None,
         'player_mapping': None,
         'era': None,
+        'website_url': None,
         'fetched_from': []
     }
 
@@ -370,6 +374,7 @@ def fetch_track_info(track_name: str, artist: str = None,
         info['style'] = knowledge.get('style')
         info['common_keys'] = knowledge.get('common_keys')
         info['wikipedia_url'] = knowledge.get('wikipedia_url')
+        info['website_url'] = knowledge.get('website_url')
         info['fetched_from'].append('local_knowledge')
         info['player_mapping'] = get_player_mapping(known_artist)
         found_local = True
@@ -445,7 +450,15 @@ def fetch_track_info(track_name: str, artist: str = None,
     except Exception as e:
         logger.debug(f"  Wikipedia failed: {e}")
 
-    # Try MusicBrainz for album
+    # Try MusicBrainz for album and website
+    try:
+        mb_website = fetch_musicbrainz_artist_url(artist)
+        if mb_website:
+            info['website_url'] = mb_website
+            logger.info(f"  ✓ Got website: {mb_website}")
+    except Exception as e:
+        logger.debug(f"  MusicBrainz website fetch failed: {e}")
+
     if not info.get('album') and track_name:
         try:
             mb_album = fetch_musicbrainz_album(artist, track_name)
@@ -455,7 +468,7 @@ def fetch_track_info(track_name: str, artist: str = None,
                 info['fetched_from'].append('musicbrainz')
                 logger.info(f"  ✓ Got album: {info['album']}")
         except Exception as e:
-            logger.debug(f"  MusicBrainz failed: {e}")
+            logger.debug(f"  MusicBrainz album failed: {e}")
 
     # Ensure we always return something useful
     if not info['bio']:
@@ -850,6 +863,57 @@ def fetch_musicbrainz_artist_members(artist: str) -> Optional[Dict[str, str]]:
 
     except Exception as e:
         logger.debug(f"MusicBrainz artist fetch failed: {e}")
+        return None
+
+
+def fetch_musicbrainz_artist_url(artist: str) -> Optional[str]:
+    """
+    Fetch the official website URL for an artist from MusicBrainz URL relations.
+    """
+    if not artist:
+        return None
+
+    try:
+        query = f'artist:"{artist}"'
+        encoded_query = urllib.parse.quote(query)
+        url = f"{MUSICBRAINZ_API}artist/?query={encoded_query}&fmt=json&limit=1"
+
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'
+        })
+
+        with urllib.request.urlopen(req, timeout=3) as response:
+            data = json.loads(response.read().decode('utf-8'))
+
+        artists = data.get('artists', [])
+        if not artists:
+            return None
+
+        artist_id = artists[0].get('id')
+        if not artist_id:
+            return None
+
+        # Fetch artist details with URL relations
+        time.sleep(0.2)  # MusicBrainz rate limit
+        detail_url = f"{MUSICBRAINZ_API}artist/{artist_id}?inc=url-rels&fmt=json"
+
+        req = urllib.request.Request(detail_url, headers={
+            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'
+        })
+
+        with urllib.request.urlopen(req, timeout=3) as response:
+            artist_data = json.loads(response.read().decode('utf-8'))
+
+        for rel in artist_data.get('relations', []):
+            if rel.get('type') == 'official homepage':
+                website = rel.get('url', {}).get('resource')
+                if website:
+                    return website
+
+        return None
+
+    except Exception as e:
+        logger.debug(f"MusicBrainz artist URL fetch failed for {artist}: {e}")
         return None
 
 
