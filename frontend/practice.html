@@ -733,6 +733,202 @@
             }
         }
 
+        /* ── View Mode Toggle (Tab ↔ Chords) ── */
+        .view-mode-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            flex-shrink: 0;
+        }
+
+        .view-mode-toggle {
+            display: flex;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .view-btn {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            padding: 0.35rem 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .view-btn:hover { color: var(--text); }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            color: white;
+        }
+
+        .tab-source-badge {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            background: var(--bg-dark);
+            transition: all 0.2s;
+        }
+
+        .tab-source-badge.songsterr {
+            color: var(--green);
+            border-color: rgba(152, 195, 121, 0.4);
+        }
+
+        /* ── Chord Sheet Panel ── */
+        .chord-sheet-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 2.5rem;
+            background: var(--bg-dark);
+            font-family: 'Courier New', 'Courier', monospace;
+        }
+
+        .cs-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .cs-title {
+            font-family: 'Righteous', cursive;
+            font-size: 1.7rem;
+            color: var(--orange);
+            margin: 0 0 0.2rem;
+        }
+
+        .cs-artist {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .cs-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .cs-meta a {
+            color: var(--yellow);
+            text-decoration: none;
+        }
+        .cs-meta a:hover { text-decoration: underline; }
+
+        /* Chord-only grid */
+        .chord-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.75rem 0 1.5rem;
+        }
+
+        .chord-pill {
+            background: rgba(97, 175, 239, 0.12);
+            border: 1px solid rgba(97, 175, 239, 0.3);
+            color: var(--blue);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .cs-section-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        .chord-only-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Chord + Lyric lines */
+        .lyric-line {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin: 0.15rem 0;
+            line-height: 1;
+        }
+
+        .lyric-line.has-chords {
+            margin-top: 0.5rem;
+        }
+
+        .lyric-segment {
+            display: inline-flex;
+            flex-direction: column;
+            white-space: pre;
+            vertical-align: bottom;
+        }
+
+        .chord-label {
+            color: var(--blue);
+            font-weight: bold;
+            font-size: 0.9rem;
+            line-height: 1.3;
+            min-height: 1.2em;
+            display: block;
+        }
+
+        .lyric-text {
+            color: var(--text);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .cs-empty-line { height: 0.9rem; }
+
+        /* Active line during playback */
+        .lyric-line.cs-active .lyric-text { color: var(--orange); }
+        .lyric-line.cs-active .chord-label { color: var(--yellow); }
+
+        .cs-no-lyrics-note {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            padding: 0.6rem 0.9rem;
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--border);
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 1rem;
+        }
+
+        .cs-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            gap: 1rem;
+            color: var(--text-dim);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
         /* Print styles */
         @media print {
             .header, .sidebar, .stem-tabs, .loading-overlay, #osmd-custom-cursor { display: none !important; }
@@ -933,6 +1129,16 @@
 
         <!-- Notation -->
         <div class="notation-area">
+
+            <!-- Tab ↔ Chords mode toggle -->
+            <div class="view-mode-bar" id="viewModeBar" style="display:none;">
+                <div class="view-mode-toggle">
+                    <button class="view-btn active" id="tabModeBtn" onclick="setViewMode('tab')">🎸 Tab</button>
+                    <button class="view-btn" id="chordModeBtn" onclick="setViewMode('chords')">♪ Chords</button>
+                </div>
+                <span class="tab-source-badge" id="tabSourceBadge" style="display:none;"></span>
+            </div>
+
             <div class="stem-tabs" id="stemTabs">
                 <!-- Populated by JS when job loads -->
             </div>
@@ -942,6 +1148,9 @@
                     <div class="spinner"></div>
                     <div id="loadingText">Loading notation...</div>
                 </div>
+
+                <!-- Chord Sheet Panel (shown in Chords mode) -->
+                <div id="chordSheetPanel" class="chord-sheet-panel" style="display:none;"></div>
 
                 <div id="alphaTab">
                     <div class="empty-state" id="emptyState">
@@ -1153,12 +1362,19 @@
                 loadStemAudio(job);
                 buildStemTabs(job, requestedStem);
 
-                // Load initial notation
-                const hasXml = job.musicxml_files && Object.keys(job.musicxml_files).length > 0;
-                const hasGP = job.gp_files && Object.keys(job.gp_files).length > 0;
-                if (hasXml || hasGP) {
-                    const stemToLoad = requestedStem || 'guitar';
-                    loadNotationForStem(stemToLoad);
+                // Show the Tab ↔ Chords toggle
+                document.getElementById('viewModeBar').style.display = 'flex';
+
+                // Try Songsterr first; fall back to AI-generated notation
+                const title = job.metadata?.title;
+                if (title) {
+                    // Kick off Songsterr fetch in background (non-blocking)
+                    fetchSongsterrTab();
+                } else {
+                    // No metadata — load AI notation directly
+                    const hasXml = job.musicxml_files && Object.keys(job.musicxml_files).length > 0;
+                    const hasGP  = job.gp_files && Object.keys(job.gp_files).length > 0;
+                    if (hasXml || hasGP) loadNotationForStem(requestedStem || 'guitar');
                 }
             } catch (error) {
                 console.error('Failed to load job:', error);
@@ -1445,6 +1661,9 @@
             } else if (a.currentTime >= duration - 0.1 && isPlaying) {
                 Object.values(stemAudios).forEach(s => s.audio.currentTime = 0);
             }
+
+            // Highlight active lyric line in Chords mode
+            if (currentViewMode === 'chords') highlightCurrentChordLine();
         }
 
         function formatTime(s) {
@@ -1884,6 +2103,266 @@
 
         // Print
         document.getElementById('printNotation')?.addEventListener('click', () => window.print());
+
+        // ── View Mode (Tab ↔ Chords) ──
+        let currentViewMode = 'tab';
+        let chordSheetLoaded = false;
+        let chordSheetData = null;
+        let songsterrLoaded = false;
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            const tabBtn   = document.getElementById('tabModeBtn');
+            const chordBtn = document.getElementById('chordModeBtn');
+            const stemTabs = document.getElementById('stemTabs');
+            const atEl     = document.getElementById('alphaTab');
+            const csPanel  = document.getElementById('chordSheetPanel');
+            const overlay  = document.getElementById('loadingOverlay');
+
+            if (mode === 'tab') {
+                tabBtn.classList.add('active');
+                chordBtn.classList.remove('active');
+                stemTabs.style.display = '';
+                atEl.style.display = '';
+                overlay.style.display = '';
+                csPanel.style.display = 'none';
+            } else {
+                tabBtn.classList.remove('active');
+                chordBtn.classList.add('active');
+                stemTabs.style.display = 'none';
+                atEl.style.display = 'none';
+                overlay.style.display = 'none';
+                csPanel.style.display = '';
+                if (!chordSheetLoaded) loadChordSheet();
+                else highlightCurrentChordLine();
+            }
+        }
+
+        // ── Songsterr Tab Fetch ──
+        async function fetchSongsterrTab() {
+            if (!currentJob || songsterrLoaded) return;
+            const badge = document.getElementById('tabSourceBadge');
+            badge.textContent = '⏳ Searching Songsterr…';
+            badge.style.display = 'inline';
+            badge.className = 'tab-source-badge';
+
+            try {
+                const resp = await fetch(`${API_BASE}/download-pro-tabs/${currentJob.job_id}`, { method: 'POST' });
+                const result = await resp.json();
+
+                if (result.success && result.download_path) {
+                    // download_path is like /api/download/{id}/pro_tabs/songsterr.gp5
+                    // API_BASE = <origin>/api — strip /api then append download_path
+                    const gpUrl = API_BASE.replace(/\/api$/, '') + result.download_path;
+                    const gpResp = await fetch(gpUrl);
+                    if (!gpResp.ok) throw new Error('GP5 download failed');
+                    const gpData = await gpResp.arrayBuffer();
+
+                    songsterrLoaded = true;
+                    badge.textContent = `✓ Songsterr: ${result.tab.title || ''}`;
+                    badge.className = 'tab-source-badge songsterr';
+
+                    // Only display if we're still in Tab mode
+                    if (currentViewMode === 'tab') {
+                        document.getElementById('loadingOverlay').classList.remove('hidden');
+                        initAlphaTab(new Uint8Array(gpData), 'songsterr.gp5');
+                        currentNotationStem = 'songsterr';
+                        currentNotationFileType = 'gp';
+                        setTimeout(updateExportButtons, 500);
+                    }
+                } else {
+                    badge.textContent = 'AI transcription';
+                    badge.style.display = 'inline';
+                    badge.className = 'tab-source-badge';
+                }
+            } catch (e) {
+                console.warn('Songsterr fetch failed:', e);
+                badge.textContent = 'AI transcription';
+                badge.style.display = 'inline';
+                badge.className = 'tab-source-badge';
+            }
+        }
+
+        // ── Chord Sheet Loading & Rendering ──
+        async function loadChordSheet() {
+            if (!currentJob) return;
+            const panel = document.getElementById('chordSheetPanel');
+            panel.innerHTML = '<div class="cs-loading"><div class="spinner"></div><span>Fetching chords &amp; lyrics…</span></div>';
+
+            try {
+                const resp = await fetch(`${API_BASE}/chord-sheet/${currentJob.job_id}`);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+                chordSheetData = data;
+                chordSheetLoaded = true;
+                renderChordSheet(data);
+            } catch (e) {
+                panel.innerHTML = `<div class="cs-loading"><span style="color:#f77;">Could not load chord sheet: ${e.message}</span></div>`;
+            }
+        }
+
+        function renderChordSheet(data) {
+            const panel = document.getElementById('chordSheetPanel');
+            const { title, artist, key, chords, lyrics, genius_url } = data;
+
+            const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+            let html = `<div class="chord-sheet">
+                <div class="cs-header">
+                    <div class="cs-title">${esc(title || 'Unknown Track')}</div>
+                    <div class="cs-artist">${esc(artist || '')}</div>
+                    <div class="cs-meta">
+                        ${key ? `<span>🎵 Key: <strong>${esc(key)}</strong></span>` : ''}
+                        ${genius_url ? `<a href="${esc(genius_url)}" target="_blank">📝 Lyrics on Genius →</a>` : ''}
+                    </div>
+                </div>`;
+
+            const hasChords = chords && chords.length > 0;
+            const hasLyrics = lyrics && lyrics.lines && lyrics.lines.length > 0;
+
+            if (!hasChords && !hasLyrics) {
+                html += '<div class="cs-loading"><span>No chord data yet — process the song to detect chords.</span></div>';
+            } else if (hasLyrics && lyrics.type === 'synced' && hasChords) {
+                html += buildSyncedSheet(lyrics.lines, chords);
+            } else {
+                if (hasChords) html += buildChordGrid(chords);
+                if (hasLyrics) html += buildPlainLyrics(lyrics.lines);
+            }
+
+            html += '</div>';
+            panel.innerHTML = html;
+        }
+
+        function buildChordGrid(chords) {
+            const unique = [...new Set(chords.map(c => c.chord))];
+            const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+            let html = `<div class="cs-no-lyrics-note">Chord progression detected from audio. Lyrics not found — <a href="#" onclick="return false" style="color:var(--yellow)">search Genius</a> for the full lyrics.</div>`;
+            html += `<div class="cs-section-label">Chords Used</div><div class="chord-grid">`;
+            unique.forEach(c => { html += `<span class="chord-pill">${esc(c)}</span>`; });
+            html += `</div><div class="cs-section-label">Progression (4 chords per row)</div>`;
+
+            // Group into rows of 4
+            for (let i = 0; i < chords.length; i += 4) {
+                html += `<div class="chord-only-line">`;
+                chords.slice(i, i + 4).forEach(c => {
+                    html += `<span class="chord-pill">${esc(c.chord)}</span>`;
+                });
+                html += `</div>`;
+            }
+            return html;
+        }
+
+        function buildPlainLyrics(lines) {
+            const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = `<div class="cs-section-label">Lyrics</div>`;
+            lines.forEach(line => {
+                if (!line.text.trim()) {
+                    html += '<div class="cs-empty-line"></div>';
+                } else {
+                    html += `<div class="lyric-line"><div class="lyric-segment"><span class="chord-label"> </span><span class="lyric-text">${esc(line.text)}</span></div></div>`;
+                }
+            });
+            return html;
+        }
+
+        function buildSyncedSheet(lines, chords) {
+            const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            let html = '';
+
+            lines.forEach((line, idx) => {
+                if (!line.text || !line.text.trim()) {
+                    html += '<div class="cs-empty-line"></div>';
+                    return;
+                }
+
+                const lineStart = line.time;
+                const lineEnd   = line.end_time || (lineStart + 5);
+                const lineDur   = Math.max(0.01, lineEnd - lineStart);
+                const lineText  = line.text;
+                const lineLen   = lineText.length;
+
+                // Chords that change during this lyric line
+                const lineChords = chords.filter(c => c.time >= lineStart && c.time < lineEnd);
+
+                // Also grab the chord active just before this line starts (carry-over)
+                let carryChord = null;
+                if (lineChords.length === 0 || lineChords[0].time > lineStart) {
+                    const prev = chords.filter(c => c.time < lineStart);
+                    if (prev.length > 0) carryChord = prev[prev.length - 1].chord;
+                }
+
+                if (lineChords.length === 0) {
+                    html += `<div class="lyric-line" data-time="${lineStart}" data-idx="${idx}">`;
+                    html += `<div class="lyric-segment"><span class="chord-label">${carryChord ? esc(carryChord) : ' '}</span><span class="lyric-text">${esc(lineText)}</span></div>`;
+                    html += `</div>`;
+                    return;
+                }
+
+                // Build split points: [{charPos, chord}]
+                const splits = [];
+
+                // Position 0 gets the carry chord or first chord if it starts at line begin
+                const firstChordPos = Math.round(((lineChords[0].time - lineStart) / lineDur) * lineLen);
+                if (firstChordPos <= 1) {
+                    splits.push({ charPos: 0, chord: lineChords[0].chord });
+                } else {
+                    // There's leading text before first chord
+                    splits.push({ charPos: 0, chord: carryChord || '' });
+                    splits.push({ charPos: firstChordPos, chord: lineChords[0].chord });
+                }
+
+                // Remaining chords
+                for (let i = 1; i < lineChords.length; i++) {
+                    const frac = (lineChords[i].time - lineStart) / lineDur;
+                    let charPos = Math.round(frac * lineLen);
+                    // Snap to word boundary
+                    charPos = snapWordBoundary(lineText, charPos);
+                    const prev = splits[splits.length - 1].charPos;
+                    if (charPos > prev) {
+                        splits.push({ charPos, chord: lineChords[i].chord });
+                    }
+                }
+
+                // Build segments from splits
+                html += `<div class="lyric-line has-chords" data-time="${lineStart}" data-idx="${idx}">`;
+                splits.forEach((sp, si) => {
+                    const segStart = sp.charPos;
+                    const segEnd   = si + 1 < splits.length ? splits[si + 1].charPos : lineLen;
+                    const segText  = lineText.slice(segStart, segEnd);
+                    if (segText) {
+                        html += `<div class="lyric-segment"><span class="chord-label">${sp.chord ? esc(sp.chord) : ' '}</span><span class="lyric-text">${esc(segText)}</span></div>`;
+                    }
+                });
+                html += `</div>`;
+            });
+
+            return html;
+        }
+
+        function snapWordBoundary(text, pos) {
+            if (pos <= 0 || pos >= text.length) return pos;
+            const left  = text.lastIndexOf(' ', pos);
+            const right = text.indexOf(' ', pos);
+            if (left < 0 && right < 0) return pos;
+            if (left < 0) return right + 1;
+            if (right < 0) return left + 1;
+            return (pos - left <= right - pos) ? left + 1 : right + 1;
+        }
+
+        // ── Highlight active lyric line during playback ──
+        function highlightCurrentChordLine() {
+            if (currentViewMode !== 'chords' || !chordSheetData?.lyrics) return;
+            const currentTime = Object.values(stemAudios)[0]?.audio?.currentTime || 0;
+            const lines = document.querySelectorAll('#chordSheetPanel .lyric-line[data-time]');
+            let bestLine = null;
+            lines.forEach(el => {
+                const t = parseFloat(el.dataset.time);
+                if (t <= currentTime) bestLine = el;
+            });
+            lines.forEach(el => el.classList.remove('cs-active'));
+            if (bestLine) bestLine.classList.add('cs-active');
+        }
 
     </script>
 </body>

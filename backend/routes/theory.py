@@ -83,6 +83,47 @@ def get_chord_theory(job_id):
         return jsonify({'error': f'Theory analysis failed: {str(e)}'}), 500
 
 
+@theory_bp.route('/api/chord-sheet/<job_id>', methods=['GET'])
+def get_chord_sheet(job_id):
+    """Get chord sheet with lyrics for a job (for the Chords view)."""
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+
+    title = (job.metadata or {}).get('title', '')
+    artist = (job.metadata or {}).get('artist', '')
+
+    chords = job.chord_progression or []
+    key = job.detected_key or ''
+
+    lyrics_data = None
+    if title and artist:
+        try:
+            from services.lyrics import fetch_lyrics
+            lyrics_data = fetch_lyrics(title, artist)
+        except Exception as e:
+            logger.warning(f"Lyrics fetch failed: {e}")
+
+    genius_url = None
+    if title and artist:
+        try:
+            from track_info import generate_genius_url
+            genius_url = generate_genius_url(title, artist)
+        except Exception:
+            pass
+
+    return jsonify({
+        'job_id': job_id,
+        'title': title,
+        'artist': artist,
+        'key': key,
+        'chords': chords,
+        'lyrics': lyrics_data,
+        'genius_url': genius_url,
+        'chord_count': len(chords),
+    })
+
+
 @theory_bp.route('/api/theory/chord', methods=['POST'])
 def get_single_chord_theory():
     """Get scale suggestions for a single chord (no job required)."""
