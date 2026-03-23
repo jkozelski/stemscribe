@@ -680,7 +680,7 @@ def fetch_wikipedia_info(query: str) -> Optional[Dict[str, Any]]:
         url = f"{WIKIPEDIA_API}{encoded_query}"
 
         req = urllib.request.Request(url, headers={
-            'User-Agent': 'StemScribe/1.0 (music learning tool)'
+            'User-Agent': 'StemScriber/1.0 (music learning tool)'
         })
 
         with urllib.request.urlopen(req, timeout=3) as response:
@@ -716,7 +716,7 @@ def fetch_lastfm_info(artist: str, track: str = None) -> Optional[Dict[str, Any]
 
         url = f"http://ws.audioscrobbler.com/2.0/?{urllib.parse.urlencode(params)}"
 
-        req = urllib.request.Request(url, headers={'User-Agent': 'StemScribe/1.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'StemScriber/1.0'})
 
         with urllib.request.urlopen(req, timeout=3) as response:
             data = json.loads(response.read().decode('utf-8'))
@@ -755,7 +755,7 @@ def fetch_musicbrainz_album(artist: str, track: str) -> Optional[Dict[str, Any]]
         url = f"{MUSICBRAINZ_API}recording/?query={encoded_query}&fmt=json&limit=5"
 
         req = urllib.request.Request(url, headers={
-            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'  # MusicBrainz requires contact info
+            'User-Agent': 'StemScriber/1.0 (jkozelski@gmail.com)'  # MusicBrainz requires contact info
         })
 
         with urllib.request.urlopen(req, timeout=3) as response:
@@ -818,7 +818,7 @@ def fetch_musicbrainz_artist_members(artist: str) -> Optional[Dict[str, str]]:
         url = f"{MUSICBRAINZ_API}artist/?query={encoded_query}&fmt=json&limit=1"
 
         req = urllib.request.Request(url, headers={
-            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'
+            'User-Agent': 'StemScriber/1.0 (jkozelski@gmail.com)'
         })
 
         with urllib.request.urlopen(req, timeout=3) as response:
@@ -836,7 +836,7 @@ def fetch_musicbrainz_artist_members(artist: str) -> Optional[Dict[str, str]]:
         detail_url = f"{MUSICBRAINZ_API}artist/{artist_id}?inc=artist-rels&fmt=json"
 
         req = urllib.request.Request(detail_url, headers={
-            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'
+            'User-Agent': 'StemScriber/1.0 (jkozelski@gmail.com)'
         })
 
         time.sleep(0.2)  # Brief pause for MusicBrainz rate limit
@@ -879,7 +879,7 @@ def fetch_musicbrainz_artist_url(artist: str) -> Optional[str]:
         url = f"{MUSICBRAINZ_API}artist/?query={encoded_query}&fmt=json&limit=1"
 
         req = urllib.request.Request(url, headers={
-            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'
+            'User-Agent': 'StemScriber/1.0 (jkozelski@gmail.com)'
         })
 
         with urllib.request.urlopen(req, timeout=3) as response:
@@ -898,7 +898,7 @@ def fetch_musicbrainz_artist_url(artist: str) -> Optional[str]:
         detail_url = f"{MUSICBRAINZ_API}artist/{artist_id}?inc=url-rels&fmt=json"
 
         req = urllib.request.Request(detail_url, headers={
-            'User-Agent': 'StemScribe/1.0 (jkozelski@gmail.com)'
+            'User-Agent': 'StemScriber/1.0 (jkozelski@gmail.com)'
         })
 
         with urllib.request.urlopen(req, timeout=3) as response:

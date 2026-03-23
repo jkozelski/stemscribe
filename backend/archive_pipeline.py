@@ -159,7 +159,7 @@ class ArchivePipeline:
         self.session = requests.Session() if REQUESTS_AVAILABLE else None
         if self.session:
             self.session.headers.update({
-                'User-Agent': 'StemScribe/1.0 (music transcription tool; https://github.com/jkozelski/stemscribe)'
+                'User-Agent': 'StemScriber/1.0 (music transcription tool; https://stemscriber.com)'
             })
 
     def _rate_limit_wait(self):

@@ -9,11 +9,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="StemScriber">
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <meta name="description" content="Upload any song. Get separated stems, Guitar Pro tabs, chord detection, and practice tools for every instrument. The only end-to-end audio-to-tab platform.">
     <meta property="og:title" content="StemScriber — Tear The Sound Apart">
     <meta property="og:description" content="Upload any song. Get stems, tabs, and Guitar Pro files for every instrument.">
@@ -42,10 +40,9 @@
         </a>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">&#9776;</button>
         <div class="nav-links-landing" id="navLinksLanding">
-            <a href="/practice.html">Practice Mode</a>
-            <a href="/tuner.html">Tuner</a>
-            <a href="/fretboard.html">Fretboard</a>
-            <a href="/karaoke">Karaoke</a>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
             <!-- Auth: Sign-In Button (shown when logged out) -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
                 <svg class="auth-google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -55,7 +52,6 @@
             <div class="auth-profile-dropdown">
                 <button class="auth-profile-btn" onclick="StemScribe.toggleProfileMenu(event)">
                     <img class="auth-profile-avatar" src="" alt="">
-                    <svg class="auth-google-profile-icon" viewBox="0 0 24 24" style="display:none;width:24px;height:24px;flex-shrink:0;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     <span class="auth-profile-name"></span>
                     <span class="auth-profile-chevron">&#9662;</span>
                 </button>
@@ -96,7 +92,7 @@
         </div>
         <div class="hero-cta-group">
             <a href="/app" class="btn-primary">&#10022; Try It Free</a>
-            <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+            <a href="#how-it-works" class="btn-secondary" onclick="event.preventDefault();document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'});">See How It Works</a>
         </div>
         <p class="hero-note">3 free songs per month. No credit card required.</p>
     </section>
@@ -128,6 +124,7 @@
                 <div class="step-desc">Mix stems, slow things down, loop tricky sections, detect chords, and export Guitar Pro files. Learn from the masters.</div>
             </div>
         </div>
+
     </section>
 
     <!-- Features -->
@@ -299,9 +296,9 @@
                 <a href="mailto:stemscribe.io@gmail.com">Contact</a>
                 <a href="/contact.html">Support</a>
                 <a href="https://www.facebook.com/profile.php?id=61582164772137" target="_blank" rel="noopener">Facebook</a>
-                <a href="https://www.instagram.com/stemscribe_app/" target="_blank" rel="noopener">Instagram</a>
-                <a href="https://x.com/stemscribe_app" target="_blank" rel="noopener">X</a>
-                <a href="https://www.tiktok.com/@stemscribe_app" target="_blank" rel="noopener">TikTok</a>
+                <a href="https://www.instagram.com/stemscriber" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://x.com/stemscriber" target="_blank" rel="noopener">X</a>
+                <a href="https://www.tiktok.com/@stemscriber" target="_blank" rel="noopener">TikTok</a>
                 <a href="/app">Launch App</a>
             </div>
             <div class="footer-links" style="margin-top:0.5rem;">
@@ -309,6 +306,7 @@
                 <a href="/privacy.html">Privacy Policy</a>
                 <a href="/dmca.html">DMCA</a>
                 <a href="/billing-faq.html">Billing FAQ</a>
+                <a href="/credits.html">Open Source Credits</a>
             </div>
             <div class="footer-copy">
                 &copy; 2026 StemScriber
