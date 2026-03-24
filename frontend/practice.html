@@ -3045,19 +3045,24 @@
                     }
                 }
 
-                // If no Songsterr tabs loaded, prefer job's own GP/MusicXML files,
-                // then fall through to chord chart / AI chords.
+                // Always show the view toggle when a job is loaded
+                var _vt = document.getElementById('viewToggle');
+                if (_vt) _vt.classList.add('visible');
+
+                // Load job's own GP/MusicXML notation if no Songsterr tabs
                 if (!songsterrLoaded) {
                     const hasGP = currentJob.gp_files && Object.keys(currentJob.gp_files).length > 0;
                     const hasXML = currentJob.musicxml_files && Object.keys(currentJob.musicxml_files).length > 0;
                     if (hasGP || hasXML) {
-                        // Auto-load the active stem tab's notation (or first available)
                         const activeStemBtn = document.querySelector('#stemTabs .stem-tab.active');
                         const stemToLoad = (activeStemBtn && activeStemBtn.dataset.stem) || requestedStem || 'guitar';
-                        await loadNotationForStem(stemToLoad);
-                    } else {
-                        await loadChordChart(currentSongsterrId || null);
+                        loadNotationForStem(stemToLoad);
                     }
+                }
+
+                // Always load chord chart regardless of Songsterr — use Songsterr ID if available
+                if (!currentChordData && !currentUGData && !currentManualChart) {
+                    await loadChordChart(currentSongsterrId || null);
                 }
             } catch (error) {
                 console.error('Failed to load job:', error);
@@ -5809,9 +5814,14 @@
             } catch (err) {
                 var loErr = document.getElementById('loadingOverlay');
                 if (loErr) loErr.classList.add('hidden');
-                var emptyStateErr = document.getElementById('emptyState');
-                if (emptyStateErr) emptyStateErr.style.display = '';
-                showToast('Failed to load tabs: ' + err.message);
+                // Only show empty state if no job is loaded; otherwise fall back to chord chart
+                if (!currentJob) {
+                    var emptyStateErr = document.getElementById('emptyState');
+                    if (emptyStateErr) emptyStateErr.style.display = '';
+                } else {
+                    showToast('Tabs unavailable — showing chords instead.');
+                    switchView('chords');
+                }
                 console.error('Songsterr load failed:', err);
             }
         }
