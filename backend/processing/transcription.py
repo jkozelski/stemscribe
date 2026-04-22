@@ -5,6 +5,7 @@ Contains the main transcribe_to_midi routing function which dispatches to the
 appropriate transcriber (neural, Basic Pitch, melody, etc.) per stem type.
 """
 
+import os
 import logging
 import numpy as np
 from pathlib import Path
@@ -12,6 +13,24 @@ from pathlib import Path
 from models.job import ProcessingJob, OUTPUT_DIR
 
 logger = logging.getLogger(__name__)
+
+
+# ============ FEATURE FLAG: CRNN TRANSCRIPTION ============
+#
+# Gates the 4 CRNN transcribers (guitar, bass, drums, piano) and the Trimplexx
+# guitar-tab CRNN. When disabled, these CPU-bound stages are skipped and the
+# pipeline falls through to Basic Pitch / melody extractor / enhanced
+# transcriber as appropriate.
+#
+# Disabled by default for the 2026-05-12 launch — the tab view is cut for
+# launch, and these stages add ~2-3 min wall time + significant memory
+# pressure on the 8 GB Hetzner VPS (prime suspect for the Apr 15-16 OOM
+# events).
+#
+# Checked at runtime (not import time) so tests can toggle it without
+# reloading the module.
+def is_crnn_transcription_enabled():
+    return os.environ.get('ENABLE_CRNN_TRANSCRIPTION', 'false').lower() in ('true', '1', 'yes')
 
 # ============ CONDITIONAL IMPORTS (single source of truth: dependencies.py) ============
 
@@ -214,7 +233,12 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                 drum_midi_path = midi_output_dir / f"{stem_name}_transcribed.mid"
 
                 # HIGHEST PRIORITY: Our trained CRNN drum model (E-GMD, 8 classes)
-                if DRUM_NN_MODEL_AVAILABLE:
+                if DRUM_NN_MODEL_AVAILABLE and not is_crnn_transcription_enabled():
+                    logger.info(
+                        f"⏭️ CRNN transcription disabled (ENABLE_CRNN_TRANSCRIPTION=false) "
+                        f"— skipping neural drum model for {stem_name}"
+                    )
+                elif DRUM_NN_MODEL_AVAILABLE:
                     logger.info(f"🥁 Transcribing {stem_name} with neural drum model (CRNN)...")
                     job.stage = f'Transcribing {stem_name} (neural drum model)'
 
@@ -332,7 +356,12 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
             stem_type = stem_name.lower().split('_')[0]  # Handle guitar_left, bass_right, etc.
 
             # ---- HIGHEST PRIORITY: Trimplexx CRNN (string+fret output) ----
-            if stem_type == 'guitar' and TRIMPLEXX_MODEL_AVAILABLE:
+            if stem_type == 'guitar' and TRIMPLEXX_MODEL_AVAILABLE and not is_crnn_transcription_enabled():
+                logger.info(
+                    f"⏭️ CRNN transcription disabled (ENABLE_CRNN_TRANSCRIPTION=false) "
+                    f"— skipping trimplexx guitar tablature for {stem_name}"
+                )
+            elif stem_type == 'guitar' and TRIMPLEXX_MODEL_AVAILABLE:
                 logger.info(f"Transcribing {stem_name} with trimplexx CRNN (string+fret)...")
                 job.stage = f'Transcribing {stem_name} (trimplexx tablature)'
 
@@ -377,7 +406,12 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                     logger.warning(f"Trimplexx failed for {stem_name}: {e}")
 
             # ---- FALLBACK: Guitar v3 NN model ----
-            if stem_type == 'guitar' and GUITAR_NN_MODEL_AVAILABLE:
+            if stem_type == 'guitar' and GUITAR_NN_MODEL_AVAILABLE and not is_crnn_transcription_enabled():
+                logger.info(
+                    f"⏭️ CRNN transcription disabled (ENABLE_CRNN_TRANSCRIPTION=false) "
+                    f"— skipping guitar v3 NN for {stem_name}"
+                )
+            elif stem_type == 'guitar' and GUITAR_NN_MODEL_AVAILABLE:
                 logger.info(f"Transcribing {stem_name} with guitar v3 NN model...")
                 job.stage = f'Transcribing {stem_name} (guitar v3 NN)'
 
@@ -493,7 +527,12 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                     # Fall through to melody extractor / enhanced transcriber
 
             # ---- HIGHEST PRIORITY: Bass v3 NN model ----
-            if stem_type == 'bass' and BASS_NN_MODEL_AVAILABLE:
+            if stem_type == 'bass' and BASS_NN_MODEL_AVAILABLE and not is_crnn_transcription_enabled():
+                logger.info(
+                    f"⏭️ CRNN transcription disabled (ENABLE_CRNN_TRANSCRIPTION=false) "
+                    f"— skipping bass v3 NN for {stem_name}"
+                )
+            elif stem_type == 'bass' and BASS_NN_MODEL_AVAILABLE:
                 logger.info(f"Transcribing {stem_name} with bass v3 NN model...")
                 job.stage = f'Transcribing {stem_name} (bass v3 NN)'
 
@@ -572,7 +611,12 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
                     # Fall through to melody extractor / enhanced transcriber
 
             # ---- HIGHEST PRIORITY: Neural piano model for piano/keys stems ----
-            if stem_type in ('piano', 'keys', 'keyboard') and PIANO_MODEL_AVAILABLE:
+            if stem_type in ('piano', 'keys', 'keyboard') and PIANO_MODEL_AVAILABLE and not is_crnn_transcription_enabled():
+                logger.info(
+                    f"⏭️ CRNN transcription disabled (ENABLE_CRNN_TRANSCRIPTION=false) "
+                    f"— skipping neural piano model for {stem_name}"
+                )
+            elif stem_type in ('piano', 'keys', 'keyboard') and PIANO_MODEL_AVAILABLE:
                 logger.info(f"🎹 Transcribing {stem_name} with neural piano model (CRNN)...")
                 job.stage = f'Transcribing {stem_name} (neural piano model)'
 
