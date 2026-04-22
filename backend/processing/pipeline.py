@@ -576,6 +576,18 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         job.status = 'completed'
         logger.info(f"Job {job.job_id} completed successfully with {len(job.stems)} stems, {len(job.sub_stems)} skill outputs")
 
+        # Job-done notification. Email-first for launch (SMS disabled on
+        # 843 local number — see memory/project_sms_broken.md). The SMS
+        # path does not currently hook job completion; when it is added back,
+        # gate it with `if not job_emails_enabled()` so we don't double-notify.
+        try:
+            from notifications import send_job_complete_email, job_emails_enabled
+            if job_emails_enabled():
+                send_job_complete_email(job)
+            # else: SMS fallback would go here once Twilio 10DLC is live.
+        except Exception as e:
+            logger.warning(f"Job-complete notification failed (non-fatal): {e}")
+
         # Google Drive upload is now on-demand, user-initiated from the UI.
         # See backend/routes/drive.py for the /api/drive/export endpoint.
 

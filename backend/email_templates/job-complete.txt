@@ -1,0 +1,20 @@
+Your song is ready on StemScriber
+
+Hey{{first_name_prefix}},
+
+{{song_title}} finished processing. Six stems and a chord chart are waiting in practice mode.
+
+- Song: {{song_title}}
+- Stems: vocals, guitar, bass, drums, piano, backing vocals
+- Chord chart: ready
+
+Open practice mode: {{practice_url}}
+
+Mute/solo any stem, slow it down to 50%, loop a hard bar. If something looks off, hit reply — I read every email.
+
+— Jeff
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+Privacy: https://stemscriber.com/privacy
+Unsubscribe from job notifications: mailto:support@stemscriber.com?subject=unsubscribe%20job%20notifications
