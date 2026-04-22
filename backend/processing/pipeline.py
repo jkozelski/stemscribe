@@ -574,6 +574,9 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         job.progress = 100
         job.stage = 'Complete'
         job.status = 'completed'
+        # Record completion time for retention policy (uploads 48h / outputs 7d)
+        import time as _time
+        job.metadata['completed_at'] = _time.time()
         logger.info(f"Job {job.job_id} completed successfully with {len(job.stems)} stems, {len(job.sub_stems)} skill outputs")
 
         # Job-done notification. Email-first for launch (SMS disabled on

@@ -326,6 +326,16 @@ def create_app():
     except Exception as e:
         logger.warning(f"Watchdog not available: {e}")
 
+    # ---- Start retention sweeper (background thread) ----
+    # Deletes uploads after UPLOAD_RETENTION_HOURS (default 48h) and outputs
+    # after OUTPUT_RETENTION_DAYS (default 7d). Dry-run by default — flip
+    # RETENTION_DRY_RUN=false in .env to activate. See processing/retention.py.
+    try:
+        from processing.retention import start_retention_sweeper
+        start_retention_sweeper(app)
+    except Exception as e:
+        logger.warning(f"Retention sweeper not available: {e}")
+
     return app
 
 
