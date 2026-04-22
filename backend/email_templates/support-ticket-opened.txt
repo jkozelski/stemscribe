@@ -1,0 +1,18 @@
+We got it — ref #{{ticket_id}}
+
+Hey {{first_name}},
+
+Your message landed. I'll read it and get back to you within 24 hours — usually a lot sooner.
+
+Your ticket reference: #{{ticket_id}}
+
+Hang onto that ticket number in case you need to follow up. If you remember something else you wanted to add, just reply to this email — it'll attach to the same thread.
+
+If it's urgent (can't log in, something's charged wrong, data looks missing), say the word "urgent" in your reply and I'll bump it.
+
+— Jeff
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+Privacy: https://stemscriber.com/privacy
+Unsubscribe: mailto:support@stemscriber.com?subject=unsubscribe

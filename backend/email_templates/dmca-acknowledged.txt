@@ -1,0 +1,26 @@
+DMCA Takedown Notice — Acknowledgment
+Reference: #{{ticket_id}}
+
+Dear {{name}},
+
+This message confirms receipt of your notification of claimed infringement submitted to StemScriber pursuant to the Digital Millennium Copyright Act, 17 U.S.C. § 512(c). Your notice has been logged by our designated agent and assigned the reference number above.
+
+Next steps:
+
+- Our team will review the notice for compliance with 17 U.S.C. § 512(c)(3) within 24-48 hours of receipt.
+- If the notice substantially complies with statutory requirements, the identified material will be removed or access to it disabled, and the user responsible will be notified.
+- The affected user may submit a counter-notification pursuant to 17 U.S.C. § 512(g)(3). If a valid counter-notification is received, we will forward it to you and, absent notice of a filed court action within 10-14 business days, may restore the material.
+- If the notice is deficient, we may request clarification or additional information before acting.
+
+Please retain this reference number for any further correspondence regarding this matter. Please be advised that under 17 U.S.C. § 512(f), any person who knowingly materially misrepresents that material is infringing may be liable for damages.
+
+Correspondence regarding this notice should be directed to support@stemscriber.com with the reference number in the subject line.
+
+Regards,
+The StemScriber Team
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+DMCA Agent: support@stemscriber.com
+Privacy: https://stemscriber.com/privacy
+Unsubscribe: mailto:support@stemscriber.com?subject=unsubscribe

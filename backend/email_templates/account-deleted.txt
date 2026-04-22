@@ -1,0 +1,24 @@
+Your StemScriber account has been deleted
+
+Hey {{first_name}},
+
+This is your confirmation — your StemScriber account is gone. Per our privacy policy, we've removed:
+
+- Your profile and login info
+- Every song you uploaded
+- All stems, chord charts, and tabs we generated for you
+- Your practice history and saved loops
+- Subscription records (kept only as required by tax and accounting law)
+
+This is permanent. We don't keep a 30-day grace copy. If you want back in, you're starting fresh with a new account.
+
+If you didn't request this deletion, email me right now at support@stemscriber.com so we can investigate.
+
+Thanks for giving StemScriber a shot. If you ever want to tell me what we could've done better, I'd really love to hear it.
+
+— Jeff
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+Privacy: https://stemscriber.com/privacy
+Unsubscribe: mailto:support@stemscriber.com?subject=unsubscribe

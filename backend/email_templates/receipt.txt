@@ -1,0 +1,23 @@
+StemScriber — Payment Receipt
+
+Hey {{first_name}},
+
+Quick confirmation that we got your payment. Here's the receipt for your records.
+
+Amount: {{amount}}
+Plan: {{plan}}
+Next billing date: {{next_billing_date}}
+Invoice ID: {{invoice_id}}
+
+Tax: included where applicable. Kozelski Enterprises LLC is a U.S. entity registered in South Carolina.
+
+Manage billing: https://stemscriber.com/billing
+
+Thanks for keeping the lights on — seriously. Any billing questions, just reply here.
+
+— Jeff
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+Privacy: https://stemscriber.com/privacy
+Unsubscribe: mailto:support@stemscriber.com?subject=unsubscribe

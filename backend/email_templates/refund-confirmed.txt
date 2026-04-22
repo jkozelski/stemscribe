@@ -1,0 +1,22 @@
+Your refund is on the way
+
+Hey {{first_name}},
+
+Confirmed — your refund has been processed. No hoops, no hassle.
+
+Refund amount: {{amount}}
+Original charge date: {{original_charge_date}}
+Expected arrival: {{expected_arrival}}
+
+Heads up: on your bank or card statement this will show as StemScriber or Kozelski Enterprises. Same thing — don't dispute it.
+
+If it doesn't show up by the expected date, reply here and I'll track it down with our processor.
+
+Sorry it wasn't the right fit — if you ever want to give it another shot, your account's still here.
+
+— Jeff
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+Privacy: https://stemscriber.com/privacy
+Unsubscribe: mailto:support@stemscriber.com?subject=unsubscribe

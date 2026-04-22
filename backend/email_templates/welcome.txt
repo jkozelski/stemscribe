@@ -1,0 +1,24 @@
+Welcome to StemScriber
+
+Hey {{first_name}},
+
+Really glad you're here. StemScriber tears a song apart so you can learn it — vocals, guitar, bass, drums, piano, backing vocals, all on their own tracks, plus a chord chart you can actually read.
+
+Here's the quick start:
+
+1. Upload a song (MP3, WAV, FLAC, or OGG).
+2. Wait a couple minutes while we separate it.
+3. You'll get six stems, a chord chart, and practice mode — loop sections, slow things down, isolate parts.
+
+Free tier gets you 3 songs a month — try it on something you've been meaning to learn.
+
+Upload your first song: https://stemscriber.com/app
+
+If you hit anything weird, just hit reply. I read every email.
+
+— Jeff
+
+---
+Kozelski Enterprises LLC, Charleston, SC
+Privacy: https://stemscriber.com/privacy
+Unsubscribe: mailto:support@stemscriber.com?subject=unsubscribe
