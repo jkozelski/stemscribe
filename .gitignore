@@ -112,3 +112,9 @@ backend/watchdog_log.json
 # Claude Code local settings
 .claude/
 
+# Large training data (2.1 GB + 2.7 GB)
+train_tab_model/guitarset_data/
+train_tab_model/trimplexx/
+train_*/data/
+train_*/datasets/
+

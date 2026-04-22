@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refund Policy — StemScriber</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a26;
+      --border: #2a2a3a;
+      --text-primary: #e8e8f0;
+      --text-secondary: #9898b0;
+      --text-muted: #6a6a80;
+      --orange: #ff6b35;
+      --orange-glow: rgba(255, 107, 53, 0.15);
+      --pink: #e84393;
+      --pink-glow: rgba(232, 67, 147, 0.15);
+      --green: #00d2a0;
+      --green-glow: rgba(0, 210, 160, 0.15);
+      --font-display: 'Righteous', cursive;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-body: 'Outfit', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(255, 107, 53, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(232, 67, 147, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* Header */
+    .brand {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      background: linear-gradient(135deg, var(--orange), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-header h1 {
+      font-family: var(--font-heading);
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin: 20px 0 12px;
+      color: var(--text-primary);
+    }
+
+    .page-header .effective-date {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Sections */
+    h2 {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 40px 0 16px;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 24px 0 10px;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      font-size: 1rem;
+    }
+
+    a {
+      color: var(--orange);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    a:hover { color: var(--pink); }
+
+    strong { color: var(--text-primary); font-weight: 600; }
+
+    /* Policy tier cards */
+    .tier-grid {
+      display: grid;
+      gap: 16px;
+      margin: 24px 0 32px;
+    }
+
+    .tier-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tier-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .tier-card.green::before { background: linear-gradient(90deg, var(--green), var(--green) 80%, transparent); }
+    .tier-card.orange::before { background: linear-gradient(90deg, var(--orange), var(--orange) 80%, transparent); }
+    .tier-card.pink::before { background: linear-gradient(90deg, var(--pink), var(--pink) 80%, transparent); }
+
+    .tier-card .tier-badge {
+      display: inline-block;
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .tier-card.green .tier-badge {
+      background: var(--green-glow);
+      color: var(--green);
+    }
+
+    .tier-card.orange .tier-badge {
+      background: var(--orange-glow);
+      color: var(--orange);
+    }
+
+    .tier-card.pink .tier-badge {
+      background: var(--pink-glow);
+      color: var(--pink);
+    }
+
+    .tier-card .tier-title {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .tier-card p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+    }
+
+    /* Info callout */
+    .callout {
+      background: var(--bg-card);
+      border-left: 3px solid var(--orange);
+      border-radius: 0 10px 10px 0;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+
+    .callout p { margin-bottom: 0; font-size: 0.95rem; }
+
+    /* Consent box */
+    .consent-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      font-family: var(--font-body);
+    }
+
+    .consent-box .checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .consent-box .checkbox-label .fake-checkbox {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+
+    /* Contact section */
+    .contact-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 36px;
+      text-align: center;
+    }
+
+    .contact-section h2 {
+      margin-top: 0;
+    }
+
+    .contact-email {
+      display: inline-block;
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--orange);
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { padding: 40px 18px 60px; }
+      .page-header h1 { font-size: 1.8rem; }
+      .tier-card { padding: 20px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-bg"></div>
+  <div class="container">
+
+    <header class="page-header">
+      <a href="https://stemscriber.com" class="brand">StemScriber</a>
+      <h1>Refund Policy</h1>
+      <p class="effective-date">Effective Date: March 24, 2026</p>
+    </header>
+
+    <p>We want you to be completely satisfied with StemScriber. This policy explains when and how you can request a refund for your purchase. By completing your purchase, you agree to the terms outlined below.</p>
+
+    <h2>Refund Tiers</h2>
+
+    <div class="tier-grid">
+
+      <div class="tier-card green">
+        <span class="tier-badge">Days 1–7</span>
+        <div class="tier-title">Full Refund — No Questions Asked</div>
+        <p>If you request a refund within <strong>7 days</strong> of your purchase date and have used <strong>fewer than 5 processing jobs</strong>, you are entitled to a full refund with no questions asked. Simply contact us and we will process your refund promptly.</p>
+      </div>
+
+      <div class="tier-card orange">
+        <span class="tier-badge">Days 8–30</span>
+        <div class="tier-title">Conditional Refund — Technical Issues Only</div>
+        <p>After the 7-day window but within <strong>30 days</strong> of your purchase, refunds are available only for <strong>verified technical issues</strong> that prevent you from using StemScriber as intended. Examples include persistent processing failures, account access problems, or service outages that we are unable to resolve. You may be asked to provide details or screenshots so our team can investigate.</p>
+      </div>
+
+      <div class="tier-card pink">
+        <span class="tier-badge">After Day 30</span>
+        <div class="tier-title">No Refunds</div>
+        <p>Refund requests submitted more than <strong>30 days</strong> after purchase are not eligible for a refund. We encourage you to evaluate StemScriber early in your subscription to ensure it meets your needs.</p>
+      </div>
+
+    </div>
+
+    <h2>Usage Cap for the 7-Day Window</h2>
+    <p>The no-questions-asked refund within the first 7 days is subject to a usage cap of <strong>fewer than 5 processing jobs</strong>. A processing job includes any stem separation or transcription task submitted through StemScriber. If you have used 5 or more processing jobs, your refund request will be evaluated under the conditional refund policy (technical issues only), regardless of when it is submitted within the 7-day period.</p>
+
+    <h2>How to Request a Refund</h2>
+    <p>To request a refund, email us at <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> with the following information:</p>
+    <p><strong>Subject line:</strong> Refund Request</p>
+    <p>Please include your account email address, the approximate date of purchase, and — if applicable — a description of the technical issue you experienced. We aim to respond to all refund requests within <strong>2 business days</strong>.</p>
+
+    <h2>Refund Processing</h2>
+    <p>Approved refunds are processed through the original payment method. Depending on your bank or payment provider, it may take <strong>5–10 business days</strong> for the refund to appear in your account. We will send you a confirmation email once the refund has been initiated.</p>
+
+    <h2>Checkout Consent</h2>
+    <p>Before completing your purchase on StemScriber, you are required to acknowledge this refund policy by checking a consent box at checkout. The consent language reads:</p>
+
+    <div class="consent-box">
+      <div class="checkbox-label">
+        <div class="fake-checkbox"></div>
+        <span>I have read and agree to the <a href="/refund-policy">Refund Policy</a>. I understand that refunds are available within 7 days of purchase (subject to a usage cap of fewer than 5 processing jobs), and that after 7 days refunds are only issued for verified technical issues through day 30. No refunds are available after 30 days.</span>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p>This checkbox must be checked before the purchase can be completed. The timestamp of consent is recorded alongside your transaction for our records.</p>
+    </div>
+
+    <h2>Exceptions and Disputes</h2>
+    <p>If you believe your situation warrants special consideration outside the terms above, please contact us. We review exceptions on a case-by-case basis and will do our best to reach a fair resolution. If we are unable to resolve a dispute directly, you retain all rights available to you through your payment provider's dispute process.</p>
+
+    <h2>Policy Changes</h2>
+    <p>We may update this refund policy from time to time. Any changes will be posted on this page with a revised effective date. Changes apply only to purchases made after the updated policy takes effect.</p>
+
+    <div class="contact-section">
+      <h2>Questions?</h2>
+      <p>If you have any questions about this policy or need help with a refund, reach out to us anytime.</p>
+      <a href="mailto:support@stemscriber.com" class="contact-email">support@stemscriber.com</a>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 StemScriber. All rights reserved.</p>
+    </footer>
+
+  </div>
+</body>
+</html>

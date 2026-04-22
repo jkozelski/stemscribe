@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Confirm Refund — StemScriber</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <meta name="theme-color" content="#ff7b54">
+    <meta name="description" content="Confirm your StemScriber refund request.">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-dark: #13131a;
+            --bg-card: #1a1a24;
+            --accent: #ff7b54;
+            --accent-pink: #ff4d8d;
+            --accent-dim: rgba(255, 123, 84, 0.15);
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: rgba(255, 255, 255, 0.06);
+            --success: #4ade80;
+            --error: #ff5577;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-dark);
+        }
+
+        .logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+        .logo-img { width: 32px; height: 32px; }
+        .logo-text {
+            font-family: 'Righteous', cursive;
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-label {
+            display: inline-block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .lede {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .detail-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 1.75rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+
+        .detail-label { color: var(--text-dim); }
+        .detail-value { color: var(--text); font-weight: 500; }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.95rem 1.25rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            color: #fff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(255, 123, 84, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 0.9rem;
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.15);
+            text-decoration: none;
+        }
+
+        .status-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .status-icon.success {
+            background: rgba(74, 222, 128, 0.15);
+            color: var(--success);
+        }
+
+        .status-icon.error {
+            background: rgba(255, 85, 119, 0.12);
+            color: var(--error);
+        }
+
+        .state-msg {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .state-sub {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .signoff {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            font-style: italic;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .hidden { display: none !important; }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #555;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        footer a {
+            color: #888;
+            text-decoration: none;
+            margin: 0 0.45rem;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 560px) {
+            .card { padding: 2rem 1.25rem; }
+            h1 { font-size: 1.5rem; }
+            .header { padding: 1rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="32" height="32">
+            <span class="logo-text">StemScriber</span>
+        </a>
+    </header>
+
+    <main class="main">
+        <div class="card" id="card">
+
+            <!-- Loading / verifying token -->
+            <div id="state-loading">
+                <span class="card-label">Verifying</span>
+                <h1>Checking your link</h1>
+                <p class="lede"><span class="spinner"></span>One moment while we look up your request.</p>
+            </div>
+
+            <!-- Initial confirm state -->
+            <div id="state-confirm" class="hidden">
+                <span class="card-label">Refund Request</span>
+                <h1>Confirm your refund</h1>
+                <p class="lede">You clicked the confirmation link we emailed you. Once you confirm, we'll start the refund right away.</p>
+
+                <div class="detail-box" id="detail-box">
+                    <div class="detail-row">
+                        <span class="detail-label">Amount</span>
+                        <span class="detail-value" id="field-amount">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Card</span>
+                        <span class="detail-value" id="field-card">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Arrives in</span>
+                        <span class="detail-value" id="field-timeframe">5–10 business days</span>
+                    </div>
+                    <div class="detail-row" id="row-account">
+                        <span class="detail-label">Account</span>
+                        <span class="detail-value" id="field-account">—</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="btn-confirm">Confirm refund</button>
+                <a href="mailto:support@stemscriber.com?subject=Not%20me%20%E2%80%94%20refund%20request" class="btn-secondary">This wasn't me</a>
+            </div>
+
+            <!-- Processing -->
+            <div id="state-processing" class="hidden">
+                <span class="card-label">Processing</span>
+                <h1>Starting your refund</h1>
+                <p class="lede"><span class="spinner"></span>Hang tight — we're kicking this off with our payment processor.</p>
+            </div>
+
+            <!-- Success -->
+            <div id="state-success" class="hidden">
+                <div class="status-icon success">&#10003;</div>
+                <h1>Refund on the way</h1>
+                <p class="state-msg" id="success-msg">Your refund is processed. You'll see it on your card in 5–10 business days.</p>
+                <p class="state-sub">We'll email a receipt once it clears. Thanks for trying StemScriber — if there's anything we could have done better, hit reply on that email. We read every one.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <!-- Error: expired -->
+            <div id="state-expired" class="hidden">
+                <div class="status-icon error">!</div>
+                <h1>This link expired</h1>
+                <p class="state-msg">Confirmation links are only good for 24 hours for your security.</p>
+                <p class="state-sub">No problem — email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll send you a fresh link.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <!-- Error: invalid -->
+            <div id="state-invalid" class="hidden">
+                <div class="status-icon error">!</div>
+                <h1>We don't recognize this link</h1>
+                <p class="state-msg">The link may have been copied incorrectly, or it's been revoked.</p>
+                <p class="state-sub">If you meant to request a refund, reach out to <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll sort it out directly.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <!-- Error: already used -->
+            <div id="state-used" class="hidden">
+                <div class="status-icon error">&#10003;</div>
+                <h1>Already confirmed</h1>
+                <p class="state-msg">Looks like this refund was already confirmed from another session or tab.</p>
+                <p class="state-sub">If you didn't expect this, email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll take a look. Otherwise you're all set — the refund is on its way.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <!-- Error: generic -->
+            <div id="state-error" class="hidden">
+                <div class="status-icon error">!</div>
+                <h1>Something went sideways</h1>
+                <p class="state-msg" id="error-msg">We couldn't process that right now.</p>
+                <p class="state-sub">Give it another shot, or email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll handle it by hand.</p>
+                <button class="btn btn-primary" id="btn-retry">Try again</button>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 StemScriber &middot; Kozelski Enterprises LLC &middot; Charleston, SC
+        &nbsp;|&nbsp;
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/dmca.html">DMCA</a>
+        <a href="mailto:support@stemscriber.com">Support</a>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var ACTION = 'refund';
+            var API_URL = '/api/confirm/' + ACTION;
+
+            var states = {
+                loading: document.getElementById('state-loading'),
+                confirm: document.getElementById('state-confirm'),
+                processing: document.getElementById('state-processing'),
+                success: document.getElementById('state-success'),
+                expired: document.getElementById('state-expired'),
+                invalid: document.getElementById('state-invalid'),
+                used: document.getElementById('state-used'),
+                error: document.getElementById('state-error')
+            };
+
+            function show(name) {
+                Object.keys(states).forEach(function (k) {
+                    states[k].classList.add('hidden');
+                });
+                if (states[name]) states[name].classList.remove('hidden');
+            }
+
+            function getToken() {
+                var params = new URLSearchParams(window.location.search);
+                return params.get('token');
+            }
+
+            function renderUserInfo(info) {
+                if (!info || typeof info !== 'object') return;
+
+                var amount = info.amount || info.refund_amount;
+                if (amount) {
+                    document.getElementById('field-amount').textContent =
+                        typeof amount === 'number' ? '$' + amount.toFixed(2) : String(amount);
+                }
+
+                var cardLast4 = info.card_last4 || info.last4;
+                var cardBrand = info.card_brand || info.brand || 'Card';
+                if (cardLast4) {
+                    document.getElementById('field-card').textContent =
+                        cardBrand + ' ending in ' + cardLast4;
+                }
+
+                if (info.timeframe) {
+                    document.getElementById('field-timeframe').textContent = info.timeframe;
+                }
+
+                if (info.email || info.account) {
+                    document.getElementById('field-account').textContent =
+                        info.email || info.account;
+                } else {
+                    var row = document.getElementById('row-account');
+                    if (row) row.style.display = 'none';
+                }
+            }
+
+            function mapError(message, code) {
+                var m = ((message || '') + ' ' + (code || '')).toLowerCase();
+                if (m.indexOf('expire') !== -1) return 'expired';
+                if (m.indexOf('used') !== -1 || m.indexOf('consumed') !== -1 || m.indexOf('already') !== -1) return 'used';
+                if (m.indexOf('invalid') !== -1 || m.indexOf('not found') !== -1 || m.indexOf('unknown') !== -1) return 'invalid';
+                return 'error';
+            }
+
+            function post(body) {
+                return fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(body)
+                }).then(function (res) {
+                    return res.json().then(function (data) {
+                        return { ok: res.ok, status: res.status, data: data };
+                    }).catch(function () {
+                        return { ok: false, status: res.status, data: {} };
+                    });
+                });
+            }
+
+            var token = getToken();
+
+            if (!token) {
+                show('invalid');
+                return;
+            }
+
+            // Step 1: preview / fetch user_info
+            post({ token: token, preview: true }).then(function (res) {
+                if (!res.ok || (res.data && res.data.status === 'error')) {
+                    var bucket = mapError(res.data && res.data.message, res.data && res.data.code);
+                    if (bucket === 'error' && res.data && res.data.message) {
+                        document.getElementById('error-msg').textContent = res.data.message;
+                    }
+                    show(bucket);
+                    return;
+                }
+
+                if (res.data && res.data.status === 'success') {
+                    // Already consumed
+                    show('used');
+                    return;
+                }
+
+                var details = (res.data && (res.data.details || res.data.user_info)) || {};
+                renderUserInfo(details);
+                show('confirm');
+            }).catch(function () {
+                show('error');
+            });
+
+            // Step 2: user clicks confirm
+            document.getElementById('btn-confirm').addEventListener('click', function () {
+                var btn = this;
+                btn.disabled = true;
+                show('processing');
+
+                post({ token: token }).then(function (res) {
+                    if (!res.ok || (res.data && res.data.status === 'error')) {
+                        var bucket = mapError(res.data && res.data.message, res.data && res.data.code);
+                        if (bucket === 'error' && res.data && res.data.message) {
+                            document.getElementById('error-msg').textContent = res.data.message;
+                        }
+                        show(bucket);
+                        return;
+                    }
+
+                    if (res.data && res.data.details && res.data.details.success_message) {
+                        document.getElementById('success-msg').textContent = res.data.details.success_message;
+                    } else if (res.data && res.data.message) {
+                        document.getElementById('success-msg').textContent = res.data.message;
+                    }
+                    show('success');
+                }).catch(function () {
+                    show('error');
+                });
+            });
+
+            // Retry button on generic error
+            document.getElementById('btn-retry').addEventListener('click', function () {
+                window.location.reload();
+            });
+        })();
+    </script>
+</body>
+</html>

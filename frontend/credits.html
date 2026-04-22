@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Source Credits — StemScriber</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ff7b54">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/landing.css">
+    <style>
+        .credits-wrap {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 4rem;
+        }
+        .credits-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2.5rem;
+            transition: color 0.2s;
+        }
+        .credits-back:hover { color: var(--text-primary); }
+        .credits-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+        .credits-subtitle {
+            color: var(--text-dim);
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            max-width: 620px;
+        }
+        .credits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        .credit-card {
+            padding: 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+        }
+        .credit-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+        .credit-name a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .credit-name a:hover { text-decoration: underline; }
+        .credit-desc {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+        .credits-footer-note {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            border-top: 1px solid rgba(255,255,255,0.07);
+            padding-top: 1.5rem;
+        }
+    </style>
+</head>
+<body class="landing-body">
+
+    <!-- Background -->
+    <div class="landing-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="credits-wrap">
+        <a href="/" class="credits-back">&#8592; Back to StemScriber</a>
+
+        <div class="credits-title">Open Source Credits</div>
+        <p class="credits-subtitle">
+            StemScriber stands on the shoulders of the open source community. Every stem, every note, every lyric line is powered by world-class research released freely to the world. We're grateful to these projects and the teams behind them.
+        </p>
+
+        <div class="credits-grid">
+            <div class="credit-card">
+                <div class="credit-name" style="color:#ff7b54;">
+                    <a href="https://github.com/facebookresearch/demucs" target="_blank" rel="noopener">Demucs</a> — Meta AI Research
+                </div>
+                <div class="credit-desc">State-of-the-art music source separation model. Splits any song into up to 6 clean stems in seconds using deep learning trained on thousands of hours of music.</div>
+            </div>
+            <div class="credit-card">
+                <div class="credit-name" style="color:#61afef;">
+                    <a href="https://github.com/openai/whisper" target="_blank" rel="noopener">Whisper</a> — OpenAI
+                </div>
+                <div class="credit-desc">General-purpose speech recognition model trained on 680,000 hours of multilingual data. Powers our vocal transcription and lyric alignment pipeline.</div>
+            </div>
+            <div class="credit-card">
+                <div class="credit-name" style="color:#98c379;">
+                    <a href="https://github.com/spotify/basic-pitch" target="_blank" rel="noopener">Basic Pitch</a> — Spotify Research
+                </div>
+                <div class="credit-desc">Audio-to-MIDI transcription using a lightweight neural network. Converts isolated instrument stems into accurate MIDI and Guitar Pro tablature.</div>
+            </div>
+            <div class="credit-card">
+                <div class="credit-name" style="color:#c678dd;">
+                    <a href="https://alphatab.net" target="_blank" rel="noopener">AlphaTab</a> — Open Source
+                </div>
+                <div class="credit-desc">Cross-platform music notation and tablature rendering engine. Powers the Practice Mode viewer — renders Guitar Pro files directly in the browser with zero plugins.</div>
+            </div>
+            <div class="credit-card">
+                <div class="credit-name" style="color:#56b6c2;">
+                    <a href="https://lrclib.net" target="_blank" rel="noopener">LRCLIB</a> — Community
+                </div>
+                <div class="credit-desc">Free, open synced lyrics database built by the community. Provides timestamped lyrics that power Karaoke Mode — no scraped data, no paywalled APIs.</div>
+            </div>
+            <div class="credit-card">
+                <div class="credit-name" style="color:#e5c07b;">
+                    <a href="https://www.songsterr.com" target="_blank" rel="noopener">Songsterr</a> — Guitar Tab Reference
+                </div>
+                <div class="credit-desc">Professional guitar and bass tablature used as a reference alongside our AI transcription. When available, provides human-verified tabs you can compare against.</div>
+            </div>
+        </div>
+
+        <p class="credits-footer-note">
+            StemScriber is built with ❤️ on top of open source. If you're a researcher or developer behind any of these projects — thank you.
+        </p>
+    </div>
+
+    <footer class="landing-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="28" height="28">
+                <span class="logo-text">StemScriber</span>
+            </div>
+            <div class="footer-links">
+                <a href="mailto:support@stemscriber.com">Contact</a>
+                <a href="/contact.html">Support</a>
+                <a href="/app">Launch App</a>
+            </div>
+            <div class="footer-links" style="margin-top:0.5rem;">
+                <a href="/terms.html">Terms of Service</a>
+                <a href="/privacy.html">Privacy Policy</a>
+                <a href="/dmca.html">DMCA</a>
+                <a href="/credits.html">Open Source Credits</a>
+            </div>
+            <div class="footer-copy">
+                &copy; 2026 StemScriber
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

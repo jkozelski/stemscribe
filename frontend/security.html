@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="canonical" href="https://stemscriber.com/security.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security | StemScriber</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0d0d12;
+            color: #e8e4df;
+            font-family: 'Outfit', 'Space Grotesk', sans-serif;
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        header {
+            background: rgba(13, 13, 18, 0.95);
+            border-bottom: 1px solid rgba(255, 123, 84, 0.15);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #e8e4df;
+        }
+
+        .logo-img {
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo-text {
+            font-family: 'Righteous', cursive;
+            font-size: 1.3rem;
+            color: #ff7b54;
+        }
+
+        .back-link {
+            margin-left: auto;
+            color: #ff7b54;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 1;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 5rem;
+        }
+
+        h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 2.2rem;
+            color: #ff7b54;
+            margin-bottom: 0.5rem;
+        }
+
+        .last-updated {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 2.5rem;
+        }
+
+        h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            color: #ffb088;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255, 123, 84, 0.12);
+        }
+
+        h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            color: #00d4aa;
+            margin-top: 1.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            color: #ccc;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        a {
+            color: #ff7b54;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        strong {
+            color: #e8e4df;
+        }
+
+        .highlight-box {
+            background: rgba(255, 123, 84, 0.06);
+            border: 1px solid rgba(255, 123, 84, 0.18);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+
+        .toc {
+            background: rgba(0, 212, 170, 0.06);
+            border: 1px solid rgba(0, 212, 170, 0.18);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0 2.5rem;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 0.8rem;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .toc li {
+            margin-bottom: 0.4rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #555;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer a {
+            color: #888;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+
+        footer a:hover {
+            color: #ff7b54;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 2rem 1.2rem 4rem;
+            }
+            h1 {
+                font-size: 1.7rem;
+            }
+            h2 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="logo">
+                <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="32" height="32">
+                <span class="logo-text">StemScriber</span>
+            </a>
+            <a href="/" class="back-link">Back to App</a>
+        </div>
+    </header>
+
+    <main>
+        <h1>Security</h1>
+        <p class="last-updated">Last updated: March 24, 2026</p>
+
+        <p>At StemScriber, we take data security seriously. We understand that you're entrusting us with your audio files and personal information, and we've implemented comprehensive security measures to protect your data throughout its lifecycle.</p>
+
+        <div class="toc">
+            <h3>Contents</h3>
+            <ul>
+                <li><a href="#infrastructure">Infrastructure Security</a></li>
+                <li><a href="#payments">Payment Security</a></li>
+                <li><a href="#authentication">Authentication &amp; Access</a></li>
+                <li><a href="#protection">Data Protection</a></li>
+                <li><a href="#files">File Processing</a></li>
+                <li><a href="#incident">Incident Response</a></li>
+                <li><a href="#disclosure">Responsible Disclosure</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <h2 id="infrastructure">Infrastructure Security</h2>
+
+        <h3>Cloudflare Tunnel Protection</h3>
+        <p>StemScriber's servers are protected by Cloudflare Tunnel — our server's IP address is never exposed to the public internet. All traffic is routed securely through Cloudflare's global network, providing protection against direct attacks and reconnaissance attempts.</p>
+
+        <h3>Encrypted Connections</h3>
+        <p>All connections to StemScriber use HTTPS with TLS 1.2 or higher. All data transmitted between your browser and our servers is encrypted and cannot be intercepted by third parties. We enforce HTTPS on all endpoints.</p>
+
+        <h3>DDoS Protection &amp; Web Application Firewall</h3>
+        <p>Cloudflare's DDoS protection automatically mitigates distributed denial-of-service attacks. Cloudflare's Web Application Firewall (WAF) filters malicious requests and protects against SQL injection, cross-site scripting, and bot abuse.</p>
+
+        <h3>Hosting Infrastructure</h3>
+        <p>Our backend runs on a dedicated Hetzner VPS in Ashburn, VA. Files are processed in isolated directories per-job and cleaned up after download or expiry. We do not use shared hosting environments.</p>
+
+        <h2 id="payments">Payment Security</h2>
+
+        <p>StemScriber uses <strong>Stripe</strong> to process all payments. Stripe is PCI-DSS Level 1 certified — the highest level of payment card security compliance.</p>
+
+        <div class="highlight-box">
+            <p><strong>StemScriber never sees your credit card numbers.</strong> Your payment information goes directly from your browser to Stripe's secure servers. No card data is stored on our infrastructure — we only receive a secure token from Stripe representing your payment method.</p>
+        </div>
+
+        <ul>
+            <li><strong>PCI-DSS Level 1</strong> compliance via Stripe</li>
+            <li><strong>No card data</strong> stored on StemScriber servers</li>
+            <li><strong>Fraud detection</strong> automatically applied via Stripe Radar</li>
+            <li>Stripe handles all billing portal and subscription management</li>
+        </ul>
+
+        <h2 id="authentication">Authentication &amp; Access</h2>
+
+        <h3>Google OAuth 2.0</h3>
+        <p>StemScriber uses Google OAuth 2.0 for secure authentication. You authenticate through Google's secure identity service — we never store your password. Google handles verification and multi-factor authentication options.</p>
+
+        <h3>Email/Password Authentication</h3>
+        <p>If you use email/password login, passwords are hashed using bcrypt before storage. We never store plaintext passwords. JWT tokens are used for session management with appropriate expiry windows.</p>
+
+        <h3>Secure Session Management</h3>
+        <p>User sessions are managed using secure, httpOnly cookies that cannot be accessed by client-side JavaScript. Cookies are marked Secure (HTTPS only) with SameSite protections against CSRF attacks.</p>
+
+        <h2 id="protection">Data Protection</h2>
+
+        <h3>Database Access Controls</h3>
+        <p>StemScriber uses Supabase (PostgreSQL) with row-level security (RLS) policies. Only authenticated users can access their own data. Application code follows the principle of least privilege — each module only accesses the data it needs.</p>
+
+        <h3>File Storage</h3>
+        <p>Uploaded audio files and processed outputs are stored securely on your behalf as long as your account is active. You can delete any upload or output from your library at any time, and doing so removes it from our servers. Deleting your account removes all associated files.</p>
+
+        <h3>No Model Training on Your Audio</h3>
+        <p><strong>We do not use your audio files to train AI models.</strong> Your uploaded audio is used only for your requested processing and is never shared with other users or used for research without your explicit written consent.</p>
+
+        <h2 id="files">File Processing</h2>
+
+        <h3>Isolation</h3>
+        <p>Each processing job runs in isolation. Your files are never mixed with other users' files. Processing logs contain only metadata about the request — no file contents are logged.</p>
+
+        <h3>Output Availability</h3>
+        <p>Processed stems and transcription outputs remain available in your library for as long as your account is active. You control when to delete them; we never auto-delete your files without your action.</p>
+
+        <h3>No Third-Party Access to Audio</h3>
+        <p>Your audio files and processing results are never shared with third parties except as strictly necessary to provide the service (e.g., infrastructure providers). We do not sell or license your audio data.</p>
+
+        <h2 id="incident">Incident Response</h2>
+
+        <p>In the event of a confirmed security incident affecting user data, StemScriber will:</p>
+
+        <ul>
+            <li>Immediately investigate and contain the incident</li>
+            <li>Notify affected users within <strong>72 hours</strong> as required by GDPR</li>
+            <li>Provide details about what data was affected and remediation steps</li>
+            <li>Cooperate with relevant authorities if required by law</li>
+        </ul>
+
+        <p>Incident notifications will be sent to the email associated with your StemScriber account. Contact us immediately at <a href="mailto:security@stemscriber.com">security@stemscriber.com</a> if you have concerns about your account.</p>
+
+        <h2 id="disclosure">Responsible Disclosure</h2>
+
+        <p>If you discover a potential security vulnerability in StemScriber, please contact our security team directly rather than disclosing it publicly:</p>
+
+        <p><strong>Email:</strong> <a href="mailto:security@stemscriber.com">security@stemscriber.com</a></p>
+
+        <p>Please include a description of the vulnerability, steps to reproduce, potential impact, and your contact information. We'll acknowledge your report within 48 hours and ask that you allow us reasonable time to release a fix before public disclosure.</p>
+
+        <h2 id="contact">Contact</h2>
+
+        <p>For security inquiries or to report a vulnerability:</p>
+        <p><strong>Email:</strong> <a href="mailto:security@stemscriber.com">security@stemscriber.com</a></p>
+        <p>We respond to security inquiries within 24 business hours.</p>
+    </main>
+
+    <footer>
+        &copy; 2026 StemScriber &middot; Kozelski Enterprises LLC &middot; Charleston, SC
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/security.html">Security</a>
+        <a href="/cookie-policy.html">Cookies</a>
+        <a href="/dmca.html">DMCA</a>
+        <a href="/refund-policy.html">Refunds</a>
+    </footer>
+</body>
+</html>

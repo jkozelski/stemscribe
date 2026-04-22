@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Confirm Email Change — StemScriber</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <meta name="theme-color" content="#ff7b54">
+    <meta name="description" content="Confirm your StemScriber email address change.">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #0d0d12;
+            --bg-dark: #13131a;
+            --bg-card: #1a1a24;
+            --accent: #ff7b54;
+            --accent-pink: #ff4d8d;
+            --accent-dim: rgba(255, 123, 84, 0.15);
+            --text: #e8e4df;
+            --text-dim: #7a7a85;
+            --border: rgba(255, 255, 255, 0.06);
+            --success: #4ade80;
+            --error: #ff5577;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-dark);
+        }
+
+        .logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+        .logo-img { width: 32px; height: 32px; }
+        .logo-text {
+            font-family: 'Righteous', cursive;
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            max-width: 520px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-label {
+            display: inline-block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .lede {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .email-swap {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1.75rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .email-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.35rem 0;
+        }
+
+        .email-label {
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            min-width: 56px;
+        }
+
+        .email-value {
+            color: var(--text);
+            font-weight: 500;
+            word-break: break-all;
+            font-size: 0.98rem;
+        }
+
+        .email-value.old { color: var(--text-dim); text-decoration: line-through; }
+        .email-value.new { color: var(--accent); }
+
+        .email-arrow {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            padding: 0.25rem 0;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.95rem 1.25rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-pink));
+            color: #fff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(255, 123, 84, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 0.9rem;
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.15);
+            text-decoration: none;
+        }
+
+        .status-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .status-icon.success { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+        .status-icon.error { background: rgba(255, 85, 119, 0.12); color: var(--error); }
+
+        .state-msg {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .state-sub {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .signoff {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            font-style: italic;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .hidden { display: none !important; }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #555;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        footer a { color: #888; text-decoration: none; margin: 0 0.45rem; }
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 560px) {
+            .card { padding: 2rem 1.25rem; }
+            h1 { font-size: 1.5rem; }
+            .header { padding: 1rem 1.25rem; }
+            .email-row { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="32" height="32">
+            <span class="logo-text">StemScriber</span>
+        </a>
+    </header>
+
+    <main class="main">
+        <div class="card" id="card">
+
+            <div id="state-loading">
+                <span class="card-label">Verifying</span>
+                <h1>Checking your link</h1>
+                <p class="lede"><span class="spinner"></span>One moment while we look up your request.</p>
+            </div>
+
+            <div id="state-confirm" class="hidden">
+                <span class="card-label">Email Change</span>
+                <h1>Confirm your new email</h1>
+                <p class="lede">You asked to switch the email on your StemScriber account. Confirm below and we'll make the swap.</p>
+
+                <div class="email-swap">
+                    <div class="email-row">
+                        <span class="email-label">From</span>
+                        <span class="email-value old" id="field-old">—</span>
+                    </div>
+                    <div class="email-arrow">&darr;</div>
+                    <div class="email-row">
+                        <span class="email-label">To</span>
+                        <span class="email-value new" id="field-new">—</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="btn-confirm">Confirm email change</button>
+                <a href="mailto:support@stemscriber.com?subject=Not%20me%20%E2%80%94%20email%20change" class="btn-secondary">This wasn't me</a>
+            </div>
+
+            <div id="state-processing" class="hidden">
+                <span class="card-label">Processing</span>
+                <h1>Updating your email</h1>
+                <p class="lede"><span class="spinner"></span>Hang tight — this only takes a second.</p>
+            </div>
+
+            <div id="state-success" class="hidden">
+                <div class="status-icon success">&#10003;</div>
+                <h1>Email updated</h1>
+                <p class="state-msg" id="success-msg">Your sign-in email is updated. Use your new email to sign in from now on.</p>
+                <p class="state-sub">We sent a heads-up to your old address so you know the change happened. If you didn't do this, email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> right away.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <div id="state-expired" class="hidden">
+                <div class="status-icon error">!</div>
+                <h1>This link expired</h1>
+                <p class="state-msg">Confirmation links are only good for 24 hours for your security.</p>
+                <p class="state-sub">Sign in and start the email change again, or email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll sort it out.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <div id="state-invalid" class="hidden">
+                <div class="status-icon error">!</div>
+                <h1>We don't recognize this link</h1>
+                <p class="state-msg">The link may have been copied incorrectly, or it's been revoked.</p>
+                <p class="state-sub">If you meant to change your email, reach out to <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll handle it directly.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <div id="state-used" class="hidden">
+                <div class="status-icon success">&#10003;</div>
+                <h1>Already confirmed</h1>
+                <p class="state-msg">Looks like this email change was already confirmed.</p>
+                <p class="state-sub">You're all set — sign in with your new email. If you didn't expect this, email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> right away.</p>
+                <a href="/" class="btn-secondary">Back to StemScriber</a>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+            <div id="state-error" class="hidden">
+                <div class="status-icon error">!</div>
+                <h1>Something went sideways</h1>
+                <p class="state-msg" id="error-msg">We couldn't process that right now.</p>
+                <p class="state-sub">Give it another shot, or email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll handle it by hand.</p>
+                <button class="btn btn-primary" id="btn-retry">Try again</button>
+                <p class="signoff">— The StemScriber team</p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 StemScriber &middot; Kozelski Enterprises LLC &middot; Charleston, SC
+        &nbsp;|&nbsp;
+        <a href="/terms.html">Terms</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/dmca.html">DMCA</a>
+        <a href="mailto:support@stemscriber.com">Support</a>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var ACTION = 'email-change';
+            var API_URL = '/api/confirm/' + ACTION;
+
+            var states = {
+                loading: document.getElementById('state-loading'),
+                confirm: document.getElementById('state-confirm'),
+                processing: document.getElementById('state-processing'),
+                success: document.getElementById('state-success'),
+                expired: document.getElementById('state-expired'),
+                invalid: document.getElementById('state-invalid'),
+                used: document.getElementById('state-used'),
+                error: document.getElementById('state-error')
+            };
+
+            function show(name) {
+                Object.keys(states).forEach(function (k) {
+                    states[k].classList.add('hidden');
+                });
+                if (states[name]) states[name].classList.remove('hidden');
+            }
+
+            function getToken() {
+                return new URLSearchParams(window.location.search).get('token');
+            }
+
+            function renderUserInfo(info) {
+                if (!info || typeof info !== 'object') return;
+                var oldEmail = info.old_email || info.current_email || info.from_email || '—';
+                var newEmail = info.new_email || info.to_email || '—';
+                document.getElementById('field-old').textContent = oldEmail;
+                document.getElementById('field-new').textContent = newEmail;
+
+                if (newEmail && newEmail !== '—') {
+                    document.getElementById('success-msg').textContent =
+                        'Email updated to ' + newEmail + '. Use it to sign in from now on.';
+                }
+            }
+
+            function mapError(message, code) {
+                var m = ((message || '') + ' ' + (code || '')).toLowerCase();
+                if (m.indexOf('expire') !== -1) return 'expired';
+                if (m.indexOf('used') !== -1 || m.indexOf('consumed') !== -1 || m.indexOf('already') !== -1) return 'used';
+                if (m.indexOf('invalid') !== -1 || m.indexOf('not found') !== -1 || m.indexOf('unknown') !== -1) return 'invalid';
+                return 'error';
+            }
+
+            function post(body) {
+                return fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(body)
+                }).then(function (res) {
+                    return res.json().then(function (data) {
+                        return { ok: res.ok, status: res.status, data: data };
+                    }).catch(function () {
+                        return { ok: false, status: res.status, data: {} };
+                    });
+                });
+            }
+
+            var token = getToken();
+
+            if (!token) {
+                show('invalid');
+                return;
+            }
+
+            post({ token: token, preview: true }).then(function (res) {
+                if (!res.ok || (res.data && res.data.status === 'error')) {
+                    var bucket = mapError(res.data && res.data.message, res.data && res.data.code);
+                    if (bucket === 'error' && res.data && res.data.message) {
+                        document.getElementById('error-msg').textContent = res.data.message;
+                    }
+                    show(bucket);
+                    return;
+                }
+
+                if (res.data && res.data.status === 'success') {
+                    show('used');
+                    return;
+                }
+
+                var details = (res.data && (res.data.details || res.data.user_info)) || {};
+                renderUserInfo(details);
+                show('confirm');
+            }).catch(function () {
+                show('error');
+            });
+
+            document.getElementById('btn-confirm').addEventListener('click', function () {
+                var btn = this;
+                btn.disabled = true;
+                show('processing');
+
+                post({ token: token }).then(function (res) {
+                    if (!res.ok || (res.data && res.data.status === 'error')) {
+                        var bucket = mapError(res.data && res.data.message, res.data && res.data.code);
+                        if (bucket === 'error' && res.data && res.data.message) {
+                            document.getElementById('error-msg').textContent = res.data.message;
+                        }
+                        show(bucket);
+                        return;
+                    }
+
+                    var details = (res.data && (res.data.details || res.data.user_info)) || {};
+                    var newEmail = details.new_email || details.to_email;
+                    if (newEmail) {
+                        document.getElementById('success-msg').textContent =
+                            'Email updated to ' + newEmail + '. Use it to sign in from now on.';
+                    } else if (res.data && res.data.message) {
+                        document.getElementById('success-msg').textContent = res.data.message;
+                    }
+                    show('success');
+                }).catch(function () {
+                    show('error');
+                });
+            });
+
+            document.getElementById('btn-retry').addEventListener('click', function () {
+                window.location.reload();
+            });
+        })();
+    </script>
+</body>
+</html>

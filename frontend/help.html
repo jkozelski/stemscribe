@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="canonical" href="https://stemscriber.com/help.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StemScriber Help Center &mdash; FAQs for Musicians</title>
+    <meta name="description" content="Answers for StemScriber musicians: uploads, stems, chord charts, guitar tabs, practice mode, billing, refunds, DMCA, and troubleshooting.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="StemScriber Help Center">
+    <meta property="og:description" content="Answers for musicians: uploads, stems, chord charts, guitar tabs, practice mode, billing, and troubleshooting.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stemscriber.com/help.html">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0d0d12;
+            color: #e8e4df;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            font-size: 16px;
+            min-height: 100vh;
+        }
+
+        /* Decorative background orbs */
+        .help-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+        }
+
+        .orb-1 {
+            width: 420px;
+            height: 420px;
+            background: #f97316;
+            top: -120px;
+            left: -120px;
+        }
+
+        .orb-2 {
+            width: 380px;
+            height: 380px;
+            background: #ec4899;
+            bottom: -140px;
+            right: -100px;
+        }
+
+        /* Top nav */
+        .help-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 22px 24px;
+        }
+
+        .help-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f0ece7;
+            text-decoration: none;
+            border-bottom: none;
+        }
+
+        .help-nav .logo-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+        }
+
+        .help-nav .logo-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .help-nav .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .help-nav .nav-links a {
+            color: #c4c0bb;
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-bottom: none;
+            transition: color 0.2s;
+        }
+
+        .help-nav .nav-links a:hover {
+            color: #f97316;
+        }
+
+        .help-nav .nav-cta {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #f97316, #ec4899);
+            color: #fff !important;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .help-nav .nav-cta:hover {
+            opacity: 0.92;
+        }
+
+        @media (max-width: 720px) {
+            .help-nav .nav-links a:not(.nav-cta) {
+                display: none;
+            }
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 24px 100px;
+        }
+
+        .page-header {
+            margin-bottom: 44px;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f97316, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            line-height: 1.15;
+        }
+
+        .subtitle {
+            color: #8a8580;
+            font-size: 1.08rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f97316, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 52px;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: #d0ccc7;
+        }
+
+        a {
+            color: #f97316;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(249, 115, 22, 0.3);
+            transition: border-color 0.2s;
+        }
+
+        a:hover {
+            border-bottom-color: #f97316;
+        }
+
+        strong {
+            color: #f0ece7;
+            font-weight: 600;
+        }
+
+        /* Native details/summary FAQ cards */
+        details {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 4px 4px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+
+        details:hover {
+            border-color: rgba(249, 115, 22, 0.22);
+        }
+
+        details[open] {
+            border-color: rgba(249, 115, 22, 0.3);
+            background: rgba(249, 115, 22, 0.04);
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 20px 24px;
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: #f0ece7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary:focus-visible {
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.6);
+        }
+
+        summary::after {
+            content: "+";
+            font-size: 1.4rem;
+            color: #f97316;
+            font-weight: 300;
+            flex-shrink: 0;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        details[open] > summary::after {
+            content: "\2212";
+        }
+
+        .faq-body {
+            padding: 0 24px 22px 24px;
+            color: #d0ccc7;
+        }
+
+        .faq-body p {
+            margin-bottom: 12px;
+        }
+
+        .faq-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .faq-body ul {
+            margin: 6px 0 14px 0;
+            padding-left: 22px;
+        }
+
+        .faq-body li {
+            margin-bottom: 6px;
+            color: #d0ccc7;
+        }
+
+        /* Still-need-help CTA */
+        .help-cta {
+            margin-top: 56px;
+            padding: 32px 28px;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(236, 72, 153, 0.08));
+            border: 1px solid rgba(249, 115, 22, 0.25);
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .help-cta h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #f0ece7;
+            margin-bottom: 10px;
+        }
+
+        .help-cta p.cta-sub {
+            color: #c4c0bb;
+            margin-bottom: 22px;
+        }
+
+        .cta-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.98rem;
+            text-decoration: none;
+            border-bottom: none;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .cta-primary {
+            background: linear-gradient(135deg, #f97316, #ec4899);
+            color: #fff;
+            border: 1px solid transparent;
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: #f0ece7;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-secondary:hover {
+            border-color: #f97316;
+        }
+
+        /* Footer */
+        .help-footer {
+            max-width: 860px;
+            margin: 48px auto 0;
+            padding: 24px;
+            text-align: center;
+            color: #6a6560;
+            font-size: 0.9rem;
+        }
+
+        .help-footer a {
+            color: #6a6560;
+            border-bottom-color: rgba(106, 101, 96, 0.3);
+            margin: 0 6px;
+        }
+
+        .help-footer a:hover {
+            color: #f97316;
+            border-bottom-color: #f97316;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 28px 16px 80px;
+            }
+            h1 {
+                font-size: 1.9rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
+            summary {
+                padding: 16px 18px;
+                font-size: 1rem;
+            }
+            .faq-body {
+                padding: 0 18px 18px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="help-bg" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <!-- Top nav -->
+    <nav class="help-nav" aria-label="Primary">
+        <a href="/" class="logo">
+            <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="32" height="32">
+            <span class="logo-text">StemScriber</span>
+        </a>
+        <div class="nav-links">
+            <a href="/landing.html#features">Features</a>
+            <a href="/landing.html#how-it-works">How It Works</a>
+            <a href="/landing.html#pricing">Pricing</a>
+            <a href="/app" class="nav-cta">Launch App</a>
+        </div>
+    </nav>
+
+    <main class="container">
+
+        <header class="page-header">
+            <h1>Help Center</h1>
+            <p class="subtitle">Answers for musicians &mdash; uploads, stems, chord charts, billing, and the rest.</p>
+        </header>
+
+        <!-- =========================================================== -->
+        <!-- Getting Started -->
+        <!-- =========================================================== -->
+        <section aria-labelledby="getting-started">
+            <h2 id="getting-started">Getting Started</h2>
+
+            <details open>
+                <summary>How do I upload a song?</summary>
+                <div class="faq-body">
+                    <p>Go to <a href="https://stemscriber.com">stemscriber.com</a>, sign in with Google, and drag your audio file onto the page. MP3, WAV, FLAC, and OGG all work. It'll take a couple minutes to process.</p>
+                </div>
+            </details>
+
+            <details open>
+                <summary>What file formats do you support?</summary>
+                <div class="faq-body">
+                    <p>We accept <strong>MP3, WAV, FLAC, OGG, and M4A</strong> &mdash; basically every common audio format. If your file is in something weirder, convert it first and you should be good.</p>
+                    <p>There's a duration cap per plan: free tier is 30 minutes max per song.</p>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Is there a free tier?</summary>
+                <div class="faq-body">
+                    <p>There's a free tier you can try right now. If you need longer songs or more uploads, it's $10 a month for Pro or $20 for Premium.</p>
+                    <p>Free gets you <strong>3 songs per month</strong>, 6-stem separation, MIDI export, and practice mode (speed + looping). No credit card required.</p>
+                </div>
+            </details>
+
+            <details open>
+                <summary>How long does processing take?</summary>
+                <div class="faq-body">
+                    <p>A couple of minutes for most songs. Longer tracks and busier mixes take a bit more time. You can navigate away and come back &mdash; your library will show the finished file when it's ready.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =========================================================== -->
+        <!-- Features -->
+        <!-- =========================================================== -->
+        <section aria-labelledby="features">
+            <h2 id="features">Features</h2>
+
+            <details>
+                <summary>How accurate are the chords?</summary>
+                <div class="faq-body">
+                    <p>Pretty solid for most songs &mdash; we use bass-aware detection that gets the roots right almost every time. For popular songs we often have a human-verified chart in the library that overrides the automatic detection.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Why does my guitar stem sound muddy?</summary>
+                <div class="faq-body">
+                    <p>Some songs are hard to separate &mdash; especially when two guitars are panned to the same spot or when guitar and piano overlap a lot. It's a known limitation of separation tech. Try the song in our practice mode and see if isolating parts still helps, even if one stem has some bleed.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Can I download the stems?</summary>
+                <div class="faq-body">
+                    <p>Yes. After a song finishes processing, there's a download button for each stem individually, or a ZIP with all of them.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>What's practice mode?</summary>
+                <div class="faq-body">
+                    <p>Practice mode is where the real work gets done. You can:</p>
+                    <ul>
+                        <li><strong>Loop sections</strong> &mdash; pick a start and end point and repeat a tricky passage as many times as you need.</li>
+                        <li><strong>Slow the tempo</strong> without changing the pitch, so you can hear every note at half speed.</li>
+                        <li><strong>Isolate or mute individual stems</strong> to play along with just drums, just bass, or any combination.</li>
+                    </ul>
+                    <p>It's built for learning parts by ear, not just listening to them.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>What are guitar tabs and how do I use them?</summary>
+                <div class="faq-body">
+                    <p>After we separate the guitar stem, we detect <strong>which string and fret</strong> each note is played on and render it as a tab you can read in the browser. It shows up alongside the chord chart so you can follow along position-by-position.</p>
+                    <p>On Pro and Premium plans you can also export a Guitar Pro <strong>.gp5</strong> file to open in any tab editor.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Do you have karaoke / lyrics?</summary>
+                <div class="faq-body">
+                    <p>Not right now &mdash; we're working on it. Licensing for synced lyrics is a whole separate thing we're setting up.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =========================================================== -->
+        <!-- Account & Billing -->
+        <!-- =========================================================== -->
+        <section aria-labelledby="account-billing">
+            <h2 id="account-billing">Account &amp; Billing</h2>
+
+            <details>
+                <summary>How do I cancel?</summary>
+                <div class="faq-body">
+                    <p>Yes. To cancel, email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and we'll take care of it within 24 hours.</p>
+                    <p>Your paid features remain active until the end of your current billing period. After that, your account reverts to the Free tier. Your processed files stay put.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>How do I get a refund?</summary>
+                <div class="faq-body">
+                    <p>We have a 30-day money-back guarantee. Email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> with your account email and what happened, and we'll process it within 5 business days.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>How do I change my email?</summary>
+                <div class="faq-body">
+                    <p>Email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> from your current account address and tell us the new one you'd like to switch to. We'll move your library, subscription, and processed songs over &mdash; usually within 24 hours.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>How do I change plans?</summary>
+                <div class="faq-body">
+                    <p>Open your profile menu and click <strong>Manage Billing</strong>. That opens the Stripe Customer Portal where you can upgrade, downgrade, or switch between monthly and annual billing. Changes take effect right away.</p>
+                    <p>Upgrades are pro-rated. Downgrades take effect at the next billing cycle so you don't lose what you already paid for.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Can I pause my subscription?</summary>
+                <div class="faq-body">
+                    <p>We don't have a built-in pause button yet, but we can do it manually &mdash; email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> and tell us how long you want to pause for. When you come back, we'll reactivate without changing your plan.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =========================================================== -->
+        <!-- Using the Tool -->
+        <!-- =========================================================== -->
+        <section aria-labelledby="using-the-tool">
+            <h2 id="using-the-tool">Using the Tool</h2>
+
+            <details>
+                <summary>Can I upload songs from YouTube?</summary>
+                <div class="faq-body">
+                    <p>At launch, StemScriber works with <strong>files you own or have rights to</strong>. Paste-a-link imports are supported for a few artist-friendly sources:</p>
+                    <ul>
+                        <li><strong>Bandcamp</strong> &mdash; your own purchases and free downloads</li>
+                        <li><strong>SoundCloud</strong> &mdash; tracks the uploader has enabled for download</li>
+                        <li><strong>Archive.org</strong> &mdash; public-domain and Creative Commons recordings</li>
+                    </ul>
+                    <p>For anything else, export the file from your DAW, streaming locker, or local library and drag it onto the uploader.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Why did my song fail to process?</summary>
+                <div class="faq-body">
+                    <p>Usually one of three things:</p>
+                    <ul>
+                        <li><strong>File format</strong> &mdash; make sure it's MP3, WAV, FLAC, OGG, or M4A.</li>
+                        <li><strong>Length</strong> &mdash; songs over your plan's duration limit will bounce.</li>
+                        <li><strong>Corrupted file</strong> &mdash; re-export from your source and try again.</li>
+                    </ul>
+                    <p>If processing fails due to an error on our end, <strong>your credit is automatically restored</strong> &mdash; you don't have to ask. Still stuck? Email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> with the song title and we'll dig in.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>How do I share stems with bandmates?</summary>
+                <div class="faq-body">
+                    <p>Download the ZIP from the song page, then drop it into whatever you normally use &mdash; Dropbox, Google Drive, email, Discord. The stems are standard WAV files so anyone can open them.</p>
+                    <p>A public share-link feature is on the roadmap.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Can I use StemScriber offline?</summary>
+                <div class="faq-body">
+                    <p>No &mdash; separation and transcription run on our servers, so you need an internet connection to process songs. Once a song is done, you can download the stems and play them locally in any audio app.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =========================================================== -->
+        <!-- Legal & Privacy -->
+        <!-- =========================================================== -->
+        <section aria-labelledby="legal-privacy">
+            <h2 id="legal-privacy">Legal &amp; Privacy</h2>
+
+            <details>
+                <summary>What happens to my uploaded audio?</summary>
+                <div class="faq-body">
+                    <p>Your file gets processed into stems and stored on your account so you can come back to it. We don't share uploads with other users, sell them, or use them to train models. You can delete a song from your library at any time, and we'll remove the source file and the generated stems.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Do you own my stems?</summary>
+                <div class="faq-body">
+                    <p>No. The underlying copyright to the audio belongs to whoever wrote and recorded the song (which may be you). We don't claim any ownership over files you process &mdash; the stems, chord charts, and tabs are yours to use.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>How do I file a DMCA takedown?</summary>
+                <div class="faq-body">
+                    <p>If you're a rightsholder and want content removed, head over to our <a href="/dmca.html">DMCA page</a> for the full procedure and our agent's contact info. Notices go to <a href="mailto:support@stemscriber.com">support@stemscriber.com</a>.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Is this legal?</summary>
+                <div class="faq-body">
+                    <p>StemScriber is a tool &mdash; like a DAW or a tab editor. <strong>You're responsible for having the rights to the audio you upload.</strong> Every upload asks you to confirm you own the file or have permission to use it; that attestation is what keeps things on the level.</p>
+                    <p>If you're unsure, stick to your own recordings, public-domain material, Creative Commons tracks, or songs you've purchased.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =========================================================== -->
+        <!-- Troubleshooting -->
+        <!-- =========================================================== -->
+        <section aria-labelledby="troubleshooting">
+            <h2 id="troubleshooting">Troubleshooting</h2>
+
+            <details>
+                <summary>Playback isn't working</summary>
+                <div class="faq-body">
+                    <p>Try these in order:</p>
+                    <ul>
+                        <li>Refresh the page &mdash; audio contexts sometimes get stuck after a tab has been idle.</li>
+                        <li>Make sure your browser tab isn't muted (check the tab icon).</li>
+                        <li>Try a different browser. Chrome and Safari have the best Web Audio support.</li>
+                        <li>If you're on a phone, unplug and replug Bluetooth headphones.</li>
+                    </ul>
+                    <p>Still dead silent? Email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> with your browser and OS.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>I can't log in</summary>
+                <div class="faq-body">
+                    <p>We use Google sign-in. If it's bouncing you, check:</p>
+                    <ul>
+                        <li>You're signed into the <strong>same Google account</strong> you used to create your StemScriber account.</li>
+                        <li>Your browser isn't blocking third-party cookies for stemscriber.com.</li>
+                        <li>You don't have a rogue extension (privacy blockers love to break Google auth).</li>
+                    </ul>
+                    <p>If it's still broken, email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> from the Google address on your account and we'll unstick it.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>Upload is stuck</summary>
+                <div class="faq-body">
+                    <p>Uploads occasionally stall on flaky connections. Cancel and try again &mdash; you won't be charged a song credit for an upload that never finished processing. If it consistently hangs at the same spot, the file itself might be corrupt; re-export from the source and retry.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>The chord chart looks wrong</summary>
+                <div class="faq-body">
+                    <p>Automatic detection gets close on most songs but isn't perfect &mdash; especially on tracks with dense harmony, heavy effects, or modulations. For popular songs we often have a <strong>human-verified chart</strong> in our library that's much more accurate; if yours switched to the automatic version, let us know and we'll check coverage.</p>
+                    <p>Found a clear mistake on a verified chart? Email <a href="mailto:support@stemscriber.com">support@stemscriber.com</a> with the song title and roughly where the bad bar is, and we'll fix it.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =========================================================== -->
+        <!-- Still need help CTA -->
+        <!-- =========================================================== -->
+        <aside class="help-cta" aria-label="Contact support">
+            <h3>Still need help?</h3>
+            <p class="cta-sub">Can't find what you're looking for? We typically respond within 24 hours.</p>
+            <div class="cta-actions">
+                <a href="mailto:support@stemscriber.com" class="cta-btn cta-primary">Email support@stemscriber.com</a>
+                <a href="tel:+18447915323" class="cta-btn cta-secondary">Call (844) 791-5323</a>
+            </div>
+        </aside>
+
+    </main>
+
+    <footer class="help-footer">
+        <p>
+            &copy; 2026 StemScriber
+            <br>
+            <a href="/terms.html">Terms of Service</a>
+            &middot;
+            <a href="/privacy.html">Privacy Policy</a>
+            &middot;
+            <a href="/dmca.html">DMCA</a>
+            &middot;
+            <a href="/billing-faq.html">Billing FAQ</a>
+        </p>
+    </footer>
+
+</body>
+</html>
