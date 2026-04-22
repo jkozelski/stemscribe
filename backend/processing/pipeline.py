@@ -303,6 +303,54 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         except Exception as e:
             logger.warning(f"Smart separation failed (non-fatal): {e}")
 
+        # Step 1b: Detect vocal onset time (for karaoke sync)
+        # Analyzes the vocal stem to find when singing actually starts
+        vocals_stem_path = job.stems.get('vocals_lead') or job.stems.get('vocals')
+        if vocals_stem_path and Path(vocals_stem_path).exists():
+            try:
+                import numpy as np
+                import subprocess
+                logger.info("🎤 Detecting vocal onset time for karaoke sync...")
+
+                # Decode vocal stem to raw PCM using ffmpeg
+                result = subprocess.run([
+                    'ffmpeg', '-i', str(vocals_stem_path),
+                    '-f', 'f32le', '-ac', '1', '-ar', '22050', '-'
+                ], capture_output=True, timeout=30)
+
+                if result.returncode == 0 and len(result.stdout) > 0:
+                    samples = np.frombuffer(result.stdout, dtype=np.float32)
+                    sr = 22050
+
+                    # Compute RMS energy in 50ms windows
+                    window_size = int(sr * 0.05)
+                    num_windows = len(samples) // window_size
+                    rms = np.array([
+                        np.sqrt(np.mean(samples[i*window_size:(i+1)*window_size]**2))
+                        for i in range(num_windows)
+                    ])
+
+                    # Find first window where RMS exceeds threshold (vocal activity)
+                    # Use adaptive threshold: 5x the median noise floor
+                    noise_floor = np.median(rms[:int(sr / window_size * 2)])  # first 2 seconds
+                    threshold = max(noise_floor * 5, 0.005)
+
+                    onset_window = None
+                    # Require 3 consecutive windows above threshold (not just a blip)
+                    for i in range(len(rms) - 2):
+                        if rms[i] > threshold and rms[i+1] > threshold and rms[i+2] > threshold:
+                            onset_window = i
+                            break
+
+                    if onset_window is not None:
+                        vocals_onset = onset_window * 0.05  # convert to seconds
+                        job.metadata['vocals_onset_time'] = round(vocals_onset, 2)
+                        logger.info(f"✓ Vocal onset detected at {vocals_onset:.2f}s (threshold={threshold:.4f})")
+                    else:
+                        logger.info("ℹ No clear vocal onset detected — may be instrumental")
+            except Exception as e:
+                logger.warning(f"Vocal onset detection failed (non-fatal): {e}")
+
         # Step 2: Detect chord progression (optional - before transcription)
         if chord_detection and CHORD_DETECTOR_AVAILABLE:
             job.stage = 'Detecting chords and key'
@@ -314,52 +362,154 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         elif not chord_detection:
             logger.info("⏭️ Skipping chord detection (disabled)")
 
-        # Step 2b: Generate chord chart (chords + lyrics + structure)
-        # Wrapped in a timeout thread to prevent stalls from Whisper/lyrics extraction
+        # Step 2a: Extract tempo + beat/downbeat grid. Everything downstream
+        # (chord-to-bar quantization, rendering, pickup detection) reads from
+        # this grid so we stop guessing at bar boundaries.
         if job.chord_progression:
-            CHART_TIMEOUT = 180  # 3 minutes max for chord chart generation
-            chart_result = [None]
-            chart_error = [None]
-
-            def _generate_chart():
-                try:
-                    from chart_assembler import generate_chord_chart_for_job
-                    vocals_stem = job.stems.get('vocals_lead') or job.stems.get('vocals')
-                    title = job.metadata.get('title', job.filename or 'Untitled') if job.metadata else (job.filename or 'Untitled')
-                    artist = job.metadata.get('artist', '') if job.metadata else ''
-                    chart_result[0] = generate_chord_chart_for_job(
-                        job_id=job.job_id,
-                        chords=job.chord_progression,
-                        vocals_path=vocals_stem,
-                        audio_path=str(audio_path),
-                        title=title,
-                        artist=artist,
-                    )
-                except Exception as e:
-                    chart_error[0] = e
-
             try:
-                job.stage = 'Generating chord chart'
-                job.progress = 59
-                save_job_checkpoint(job)
+                from processing.tempo_beats import extract_grid
+                drums_stem = job.stems.get('drums')
+                grid = extract_grid(
+                    drums_path=drums_stem if drums_stem and os.path.isfile(drums_stem) else None,
+                    mix_path=str(audio_path),
+                )
+                job.metadata['grid'] = grid
+                logger.info(
+                    f"Grid: {grid.get('tempo_bpm')} BPM, "
+                    f"{grid.get('bar_count')} bars, "
+                    f"source={grid.get('source')}"
+                )
+            except Exception as e:
+                logger.warning(f"Grid extraction failed (non-fatal, formatter will fall back): {e}")
 
-                chart_thread = threading.Thread(target=_generate_chart, daemon=True)
-                chart_thread.start()
-                chart_thread.join(timeout=CHART_TIMEOUT)
+        # Step 2a2: Extract bass ROOT per bar from the bass stem. This anchors
+        # each chord's root to an actual pitch (reliable) and the polyphonic
+        # detector only contributes quality (m/maj7/7/etc.). Fixes the
+        # root-confusion where the detector labels Am as Cm on keyboard-heavy
+        # mixes.
+        if job.chord_progression and job.metadata.get('grid'):
+            try:
+                from processing.bass_root_extraction import extract_bass_roots
+                bass_stem = job.stems.get('bass')
+                if bass_stem and os.path.isfile(bass_stem):
+                    bass_roots = extract_bass_roots(bass_stem, job.metadata['grid'])
+                    job.metadata['bass_roots'] = bass_roots
+                    logger.info(f"Bass roots: {len(bass_roots)} bar-roots extracted from bass.mp3")
+                else:
+                    logger.info("No bass stem available — bass-root extraction skipped")
+            except Exception as e:
+                logger.warning(f"Bass-root extraction failed (non-fatal): {e}")
 
-                if chart_thread.is_alive():
-                    logger.warning(f"Chord chart generation timed out after {CHART_TIMEOUT}s — skipping")
-                elif chart_error[0]:
-                    logger.warning(f"Chord chart generation failed (non-fatal): {chart_error[0]}")
-                elif chart_result[0]:
-                    chart = chart_result[0]
+        # Step 2b: Generate formatted chord chart (chords above lyrics, UG-style)
+        _pipeline_word_ts = []  # Shared with RAG step below
+        if job.chord_progression:
+            job.stage = 'Generating chord chart'
+            job.progress = 59
+            save_job_checkpoint(job)
+            try:
+                import json as _json
+                from chart_formatter import format_chart
+                from word_timestamps import get_word_timestamps
+
+                vocals_stem = job.stems.get('vocals_lead') or job.stems.get('vocals')
+                title = job.metadata.get('title', job.filename or 'Untitled') if job.metadata else (job.filename or 'Untitled')
+                artist = job.metadata.get('artist', '') if job.metadata else ''
+                key = job.detected_key or 'Unknown'
+
+                # Get word-level timestamps from vocal stem via Whisper
+                word_ts = []
+                if vocals_stem and os.path.isfile(vocals_stem):
+                    try:
+                        word_ts = get_word_timestamps(vocals_stem)
+                        logger.info(f"Got {len(word_ts)} word timestamps from vocal stem")
+                        _pipeline_word_ts = word_ts  # Save for RAG
+                    except Exception as wte:
+                        logger.warning(f"Word timestamp extraction failed (non-fatal): {wte}")
+                else:
+                    logger.info("No vocal stem available — chart will be instrumental-only")
+
+                # Generate the formatted chart
+                # Phi-3 LLM formatter is wired but disabled until retraining completes
+                # (1-epoch model produces hallucinated output — needs 3+ epochs)
+                # To re-enable: uncomment the block below and deploy modal_chart_formatter.py
+                chart = None
+                phi3_used = False
+                # --- PHI-3 DISABLED (retrain in progress) ---
+                # try:
+                #     from phi3_chart_formatter import format_chart_phi3, is_phi3_formatter_available
+                #     if is_phi3_formatter_available():
+                #         logger.info("Trying Phi-3 chart formatter (Modal GPU)...")
+                #         chart = format_chart_phi3(
+                #             chord_events=job.chord_progression,
+                #             word_timestamps=word_ts,
+                #             title=title,
+                #             artist=artist,
+                #             key=key,
+                #         )
+                #         if chart and chart.get('sections'):
+                #             phi3_used = True
+                #             logger.info("✓ Phi-3 chart formatter succeeded")
+                #         else:
+                #             chart = None
+                #             logger.info("Phi-3 formatter returned no sections, falling back to rule-based")
+                # except Exception as phi3_err:
+                #     logger.warning(f"Phi-3 chart formatter failed, falling back to rule-based: {phi3_err}")
+                # --- END PHI-3 ---
+
+                # Rule-based formatter (production path).
+                # Pass stem paths so instrumental sections get labeled with the
+                # dominant instrument (e.g. "Piano Solo" vs. generic "Interlude").
+                chart = format_chart(
+                    chord_events=job.chord_progression,
+                    word_timestamps=word_ts,
+                    title=title,
+                    artist=artist,
+                    key=key,
+                    stem_paths=dict(job.stems) if getattr(job, 'stems', None) else None,
+                    grid=job.metadata.get('grid') if job.metadata else None,
+                    bass_roots=job.metadata.get('bass_roots') if job.metadata else None,
+                )
+
+                if chart and chart.get('sections'):
+                    # Save to job output directory as chord_chart.json
+                    chart_dir = OUTPUT_DIR / job.job_id
+                    chart_dir.mkdir(parents=True, exist_ok=True)
+                    chart_path = chart_dir / 'chord_chart.json'
+                    with open(chart_path, 'w') as f:
+                        _json.dump(chart, f, indent=2)
+
+                    formatter_label = "Phi-3 LLM" if phi3_used else "rule-based"
                     num_sections = len(chart.get('sections', []))
                     num_lines = sum(len(s.get('lines', [])) for s in chart.get('sections', []))
-                    logger.info(f"✓ Auto-generated chord chart: {num_sections} sections, {num_lines} lines")
+                    logger.info(f"✓ Formatted chord chart ({formatter_label}): {num_sections} sections, {num_lines} lines → {chart_path}")
                 else:
-                    logger.info("Chord chart generation returned no result")
+                    logger.info("Chart formatter returned no sections")
+
             except Exception as e:
                 logger.warning(f"Chord chart generation failed (non-fatal): {e}")
+
+        # Step 2b-RAG: DISABLED — RAG chord recall used stored third-party chord charts
+        # with lyrics, which creates copyright exposure (NMPA/Genius lawsuit risk).
+        # Chart generation now relies on detection + formatter only. Model-based recall
+        # (Phi-3 parametric memory) will replace this once the 3-epoch training finishes.
+
+        # Step 2c: Generate lead sheet (MusicXML with slash notation + chord symbols)
+        if job.chord_progression:
+            try:
+                from lead_sheet_generator import generate_lead_sheet_for_job, MUSIC21_AVAILABLE
+                if MUSIC21_AVAILABLE:
+                    job.stage = 'Generating lead sheet'
+                    job.progress = 59
+                    save_job_checkpoint(job)
+                    lead_sheet_path = generate_lead_sheet_for_job(job, str(audio_path))
+                    if lead_sheet_path:
+                        logger.info(f"✓ Lead sheet generated: {lead_sheet_path}")
+                    else:
+                        logger.info("Lead sheet generation returned no output")
+                else:
+                    logger.info("music21 not available — skipping lead sheet generation")
+            except Exception as e:
+                logger.warning(f"Lead sheet generation failed (non-fatal): {e}")
 
         # Step 3: Transcribe to MIDI
         job.progress = 60
@@ -426,16 +576,25 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         job.status = 'completed'
         logger.info(f"Job {job.job_id} completed successfully with {len(job.stems)} stems, {len(job.sub_stems)} skill outputs")
 
-        # Auto-upload to Google Drive (transcriptions only, not stems)
-        if DRIVE_AVAILABLE:
+        # Google Drive upload is now on-demand, user-initiated from the UI.
+        # See backend/routes/drive.py for the /api/drive/export endpoint.
+
+        # Cache URL results for future lookups
+        if job.source_url:
             try:
-                job.stage = 'Uploading to Google Drive'
-                drive_result = upload_job_to_drive(job, keep_stems=False)
-                if drive_result:
-                    job.metadata['drive_upload'] = drive_result
-                    logger.info(f"Uploaded job {job.job_id} to Google Drive")
+                from url_cache import add_to_cache
+                add_to_cache(
+                    url=job.source_url,
+                    job_id=job.job_id,
+                    title=job.metadata.get('title', ''),
+                    artist=job.metadata.get('artist', ''),
+                    stem_count=len(job.stems),
+                    has_chords=bool(job.chord_progression),
+                    has_gp=bool(job.gp_files),
+                    has_midi=bool(job.midi_files),
+                )
             except Exception as e:
-                logger.warning(f"Drive upload failed (non-fatal): {e}")
+                logger.warning(f"Failed to cache URL result: {e}")
 
         # Save job to disk for library persistence
         save_job_to_disk(job)
