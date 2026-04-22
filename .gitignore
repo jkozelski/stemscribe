@@ -91,3 +91,24 @@ backend/outputs
 
 # Model pretrained weights
 backend/models/pretrained/
+.cloudflare_token
+
+# Training data (large + potentially license-sensitive)
+backend/training_data/btc_finetune/checkpoints/
+backend/training_data/chart_formatter/
+backend/training_data/chart_recall/
+# LEGAL-SENSITIVE per Alexandra Mayo Apr 10 directive — do NOT commit.
+# Contains 185MB embeddings + 14MB metadata referencing 15k deleted scraped charts.
+# Delete from disk before re-enabling any RAG feature.
+backend/training_data/chord_recall_index/
+# JAAH research dataset — check license (may be CC-BY-NC, non-commercial)
+backend/training_data/jaah/
+
+# Runtime caches / DBs / logs
+backend/url_cache.db
+backend/error_log.json
+backend/watchdog_log.json
+
+# Claude Code local settings
+.claude/
+
