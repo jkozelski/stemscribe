@@ -470,6 +470,24 @@ def fetch_track_info(track_name: str, artist: str = None,
         except Exception as e:
             logger.debug(f"  MusicBrainz album failed: {e}")
 
+    # Band members via MusicBrainz (function existed but was never wired in —
+    # this is the "who was playing the instrument" section the panel needs)
+    if not info.get('members'):
+        try:
+            mb_members = fetch_musicbrainz_artist_members(artist)
+            if mb_members:
+                info['members'] = mb_members
+                logger.info(f"  ✓ Got {len(mb_members)} band members from MusicBrainz")
+                # Derive per-stem player mapping from roles where MusicBrainz
+                # tagged a specific instrument. Members tagged just "Member"
+                # (no role) are skipped — they could play anything.
+                if not info.get('player_mapping'):
+                    info['player_mapping'] = _derive_player_mapping_from_members(mb_members)
+                    if info['player_mapping']:
+                        logger.info(f"  ✓ Derived player mapping: {info['player_mapping']}")
+        except Exception as e:
+            logger.debug(f"  MusicBrainz members fetch failed: {e}")
+
     # Ensure we always return something useful
     if not info['bio']:
         info['bio'] = f"{artist} - Use stem separation to isolate and study individual instrument parts."
@@ -486,6 +504,38 @@ def get_player_mapping(artist_key: str) -> Dict[str, str]:
     Returns a dict mapping stem names to player names.
     """
     return PLAYER_POSITIONS.get(artist_key, {}).copy()
+
+
+def _derive_player_mapping_from_members(members: Dict[str, str]) -> Dict[str, str]:
+    """
+    Map stem names -> member names based on role attributes from MusicBrainz.
+
+    MusicBrainz tags some band members with an instrument role (e.g.
+    "drums (drum set)", "background vocals", "bass guitar") and leaves
+    others as the generic "Member". Use the tagged ones to auto-populate
+    the stem labels. Multiple members on one instrument get comma-joined.
+    """
+    if not members:
+        return {}
+    role_to_stem = [
+        (('drum',), 'drums'),
+        (('bass',), 'bass'),
+        (('lead guitar', 'rhythm guitar', 'electric guitar', 'acoustic guitar', ' guitar'), 'guitar'),
+        (('piano', 'keyboard', 'organ', 'synthesizer', 'rhodes'), 'piano'),
+        (('background vocal', 'backing vocal', 'harmony vocal'), 'vocals_backing'),
+        (('lead vocal', 'lead singer'), 'vocals_lead'),
+    ]
+    mapping: Dict[str, List[str]] = {}
+    for name, role in members.items():
+        role_lc = (role or '').lower()
+        if not role_lc or role_lc == 'member':
+            continue
+        for keywords, stem in role_to_stem:
+            if any(kw in role_lc for kw in keywords):
+                display_name = name.title()
+                mapping.setdefault(stem, []).append(display_name)
+                break
+    return {stem: ', '.join(names) for stem, names in mapping.items()}
 
 
 # Bands that benefit from stereo splitting (dual guitars, dual drums, panned keyboards)
