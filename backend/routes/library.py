@@ -45,9 +45,12 @@ def _job_belongs_to_user(job, user, session_id):
 
 
 def _thumb_url(raw):
-    """Rewrite a raw thumbnail URL to go through the proxy endpoint."""
+    """Rewrite a raw thumbnail URL to go through the proxy endpoint.
+    Local paths (starting with /) are returned as-is."""
     if not raw:
         return None
+    if raw.startswith('/'):
+        return raw  # Local image, serve directly
     return '/api/thumbnail?url=' + quote(raw, safe='')
 
 
@@ -101,7 +104,24 @@ def get_library():
     """
     user = getattr(g, 'current_user', None)
     session_id = request.cookies.get('session_id')
-    show_all = request.args.get('all', '').lower() == 'true' and _is_admin()
+    is_admin = _is_admin()
+
+    # Fallback admin check: try to get user from JWT directly
+    if not is_admin and not user:
+        try:
+            from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+            verify_jwt_in_request(optional=True)
+            uid = get_jwt_identity()
+            if uid:
+                from auth.models import get_user_by_id
+                fallback_user = get_user_by_id(uid)
+                if fallback_user:
+                    user = fallback_user
+                    is_admin = getattr(fallback_user, 'email', None) in ADMIN_EMAILS
+        except Exception:
+            pass
+
+    show_all = request.args.get('all', '').lower() == 'true' and is_admin
 
     library = []
 
@@ -109,20 +129,25 @@ def get_library():
         if job.status != 'completed' or not job.stems:
             continue
 
+        # Demo songs are visible to everyone
+        is_demo = job.metadata.get('demo', False) if job.metadata else False
+
         # Determine visibility
-        if show_all:
-            pass  # Admin sees everything
+        if is_demo:
+            pass  # Demo songs always shown
+        elif is_admin:
+            pass  # Admin always sees everything
+        elif show_all:
+            pass  # Explicit all flag
         elif user:
-            # Logged-in user: show their own jobs
+            # Logged-in user: show only their own jobs
             if not _job_belongs_to_user(job, user, session_id):
-                # Also show legacy unclaimed jobs (no user_id set)
-                if job.user_id is not None:
-                    continue
-        else:
-            # Anonymous: show only their session's jobs, plus legacy unclaimed jobs
-            if job.session_id and job.session_id != session_id:
                 continue
-            if job.user_id is not None:
+        else:
+            # Anonymous: show only their own session's jobs
+            if not session_id:
+                continue
+            if job.session_id != session_id:
                 continue
 
         library.append({
@@ -135,6 +160,7 @@ def get_library():
             'has_midi': len(job.midi_files) > 0,
             'has_gp': len(job.gp_files) > 0,
             'thumbnail': _thumb_url(job.metadata.get('thumbnail')),
+            'demo': is_demo,
             'source_url': job.source_url
         })
 
@@ -201,11 +227,15 @@ def delete_from_library(job_id):
 
     user = getattr(g, 'current_user', None)
 
-    # Authorization: must be admin or job owner
+    # Authorization: admin can delete anything, owner can delete their own,
+    # any signed-in user can delete unclaimed jobs (no user_id)
     if not _is_admin():
         if not user:
             return jsonify({'error': 'Authentication required'}), 401
-        if job.user_id and job.user_id != str(user.id):
+        session_id = request.cookies.get('session_id')
+        is_owner = _job_belongs_to_user(job, user, session_id)
+        is_unclaimed = job.user_id is None
+        if not is_owner and not is_unclaimed:
             return jsonify({'error': 'You do not own this song'}), 403
 
     try:

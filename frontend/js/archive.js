@@ -34,7 +34,7 @@ window.StemScribe = window.StemScribe || {};
                         btn.classList.add('active');
                         archiveSelectedCollection = btn.dataset.collection;
                         if (archiveSearchInput) {
-                            var query = archiveSearchInput.value.trim() || btn.textContent.trim().split(' ').slice(1).join(' ');
+                            var query = archiveSearchInput.value.trim() || btn.textContent.trim();
                             archiveSearchInput.value = query;
                         }
                         SS.performArchiveSearch();

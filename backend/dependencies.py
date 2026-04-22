@@ -38,6 +38,7 @@ NOTATION_CONVERTER_AVAILABLE = False
 MUSIC21_AVAILABLE = False
 ENSEMBLE_SEPARATOR_AVAILABLE = False
 EXTENDED_BAND_CONFIG_AVAILABLE = False
+TRIMPLEXX_MODEL_AVAILABLE = False
 
 # Singletons
 _gpu_manager = None
@@ -167,6 +168,19 @@ except ImportError as e:
     DRUM_NN_MODEL_AVAILABLE = False
     logger.warning(f"Neural drum model not available: {e}")
 
+# Trimplexx guitar tablature model (CRNN, string+fret output, GuitarSet run_72)
+try:
+    from trimplexx_transcriber import (
+        TrimplexxTranscriber, transcribe_trimplexx,  # noqa: F401
+        TRIMPLEXX_MODEL_AVAILABLE as _trimplexx, is_available as trimplexx_is_available  # noqa: F401
+    )
+    TRIMPLEXX_MODEL_AVAILABLE = _trimplexx
+    if TRIMPLEXX_MODEL_AVAILABLE:
+        logger.info("Trimplexx guitar model available (CRNN, string+fret, TDR F1=0.857)")
+except ImportError as e:
+    TRIMPLEXX_MODEL_AVAILABLE = False
+    logger.warning(f"Trimplexx guitar model not available: {e}")
+
 # Model manager for pretrained models
 try:
     from models.model_manager import ModelManager, ensure_model, list_available_models  # noqa: F401
@@ -176,18 +190,19 @@ except ImportError as e:
     MODEL_MANAGER_AVAILABLE = False
     logger.warning(f"Model manager not available: {e}")
 
-# Chord detection (V10 BTC fine-tuned preferred, falls back to V8/V7/basic)
+# Chord detection (V8 Transformer preferred — 93.6% accuracy, 337 classes including jazz voicings)
+# V8 > V10 (BTC) because V8 has more chord classes (337 vs 170) and higher accuracy
 try:
-    from chord_detector_v10 import ChordDetector, detect_chords
+    from chord_detector_v8 import ChordDetector, detect_chords
     CHORD_DETECTOR_AVAILABLE = True
-    CHORD_DETECTOR_VERSION = 'v10'
-    logger.info("Chord detector V10 available (BTC fine-tuned, 170 classes)")
+    CHORD_DETECTOR_VERSION = 'v8'
+    logger.info("Chord detector V8 available (93.6% accuracy, 337 classes, inversions, mMaj7)")
 except ImportError:
     try:
-        from chord_detector_v8 import ChordDetector, detect_chords
+        from chord_detector_v10 import ChordDetector, detect_chords
         CHORD_DETECTOR_AVAILABLE = True
-        CHORD_DETECTOR_VERSION = 'v8'
-        logger.info("Chord detector V8 available (337 classes, inversions, mMaj7)")
+        CHORD_DETECTOR_VERSION = 'v10'
+        logger.info("Chord detector V10 available (BTC fine-tuned, 170 classes)")
     except ImportError:
         try:
             from chord_detector_v7 import ChordDetector, detect_chords

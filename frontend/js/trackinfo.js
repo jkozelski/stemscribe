@@ -125,9 +125,10 @@ window.StemScribe = window.StemScribe || {};
                 wikiLink.style.display = 'none';
             }
             if (wikiSearchLink) {
-                if (info.artist) {
+                // Hide Wikipedia search if we already have a website or wiki URL
+                if (info.artist && !info.wikipedia_url && !info.website_url) {
                     wikiSearchLink.href = 'https://en.wikipedia.org/w/index.php?search=' + encodeURIComponent(info.artist);
-                    wikiSearchLink.style.display = info.wikipedia_url ? 'none' : 'inline-block';
+                    wikiSearchLink.style.display = 'inline-block';
                 } else {
                     wikiSearchLink.style.display = 'none';
                 }
@@ -138,6 +139,15 @@ window.StemScribe = window.StemScribe || {};
                     websiteLink.style.display = 'inline-block';
                 } else {
                     websiteLink.style.display = 'none';
+                }
+            }
+            var spotifyLink = document.getElementById('spotifyLink');
+            if (spotifyLink) {
+                if (info.spotify_url) {
+                    spotifyLink.href = info.spotify_url;
+                    spotifyLink.style.display = 'inline-block';
+                } else {
+                    spotifyLink.style.display = 'none';
                 }
             }
         } else {

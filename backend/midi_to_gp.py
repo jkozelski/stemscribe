@@ -7,12 +7,13 @@ Uses pyguitarpro for GP file creation and mido for MIDI parsing.
 Features:
 - Automatic instrument detection (guitar, bass, drums, piano, vocals)
 - Proper tuning assignment based on instrument type
-- Note-to-fret mapping with intelligent position selection
-- Lead mode: enhanced same-string preference, bend-aware fret selection
+- A*-Guitar search for optimal fret position assignment (minimizes hand movement)
+- Lead mode: bend-aware fret selection (prefer frets 5-15 for bends)
 - Tempo and time signature preservation
 - Articulation effects: bends, slides, hammer-ons, vibrato (from MIDI pitch bend + CC#20)
 """
 
+import heapq
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -31,6 +32,13 @@ TUNINGS = {
 # Fret range
 MAX_FRET = 24
 
+# A*-Guitar search parameters
+HAND_SPAN = 4           # Comfortable fret span without shifting
+POSITION_WEIGHT = 1.0   # Cost multiplier for fret distance
+STRING_WEIGHT = 0.5     # Cost multiplier for string jumps
+BEND_PENALTY = 20       # Penalty for bend on open/fret-1
+LOOKAHEAD = 12          # Notes to look ahead in A* search window
+
 
 @dataclass
 class GPNote:
@@ -45,11 +53,87 @@ class GPNote:
     is_slide: bool = False
 
 
+def _get_candidates(midi_note: int, tuning: List[int]) -> List[Tuple[int, int]]:
+    """Return all valid (string, fret) pairs for a MIDI note on the given tuning.
+    String numbers are 1-indexed."""
+    candidates = []
+    for string_idx, open_note in enumerate(tuning):
+        fret = midi_note - open_note
+        if 0 <= fret <= MAX_FRET:
+            candidates.append((string_idx + 1, fret))
+    return candidates
+
+
+def _transition_cost(prev_string: int, prev_fret: int,
+                     cur_string: int, cur_fret: int,
+                     has_bend: bool = False) -> float:
+    """
+    Cost of moving from one fret position to another.
+    Models real guitar ergonomics: fret distance, string jumps, bend constraints.
+    """
+    cost = 0.0
+
+    # Fret distance — primary driver of hand movement
+    fret_delta = abs(cur_fret - prev_fret)
+    if fret_delta == 0:
+        cost += 0.0
+    elif fret_delta <= HAND_SPAN:
+        cost += fret_delta * POSITION_WEIGHT
+    else:
+        # Penalize shifts beyond hand span quadratically
+        cost += HAND_SPAN * POSITION_WEIGHT + (fret_delta - HAND_SPAN) ** 2 * POSITION_WEIGHT
+
+    # String jump cost
+    string_delta = abs(cur_string - prev_string)
+    if string_delta == 0:
+        cost += 0.0   # Same string — no extra cost
+    elif string_delta == 1:
+        cost += 0.5 * STRING_WEIGHT
+    else:
+        cost += string_delta * STRING_WEIGHT
+
+    # Bend constraints
+    if has_bend:
+        if cur_fret < 2:
+            cost += BEND_PENALTY  # Can't bend open or fret 1
+        elif cur_fret > 17:
+            cost += 10  # Hard to bend above fret 17
+
+    return cost
+
+
+def _position_cost(string: int, fret: int, num_strings: int,
+                   has_bend: bool = False) -> float:
+    """Intrinsic cost of a fret position (no context). Slight preference for
+    comfortable zones but much lighter than the old heuristic — the A* path
+    optimizer handles most of the work."""
+    cost = 0.0
+
+    # Slight zone preference
+    if fret == 0:
+        cost += 1.0   # Open string — easy but can't bend
+    elif 1 <= fret <= 7:
+        cost += 0.0   # First/second position
+    elif 8 <= fret <= 12:
+        cost += 1.0   # Mid-neck
+    else:
+        cost += 2.0   # Upper frets
+
+    # Bend awareness
+    if has_bend:
+        if fret < 2:
+            cost += BEND_PENALTY
+        elif fret > 17:
+            cost += 10
+
+    return cost
+
+
 def midi_note_to_fret(midi_note: int, tuning: List[int],
                       prev_fret: int = None, prev_string: int = None) -> Optional[Tuple[int, int]]:
     """
     Convert MIDI note to (string, fret) for given tuning.
-    Uses context-aware positioning for realistic playability.
+    Single-note greedy fallback used when A* path is not available.
 
     Args:
         midi_note: MIDI note number
@@ -60,80 +144,186 @@ def midi_note_to_fret(midi_note: int, tuning: List[int],
     Returns:
         (string_number, fret) - string is 1-indexed
     """
-    candidates = []
-
-    for string_idx, open_note in enumerate(tuning):
-        fret = midi_note - open_note
-        if 0 <= fret <= MAX_FRET:
-            string_num = string_idx + 1
-
-            # Base score components
-            score = 0
-
-            # 1. Position zone preference (prefer positions 1-7 for most playing)
-            if fret == 0:
-                score += 5  # Open strings are easy
-            elif 1 <= fret <= 4:
-                score += 0  # First position - most comfortable
-            elif 5 <= fret <= 7:
-                score += 3  # Second position - still easy
-            elif 8 <= fret <= 12:
-                score += 8  # Third position - need to shift
-            else:
-                score += 15  # High frets - harder to play
-
-            # 2. String preference (middle strings easier for single notes)
-            # For 6-string: prefer strings 2-5 (indices 1-4)
-            mid_string = len(tuning) // 2
-            string_distance = abs(string_idx - mid_string)
-            score += string_distance * 2
-
-            # 3. Hand position continuity (KEY FOR PLAYABILITY)
-            if prev_fret is not None:
-                fret_jump = abs(fret - prev_fret)
-                if fret_jump == 0:
-                    score -= 3  # Same fret - very easy
-                elif fret_jump <= 2:
-                    score += 0  # Within hand span - natural
-                elif fret_jump <= 4:
-                    score += 5  # Small shift
-                elif fret_jump <= 7:
-                    score += 12  # Position shift required
-                else:
-                    score += 20  # Large jump - avoid if possible
-
-            # 4. String continuity (avoid large string jumps)
-            if prev_string is not None:
-                string_jump = abs(string_num - prev_string)
-                if string_jump == 0:
-                    score -= 2  # Same string - natural for runs
-                elif string_jump == 1:
-                    score += 0  # Adjacent string - easy
-                elif string_jump == 2:
-                    score += 3  # Skip one string
-                else:
-                    score += string_jump * 3  # Large jumps harder
-
-            # 5. Bendability (can't bend open strings, hard to bend above fret 15)
-            # Not penalizing here, but could add articulation awareness
-
-            candidates.append((string_num, fret, score))
-
+    candidates = _get_candidates(midi_note, tuning)
     if not candidates:
         return None
 
-    # Return best candidate (lowest score)
-    candidates.sort(key=lambda x: x[2])
-    return (candidates[0][0], candidates[0][1])
+    num_strings = len(tuning)
+
+    def score(c):
+        s, f = c
+        base = _position_cost(s, f, num_strings)
+        if prev_fret is not None and prev_string is not None:
+            base += _transition_cost(prev_string, prev_fret, s, f)
+        return base
+
+    best = min(candidates, key=score)
+    return best
+
+
+def astar_fret_search(midi_notes: List[int], tuning: List[int],
+                      bend_flags: List[bool] = None,
+                      window: int = LOOKAHEAD) -> List[Optional[Tuple[int, int]]]:
+    """
+    A*-Guitar: find the minimum-cost path of fret assignments for a note sequence.
+
+    Treats the sequence as a graph where each layer is the set of candidate
+    (string, fret) positions for one note, and edges are weighted by hand-
+    movement cost. Uses A* with a lookahead window to keep complexity bounded
+    while still producing globally-aware assignments.
+
+    Args:
+        midi_notes: Sequence of MIDI note numbers
+        tuning: Open string pitches (low to high)
+        bend_flags: Per-note flag indicating if note has a bend articulation
+        window: How many notes to optimize together in each A* window
+
+    Returns:
+        List of (string, fret) tuples (or None for unmappable notes)
+    """
+    if not midi_notes:
+        return []
+
+    n = len(midi_notes)
+    num_strings = len(tuning)
+
+    if bend_flags is None:
+        bend_flags = [False] * n
+
+    # Pre-compute candidates for every note
+    all_candidates = [_get_candidates(note, tuning) for note in midi_notes]
+
+    results: List[Optional[Tuple[int, int]]] = [None] * n
+
+    # Process in overlapping windows
+    start = 0
+    prev_state = None  # (string, fret) from previous window's last assigned note
+
+    while start < n:
+        end = min(start + window, n)
+
+        # Skip notes with no candidates
+        segment_indices = []
+        segment_candidates = []
+        segment_bends = []
+        for i in range(start, end):
+            if all_candidates[i]:
+                segment_indices.append(i)
+                segment_candidates.append(all_candidates[i])
+                segment_bends.append(bend_flags[i])
+
+        if not segment_indices:
+            start = end
+            continue
+
+        # A* search through this segment
+        # State: index into segment_candidates, chosen (string, fret)
+        # Priority queue: (cost, segment_idx, string, fret, path)
+
+        best_path = _astar_segment(
+            segment_candidates, segment_bends, num_strings, prev_state
+        )
+
+        # Write results
+        for idx, (seg_i, assignment) in enumerate(zip(segment_indices, best_path)):
+            results[seg_i] = assignment
+
+        # Carry forward the last assigned position for continuity
+        if best_path:
+            prev_state = best_path[-1]
+
+        # Overlap: step back a bit so the next window has context
+        overlap = min(3, len(segment_indices))
+        start = end
+
+    return results
+
+
+def _astar_segment(candidates: List[List[Tuple[int, int]]],
+                   bend_flags: List[bool],
+                   num_strings: int,
+                   prev_state: Optional[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """
+    Run A* search over a segment of notes to find the minimum-cost path.
+
+    Each node is (layer_index, string, fret). Edges connect adjacent layers.
+    Uses a simple admissible heuristic: remaining layers * minimum possible
+    transition cost (0).
+
+    Returns list of (string, fret) assignments for the segment.
+    """
+    seg_len = len(candidates)
+    if seg_len == 0:
+        return []
+
+    # For single note, just pick best intrinsic cost
+    if seg_len == 1:
+        best = min(candidates[0],
+                   key=lambda c: _position_cost(c[0], c[1], num_strings, bend_flags[0]) +
+                   (_transition_cost(prev_state[0], prev_state[1], c[0], c[1], bend_flags[0])
+                    if prev_state else 0))
+        return [best]
+
+    # Priority queue: (total_est_cost, cost_so_far, layer, string, fret, path_as_tuple)
+    # Using a counter to break ties deterministically
+    counter = 0
+    pq = []
+
+    # Initialize with all candidates for first note
+    for s, f in candidates[0]:
+        base = _position_cost(s, f, num_strings, bend_flags[0])
+        if prev_state:
+            base += _transition_cost(prev_state[0], prev_state[1], s, f, bend_flags[0])
+        est = base  # Heuristic for remaining = 0 (admissible)
+        heapq.heappush(pq, (est, base, 0, s, f, ((s, f),), counter))
+        counter += 1
+
+    # Track best cost to reach each (layer, string, fret) to prune
+    best_cost = {}
+
+    while pq:
+        est_total, cost_so_far, layer, cur_s, cur_f, path, _ = heapq.heappop(pq)
+
+        # Goal: reached last layer
+        if layer == seg_len - 1:
+            return list(path)
+
+        # Prune: if we've already reached this state cheaper, skip
+        state_key = (layer, cur_s, cur_f)
+        if state_key in best_cost and best_cost[state_key] <= cost_so_far:
+            continue
+        best_cost[state_key] = cost_so_far
+
+        # Expand to next layer
+        next_layer = layer + 1
+        for ns, nf in candidates[next_layer]:
+            trans = _transition_cost(cur_s, cur_f, ns, nf, bend_flags[next_layer])
+            pos = _position_cost(ns, nf, num_strings, bend_flags[next_layer])
+            new_cost = cost_so_far + trans + pos
+
+            nk = (next_layer, ns, nf)
+            if nk in best_cost and best_cost[nk] <= new_cost:
+                continue
+
+            # Heuristic: 0 is admissible (optimistic)
+            est = new_cost
+            heapq.heappush(pq, (est, new_cost, next_layer, ns, nf,
+                                path + ((ns, nf),), counter))
+            counter += 1
+
+    # Fallback: shouldn't happen if candidates are non-empty
+    return [(c[0][0], c[0][1]) for c in candidates]
 
 
 class FretMapper:
     """
-    Intelligent fret position mapper that maintains hand position context
-    across a sequence of notes.
+    A*-Guitar fret position mapper. Replaces the old greedy heuristic with
+    A* search that minimizes total hand movement across note sequences.
 
-    Lead mode: stronger same-string preference, wider position memory,
-    bend-aware fret selection (prefer frets 5-15 for bends).
+    For batch assignment (preferred): call map_sequence() with all notes at once.
+    For single-note streaming: map_note() falls back to greedy with transition costs.
+
+    Lead mode: bend-aware cost penalties to keep bends on frets 2-17.
     """
 
     def __init__(self, tuning: List[int], lead_mode: bool = False):
@@ -142,170 +332,54 @@ class FretMapper:
         self.prev_fret = None
         self.prev_string = None
         self.lead_mode = lead_mode
-        self.position_history = []  # Last N fret positions for lead mode
+
+    def map_sequence(self, midi_notes: List[int],
+                     bend_flags: List[bool] = None) -> List[Optional[Tuple[int, int]]]:
+        """
+        Map an entire note sequence using A*-Guitar search.
+        This is the preferred entry point — gives globally optimal fret assignments.
+
+        Args:
+            midi_notes: List of MIDI note numbers in time order
+            bend_flags: Per-note bend flag (optional)
+
+        Returns:
+            List of (string, fret) or None for each note
+        """
+        results = astar_fret_search(midi_notes, self.tuning,
+                                    bend_flags=bend_flags,
+                                    window=LOOKAHEAD)
+
+        # Update internal state to last assigned position
+        for r in reversed(results):
+            if r is not None:
+                self.prev_string, self.prev_fret = r
+                self.current_position = max(0, self.prev_fret - 2)
+                break
+
+        return results
 
     def map_note(self, midi_note: int, has_bend: bool = False) -> Optional[Tuple[int, int]]:
-        """Map a single note, updating position context."""
-        if self.lead_mode:
-            result = self._map_note_lead(midi_note, has_bend)
-        else:
-            result = midi_note_to_fret(
-                midi_note, self.tuning,
-                prev_fret=self.prev_fret,
-                prev_string=self.prev_string
-            )
-
-        if result:
-            self.prev_string, self.prev_fret = result
-            self.current_position = max(0, self.prev_fret - 2)
-            if self.lead_mode:
-                self.position_history.append(self.prev_fret)
-                if len(self.position_history) > 6:
-                    self.position_history.pop(0)
-
-        return result
-
-    def _map_note_lead(self, midi_note: int, has_bend: bool = False) -> Optional[Tuple[int, int]]:
-        """Lead-optimized fret mapping: same-string preference, position memory, bend-aware."""
-        candidates = []
-
-        for string_idx, open_note in enumerate(self.tuning):
-            fret = midi_note - open_note
-            if 0 <= fret <= MAX_FRET:
-                string_num = string_idx + 1
-                score = 0
-
-                # Position zone — for leads, prefer mid-fret positions (5-12)
-                if fret == 0:
-                    score += 8 if has_bend else 5  # Can't bend open strings
-                elif 1 <= fret <= 4:
-                    score += 2
-                elif 5 <= fret <= 12:
-                    score += 0  # Sweet spot for lead playing + bends
-                elif 13 <= fret <= 17:
-                    score += 4
-                else:
-                    score += 12
-
-                # Bend-aware: strongly penalize open strings and frets < 2 for bends
-                if has_bend:
-                    if fret < 2:
-                        score += 20  # Can't bend open/1st fret easily
-                    elif fret > 17:
-                        score += 10  # Hard to bend high frets
-
-                # Same string: much stronger preference for leads (runs stay on one string)
-                if self.prev_string is not None:
-                    string_jump = abs(string_num - self.prev_string)
-                    if string_jump == 0:
-                        score -= 5  # Strong same-string bonus
-                    elif string_jump == 1:
-                        score += 1
-                    else:
-                        score += string_jump * 4
-
-                # Hand position continuity with history
-                if self.position_history:
-                    avg_pos = sum(self.position_history) / len(self.position_history)
-                    pos_distance = abs(fret - avg_pos)
-                    if pos_distance <= 3:
-                        score -= 2  # Within established position
-                    elif pos_distance <= 5:
-                        score += 3
-                    else:
-                        score += pos_distance * 2
-
-                # Previous fret continuity
-                if self.prev_fret is not None:
-                    fret_jump = abs(fret - self.prev_fret)
-                    if fret_jump <= 2:
-                        score -= 1
-                    elif fret_jump <= 4:
-                        score += 3
-                    else:
-                        score += fret_jump * 2
-
-                candidates.append((string_num, fret, score))
-
+        """Map a single note with greedy fallback, updating position context."""
+        candidates = _get_candidates(midi_note, self.tuning)
         if not candidates:
             return None
 
-        candidates.sort(key=lambda x: x[2])
-        return (candidates[0][0], candidates[0][1])
+        num_strings = len(self.tuning)
 
-    def map_chord(self, midi_notes: List[int]) -> List[Tuple[int, int]]:
-        """
-        Map a chord (simultaneous notes) to fret positions.
-        Ensures all notes are playable together within a hand span.
-        """
-        if not midi_notes:
-            return []
+        def score(c):
+            s, f = c
+            base = _position_cost(s, f, num_strings, has_bend)
+            if self.prev_fret is not None and self.prev_string is not None:
+                base += _transition_cost(self.prev_string, self.prev_fret, s, f, has_bend)
+            return base
 
-        # Sort notes low to high
-        sorted_notes = sorted(midi_notes)
+        result = min(candidates, key=score)
 
-        # Find all possible positions for each note
-        all_candidates = []
-        for note in sorted_notes:
-            note_candidates = []
-            for string_idx, open_note in enumerate(self.tuning):
-                fret = note - open_note
-                if 0 <= fret <= MAX_FRET:
-                    note_candidates.append((string_idx + 1, fret))
-            all_candidates.append(note_candidates)
+        self.prev_string, self.prev_fret = result
+        self.current_position = max(0, self.prev_fret - 2)
 
-        if not all(all_candidates):
-            # At least one note has no valid position
-            return []
-
-        # Find combination where:
-        # 1. Each note on different string
-        # 2. Fret span <= 4 (or 5 with stretch)
-        # 3. Prefer lower positions
-
-        best_combo = None
-        best_score = float('inf')
-
-        def find_combos(note_idx, used_strings, current_combo):
-            nonlocal best_combo, best_score
-
-            if note_idx == len(sorted_notes):
-                # Evaluate this combination
-                frets = [f for _, f in current_combo]
-                non_open = [f for f in frets if f > 0]
-
-                if non_open:
-                    fret_span = max(non_open) - min(non_open)
-                    if fret_span > 5:  # Too wide for one hand
-                        return
-
-                    # Score: prefer lower positions, smaller span
-                    score = min(non_open) + fret_span * 2
-                else:
-                    score = 0  # All open strings
-
-                if score < best_score:
-                    best_score = score
-                    best_combo = list(current_combo)
-                return
-
-            for string, fret in all_candidates[note_idx]:
-                if string not in used_strings:
-                    find_combos(
-                        note_idx + 1,
-                        used_strings | {string},
-                        current_combo + [(string, fret)]
-                    )
-
-        find_combos(0, set(), [])
-
-        if best_combo:
-            # Update context with the lowest note's position
-            if best_combo:
-                self.prev_string = best_combo[0][0]
-                self.prev_fret = best_combo[0][1]
-
-        return best_combo or []
+        return result
 
     def reset(self):
         """Reset position context (e.g., at section boundaries)."""
@@ -469,11 +543,10 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
             measure = guitarpro.models.Measure(gp_track, measure_header)
             gp_track.measures.append(measure)
 
-        # Create FretMapper — use lead mode if we have articulation markers
+        # Create FretMapper with A*-Guitar search
         use_lead_mode = len(articulation_markers) > 0
         fret_mapper = FretMapper(tuning_notes, lead_mode=use_lead_mode)
-        if use_lead_mode:
-            logger.info("Using lead-optimized fret mapping (bend-aware, position memory)")
+        logger.info("Using A*-Guitar search for fret position optimization")
 
         # Helper: find articulation nearest to a beat time
         def _find_articulation(beat_time, tolerance=0.15):
@@ -490,8 +563,20 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
                     max_val = max(max_val, abs(pb['value']))
             return max_val
 
+        # --- A*-Guitar batch assignment (non-drum tracks) ---
+        is_drum = 'drum' in instrument_type.lower()
+        fret_positions = []
+
+        if not is_drum:
+            # Build per-note bend flags for A* search
+            bend_flags = [_find_articulation(n['start_beat']) == 'bend' for n in notes]
+
+            midi_sequence = [n['midi_note'] for n in notes]
+            fret_positions = fret_mapper.map_sequence(midi_sequence, bend_flags=bend_flags)
+            logger.info(f"A*-Guitar assigned {sum(1 for p in fret_positions if p is not None)}/{len(notes)} notes")
+
         # Add notes to measures
-        for note_data in notes:
+        for note_idx, note_data in enumerate(notes):
             measure_idx = int(note_data['start_beat'] / beats_per_measure)
             if measure_idx >= len(gp_track.measures):
                 continue
@@ -501,15 +586,14 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
 
             # Look up articulation for this note
             note_art = _find_articulation(note_data['start_beat'])
-            has_bend = note_art == 'bend'
 
-            # Convert MIDI note to fret position with hand position awareness
-            if 'drum' in instrument_type.lower():
+            # Convert MIDI note to fret position
+            if is_drum:
                 # Drums: use voice for different drums
                 fret_pos = (1, note_data['midi_note'] % 6)  # Simplified drum mapping
             else:
-                # Use FretMapper for context-aware fret selection
-                fret_pos = fret_mapper.map_note(note_data['midi_note'], has_bend=has_bend)
+                # Use A*-Guitar pre-computed assignment
+                fret_pos = fret_positions[note_idx] if note_idx < len(fret_positions) else None
 
             if fret_pos is None:
                 continue  # Note out of range

@@ -1,5 +1,5 @@
 // StemScriber Service Worker — PWA support
-const CACHE_NAME = 'stemscriber-v9';
+const CACHE_NAME = 'stemscriber-v20';
 
 // Static assets to cache for offline shell
 const SHELL_ASSETS = [

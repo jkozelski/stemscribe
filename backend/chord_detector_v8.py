@@ -54,6 +54,7 @@ class ChordProgression:
     """Result of chord detection."""
     chords: List[ChordEvent]
     key: str
+    tuning_info: dict = None  # Compatibility with v10 pipeline interface
 
 
 # Note names for chord labeling
@@ -237,12 +238,14 @@ class ChordDetector:
             logger.warning("V8 model not found. Falling back to template matching.")
             self.model = None
 
-    def detect(self, audio_path: str) -> ChordProgression:
+    def detect(self, audio_path: str, artist: str = None, title: str = None) -> ChordProgression:
         """
         Detect chords from an audio file.
 
         Args:
             audio_path: Path to audio file
+            artist: Artist name (unused in v8, accepted for pipeline compatibility)
+            title: Song title (unused in v8, accepted for pipeline compatibility)
 
         Returns:
             ChordProgression with detected chords and key

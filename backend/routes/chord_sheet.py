@@ -382,6 +382,19 @@ def generate_chord_sheet_from_job(job_id):
     if not job:
         return jsonify({"error": "Job not found"}), 404
 
+    # Prefer the pre-built chord_chart.json which has sections with lyrics
+    from models.job import OUTPUT_DIR
+    chart_path = OUTPUT_DIR / job_id / "chord_chart.json"
+    if chart_path.exists():
+        try:
+            import json as _json
+            with open(chart_path) as f:
+                chart_data = _json.load(f)
+            if chart_data.get("sections"):
+                return jsonify(chart_data)
+        except Exception:
+            pass  # Fall through to generated version
+
     chord_progression = job.chord_progression
     if not chord_progression:
         return jsonify({"error": "No chord data detected for this job"}), 404

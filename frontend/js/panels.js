@@ -99,22 +99,37 @@ window.StemScribe = window.StemScribe || {};
             });
         }
 
-        // Google Drive connect button
+        // Google Drive connect button — kicks off OAuth redirect flow
         var connectDriveBtn = document.getElementById('connectDriveBtn');
         if (connectDriveBtn) connectDriveBtn.addEventListener('click', async function() {
             var btn = document.getElementById('connectDriveBtn');
-            btn.textContent = '\u23F3 Authenticating...';
+            btn.textContent = '\u23F3 Opening Google...';
             btn.disabled = true;
 
             try {
-                var response = await fetch(SS.API_BASE + '/drive/auth');
-                var data = await response.json();
+                // If already connected, offer to disconnect instead
+                var statusResp = await fetch(SS.API_BASE + '/drive/status', { credentials: 'include' });
+                var statusData = await statusResp.json();
+                if (statusData.connected) {
+                    if (confirm('Disconnect Google Drive (' + (statusData.email || 'connected') + ')?')) {
+                        await fetch(SS.API_BASE + '/drive/disconnect', { method: 'POST', credentials: 'include' });
+                        SS.showToast('Disconnected from Google Drive');
+                        SS.checkDriveStatus();
+                    } else {
+                        btn.textContent = '\u2713 Connected: ' + (statusData.email || 'Drive');
+                        btn.disabled = false;
+                    }
+                    return;
+                }
 
-                if (data.status === 'authenticated') {
-                    SS.showToast('\u2713 Connected to Google Drive!');
-                    SS.checkDriveStatus();
+                // Start OAuth flow
+                var response = await fetch(SS.API_BASE + '/drive/auth', { credentials: 'include' });
+                var data = await response.json();
+                if (data.auth_url) {
+                    // Redirect to Google
+                    window.location.href = data.auth_url;
                 } else {
-                    SS.showToast('Google Drive connection coming soon', true);
+                    SS.showToast(data.error || 'Could not start Drive connection', true);
                     btn.textContent = '\u{1F517} Connect Google Drive';
                     btn.disabled = false;
                 }
@@ -124,6 +139,23 @@ window.StemScribe = window.StemScribe || {};
                 btn.disabled = false;
             }
         });
+
+        // Handle OAuth callback query params (?drive=connected or ?drive=error)
+        (function handleDriveCallback() {
+            var params = new URLSearchParams(window.location.search);
+            var driveStatus = params.get('drive');
+            if (!driveStatus) return;
+            if (driveStatus === 'connected') {
+                SS.showToast('\u2713 Connected to Google Drive!');
+                if (typeof SS.checkDriveStatus === 'function') SS.checkDriveStatus();
+            } else if (driveStatus === 'error') {
+                var reason = params.get('reason') || 'unknown';
+                SS.showToast('Drive connection failed: ' + reason, true);
+            }
+            // Clean the URL so the toast doesn't re-fire on refresh
+            var cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, '', cleanUrl);
+        })();
 
         // Cleanup button
         var cleanupBtn = document.getElementById('cleanupBtn');
@@ -184,32 +216,85 @@ window.StemScribe = window.StemScribe || {};
         var statsRow = document.getElementById('driveStatsRow');
 
         try {
-            var response = await fetch(SS.API_BASE + '/drive/auth');
+            var response = await fetch(SS.API_BASE + '/drive/status', { credentials: 'include' });
             var data = await response.json();
 
-            if (data.status === 'authenticated') {
-                if (statusText) statusText.textContent = 'Connected';
+            if (data.connected) {
+                var label = data.email ? 'Connected: ' + data.email : 'Connected';
+                if (statusText) statusText.textContent = label;
                 if (statusDot) statusDot.className = 'status-dot green';
-                if (connectBtn) { connectBtn.textContent = '\u2713 Connected to Google Drive'; connectBtn.disabled = true; }
-
-                var statsResponse = await fetch(SS.API_BASE + '/drive/stats');
-                var stats = await statsResponse.json();
-                if (stats.exists) {
-                    if (statsRow) statsRow.style.display = 'flex';
-                    var dfc = document.getElementById('driveFileCount');
-                    if (dfc) dfc.textContent = stats.folder_count + ' songs';
-                }
+                if (connectBtn) { connectBtn.textContent = '\u2713 ' + label + ' (click to disconnect)'; connectBtn.disabled = false; }
+                if (statsRow) statsRow.style.display = 'none';
             } else {
                 if (statusText) statusText.textContent = 'Not connected';
                 if (statusDot) statusDot.className = 'status-dot red';
                 if (connectBtn) { connectBtn.textContent = '\u{1F517} Connect Google Drive'; connectBtn.disabled = false; }
+                if (statsRow) statsRow.style.display = 'none';
             }
         } catch (error) {
             if (statusText) statusText.textContent = 'Unavailable';
             if (statusDot) statusDot.className = 'status-dot red';
-            if (connectBtn) { connectBtn.textContent = '\u26A0\uFE0F Install Drive libraries first'; connectBtn.disabled = true; }
+            if (connectBtn) { connectBtn.textContent = '\u26A0\uFE0F Drive unavailable'; connectBtn.disabled = true; }
         }
     };
+
+    // Per-song "Export to Drive" — call this from results.js with the job id
+    SS.exportToDrive = async function(jobId, btnEl) {
+        if (!jobId) return;
+        var orig = btnEl ? btnEl.textContent : '';
+        if (btnEl) { btnEl.disabled = true; btnEl.textContent = '\u23F3 Uploading to Drive...'; }
+
+        try {
+            // Check connection; if not connected, kick off OAuth
+            var statusResp = await fetch(SS.API_BASE + '/drive/status', { credentials: 'include' });
+            var statusData = await statusResp.json();
+            if (!statusData.connected) {
+                var authResp = await fetch(SS.API_BASE + '/drive/auth', { credentials: 'include' });
+                var authData = await authResp.json();
+                if (authData.auth_url) {
+                    // Save intent so we can auto-export after return
+                    sessionStorage.setItem('drive_export_after_auth', jobId);
+                    window.location.href = authData.auth_url;
+                    return;
+                }
+                SS.showToast(authData.error || 'Could not connect to Drive', true);
+                if (btnEl) { btnEl.disabled = false; btnEl.textContent = orig; }
+                return;
+            }
+
+            var resp = await fetch(SS.API_BASE + '/drive/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ job_id: jobId }),
+            });
+            var data = await resp.json();
+            if (resp.ok && data.status === 'ok') {
+                SS.showToast('\u2713 Uploaded ' + data.count + ' stems to Drive');
+                if (data.folder_url) {
+                    window.open(data.folder_url, '_blank');
+                }
+                if (btnEl) { btnEl.textContent = '\u2713 In Drive'; btnEl.disabled = true; }
+            } else {
+                SS.showToast(data.error || 'Export failed', true);
+                if (btnEl) { btnEl.disabled = false; btnEl.textContent = orig; }
+            }
+        } catch (error) {
+            SS.showToast('Export failed: ' + error.message, true);
+            if (btnEl) { btnEl.disabled = false; btnEl.textContent = orig; }
+        }
+    };
+
+    // If we redirected to Google then came back connected AND had a pending export, run it
+    (function resumeExport() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('drive') !== 'connected') return;
+        var pendingJobId = sessionStorage.getItem('drive_export_after_auth');
+        if (!pendingJobId) return;
+        sessionStorage.removeItem('drive_export_after_auth');
+        // Defer a tick so the page has mounted
+        setTimeout(function() { SS.exportToDrive(pendingJobId); }, 500);
+    })();
 
     SS.loadLocalStats = async function() {
         try {
@@ -237,7 +322,7 @@ window.StemScribe = window.StemScribe || {};
         libraryList.innerHTML = '<div class="library-loading">Loading library...</div>';
 
         try {
-            var response = await fetch(SS.API_BASE + '/library');
+            var response = await fetch(SS.API_BASE + '/library', { headers: SS.authHeaders() });
             var data = await response.json();
 
             if (data.library && data.library.length > 0) {
@@ -254,7 +339,16 @@ window.StemScribe = window.StemScribe || {};
                         '<div class="library-item-header">' +
                             (item.thumbnail
                                 ? '<img src="' + SS.escapeHtml(item.thumbnail) + '" class="library-item-thumb" alt="">'
-                                : '<div class="library-item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem;">\u{1F3B5}</div>'
+                                : (function() {
+                                    var initSrc = item.artist || libArtist || libTitle || '?';
+                                    var initials = initSrc.split(/\s+/).map(function(w) { return w.charAt(0).toUpperCase(); }).join('').substring(0, 3);
+                                    // Generate a consistent color from the string
+                                    var hash = 0;
+                                    for (var ci = 0; ci < initSrc.length; ci++) hash = initSrc.charCodeAt(ci) + ((hash << 5) - hash);
+                                    var colors = ['#ff7b54','#c084fc','#61afef','#00ff88','#ff6b9d','#ffd700','#e06c75','#56b6c2','#d19a66','#98c379'];
+                                    var bgColor = colors[Math.abs(hash) % colors.length];
+                                    return '<div class="library-item-thumb" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,' + bgColor + '22,' + bgColor + '44);border:1px solid ' + bgColor + '33;font-family:Righteous,cursive;font-size:1.1rem;color:' + bgColor + ';letter-spacing:1px;">' + initials + '</div>';
+                                })()
                             ) +
                             '<div class="library-item-info">' +
                                 '<div class="library-item-title">' + SS.escapeHtml(libTitle) + '</div>' +
@@ -311,7 +405,8 @@ window.StemScribe = window.StemScribe || {};
 
         try {
             var response = await fetch(SS.API_BASE + '/library/' + jobId, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: SS.authHeaders()
             });
 
             if (response.ok) {

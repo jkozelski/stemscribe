@@ -191,11 +191,151 @@ def _assign_lines_to_sections(lyrics: List[dict],
     return assigned
 
 
+def _estimate_tempo(chords: List[dict]) -> float:
+    """
+    Estimate tempo (BPM) from chord durations.
+    Looks for the most common duration quantum that could be a beat.
+    Returns estimated BPM, default 120 if can't determine.
+    """
+    if not chords or len(chords) < 2:
+        return 120.0
+
+    durations = [c.get('duration', 0) for c in chords if c.get('duration', 0) > 0.1]
+    if not durations:
+        return 120.0
+
+    # Find the GCD-like quantum: the smallest common duration unit
+    # Most chord durations should be multiples of the beat duration
+    min_dur = min(durations)
+    median_dur = sorted(durations)[len(durations) // 2]
+
+    # Try common beat durations (BPM 60-180 -> beat = 1.0s to 0.33s)
+    best_bpm = 120.0
+    best_score = 0
+
+    for bpm_candidate in range(60, 181, 2):
+        beat_dur = 60.0 / bpm_candidate
+        score = 0
+        for d in durations:
+            beats = d / beat_dur
+            # How close is this to a whole number of beats?
+            rounded = round(beats)
+            if rounded >= 1:
+                error = abs(beats - rounded) / rounded
+                if error < 0.2:  # within 20%
+                    score += 1
+        if score > best_score:
+            best_score = score
+            best_bpm = bpm_candidate
+
+    return best_bpm
+
+
+def _compute_chord_beats_for_line(chords_in_line: List[dict], tempo: float,
+                                   line_start: float, line_end: float,
+                                   beats_per_bar: int = 4) -> List[dict]:
+    """
+    Compute beat counts for each chord in a line.
+
+    Returns list of {name: str, beats: int} where beats is quantized to
+    whole beats and the total is rounded to a multiple of beats_per_bar.
+    """
+    if not chords_in_line:
+        return []
+
+    beat_duration = 60.0 / tempo if tempo > 0 else 0.5  # seconds per beat
+
+    raw_beats = []
+    for i, c in enumerate(chords_in_line):
+        # Duration: time until next chord, or until line end
+        if i + 1 < len(chords_in_line):
+            dur = chords_in_line[i + 1]['time'] - c['time']
+        else:
+            dur = line_end - c['time']
+        dur = max(dur, beat_duration * 0.5)  # at least half a beat
+
+        beats_float = dur / beat_duration
+        raw_beats.append({
+            'name': c['chord'],
+            'beats_float': beats_float,
+        })
+
+    # Round each to nearest whole beat (minimum 1)
+    result = []
+    for rb in raw_beats:
+        b = max(1, round(rb['beats_float']))
+        result.append({'name': rb['name'], 'beats': b})
+
+    # Quantize total to multiple of beats_per_bar
+    total = sum(r['beats'] for r in result)
+    target = max(beats_per_bar, round(total / beats_per_bar) * beats_per_bar)
+
+    # Adjust if needed - scale proportionally
+    if target != total and total > 0:
+        scale = target / total
+        new_total = 0
+        for r in result:
+            r['beats'] = max(1, round(r['beats'] * scale))
+            new_total += r['beats']
+        # Fix rounding on last chord
+        if new_total != target and result:
+            result[-1]['beats'] += (target - new_total)
+            if result[-1]['beats'] < 1:
+                result[-1]['beats'] = 1
+
+    return result
+
+
+def _compute_instrumental_chord_beats(chords_in_section: List[dict],
+                                       tempo: float,
+                                       beats_per_bar: int = 4) -> List[List[dict]]:
+    """
+    Compute chord_beats for instrumental sections (no lyrics).
+    Groups chords into lines of ~4 bars each.
+    Returns list of chord_beats arrays (one per line).
+    """
+    if not chords_in_section:
+        return []
+
+    beat_duration = 60.0 / tempo if tempo > 0 else 0.5
+
+    # Compute beats for each chord
+    all_beats = []
+    for i, c in enumerate(chords_in_section):
+        if i + 1 < len(chords_in_section):
+            dur = chords_in_section[i + 1]['time'] - c['time']
+        else:
+            dur = c.get('duration', beat_duration * 2)
+        dur = max(dur, beat_duration * 0.5)
+        b = max(1, round(dur / beat_duration))
+        all_beats.append({'name': c['chord'], 'beats': b})
+
+    # Group into lines of ~4 bars (16 beats in 4/4)
+    beats_per_line = beats_per_bar * 4
+    lines = []
+    current_line = []
+    current_count = 0
+
+    for cb in all_beats:
+        current_line.append(cb)
+        current_count += cb['beats']
+        if current_count >= beats_per_line:
+            lines.append(current_line)
+            current_line = []
+            current_count = 0
+
+    if current_line:
+        lines.append(current_line)
+
+    return lines
+
+
 def assemble_chart(chords: List[dict],
                    lyrics: Optional[List[dict]] = None,
                    sections: Optional[List[dict]] = None,
                    title: str = "",
-                   artist: str = "") -> dict:
+                   artist: str = "",
+                   tempo: float = 0) -> dict:
     """
     Assemble a chord chart from detected chords, lyrics, and sections.
 
@@ -205,12 +345,18 @@ def assemble_chart(chords: List[dict],
         sections: list of {name, start_time, end_time} (optional)
         title: song title
         artist: artist name
+        tempo: BPM (0 = auto-estimate)
 
     Returns:
         dict matching the chord_chart.json format for renderManualChordChart()
     """
     # Sort inputs by time
     chords = sorted(chords, key=lambda c: c.get('time', 0))
+
+    # Estimate tempo if not provided
+    if not tempo or tempo <= 0:
+        tempo = _estimate_tempo(chords)
+    beats_per_bar = 4  # 4/4 time assumed
 
     # Handle no-chords edge case (lyrics only)
     if not chords:
@@ -256,6 +402,11 @@ def assemble_chart(chords: List[dict],
             sec_chords = _find_chords_in_range(chords, s, e)
             if sec_chords:
                 lines = _format_instrumental_chords(sec_chords)
+                # Add chord_beats data to instrumental lines
+                beat_lines = _compute_instrumental_chord_beats(sec_chords, tempo, beats_per_bar)
+                for li, line in enumerate(lines):
+                    if li < len(beat_lines):
+                        line['chord_beats'] = beat_lines[li]
             else:
                 lines = []
             if lines:
@@ -266,6 +417,8 @@ def assemble_chart(chords: List[dict],
         return {
             "title": title,
             "artist": artist,
+            "tempo": round(tempo),
+            "beats_per_bar": beats_per_bar,
             "source": "auto",
             "sections": out_sections
         }
@@ -336,13 +489,20 @@ def assemble_chart(chords: List[dict],
                 if line_chords:
                     last_chord = line_chords[-1]['chord']
                     chord_str = _format_chord_line(line_chords, text, l_start, l_end)
+                    chord_beats = _compute_chord_beats_for_line(
+                        line_chords, tempo, l_start, l_end, beats_per_bar)
                 elif last_chord:
                     # No chord change on this line — show carried chord at start
                     chord_str = last_chord.ljust(len(text)) if text else last_chord
+                    chord_beats = [{'name': last_chord, 'beats': beats_per_bar}]
                 else:
                     chord_str = ""
+                    chord_beats = []
 
-                lines.append({"chords": chord_str, "lyrics": text})
+                line_dict = {"chords": chord_str, "lyrics": text}
+                if chord_beats:
+                    line_dict["chord_beats"] = chord_beats
+                lines.append(line_dict)
 
         # Also check for instrumental gap before first lyric in this section
         if sec_lyrics:
@@ -360,6 +520,8 @@ def assemble_chart(chords: List[dict],
     return {
         "title": title,
         "artist": artist,
+        "tempo": round(tempo),
+        "beats_per_bar": beats_per_bar,
         "source": "auto",
         "sections": out_sections
     }

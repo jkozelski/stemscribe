@@ -9,21 +9,22 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="StemScriber">
-    <link rel="shortcut icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
-    <meta name="description" content="Upload any song. Get separated stems, Guitar Pro tabs, chord detection, and practice tools for every instrument. The only end-to-end audio-to-tab platform.">
+    <meta name="description" content="Upload any song. Get separated stems, a professional chord chart with diagrams, and a built-in practice mode. Stems + chord chart + practice in one upload.">
     <meta property="og:title" content="StemScriber — Tear The Sound Apart">
-    <meta property="og:description" content="Upload any song. Get stems, tabs, and Guitar Pro files for every instrument.">
+    <meta property="og:description" content="Upload any song. Get stems, a chord chart, and a practice mode.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://stemscribe.io">
+    <meta property="og:url" content="https://stemscriber.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/landing.css">
     <link rel="stylesheet" href="css/auth.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
+    <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
+    <script src="js/analytics.js"></script>
 </head>
 <body class="landing-body">
 
@@ -42,10 +43,9 @@
         </a>
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">&#9776;</button>
         <div class="nav-links-landing" id="navLinksLanding">
-            <a href="/practice.html">Practice Mode</a>
-            <a href="/tuner.html">Tuner</a>
-            <a href="/fretboard.html">Fretboard</a>
-            <a href="/karaoke">Karaoke</a>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
             <!-- Auth: Sign-In Button (shown when logged out) -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
                 <svg class="auth-google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -55,7 +55,6 @@
             <div class="auth-profile-dropdown">
                 <button class="auth-profile-btn" onclick="StemScribe.toggleProfileMenu(event)">
                     <img class="auth-profile-avatar" src="" alt="">
-                    <svg class="auth-google-profile-icon" viewBox="0 0 24 24" style="display:none;width:24px;height:24px;flex-shrink:0;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     <span class="auth-profile-name"></span>
                     <span class="auth-profile-chevron">&#9662;</span>
                 </button>
@@ -87,16 +86,34 @@
             Apart
         </h1>
         <p class="hero-subtitle">
-            Drop any track and watch it split into pristine stems. Get tabs, sheet music, and practice tools. Learn from the masters.
+            Upload any song. Hear every part. Learn every chord.
         </p>
-        <div class="hero-waves">
-            <div class="hero-wave"></div>
-            <div class="hero-wave"></div>
-            <div class="hero-wave"></div>
+        <p class="hero-sub2">
+            The only platform that separates stems, detects chords, and gives you practice tools — all in one upload.
+        </p>
+
+        <!-- Stem separation animation -->
+        <div class="stem-demo" aria-hidden="true">
+            <div class="stem-demo-label">Full Mix</div>
+            <div class="stem-track stem-mix">
+                <div class="stem-waveform"></div>
+            </div>
+            <div class="stem-arrow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="stem-tracks-split">
+                <div class="stem-track stem-vocals"><span class="stem-label">Vocals</span><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-guitar"><span class="stem-label">Guitar</span><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-bass"><span class="stem-label">Bass</span><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-drums"><span class="stem-label">Drums</span><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-piano"><span class="stem-label">Piano</span><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-other"><span class="stem-label">Other</span><div class="stem-waveform"></div></div>
+            </div>
         </div>
+
         <div class="hero-cta-group">
             <a href="/app" class="btn-primary">&#10022; Try It Free</a>
-            <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+            <a href="#how-it-works" class="btn-secondary" onclick="event.preventDefault();document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'});">See How It Works</a>
         </div>
         <p class="hero-note">3 free songs per month. No credit card required.</p>
     </section>
@@ -106,28 +123,29 @@
         <div class="section-label">How It Works</div>
         <h2 class="section-title">Three Steps. Any Song.</h2>
         <p class="section-subtitle">
-            From a recording to playable tabs in minutes. No manual transcription, no guesswork.
+            From a recording to a playable chord chart in minutes. No manual transcription, no guesswork.
         </p>
         <div class="steps-grid">
             <div class="step-card">
                 <div class="step-number">1</div>
                 <div class="step-icon"><img src="icons/custom/features/48/step-upload.png" width="36" height="36" style="border-radius:6px;"></div>
-                <div class="step-title">Upload or Paste a Link</div>
-                <div class="step-desc">Drop an audio file or paste a YouTube, Spotify, Apple Music, or SoundCloud link. We handle the rest.</div>
+                <div class="step-title">Drop Your Track</div>
+                <div class="step-desc">Upload any audio file — MP3, WAV, FLAC, M4A. Got a song? We'll split it into every instrument.</div>
             </div>
             <div class="step-card">
                 <div class="step-number">2</div>
                 <div class="step-icon"><img src="icons/custom/features/48/step-separate.png" width="36" height="36" style="border-radius:6px;"></div>
-                <div class="step-title">Separates &amp; Transcribes</div>
-                <div class="step-desc">StemScriber isolates 6 stems (vocals, guitar, bass, drums, piano, other) and transcribes each instrument to MIDI and Guitar Pro tabs.</div>
+                <div class="step-title">Separates &amp; Charts</div>
+                <div class="step-desc">StemScriber isolates 6 stems (vocals, guitar, bass, drums, piano, other) and generates a professional chord chart with diagrams, lyrics, and timing.</div>
             </div>
             <div class="step-card">
                 <div class="step-number">3</div>
                 <div class="step-icon"><img src="icons/custom/features/48/step-practice.png" width="36" height="36" style="border-radius:6px;"></div>
                 <div class="step-title">Play, Practice, Download</div>
-                <div class="step-desc">Mix stems, slow things down, loop tricky sections, detect chords, and export Guitar Pro files. Learn from the masters.</div>
+                <div class="step-desc">Mix stems, slow things down, loop tricky sections, and learn from a chord chart that auto-scrolls with the song.</div>
             </div>
         </div>
+
     </section>
 
     <!-- Features -->
@@ -135,45 +153,9 @@
         <div class="section-label">Features</div>
         <h2 class="section-title">Everything You Need to Learn Any Song</h2>
         <p class="section-subtitle">
-            The only platform that combines stem separation, tab transcription, and practice tools in one pipeline.
+            The only platform that combines stem separation, chord charting, and practice tools in one pipeline.
         </p>
         <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon"><img src="icons/custom/features/48/feature-separation.png" width="40" height="40" style="border-radius:6px;"></div>
-                <div class="feature-title">6-Stem Separation</div>
-                <div class="feature-desc">Isolate vocals, guitar, bass, drums, piano, and other instruments using state-of-the-art RoFormer models.</div>
-                <span class="feature-badge badge-free">Free</span>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><img src="icons/custom/features/48/feature-karaoke.png" width="40" height="40" style="border-radius:6px;"></div>
-                <div class="feature-title">Karaoke Mode</div>
-                <div class="feature-desc">Remove vocals, add synced lyrics, and sing along. Perfect for practice or just for fun.</div>
-                <span class="feature-badge badge-free">Free</span>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><img src="icons/custom/features/48/feature-chords.png" width="40" height="40" style="border-radius:6px;"></div>
-                <div class="feature-title">Chord Detection</div>
-                <div class="feature-desc">Automatic chord progressions and key detection. See the harmony behind any song in seconds.</div>
-                <span class="feature-badge badge-premium">Premium</span>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><img src="icons/custom/features/48/feature-guitarpro.png" width="40" height="40" style="border-radius:6px;"></div>
-                <div class="feature-title">Guitar Pro Export</div>
-                <div class="feature-desc">Download .gp5 files with real tablature for guitar, bass, drums, and piano. Open in Guitar Pro, TuxGuitar, or any GP reader.</div>
-                <span class="feature-badge badge-pro">Pro</span>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><img src="icons/custom/features/48/feature-practice.png" width="40" height="40" style="border-radius:6px;"></div>
-                <div class="feature-title">Practice Mode</div>
-                <div class="feature-desc">Speed control (25%-200%), A-B looping, isolated stems. Woodshed any riff until your fingers remember it.</div>
-                <span class="feature-badge badge-free">Free</span>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><img src="icons/custom/features/48/feature-streaming.png" width="40" height="40" style="border-radius:6px;"></div>
-                <div class="feature-title">YouTube &amp; Streaming Links</div>
-                <div class="feature-desc">Paste a YouTube, Spotify, Apple Music, SoundCloud, or Bandcamp link. No file downloads needed.</div>
-                <span class="feature-badge badge-free">Free</span>
-            </div>
         </div>
     </section>
 
@@ -182,18 +164,18 @@
         <div class="section-label">Why StemScriber</div>
         <h2 class="section-title">Stop Paying for Two Tools</h2>
         <p class="section-subtitle" style="margin-left:auto;margin-right:auto;">
-            Every competitor does EITHER stem separation OR tab transcription. StemScriber does both.
+            Every competitor does EITHER stem separation OR chord detection. StemScriber does both.
         </p>
         <div class="comparison-cards">
             <div class="compare-card them">
                 <div class="compare-label them-label">Without StemScriber</div>
-                <div class="compare-price">$36.98<span class="price-amount"><span class="period">/mo</span></span></div>
-                <div class="compare-price-note">Moises Pro + Klangio Studio Pro</div>
+                <div class="compare-price">$21.98<span class="price-amount"><span class="period">/mo</span></span></div>
+                <div class="compare-price-note">Moises Pro + Chordify Premium</div>
                 <ul class="compare-list">
                     <li><span class="check">&#10003;</span> Stem separation (Moises)</li>
-                    <li><span class="cross">&#10007;</span> Download stems, re-upload to second app</li>
-                    <li><span class="check">&#10003;</span> Tab generation (Klangio)</li>
-                    <li><span class="cross">&#10007;</span> One instrument per upload</li>
+                    <li><span class="cross">&#10007;</span> No chord chart in the same place</li>
+                    <li><span class="check">&#10003;</span> Chord detection (Chordify)</li>
+                    <li><span class="cross">&#10007;</span> No integrated practice mode</li>
                     <li><span class="cross">&#10007;</span> Two subscriptions, two workflows</li>
                 </ul>
             </div>
@@ -204,9 +186,9 @@
                 <div class="compare-price-note">Everything in one upload</div>
                 <ul class="compare-list">
                     <li><span class="check">&#10003;</span> 6-stem separation</li>
-                    <li><span class="check">&#10003;</span> All instruments transcribed automatically</li>
-                    <li><span class="check">&#10003;</span> Guitar Pro tabs for every stem</li>
-                    <li><span class="check">&#10003;</span> Chord detection + key analysis</li>
+                    <li><span class="check">&#10003;</span> Professional chord chart with diagrams &amp; lyrics</li>
+                    <li><span class="check">&#10003;</span> Auto-scroll + measure highlight during playback</li>
+                    <li><span class="check">&#10003;</span> Practice mode: mute, solo, speed, loop</li>
                     <li><span class="check">&#10003;</span> One upload, one pipeline, done</li>
                 </ul>
             </div>
@@ -229,10 +211,8 @@
                 <ul class="price-features">
                     <li><span class="check">&#10003;</span> 3 songs per month</li>
                     <li><span class="check">&#10003;</span> 6-stem separation</li>
-                    <li><span class="check">&#10003;</span> MIDI export</li>
+                    <li><span class="check">&#10003;</span> Professional chord chart</li>
                     <li><span class="check">&#10003;</span> Practice mode (speed + looping)</li>
-                    <li><span class="check">&#10003;</span> Karaoke mode</li>
-                    <li><span class="check">&#10003;</span> YouTube &amp; streaming links</li>
                 </ul>
                 <a href="/app" class="price-cta secondary">Start Free</a>
             </div>
@@ -245,8 +225,8 @@
                 <ul class="price-features">
                     <li><span class="check">&#10003;</span> 25 songs per month</li>
                     <li><span class="check">&#10003;</span> Everything in Free</li>
-                    <li><span class="check">&#10003;</span> Chord detection + key analysis</li>
-                    <li><span class="check">&#10003;</span> Guitar Pro tab export (.gp5)</li>
+                    <li><span class="check">&#10003;</span> Key analysis + transpose + ♭/♯ toggle</li>
+                    <li><span class="check">&#10003;</span> Chord chart export (PDF + ChordPro)</li>
                     <li><span class="check">&#10003;</span> Priority processing</li>
                 </ul>
                 <a href="/app" class="price-cta primary">Go Pro</a>
@@ -270,49 +250,49 @@
         </div>
     </section>
 
-    <!-- Beta Access -->
-    <section class="landing-section beta-section" id="beta">
-        <div class="beta-box">
-            <div class="beta-badge-landing">Beta Access</div>
-            <h3 class="beta-title">Got an Invite Code?</h3>
-            <p class="beta-desc">
-                StemScriber is currently in private beta. If you have an invite code, redeem it to unlock full access.
-            </p>
-            <div class="beta-form">
-                <input type="text" class="beta-input" id="betaCodeInput" placeholder="STEM-XXXX-XXXX" maxlength="14">
-                <button class="beta-submit" onclick="window.location.href='beta.html'">Redeem Code</button>
-            </div>
-            <p class="beta-note">
-                Don't have a code? <a href="mailto:stemscribe.io@gmail.com">Request access</a>
-            </p>
-        </div>
-    </section>
+    <!-- Beta section removed — open access now -->
 
     <!-- Footer -->
     <footer class="landing-footer">
-        <div class="footer-inner">
-            <div class="footer-brand">
-                <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="28" height="28">
-                <span class="logo-text">StemScriber</span>
+        <div class="footer-grid">
+            <div class="footer-brand-block">
+                <div class="footer-brand">
+                    <img src="/images/logomark.png" alt="StemScriber logo" class="logo-img" width="28" height="28">
+                    <span class="logo-text">StemScriber</span>
+                </div>
+                <p class="footer-tagline">Tear The Sound Apart</p>
             </div>
-            <div class="footer-links">
-                <a href="mailto:stemscribe.io@gmail.com">Contact</a>
-                <a href="/contact.html">Support</a>
-                <a href="https://www.facebook.com/profile.php?id=61582164772137" target="_blank" rel="noopener">Facebook</a>
-                <a href="https://www.instagram.com/stemscribe_app/" target="_blank" rel="noopener">Instagram</a>
-                <a href="https://x.com/stemscribe_app" target="_blank" rel="noopener">X</a>
-                <a href="https://www.tiktok.com/@stemscribe_app" target="_blank" rel="noopener">TikTok</a>
+            <div class="footer-col">
+                <div class="footer-col-title">Product</div>
+                <a href="/#features">Features</a>
+                <a href="/#how-it-works">How It Works</a>
+                <a href="/#pricing">Pricing</a>
                 <a href="/app">Launch App</a>
             </div>
-            <div class="footer-links" style="margin-top:0.5rem;">
+            <div class="footer-col">
+                <div class="footer-col-title">Help</div>
+                <a href="/help.html">Help Center</a>
+                <a href="mailto:support@stemscriber.com">Contact us</a>
+                <a href="tel:+18447915323">(844) 791-5323</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Legal</div>
                 <a href="/terms.html">Terms of Service</a>
                 <a href="/privacy.html">Privacy Policy</a>
                 <a href="/dmca.html">DMCA</a>
                 <a href="/billing-faq.html">Billing FAQ</a>
+                <a href="/credits.html">Open Source Credits</a>
             </div>
-            <div class="footer-copy">
-                &copy; 2026 StemScriber
+            <div class="footer-col">
+                <div class="footer-col-title">Connect</div>
+                <a href="https://www.facebook.com/profile.php?id=61582164772137" target="_blank" rel="noopener">Facebook</a>
+                <a href="https://www.instagram.com/stemscriber" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://x.com/stemscriber" target="_blank" rel="noopener">X</a>
+                <a href="https://www.tiktok.com/@stemscriber" target="_blank" rel="noopener">TikTok</a>
             </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 StemScriber
         </div>
     </footer>
 
@@ -345,32 +325,101 @@
             });
         });
 
-        // Beta code redirect — send code as URL param to beta.html
-        document.getElementById('betaCodeInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                var code = this.value.trim();
-                if (code) {
-                    window.location.href = 'beta.html?code=' + encodeURIComponent(code);
+        // ── Render real audio-style waveform bars in hero stem demo ──
+        (function() {
+            var stems = {
+                'stem-mix':    { pattern: 'full',      color: 'rgba(255,255,255,0.55)' },
+                'stem-vocals': { pattern: 'vocal',     color: '#ff6b9d' },
+                'stem-guitar': { pattern: 'sustained', color: '#ff7b54' },
+                'stem-bass':   { pattern: 'bass',      color: '#61afef' },
+                'stem-drums':  { pattern: 'drums',     color: '#e5c07b' },
+                'stem-piano':  { pattern: 'piano',     color: '#c678dd' },
+                'stem-other':  { pattern: 'other',     color: '#56b6c2' }
+            };
+
+            // Deterministic pseudo-random based on index so bars don't reshuffle per page load
+            function pseudo(seed) {
+                var x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+                return x - Math.floor(x);
+            }
+
+            function amplitude(pattern, i, total) {
+                var t = i / total;
+                var r1 = pseudo(i * 1.7);
+                var r2 = pseudo(i * 3.3);
+                switch (pattern) {
+                    case 'full':
+                        return 0.35 + 0.55 * Math.abs(Math.sin(t * 18) * 0.6 + Math.sin(t * 41) * 0.4) + 0.1 * r1;
+                    case 'vocal':
+                        // Singing — phrases of activity separated by gaps
+                        var phrase = Math.sin(t * 6);
+                        var base = phrase > 0.2 ? 0.4 + 0.5 * Math.abs(Math.sin(t * 25 + r1 * 3)) : 0.1 * r2;
+                        return base;
+                    case 'sustained':
+                        // Guitar — steady with some strumming variation
+                        return 0.4 + 0.35 * Math.abs(Math.sin(t * 9)) + 0.2 * r1;
+                    case 'bass':
+                        // Bass — tall but fewer peaks, heartbeat feel
+                        var beat = Math.abs(Math.sin(t * 5));
+                        return 0.3 + 0.65 * Math.pow(beat, 0.6);
+                    case 'drums':
+                        // Drums — spiky transients with quiet gaps
+                        return r1 > 0.72 ? 0.55 + 0.45 * r2 : 0.08 + 0.12 * r1;
+                    case 'piano':
+                        // Piano — mix of sustains and strikes
+                        var strike = r1 > 0.85 ? 0.7 : 0;
+                        return 0.25 + 0.35 * Math.abs(Math.sin(t * 11)) + strike;
+                    case 'other':
+                        // Other — low amplitude varied
+                        return 0.2 + 0.35 * Math.abs(Math.sin(t * 7) * Math.cos(t * 13)) + 0.1 * r1;
                 }
+                return 0.5;
             }
-        });
 
-        // Auto-format code input
-        document.getElementById('betaCodeInput').addEventListener('input', function(e) {
-            var val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            if (val.length > 4) val = val.slice(0, 4) + '-' + val.slice(4);
-            if (val.length > 9) val = val.slice(0, 9) + '-' + val.slice(9);
-            e.target.value = val.slice(0, 14);
-        });
+            var SVG_NS = 'http://www.w3.org/2000/svg';
+            var barCount = 90;
+            var barWidth = 3;
+            var barGap = 2;
 
-        document.querySelector('.beta-submit').addEventListener('click', function() {
-            var code = document.getElementById('betaCodeInput').value.trim();
-            if (code) {
-                window.location.href = 'beta.html?code=' + encodeURIComponent(code);
-            } else {
-                window.location.href = 'beta.html';
-            }
-        });
+            document.querySelectorAll('.stem-track').forEach(function(track) {
+                var stemClass = null;
+                track.classList.forEach(function(c) {
+                    if (c.indexOf('stem-') === 0 && c !== 'stem-track' && stems[c]) stemClass = c;
+                });
+                if (!stemClass) return;
+
+                var config = stems[stemClass];
+                var waveform = track.querySelector('.stem-waveform');
+                if (!waveform) return;
+
+                var totalWidth = barCount * (barWidth + barGap);
+                var svg = document.createElementNS(SVG_NS, 'svg');
+                svg.setAttribute('viewBox', '0 0 ' + (totalWidth * 2) + ' 40');
+                svg.setAttribute('preserveAspectRatio', 'none');
+
+                // Render bars twice for seamless loop
+                for (var cycle = 0; cycle < 2; cycle++) {
+                    for (var i = 0; i < barCount; i++) {
+                        var amp = Math.max(0.08, Math.min(1, amplitude(config.pattern, i, barCount)));
+                        var h = amp * 34;
+                        var y = (40 - h) / 2;
+                        var x = cycle * totalWidth + i * (barWidth + barGap);
+                        var rect = document.createElementNS(SVG_NS, 'rect');
+                        rect.setAttribute('x', x);
+                        rect.setAttribute('y', y);
+                        rect.setAttribute('width', barWidth);
+                        rect.setAttribute('height', h);
+                        rect.setAttribute('rx', 1);
+                        rect.setAttribute('fill', config.color);
+                        svg.appendChild(rect);
+                    }
+                }
+
+                waveform.innerHTML = '';
+                waveform.appendChild(svg);
+            });
+        })();
+
     </script>
 </body>
 </html>

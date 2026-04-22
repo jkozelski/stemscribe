@@ -1,6 +1,6 @@
 """
 Tests for MIDI to Guitar Pro conversion.
-Covers note-to-fret mapping, chord voicing, lead mode, and GP file generation.
+Covers note-to-fret mapping, A*-Guitar search, lead mode, and GP file generation.
 """
 
 import sys
@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from midi_to_gp import (
     midi_note_to_fret,
     FretMapper,
+    astar_fret_search,
     get_tuning_for_instrument,
     get_gp_instrument,
     convert_midi_to_gp,
@@ -153,33 +154,46 @@ class TestFretMapper:
         assert mapper.prev_fret is None
         assert mapper.prev_string is None
 
-    def test_chord_mapping(self):
+    def test_sequence_mapping(self):
         mapper = FretMapper(TUNINGS['guitar'])
-        # C major chord: C E G (MIDI 60, 64, 67)
-        result = mapper.map_chord([60, 64, 67])
-        assert len(result) == 3
+        # C major scale
+        midi_notes = [60, 62, 64, 65, 67, 69, 71, 72]
+        results = mapper.map_sequence(midi_notes)
+        assert len(results) == 8
+        for r in results:
+            assert r is not None
+            s, f = r
+            assert 1 <= s <= 6
+            assert 0 <= f <= MAX_FRET
 
-        # All notes on different strings
-        strings = [s for s, _ in result]
-        assert len(set(strings)) == 3, "Chord notes must be on different strings"
-
-        # Fret span should be playable (<=5)
-        frets = [f for _, f in result]
-        non_open = [f for f in frets if f > 0]
-        if non_open:
-            span = max(non_open) - min(non_open)
-            assert span <= 5, f"Chord span too wide: {span}"
-
-    def test_chord_empty_input(self):
+    def test_sequence_minimizes_movement(self):
         mapper = FretMapper(TUNINGS['guitar'])
-        result = mapper.map_chord([])
-        assert result == []
+        # Chromatic run that could be played in one position
+        midi_notes = [60, 61, 62, 63, 64]  # C C# D D# E
+        results = mapper.map_sequence(midi_notes)
 
-    def test_chord_impossible_notes(self):
+        # Check that the A* path keeps fret jumps small
+        fret_jumps = []
+        for i in range(1, len(results)):
+            if results[i] and results[i-1]:
+                fret_jumps.append(abs(results[i][1] - results[i-1][1]))
+        if fret_jumps:
+            avg_jump = sum(fret_jumps) / len(fret_jumps)
+            assert avg_jump <= 3, f"A* should minimize movement, got avg jump {avg_jump}"
+
+    def test_sequence_empty(self):
         mapper = FretMapper(TUNINGS['guitar'])
-        # Notes way too low for guitar
-        result = mapper.map_chord([10, 15, 20])
-        assert result == []
+        results = mapper.map_sequence([])
+        assert results == []
+
+    def test_sequence_unmappable_notes(self):
+        mapper = FretMapper(TUNINGS['guitar'])
+        # Mix of valid and out-of-range notes
+        results = mapper.map_sequence([60, 10, 64])
+        assert len(results) == 3
+        assert results[0] is not None
+        assert results[1] is None  # Too low for guitar
+        assert results[2] is not None
 
 
 # =============================================================================
@@ -329,3 +343,107 @@ class TestGPFileGeneration:
         success = convert_midi_to_gp(simple_midi, output_path, instrument_type='guitar')
         assert success is True
         assert Path(output_path + '.gp5').exists()
+
+
+# =============================================================================
+# A*-Guitar search tests
+# =============================================================================
+
+class TestAStarFretSearch:
+    """Tests for the A*-Guitar pathfinding algorithm."""
+
+    def test_single_note(self):
+        tuning = TUNINGS['guitar']
+        results = astar_fret_search([60], tuning)
+        assert len(results) == 1
+        assert results[0] is not None
+        s, f = results[0]
+        assert 1 <= s <= 6
+        assert 0 <= f <= MAX_FRET
+
+    def test_scale_run_stays_compact(self):
+        tuning = TUNINGS['guitar']
+        # A minor pentatonic box: A C D E G A (MIDI 57 60 62 64 67 69)
+        scale = [57, 60, 62, 64, 67, 69]
+        results = astar_fret_search(scale, tuning)
+
+        assert all(r is not None for r in results)
+        frets = [r[1] for r in results]
+        non_open = [f for f in frets if f > 0]
+        if non_open:
+            span = max(non_open) - min(non_open)
+            assert span <= 7, f"Pentatonic box should fit within ~5 frets, got span {span}"
+
+    def test_bend_avoids_open_string(self):
+        tuning = TUNINGS['guitar']
+        # MIDI 64 = E4. On high E string that's fret 0 (open), on B string fret 5
+        # With bend flag, should NOT choose fret 0
+        results = astar_fret_search([64], tuning, bend_flags=[True])
+        assert results[0] is not None
+        _, fret = results[0]
+        assert fret >= 2, f"Bend should avoid fret {fret}"
+
+    def test_large_sequence_performance(self):
+        """A* should handle 200+ notes without issues."""
+        import time
+        tuning = TUNINGS['guitar']
+        # Simulate a guitar solo: 200 notes in range
+        import random
+        random.seed(42)
+        notes = [random.randint(48, 76) for _ in range(200)]
+
+        start = time.time()
+        results = astar_fret_search(notes, tuning)
+        elapsed = time.time() - start
+
+        assert len(results) == 200
+        assert elapsed < 5.0, f"A* took {elapsed:.2f}s for 200 notes — too slow"
+        mapped = sum(1 for r in results if r is not None)
+        assert mapped >= 190, f"Only {mapped}/200 notes mapped"
+
+    def test_empty_input(self):
+        results = astar_fret_search([], TUNINGS['guitar'])
+        assert results == []
+
+    def test_bass_tuning(self):
+        tuning = TUNINGS['bass']
+        # Bass line: E A D G (MIDI 28 33 38 43)
+        results = astar_fret_search([28, 33, 38, 43], tuning)
+        assert all(r is not None for r in results)
+        # All should be open strings
+        for s, f in results:
+            assert f == 0, f"Open bass string should be fret 0, got {f}"
+
+    def test_astar_beats_greedy_on_position_shifts(self):
+        """A* should produce fewer total fret jumps than greedy note-by-note."""
+        tuning = TUNINGS['guitar']
+        # Sequence that tricks greedy: jump between two positions
+        notes = [60, 62, 64, 72, 74, 76, 60, 62, 64]
+
+        # A* path
+        astar_results = astar_fret_search(notes, tuning)
+
+        # Greedy path (note by note)
+        greedy_results = []
+        prev_s, prev_f = None, None
+        for n in notes:
+            r = midi_note_to_fret(n, tuning, prev_fret=prev_f, prev_string=prev_s)
+            greedy_results.append(r)
+            if r:
+                prev_s, prev_f = r
+
+        def total_movement(results):
+            total = 0
+            for i in range(1, len(results)):
+                if results[i] and results[i-1]:
+                    total += abs(results[i][1] - results[i-1][1])
+                    total += abs(results[i][0] - results[i-1][0]) * 0.5
+            return total
+
+        astar_cost = total_movement(astar_results)
+        greedy_cost = total_movement(greedy_results)
+
+        # A* should be at least as good as greedy (usually better)
+        assert astar_cost <= greedy_cost + 1.0, (
+            f"A* cost {astar_cost} should be <= greedy cost {greedy_cost}"
+        )

@@ -20,16 +20,16 @@ COPY frontend/ ./frontend/
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-5555}/health')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT:-5555}/api/health')" || exit 1
 
 # Railway sets PORT env var; default to 5555 for local
 EXPOSE ${PORT:-5555}
 
-# Gunicorn: 2 workers, 300s timeout for long processing jobs
+# Gunicorn: 1 worker (jobs dict is in-memory, multiple workers can't share it)
 # --preload shares model memory across workers
 CMD gunicorn \
     --bind 0.0.0.0:${PORT:-5555} \
-    --workers 2 \
+    --workers 1 \
     --timeout 300 \
     --preload \
     --access-logfile - \

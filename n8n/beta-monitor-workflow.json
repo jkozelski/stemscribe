@@ -1,0 +1,151 @@
+{
+  "name": "StemScribe — Beta Tester Activity Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 30 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5555/api/beta/codes",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "get-beta-codes",
+      "name": "GET Beta Codes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5555/api/library",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "get-library",
+      "name": "GET Library Songs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 420]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByPosition": true,
+        "options": {}
+      },
+      "id": "merge-data",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get current data from inputs\nconst betaData = $input.all()[0]?.json || {};\nconst libraryData = $input.all()[1]?.json || {};\n\n// Get previous run data from static data\nconst staticData = $getWorkflowStaticData('global');\nconst prevRedeemed = staticData.prevRedeemed || 0;\nconst prevSongCount = staticData.prevSongCount || 0;\n\n// Current values\nconst currentRedeemed = betaData.redeemed_count || betaData.total_redeemed || 0;\nconst currentSongCount = libraryData.count || libraryData.total || 0;\n\n// Calculate deltas\nconst newRedemptions = currentRedeemed - prevRedeemed;\nconst newSongs = currentSongCount - prevSongCount;\nconst hasActivity = newRedemptions > 0 || newSongs > 0;\n\n// Save current values for next run\nstaticData.prevRedeemed = currentRedeemed;\nstaticData.prevSongCount = currentSongCount;\nstaticData.lastChecked = new Date().toISOString();\n\nreturn [{\n  json: {\n    hasActivity,\n    newRedemptions,\n    newSongs,\n    totalRedeemed: currentRedeemed,\n    totalSongs: currentSongCount,\n    lastChecked: staticData.lastChecked\n  }\n}];"
+      },
+      "id": "compare-activity",
+      "name": "Compare With Previous Run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-activity",
+              "leftValue": "={{ $json.hasActivity }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-new-activity",
+      "name": "IF New Activity",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "from": "+18447915323",
+        "to": "+18034149454",
+        "message": "=📊 StemScribe Beta Activity\n{{ $json.newRedemptions > 0 ? '🆕 ' + $json.newRedemptions + ' new code redemption(s) (total: ' + $json.totalRedeemed + ')\\n' : '' }}{{ $json.newSongs > 0 ? '🎵 ' + $json.newSongs + ' new song(s) processed (total: ' + $json.totalSongs + ')\\n' : '' }}Checked: {{ $json.lastChecked }}"
+      },
+      "id": "sms-activity",
+      "name": "SMS Activity Summary",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [1440, 220],
+      "credentials": {
+        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScribe" }
+      }
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [
+          { "node": "GET Beta Codes", "type": "main", "index": 0 },
+          { "node": "GET Library Songs", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "GET Beta Codes": {
+      "main": [
+        [{ "node": "Merge Results", "type": "main", "index": 0 }]
+      ]
+    },
+    "GET Library Songs": {
+      "main": [
+        [{ "node": "Merge Results", "type": "main", "index": 1 }]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [{ "node": "Compare With Previous Run", "type": "main", "index": 0 }]
+      ]
+    },
+    "Compare With Previous Run": {
+      "main": [
+        [{ "node": "IF New Activity", "type": "main", "index": 0 }]
+      ]
+    },
+    "IF New Activity": {
+      "main": [
+        [{ "node": "SMS Activity Summary", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "prevRedeemed": 0,
+      "prevSongCount": 0,
+      "lastChecked": null
+    }
+  },
+  "tags": [{ "name": "StemScribe" }, { "name": "Beta" }],
+  "triggerCount": 1,
+  "pinData": {},
+  "versionId": "1"
+}

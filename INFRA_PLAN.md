@@ -651,7 +651,7 @@ STRIPE_PRICE_PRO_MONTHLY=price_xxx
 STRIPE_PRICE_PRO_ANNUAL=price_xxx
 
 # Cloudflare R2
-CF_ACCOUNT_ID=dcd390562dd56ea565ae735f112bf60b
+CF_ACCOUNT_ID=<your cloudflare account id>
 R2_ACCESS_KEY_ID=<create in CF dashboard>
 R2_SECRET_ACCESS_KEY=<create in CF dashboard>
 R2_BUCKET_NAME=stemscribe-uploads

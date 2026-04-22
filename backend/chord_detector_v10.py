@@ -646,8 +646,35 @@ def _apply_key_weighting(events: List[ChordEvent], key: str) -> List[ChordEvent]
     return weighted
 
 
+VOCAB_INDEX_PATH = Path(__file__).parent / "training_data" / "chord_vocabulary_index.json"
+
+
+def _load_vocab_index() -> dict:
+    """Load the chord vocabulary index (song-specific known chords from 15k+ charts)."""
+    if VOCAB_INDEX_PATH.exists():
+        try:
+            data = json.loads(VOCAB_INDEX_PATH.read_text())
+            return data
+        except Exception as e:
+            logger.warning(f"Failed to load chord vocabulary index: {e}")
+    return {}
+
+
 class ChordDetector:
-    """Chord detector using BTC pre-trained model with optional vocabulary constraint."""
+    """Hybrid chord detector: BTC transformer (primary) + V8 transformer (fallback).
+
+    Architecture:
+      - BTC runs first (better attention-based architecture, 170 chord classes)
+      - If BTC confidence is high -> use its prediction
+      - If BTC confidence is low OR chord is outside BTC's 170-class vocabulary
+        -> run V8 (337 classes: mMaj7, dim7, hdim7, 9, add9, sus2, sus4, 6, min6, slash chords)
+      - If the song is in the vocabulary index -> constrain both models to known chords
+
+    This gives the best transformer analysis + widest chord vocabulary + song-specific knowledge.
+    """
+
+    # Confidence threshold: BTC predictions below this trigger V8 fallback
+    BTC_CONFIDENCE_THRESHOLD = 0.35
 
     def __init__(self, min_duration: float = 0.3, **kwargs):
         self.min_duration = min_duration
@@ -659,6 +686,11 @@ class ChordDetector:
         self._idx_to_chord = None
         self._device = None
         self._chord_db = None
+        # V8 fallback
+        self._v8_detector = None
+        self._v8_loaded = False
+        # Song-specific vocabulary index
+        self._vocab_index = None
 
     def _load_btc(self):
         """Lazy-load BTC model."""
@@ -708,6 +740,160 @@ class ChordDetector:
         except Exception as e:
             logger.warning(f"Failed to load BTC model: {e}")
             return False
+
+    def _load_v8(self):
+        """Lazy-load V8 Transformer model for fallback on low-confidence BTC predictions."""
+        if self._v8_loaded:
+            return self._v8_detector is not None
+
+        self._v8_loaded = True  # Mark as attempted even if it fails
+        try:
+            from chord_detector_v8 import ChordDetector as V8ChordDetector
+            self._v8_detector = V8ChordDetector(
+                hop_length=8192,
+                min_duration=self.min_duration,
+            )
+            if self._v8_detector.model is not None:
+                logger.info("V8 fallback model loaded (337 classes)")
+                return True
+            else:
+                logger.warning("V8 model file not found — fallback disabled")
+                self._v8_detector = None
+                return False
+        except Exception as e:
+            logger.warning(f"Failed to load V8 fallback model: {e}")
+            self._v8_detector = None
+            return False
+
+    def _load_vocab_index(self):
+        """Lazy-load the song-specific chord vocabulary index."""
+        if self._vocab_index is not None:
+            return self._vocab_index
+        self._vocab_index = _load_vocab_index()
+        return self._vocab_index
+
+    def _lookup_song_vocab(self, artist: str, title: str) -> list | None:
+        """Look up known chord vocabulary for a specific song from the 15k+ chart index.
+
+        This is separate from the UG chord DB — it's a pre-built index from the
+        chord_library with 15,400+ songs and 2,364 unique chords.
+        """
+        index = self._load_vocab_index()
+        if not index:
+            return None
+
+        chord_vocab = index.get("chord_vocabulary", [])
+        if not chord_vocab:
+            return None
+
+        # The vocab index is a flat list of all known chords across all songs.
+        # For song-specific lookup, we check the chord_db (UG scrape cache).
+        # The vocab index is used as a global constraint — if a chord isn't in
+        # the 2,364 known chords from 15k+ songs, it's likely a false positive.
+        return chord_vocab
+
+    def _v8_fallback_for_segments(self, audio_path: str, btc_events: list,
+                                   song_vocab: list = None) -> list:
+        """Re-analyze low-confidence BTC segments with V8 for a second opinion.
+
+        For each BTC chord event with confidence below BTC_CONFIDENCE_THRESHOLD,
+        V8 is consulted. If V8 provides a higher-confidence prediction, it replaces
+        the BTC prediction. V8's wider vocabulary (337 vs 170 classes) means it can
+        identify chords BTC doesn't know (e.g., add9, min6, 9, hdim7, slash chords).
+
+        Args:
+            audio_path: Path to the audio file
+            btc_events: List of ChordEvent from BTC detection
+            song_vocab: Optional song-specific vocabulary to constrain V8
+
+        Returns:
+            Merged list of ChordEvent (best of BTC + V8)
+        """
+        if not self._load_v8() or not btc_events:
+            return btc_events
+
+        # Find low-confidence segments
+        low_conf_indices = []
+        for i, ev in enumerate(btc_events):
+            if ev.confidence < self.BTC_CONFIDENCE_THRESHOLD:
+                low_conf_indices.append(i)
+
+        if not low_conf_indices:
+            logger.info("All BTC predictions above confidence threshold — no V8 fallback needed")
+            return btc_events
+
+        logger.info(f"V8 fallback: {len(low_conf_indices)}/{len(btc_events)} BTC events "
+                     f"below {self.BTC_CONFIDENCE_THRESHOLD} confidence threshold")
+
+        # Run V8 on the full audio (it's fast enough and gives temporal context)
+        try:
+            v8_progression = self._v8_detector.detect(audio_path)
+            if not v8_progression.chords:
+                logger.info("V8 returned no chords — keeping all BTC predictions")
+                return btc_events
+
+            # Build a time-indexed lookup for V8 results
+            v8_events = v8_progression.chords
+
+            # Build song vocab set for constraint (if available)
+            song_vocab_set = None
+            if song_vocab:
+                song_vocab_set = set(song_vocab)
+                # Add enharmonic equivalents
+                for ch in list(song_vocab_set):
+                    for old, new in ENHARMONIC.items():
+                        if ch.startswith(old):
+                            song_vocab_set.add(new + ch[len(old):])
+
+            # Merge: replace low-confidence BTC events with V8 if V8 is better
+            merged = list(btc_events)  # copy
+            replacements = 0
+            for idx in low_conf_indices:
+                btc_ev = btc_events[idx]
+                btc_mid = btc_ev.time + btc_ev.duration / 2
+
+                # Find best overlapping V8 event
+                best_v8 = None
+                best_overlap = 0
+                for v8_ev in v8_events:
+                    # Calculate overlap between BTC and V8 events
+                    overlap_start = max(btc_ev.time, v8_ev.time)
+                    overlap_end = min(btc_ev.time + btc_ev.duration,
+                                     v8_ev.time + v8_ev.duration)
+                    overlap = max(0, overlap_end - overlap_start)
+                    if overlap > best_overlap:
+                        best_overlap = overlap
+                        best_v8 = v8_ev
+
+                if best_v8 is None:
+                    continue
+
+                # Apply song vocab constraint if available
+                if song_vocab_set and best_v8.chord not in song_vocab_set:
+                    # V8's prediction isn't in the known vocabulary — skip
+                    continue
+
+                # V8 must be meaningfully more confident than BTC
+                if best_v8.confidence > btc_ev.confidence + 0.05:
+                    # Parse V8 chord into v10's ChordEvent format (no bass field)
+                    root, quality = _parse_chord(best_v8.chord)
+                    merged[idx] = ChordEvent(
+                        time=btc_ev.time,
+                        duration=btc_ev.duration,
+                        chord=best_v8.chord,
+                        root=root,
+                        quality=quality,
+                        confidence=best_v8.confidence,
+                    )
+                    replacements += 1
+
+            logger.info(f"V8 fallback replaced {replacements}/{len(low_conf_indices)} "
+                         f"low-confidence BTC events")
+            return merged
+
+        except Exception as e:
+            logger.warning(f"V8 fallback failed: {e}")
+            return btc_events
 
     def _build_vocab_mask(self, vocab: list):
         """Build a logit mask that constrains output to the given chord vocabulary."""
@@ -881,6 +1067,22 @@ class ChordDetector:
                 pass  # Essentia ensemble not available, use BTC alone
             except Exception as e:
                 logger.warning(f"Essentia ensemble failed, using BTC alone: {e}")
+
+            # --- V8 Fallback: re-analyze low-confidence BTC segments ---
+            # V8 has 337 chord classes vs BTC's 170, so it can identify chords
+            # BTC doesn't know (add9, min6, 9, hdim7, slash chords, etc.)
+            if result.chords:
+                # Look up song-specific vocabulary from the 15k+ chart index
+                song_vocab = None
+                if vocab:
+                    # Already have vocab from UG/Songsterr — use it
+                    song_vocab = vocab
+                else:
+                    # Check the global vocabulary index as a sanity filter
+                    song_vocab = self._lookup_song_vocab(artist, title)
+
+                result.chords = self._v8_fallback_for_segments(
+                    audio_path, result.chords, song_vocab=song_vocab)
 
             # Apply post-processing
             result.chords = postprocess_chords(result.chords, result.key, audio_path)

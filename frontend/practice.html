@@ -6,13 +6,17 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <script>
+    if ('caches' in window) { caches.keys().then(function(names) { names.forEach(function(name) { caches.delete(name); }); }); }
+    if (navigator.serviceWorker) { navigator.serviceWorker.getRegistrations().then(function(regs) { regs.forEach(function(r) { r.unregister(); }); }); }
+    </script>
     <title>StemScriber - Practice Mode</title>
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
     <!-- OpenSheetMusicDisplay for MusicXML rendering -->
     <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js"></script>
@@ -506,6 +510,47 @@
             background: #ffffff !important;
             min-height: 100%;
         }
+
+        /* Notation toggle (piano/drums sheet music) */
+        .notation-toggles {
+            display: none;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            align-items: center;
+        }
+        .notation-toggles.visible { display: flex; }
+        .notation-toggles .toggle-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-right: 0.25rem;
+        }
+        .notation-toggle-btn {
+            padding: 0.3rem 0.7rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .notation-toggle-btn:hover { border-color: var(--orange); color: var(--text); }
+        .notation-toggle-btn.active {
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            color: #fff;
+            border-color: transparent;
+        }
+        #notationOSMDContainer {
+            display: none;
+            background: #fff;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        #notationOSMDContainer.visible { display: block; }
 
         #osmd-container svg {
             background: #ffffff !important;
@@ -1366,6 +1411,328 @@
             border-bottom: 1px solid var(--border);
         }
 
+        /* === Gigging Musician Chord Chart (three-layer slash notation) === */
+        .gig-chart {
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 2rem;
+            border-radius: 10px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .gig-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #333;
+        }
+        .gig-chart-title {
+            font-family: 'Righteous', cursive;
+            font-size: 1.6rem;
+            color: #111;
+            margin-bottom: 0.2rem;
+        }
+        .gig-chart-artist {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .gig-chart-meta {
+            font-size: 0.8rem;
+            color: #777;
+            text-align: right;
+        }
+        .gig-section {
+            margin-bottom: 2rem;
+        }
+        .gig-section-label {
+            font-family: 'Righteous', cursive;
+            font-size: 1.05rem;
+            color: #333;
+            background: #eee;
+            display: inline-block;
+            padding: 0.15rem 0.7rem;
+            border-radius: 4px;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .gig-line-group {
+            margin-bottom: 1.2rem;
+            overflow-x: auto;
+        }
+        .gig-chord-row {
+            white-space: pre;
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #111;
+            line-height: 1.5;
+            letter-spacing: 0.01em;
+        }
+        .gig-slash-row {
+            white-space: pre;
+            color: #555;
+            font-size: 0.88rem;
+            line-height: 1.4;
+            letter-spacing: 0.03em;
+        }
+        .gig-lyric-row {
+            white-space: pre;
+            color: #444;
+            font-size: 0.88rem;
+            font-style: normal;
+            line-height: 1.5;
+            min-height: 1.2em;
+        }
+        .gig-bar-line {
+            color: #999;
+        }
+        /* Print overrides for gig chart */
+        @media print {
+            .gig-chart {
+                background: white !important;
+                padding: 0.5rem !important;
+                border-radius: 0 !important;
+            }
+            .gig-chart, .gig-chart * {
+                color: black !important;
+            }
+            .gig-section-label {
+                background: #eee !important;
+                color: #333 !important;
+            }
+            .gig-slash-row { color: #444 !important; }
+            .gig-bar-line { color: #666 !important; }
+        }
+        /* Dark mode overrides (when not printing) */
+        @media screen {
+            .gig-chart { background: #f7f6f3; }
+        }
+
+        /* === Lead Sheet View (classic music-publishing aesthetic) === */
+        .lead-sheet {
+            background: #fefcf8;
+            color: #1a1a1a;
+            padding: 3rem 3.5rem;
+            border-radius: 4px;
+            font-family: 'Libre Baskerville', 'Georgia', 'Cambria', serif;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 10px 40px rgba(0,0,0,0.06);
+        }
+        .lead-sheet-header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: end;
+            margin-bottom: 2.8rem;
+            padding-bottom: 1.4rem;
+            border-bottom: 1px solid #d4cfc2;
+        }
+        .lead-sheet-header-left { font-size: 0.75rem; color: #8a8578; font-style: italic; letter-spacing: 0.05em; }
+        .lead-sheet-header-center { text-align: center; }
+        .lead-sheet-title {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 2.1rem;
+            color: #1a1a1a;
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+        .lead-sheet-artist {
+            font-size: 0.85rem;
+            color: #6a6458;
+            font-style: italic;
+            letter-spacing: 0.08em;
+        }
+        .lead-sheet-meta {
+            font-size: 0.72rem;
+            color: #8a8578;
+            text-align: right;
+            line-height: 1.7;
+            font-style: italic;
+            letter-spacing: 0.03em;
+        }
+        .ls-section {
+            margin-bottom: 2.2rem;
+            page-break-inside: avoid;
+        }
+        .ls-section-label {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-weight: 400;
+            font-style: italic;
+            font-size: 0.85rem;
+            color: #4a4436;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.9rem;
+        }
+        .ls-line {
+            margin-bottom: 1.5rem;
+        }
+        .ls-bars {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            border-top: 1px solid #2a2a2a;
+            border-bottom: 1px solid #2a2a2a;
+            background: transparent;
+        }
+        .ls-bar {
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            color: #1a1a1a;
+            border-right: 0.5px solid #9a9485;
+            min-height: 4.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.15rem;
+        }
+        .ls-bar:first-child { border-left: 1px solid #2a2a2a; }
+        .ls-bar:last-child { border-right: 1px solid #2a2a2a; }
+        .ls-bar.ls-repeat-bar { color: #a8a290; font-family: 'Libre Baskerville', serif; font-size: 1.3rem; }
+        .ls-bar.ls-bar-active {
+            background: linear-gradient(180deg, rgba(234, 149, 72, 0.22), rgba(234, 149, 72, 0.08));
+            box-shadow: inset 0 0 0 2px rgba(234, 149, 72, 0.7);
+            transition: background 0.12s ease, box-shadow 0.12s ease;
+        }
+        .ls-bar.ls-bar-active .ls-chord { color: #7a3a0a; }
+
+        /* === Classic chord sheet: chord sits directly above the words it's played over === */
+        .cs-line {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 0.05rem 0.55rem;
+            margin: 0.4rem 0 1.1rem;
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+        }
+        .cs-seg {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.25;
+            padding: 0.15rem 0 0;
+            border-radius: 3px;
+            transition: background 0.12s ease;
+        }
+        .cs-seg.cs-seg-active {
+            background: rgba(234, 149, 72, 0.18);
+            box-shadow: 0 0 0 2px rgba(234, 149, 72, 0.35);
+        }
+        .cs-chord {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #7a3a0a;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.15rem;
+            white-space: nowrap;
+        }
+        .cs-words {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: #2a2620;
+            white-space: nowrap;
+        }
+        .cs-words.cs-instr { min-width: 3.2rem; border-bottom: 1px dashed #c4bca8; }
+        .cs-word { transition: color 0.08s ease, background 0.08s ease; padding: 0 1px; border-radius: 2px; }
+        .cs-word.cs-word-active {
+            color: #7a3a0a;
+            background: rgba(234, 149, 72, 0.25);
+            font-weight: 600;
+        }
+        .cs-note {
+            font-style: italic;
+            color: #6a6458;
+            font-size: 0.85rem;
+            align-self: flex-end;
+            padding-bottom: 0.1rem;
+        }
+        .cs-plain {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-style: italic;
+            color: #2a2620;
+            margin: 0.4rem 0 1rem;
+        }
+        @media print {
+            .cs-line { page-break-inside: avoid; break-inside: avoid; }
+            .cs-seg.cs-seg-active { background: transparent !important; box-shadow: none !important; }
+            .cs-chord { color: #000 !important; }
+        }
+        .ls-bar .ls-chord {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+            color: #1a1a1a;
+        }
+        .ls-bar .ls-secondary-chord {
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            color: #5a5548;
+            font-weight: 600;
+            font-size: 0.82rem;
+            font-style: italic;
+        }
+        .ls-bar-diagram { line-height: 0; }
+        .ls-bar-diagram svg { display: block; }
+        .ls-chord-row { display: flex; gap: 0.6rem; align-items: baseline; justify-content: center; flex-wrap: wrap; }
+
+        /* Lyrics — readable, restrained, subordinate to chords */
+        .ls-lyrics,
+        .ls-lyrics.ls-lyrics-full {
+            display: block;
+            padding: 0.6rem 0.2rem 0.1rem 0.2rem;
+            font-size: 0.95rem;
+            color: #3a3526;
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            font-weight: 400;
+            font-style: italic;
+            line-height: 1.55;
+            letter-spacing: 0.01em;
+            text-align: left;
+            word-spacing: normal;
+        }
+        .ls-lyrics em { font-style: normal; color: #8a8578; }
+        .ls-repeat-marker {
+            font-family: 'Righteous', cursive;
+            color: #888;
+            font-size: 0.85rem;
+            padding: 0.2rem 0.5rem;
+        }
+        .ls-view-toggle {
+            display: inline-flex;
+            gap: 0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .ls-view-toggle button {
+            padding: 0.35rem 0.8rem;
+            background: #2a2a35;
+            color: #aaa;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+            border-right: 1px solid #444;
+        }
+        .ls-view-toggle button:last-child { border-right: none; }
+        .ls-view-toggle button.active {
+            background: #ff7b54;
+            color: #0d0d12;
+            font-weight: 600;
+        }
+        @media print {
+            .lead-sheet { background: white !important; padding: 0.5rem !important; border-radius: 0 !important; }
+            .lead-sheet, .lead-sheet * { color: black !important; }
+            .ls-bars { background: white !important; }
+            .ls-section-label { border-left-color: #999 !important; color: #222 !important; }
+            .ls-view-toggle, .no-print { display: none !important; }
+        }
+
         .chord-measures {
             display: flex;
             flex-wrap: wrap;
@@ -1570,14 +1937,23 @@
         @media print {
             .header, .sidebar, .stem-tabs, .view-toggle, .loading-overlay,
             #osmd-custom-cursor, .no-print { display: none !important; }
-            body { background: white !important; color: black !important; margin: 0 !important; }
-            .main { display: block !important; height: auto !important; margin: 0 !important; padding: 0 !important; }
-            .notation-area { overflow: visible !important; padding: 0 !important; }
-            .notation-display { overflow: visible !important; max-height: none !important; background: white !important; }
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+                background: white !important;
+                color: black !important;
+                margin: 0 !important;
+            }
+            .main { display: block !important; height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
+            .notation-area { overflow: visible !important; height: auto !important; padding: 0 !important; }
+            .notation-display { overflow: visible !important; height: auto !important; max-height: none !important; background: white !important; }
             #chordChart {
-                display: block !important; overflow: visible !important; max-height: none !important;
+                display: block !important; overflow: visible !important; height: auto !important; max-height: none !important;
                 background: white !important; padding: 1rem !important;
             }
+            .lead-sheet { box-shadow: none !important; padding: 1rem 1.5rem !important; }
+            .ls-section { page-break-inside: avoid; break-inside: avoid; }
+            .ls-line { page-break-inside: avoid; break-inside: avoid; }
             #chordChart * { color: black !important; }
             .ug-sheet { font-size: 11pt !important; line-height: 1.5 !important; white-space: pre-wrap !important; }
             .ug-chord { color: black !important; font-weight: 700 !important; text-shadow: none !important; }
@@ -1795,6 +2171,9 @@
             #pianoPanel svg { max-width: 100%; height: auto; }
         }
     </style>
+    <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
+    <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
+    <script src="js/analytics.js"></script>
 </head>
 <body>
 <!-- Beta gate disabled — open access for testing -->
@@ -1817,6 +2196,8 @@
             <button class="header-btn" id="printNotation" style="display:none;" title="Print">🖨 Print</button>
             <button class="header-btn" id="downloadMusicXML" style="display:none;" title="Download MusicXML">📜 XML</button>
             <button class="header-btn" id="downloadGP" style="display:none;" title="Download Guitar Pro"><img src="icons/custom/32/guitar-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;"> GP</button>
+            <a href="tuner.html" class="header-btn">🎸 Tuner</a>
+            <a href="fretboard.html" class="header-btn">🎹 Scales</a>
             <a href="index.html" class="header-btn">← Back</a>
             <!-- Auth: Sign-In Button -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
@@ -1906,15 +2287,19 @@
 
         <!-- Notation -->
         <div class="notation-area">
-            <div class="stem-tabs" id="stemTabs">
-                <!-- Populated by JS when job loads -->
-            </div>
+            <!-- Stem-picker row + Tab/Sheet-Music view toggle removed for May-5 launch
+                 (MIDI transcription models producing unreliable output — see
+                 docs/transcription-failure-inventory.md. Post-launch: wire Basic Pitch
+                 for guitar/bass, hFT-Transformer for piano, Omnizart for drums, then
+                 re-enable the picker + Tab/Sheet-Music button.) -->
+            <div class="stem-tabs" id="stemTabs" style="display:none;"></div>
 
-            <!-- View Toggle: Tab vs Chords + Transpose -->
+            <!-- Chord-chart toolbar: Transpose + sharps/flats + Keys -->
             <div class="view-toggle" id="viewToggle">
-                <span class="view-toggle-label">View</span>
-                <button class="view-toggle-btn" id="viewTabBtn" onclick="switchView('tab')">Tab</button>
-                <button class="view-toggle-btn active" id="viewChordsBtn" onclick="switchView('chords')">Chords</button>
+                <span class="view-toggle-label" style="color:var(--text-dim); letter-spacing:0.05em; text-transform:uppercase; font-size:0.72rem;">Chord Chart</span>
+                <!-- Hidden legacy view buttons (kept so switchView calls still no-op) -->
+                <button class="view-toggle-btn" id="viewTabBtn" onclick="switchView('tab')" style="display:none;">Tab</button>
+                <button class="view-toggle-btn active" id="viewChordsBtn" onclick="switchView('chords')" style="display:none;">Chords</button>
                 <div class="transpose-ctrl" id="transposeCtrl">
                     <span class="view-toggle-label" style="margin-left:1rem;">Transpose</span>
                     <button class="transpose-btn" onclick="transpose(-1)">-</button>
@@ -1934,6 +2319,14 @@
                 <!-- Chord Chart (hidden by default) -->
                 <div id="chordChart"></div>
 
+                <!-- Piano/Drums sheet-music toggles disabled for May-5 launch
+                     (CRNN transcription output unreliable — see transcription-failure-inventory.md). -->
+                <div class="notation-toggles" id="notationToggles" style="display:none !important;">
+                    <button class="notation-toggle-btn" id="notationPianoBtn" onclick="toggleNotation('piano')">Piano</button>
+                    <button class="notation-toggle-btn" id="notationDrumsBtn" onclick="toggleNotation('drums')">Drums</button>
+                </div>
+                <div id="notationOSMDContainer" style="display:none;"></div>
+
                 <!-- Piano Keyboard Visualizer -->
                 <div id="pianoPanel">
                     <div class="piano-chord-name" id="pianoChordName">--</div>
@@ -1941,9 +2334,9 @@
                     <div class="piano-keyboard-wrap" id="pianoKeyboardWrap"></div>
                 </div>
 
-                <div id="alphaTab">
+                <div id="alphaTab" style="display:none;">
                     <div class="empty-state" id="emptyState">
-                        <h2>♫ Practice Mode</h2>
+                        <h2><img src="/images/icons/practice.png" style="width:28px;height:28px;vertical-align:middle;margin-right:6px;border-radius:4px;"> Practice Mode</h2>
                         <p>Search for any song to load professional tabs instantly.</p>
 
                         <!-- Songsterr Search (primary action) -->
@@ -2055,11 +2448,14 @@
         let lastCursorIndex = -1;
         let currentSongsterrId = null;
         let currentManualChart = null;
+        let _chordLibraryLocked = false; // Nuclear fix: when true, chord library wins over everything
         let manualChordEditMode = false;
         let currentChordData = null;
         let currentUGData = null; // UG chord sheet data (takes priority over Songsterr)
         let songsterrTracks = []; // [{index, instrument, name}] from Songsterr meta
         let currentView = 'chords'; // 'tab' or 'chords'
+        let activeNotation = null; // null, 'piano', or 'drums' — which notation sheet is showing
+        let notationOSMDInstance = null; // separate OSMD instance for the notation toggle
         let transposeAmount = 0;
         let useFlats = false;
         const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -2773,7 +3169,7 @@
                     section.style.display = 'none';
                     return;
                 }
-                const heading = '<div style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Your Library</div>';
+                const heading = '<div style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;"><img src="/images/icons/library.png" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;border-radius:3px;"> Your Library</div>';
                 const cards = data.library.map(function(song) {
                     const dur = song.duration ? Math.floor(song.duration / 60) + ':' + String(Math.floor(song.duration % 60)).padStart(2, '0') : '';
                     const badges = [];
@@ -3015,6 +3411,10 @@
                 if (job.error) { alert('Job not found'); return; }
 
                 currentJob = job;
+                // Reset chord state for new song
+                currentManualChart = null;
+                _chordLibraryLocked = false;
+                currentChordData = null;
                 var emptyStateEl = document.getElementById('emptyState');
                 if (emptyStateEl) emptyStateEl.style.display = 'none';
                 var songTitleEl = document.getElementById('songTitle');
@@ -3024,14 +3424,25 @@
 
                 loadStemAudio(job);
                 buildStemTabs(job, requestedStem);
+                updateNotationToggles();
+
+                // Reset notation toggle state on job change
+                activeNotation = null;
+                notationOSMDInstance = null;
+                var _nc = document.getElementById('notationOSMDContainer');
+                if (_nc) { _nc.classList.remove('visible'); _nc.innerHTML = ''; }
+                document.querySelectorAll('.notation-toggle-btn').forEach(b => b.classList.remove('active'));
 
                 // Try Songsterr first (real tabs), fall back to AI notation
                 const songTitle = job.metadata?.title || '';
+                const songArtist = job.metadata?.artist || '';
+                const songsterrQuery = songArtist ? (songArtist + ' - ' + songTitle) : songTitle;
                 const queryEl = document.getElementById('songsterrQuery');
-                if (queryEl) queryEl.value = songTitle;
+                if (queryEl) queryEl.value = songsterrQuery;
 
                 let songsterrLoaded = false;
-                if (songTitle) {
+                var hideTabs = job.metadata?.hide_tabs;
+                if (songTitle && !hideTabs) {
                     try {
                         // Wrap Songsterr search in a 10s timeout race
                         songsterrLoaded = await Promise.race([
@@ -3044,21 +3455,44 @@
                         console.log('Songsterr auto-search failed or timed out, using AI notation');
                     }
                 }
+                if (hideTabs) {
+                    console.log('Tabs hidden for this job (hide_tabs flag)');
+                    var atEl = document.getElementById('alphaTab');
+                    if (atEl) atEl.style.display = 'none';
+                    var songsterrDiv = document.getElementById('songsterrSearch');
+                    if (songsterrDiv) songsterrDiv.style.display = 'none';
+                    var osmdEl = document.getElementById('osmd-container');
+                    if (osmdEl) osmdEl.style.display = 'none';
+                    // Hide the Tab button in the view toggle
+                    var tabBtn = document.querySelector('[data-view="tab"]');
+                    if (tabBtn) tabBtn.style.display = 'none';
+                    // Force chords view
+                    var chordsBtn = document.querySelector('[data-view="chords"]');
+                    if (chordsBtn) chordsBtn.click();
+                }
 
-                // If no Songsterr tabs loaded, prefer job's own GP/MusicXML files,
-                // then fall through to chord chart / AI chords.
-                if (!songsterrLoaded) {
+                // Always show the view toggle when a job is loaded
+                var _vt = document.getElementById('viewToggle');
+                if (_vt) _vt.classList.add('visible');
+
+                // AI-generated GP5/MusicXML tabs are suppressed — quality is not good enough.
+                // Songsterr provides real human-transcribed tabs. If Songsterr doesn't have it,
+                // users see the chord chart view instead.
+                if (false && !songsterrLoaded && !hideTabs) {
                     const hasGP = currentJob.gp_files && Object.keys(currentJob.gp_files).length > 0;
                     const hasXML = currentJob.musicxml_files && Object.keys(currentJob.musicxml_files).length > 0;
                     if (hasGP || hasXML) {
-                        // Auto-load the active stem tab's notation (or first available)
                         const activeStemBtn = document.querySelector('#stemTabs .stem-tab.active');
                         const stemToLoad = (activeStemBtn && activeStemBtn.dataset.stem) || requestedStem || 'guitar';
-                        await loadNotationForStem(stemToLoad);
-                    } else {
-                        await loadChordChart(currentSongsterrId || null);
+                        loadNotationForStem(stemToLoad);
                     }
                 }
+
+                // Always load chord chart — force reload even if Songsterr set something
+                await loadChordChart(currentSongsterrId || null);
+
+                // Sync DOM visibility with the current view (hides alphaTab when defaulting to chords)
+                switchView(currentView);
             } catch (error) {
                 console.error('Failed to load job:', error);
             }
@@ -3098,6 +3532,7 @@
                 btn.addEventListener('click', () => {
                     container.querySelectorAll('.stem-tab').forEach(t => t.classList.remove('active'));
                     btn.classList.add('active');
+                    updateViewToggleForStem(stem);
                     if (currentSongsterrId) {
                         // Songsterr handles its own instrument switching
                     } else if (currentJob && (currentJob.gp_files || currentJob.musicxml_files)) {
@@ -3106,6 +3541,9 @@
                 });
                 container.appendChild(btn);
             });
+
+            // Initialize view-toggle label for the active stem
+            updateViewToggleForStem(active);
         }
 
         // ── Load Stem Audio + Mixer ──
@@ -3430,6 +3868,7 @@
             var ctEl = document.getElementById('currentTime');
             if (ctEl) ctEl.textContent = formatTime(ct);
             syncNotationCursor(ct);
+            syncLeadSheetCursor(ct);
 
             if (loopEnabled && loopStart < loopEnd && ct >= loopEnd && isPlaying) {
                 audioEngine.seek(loopStart);
@@ -3443,6 +3882,59 @@
             const m = Math.floor(s / 60);
             const sec = Math.floor(s % 60);
             return `${m}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        // ── Lead Sheet cursor: highlight the chord segment + currently-sung word,
+        //    and auto-scroll the active segment into view.
+        var _lastActiveSeg = null;
+        var _lastActiveWord = null;
+        function syncLeadSheetCursor(ct) {
+            var chordChart = document.getElementById('chordChart');
+            if (!chordChart || !chordChart.classList.contains('visible')) return;
+            var segs = chordChart.querySelectorAll('.cs-seg[data-start], .ls-bar[data-start]');
+            if (!segs.length) return;
+            var hit = null;
+            for (var i = 0; i < segs.length; i++) {
+                var s = parseFloat(segs[i].getAttribute('data-start'));
+                var e = parseFloat(segs[i].getAttribute('data-end'));
+                if (isNaN(s) || isNaN(e)) continue;
+                if (ct >= s && ct < e) { hit = segs[i]; break; }
+            }
+            if (hit !== _lastActiveSeg) {
+                if (_lastActiveSeg) {
+                    _lastActiveSeg.classList.remove('cs-seg-active');
+                    _lastActiveSeg.classList.remove('ls-bar-active');
+                }
+                if (hit) {
+                    hit.classList.add(hit.classList.contains('cs-seg') ? 'cs-seg-active' : 'ls-bar-active');
+                    var rect = hit.getBoundingClientRect();
+                    var vh = window.innerHeight || document.documentElement.clientHeight;
+                    if (rect.top < 80 || rect.bottom > vh - 80) {
+                        hit.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                _lastActiveSeg = hit;
+            }
+
+            // Word-level highlight — only search within the active segment
+            if (!hit) {
+                if (_lastActiveWord) { _lastActiveWord.classList.remove('cs-word-active'); _lastActiveWord = null; }
+                return;
+            }
+            var words = hit.querySelectorAll('.cs-word[data-wstart]');
+            var wHit = null;
+            for (var j = 0; j < words.length; j++) {
+                var ws = parseFloat(words[j].getAttribute('data-wstart'));
+                var we = parseFloat(words[j].getAttribute('data-wend'));
+                if (isNaN(ws)) continue;
+                if (isNaN(we)) we = ws + 1.0;
+                if (ct >= ws && ct < we) { wHit = words[j]; break; }
+            }
+            if (wHit !== _lastActiveWord) {
+                if (_lastActiveWord) _lastActiveWord.classList.remove('cs-word-active');
+                if (wHit) wHit.classList.add('cs-word-active');
+                _lastActiveWord = wHit;
+            }
         }
 
         function showToast(msg) {
@@ -3541,10 +4033,15 @@
             }
         }
 
-        // ── OSMD (MusicXML Rendering) ──
+        // ── OSMD (MusicXML Rendering) — SUPPRESSED: AI sheet music hidden below chord charts ──
         async function initOSMD(data, filename) {
-            const container = document.getElementById('alphaTab');
+            // Suppress AI-generated sheet music rendering (hidden per Jeff's request)
+            console.log('[OSMD] Suppressed — AI sheet music display is disabled');
             const overlay = document.getElementById('loadingOverlay');
+            if (overlay) { overlay.classList.add('hidden'); overlay.style.display = 'none'; }
+            return;
+
+            const container = document.getElementById('alphaTab');
 
             function hideLoading() {
                 overlay.classList.add('hidden');
@@ -3835,6 +4332,19 @@
             }
         }
 
+        // ── Adaptive view-toggle labels per stem ──
+        // Guitar/Bass → "Tab" | Piano/Drums/Vocals → "Sheet Music"
+        // Drums hides "Chords" (no chords for drums)
+        function updateViewToggleForStem(stem) {
+            var tabBtn    = document.getElementById('viewTabBtn');
+            var chordsBtn = document.getElementById('viewChordsBtn');
+            if (!tabBtn || !chordsBtn) return;
+            var s = (stem || '').toLowerCase().split('_')[0];
+            var isTab = (s === 'guitar' || s === 'bass');
+            tabBtn.textContent = isTab ? 'Tab' : 'Sheet Music';
+            chordsBtn.style.display = (s === 'drums') ? 'none' : '';
+        }
+
         // ── View Toggle (Tab vs Chords) ──
         function switchView(view) {
             currentView = view;
@@ -3843,11 +4353,17 @@
             var alphaTabEl = document.getElementById('alphaTab');
             var chordChart = document.getElementById('chordChart');
 
+            var notationToggles = document.getElementById('notationToggles');
+            var notationContainer = document.getElementById('notationOSMDContainer');
+
             if (view === 'chords') {
                 if (tabBtn) tabBtn.classList.remove('active');
                 if (chordsBtn) chordsBtn.classList.add('active');
                 if (alphaTabEl) alphaTabEl.style.display = 'none';
                 if (chordChart) chordChart.classList.add('visible');
+                // Show notation toggles in chords view
+                if (notationToggles) updateNotationToggles();
+                if (notationContainer && activeNotation) notationContainer.classList.add('visible');
 
                 // Load chords if we haven't yet — use unified chain
                 if (!currentChordData && !currentUGData && !currentManualChart) {
@@ -3864,10 +4380,107 @@
                 if (tabBtn) tabBtn.classList.add('active');
                 if (alphaTabEl) alphaTabEl.style.display = '';
                 if (chordChart) chordChart.classList.remove('visible');
+                // Hide notation toggles in tab view
+                if (notationToggles) notationToggles.classList.remove('visible');
+                if (notationContainer) notationContainer.classList.remove('visible');
                 // AlphaTab needs a resize after being hidden
                 if (alphaTabApi && alphaTabApi.render) {
                     setTimeout(function() { alphaTabApi.render(); }, 50);
                 }
+            }
+        }
+
+        // ── Notation Toggle (Piano/Drums Sheet Music) ──
+        function updateNotationToggles() {
+            const toggles = document.getElementById('notationToggles');
+            const pianoBtn = document.getElementById('notationPianoBtn');
+            const drumsBtn = document.getElementById('notationDrumsBtn');
+            if (!toggles || !currentJob) { if (toggles) toggles.classList.remove('visible'); return; }
+
+            const xmlFiles = currentJob.musicxml_files || {};
+            const hasPiano = Object.keys(xmlFiles).some(k => k.startsWith('piano'));
+            const hasDrums = Object.keys(xmlFiles).some(k => k.startsWith('drums'));
+
+            if (pianoBtn) pianoBtn.style.display = hasPiano ? '' : 'none';
+            if (drumsBtn) drumsBtn.style.display = hasDrums ? '' : 'none';
+
+            if (hasPiano || hasDrums) {
+                toggles.classList.add('visible');
+            } else {
+                toggles.classList.remove('visible');
+            }
+        }
+
+        async function toggleNotation(stem) {
+            const pianoBtn = document.getElementById('notationPianoBtn');
+            const drumsBtn = document.getElementById('notationDrumsBtn');
+            const container = document.getElementById('notationOSMDContainer');
+            if (!container || !currentJob) return;
+
+            // Toggle off if already active
+            if (activeNotation === stem) {
+                activeNotation = null;
+                container.classList.remove('visible');
+                container.innerHTML = '';
+                if (pianoBtn) pianoBtn.classList.remove('active');
+                if (drumsBtn) drumsBtn.classList.remove('active');
+                notationOSMDInstance = null;
+                return;
+            }
+
+            // Update button states
+            activeNotation = stem;
+            if (pianoBtn) pianoBtn.classList.toggle('active', stem === 'piano');
+            if (drumsBtn) drumsBtn.classList.toggle('active', stem === 'drums');
+
+            // Find the MusicXML file for this stem
+            const xmlFiles = currentJob.musicxml_files || {};
+            let targetKey = null;
+            for (const k of Object.keys(xmlFiles)) {
+                if (k.startsWith(stem)) {
+                    if (k.includes('enhanced') || !targetKey) targetKey = k;
+                }
+            }
+            if (!targetKey) {
+                container.innerHTML = '<div style="text-align:center; padding:1rem; color:#666;">No notation available</div>';
+                container.classList.add('visible');
+                return;
+            }
+
+            // Show loading
+            container.innerHTML = '<div style="text-align:center; padding:2rem; color:#666;">Loading notation...</div>';
+            container.classList.add('visible');
+
+            try {
+                const url = `${API_BASE}/download/${currentJob.job_id}/musicxml/${targetKey}`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
+                const data = await response.arrayBuffer();
+                if (data.byteLength === 0) throw new Error('Empty file');
+
+                const xmlString = new TextDecoder().decode(new Uint8Array(data));
+
+                container.innerHTML = '<div id="notationOSMDRender"></div>';
+                const renderEl = document.getElementById('notationOSMDRender');
+
+                notationOSMDInstance = new opensheetmusicdisplay.OpenSheetMusicDisplay(renderEl, {
+                    autoResize: true,
+                    backend: 'svg',
+                    drawTitle: true,
+                    drawComposer: false,
+                    drawPartNames: true,
+                    drawMeasureNumbers: true,
+                    followCursor: false
+                });
+
+                await notationOSMDInstance.load(xmlString);
+                notationOSMDInstance.render();
+
+                const measures = notationOSMDInstance.sheet?.sourceMeasures?.length || 0;
+                console.log(`[Notation Toggle] ${stem} rendered — ${measures} measures`);
+            } catch (error) {
+                console.error('[Notation Toggle] Error:', error);
+                container.innerHTML = `<div style="text-align:center; padding:1rem; color:#f77;">Failed to load ${stem} notation: ${error.message}</div>`;
             }
         }
 
@@ -3916,12 +4529,17 @@
             return toNoteString(newIdx) + suffix + slashPart;
         }
 
+        function _rerenderActiveChart() {
+            if (currentManualChart) renderManualChordChart(currentManualChart);
+            else if (currentUGData) renderUGChordChart(currentUGData);
+            else if (currentChordData) renderChordChart(currentChordData);
+        }
+
         function toggleFlats() {
             useFlats = !useFlats;
             var btn = document.getElementById('flatSharpBtn');
             if (btn) btn.textContent = useFlats ? 'Use ♯' : 'Use ♭';
-            if (currentUGData) renderUGChordChart(currentUGData);
-            else if (currentChordData) renderChordChart(currentChordData);
+            _rerenderActiveChart();
         }
 
         function transpose(delta) {
@@ -3931,8 +4549,7 @@
 
             // Re-render chord chart if visible
             if (currentView === 'chords') {
-                if (currentUGData) renderUGChordChart(currentUGData);
-                else if (currentChordData) renderChordChart(currentChordData);
+                _rerenderActiveChart();
             }
         }
 
@@ -3947,6 +4564,36 @@
 
         // Helper: render AI-detected chords as diagram-only view (no lyrics)
         function renderAIChordView(chordChart, aiChords, title, detectedKey, songsterrFallback) {
+            // === NUCLEAR FIX: chord library always wins over AI chords ===
+            if (_chordLibraryLocked && currentManualChart) {
+                console.log('Nuclear fix: chord library found, using library instead of AI chords');
+                renderManualChordChart(currentManualChart);
+                return;
+            }
+            // Also check chord library via async fetch as a fallback safety net
+            if (!_chordLibraryLocked && !currentManualChart) {
+                var _libTitle = '';
+                var _libArtist = '';
+                var _st = document.getElementById('songTitle'); if (_st) _libTitle = _st.textContent || '';
+                var _sa = document.getElementById('songArtist'); if (_sa) _libArtist = _sa.textContent || '';
+                if (!_libTitle && currentJob && currentJob.metadata) _libTitle = currentJob.metadata.title || '';
+                if (!_libArtist && currentJob && currentJob.metadata) _libArtist = currentJob.metadata.artist || '';
+                _libTitle = cleanTitle(_libTitle);
+                if (_libTitle) {
+                    fetch(API_BASE + '/chords/library?title=' + encodeURIComponent(_libTitle) + '&artist=' + encodeURIComponent(_libArtist) + '&_=' + Date.now())
+                        .then(function(r) { return r.ok ? r.json() : null; })
+                        .then(function(libData) {
+                            if (libData && libData.sections && libData.sections.length > 0) {
+                                console.log('Nuclear fix (async): chord library found for "' + _libTitle + '", replacing AI chords');
+                                currentManualChart = libData;
+                                _chordLibraryLocked = true;
+                                renderManualChordChart(libData);
+                            }
+                        })
+                        .catch(function() {}); // silently ignore errors
+                }
+            }
+            // === END NUCLEAR FIX ===
             chordChart.classList.add('visible');
             var html = '<div style="padding:1.5rem;">';
             html += '<div style="font-family:Righteous,cursive; font-size:1.2rem; margin-bottom:0.5rem;">' + (title || 'Detected Chords') + '</div>';
@@ -3963,55 +4610,97 @@
             var diagramHtml = '';
             aiChords.forEach(function(c) {
                 var name = c.chord || c;
-                if (!seen[name] && CHORD_SHAPES && CHORD_SHAPES[name]) {
+                if (!seen[name]) {
                     seen[name] = true;
-                    diagramHtml += renderChordDiagram(name, CHORD_SHAPES[name].frets, CHORD_SHAPES[name].barres);
-                } else if (!seen[name]) {
-                    seen[name] = true;
+                    var aiShape = getChordShape(name);
+                    if (aiShape) {
+                        diagramHtml += renderChordDiagram(name, aiShape.frets, aiShape.barres);
+                    }
                 }
             });
             if (diagramHtml) {
                 html += '<div class="chord-diagrams-row" style="display:flex; flex-wrap:wrap; gap:0; margin-bottom:1rem; padding:0.75rem; background:var(--bg-dark); border-radius:8px; border:1px solid var(--border);">' + diagramHtml + '</div>';
             }
-            // Show chord timeline with timestamps (clickable)
-            html += '<div style="margin-top:0.5rem;">';
-            var lastChord = '';
-            aiChords.forEach(function(c) {
-                var name = c.chord || c;
-                if (name !== lastChord) {
-                    if (c.time !== undefined) {
-                        var mins = Math.floor(c.time / 60);
-                        var secs = Math.floor(c.time % 60);
-                        var timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
-                        html += '<span style="display:inline-block; margin:0.2rem 0.3rem; padding:0.2rem 0.5rem; background:var(--bg-dark); border:1px solid var(--border); border-radius:4px; cursor:pointer;" onclick="seekToTime(' + c.time.toFixed(1) + ')" title="' + timeStr + '">';
-                        html += '<span style="color:var(--yellow);">' + name + '</span>';
-                        html += '<span style="color:var(--text-dim); font-size:0.7rem; margin-left:0.3rem;">' + timeStr + '</span></span>';
-                    } else {
-                        html += '<span style="display:inline-block; margin:0.2rem 0.3rem; padding:0.3rem 0.6rem; background:var(--bg-dark); border:1px solid var(--border); border-radius:4px; color:var(--yellow);">' + name + '</span>';
+            // Group chords into ~4-second bars for a lead-sheet style display
+            var barDuration = 4.0; // ~1 bar at 120bpm in 4/4
+            var hasTiming = aiChords.length > 0 && aiChords[0].time !== undefined;
+
+            if (hasTiming) {
+                // Find total duration
+                var lastC = aiChords[aiChords.length - 1];
+                var totalTime = (lastC.time || 0) + (lastC.duration || 2);
+                var barCount = Math.ceil(totalTime / barDuration);
+
+                // Build bars: each bar contains unique chords that fall within it
+                var bars = [];
+                for (var b = 0; b < barCount; b++) {
+                    var barStart = b * barDuration;
+                    var barEnd = barStart + barDuration;
+                    var barChords = [];
+                    var lastInBar = '';
+                    aiChords.forEach(function(c) {
+                        var t = c.time || 0;
+                        if (t >= barStart && t < barEnd) {
+                            var name = c.chord || c;
+                            if (name !== lastInBar) {
+                                barChords.push({ chord: name, time: t, confidence: c.confidence || 0 });
+                                lastInBar = name;
+                            }
+                        }
+                    });
+                    if (barChords.length > 0) {
+                        bars.push({ start: barStart, chords: barChords });
                     }
-                    lastChord = name;
                 }
-            });
-            html += '</div></div>';
+
+                // Render as grid of bars, 4 bars per row (like a lead sheet)
+                html += '<div style="margin-top:0.75rem; display:grid; grid-template-columns:repeat(4,1fr); gap:2px;">';
+                bars.forEach(function(bar, idx) {
+                    var mins = Math.floor(bar.start / 60);
+                    var secs = Math.floor(bar.start % 60);
+                    var timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                    html += '<div style="background:var(--bg-dark); border:1px solid var(--border); border-radius:4px; padding:0.5rem; cursor:pointer; min-height:2.5rem; display:flex; flex-direction:column; justify-content:center;" onclick="seekToTime(' + bar.start.toFixed(1) + ')" title="' + timeStr + '">';
+                    bar.chords.forEach(function(c, ci) {
+                        var opacity = c.confidence > 0.7 ? '1' : '0.6';
+                        html += '<span style="color:var(--yellow); font-family:Righteous,cursive; font-size:1rem; opacity:' + opacity + ';">' + c.chord + '</span>';
+                        if (ci < bar.chords.length - 1) html += ' ';
+                    });
+                    html += '<span style="color:var(--text-dim); font-size:0.6rem; display:block; margin-top:2px;">' + timeStr + '</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            } else {
+                // No timing — just show as inline badges
+                html += '<div style="margin-top:0.5rem; display:flex; flex-wrap:wrap; gap:0.3rem;">';
+                var lastChord = '';
+                aiChords.forEach(function(c) {
+                    var name = c.chord || c;
+                    if (name !== lastChord) {
+                        html += '<span style="display:inline-block; padding:0.3rem 0.6rem; background:var(--bg-dark); border:1px solid var(--border); border-radius:4px; color:var(--yellow); font-family:Righteous,cursive;">' + name + '</span>';
+                        lastChord = name;
+                    }
+                });
+                html += '</div>';
+            }
+            html += '</div>';
             chordChart.innerHTML = html;
         }
 
         // --- Helper: check if Songsterr data has real chord content ---
         function songsterrHasChords(data) {
             if (!data) return false;
-            if (data.chordEvents && data.chordEvents.length > 0 &&
-                data.chordEvents.some(function(ce) { return ce.chord && ce.chord.trim(); })) {
-                return true;
+            // Count actual chord events — need at least 5 to be useful
+            var totalChords = 0;
+            if (data.chordEvents && data.chordEvents.length > 0) {
+                totalChords = data.chordEvents.filter(function(ce) { return ce.chord && ce.chord.trim(); }).length;
             }
-            if (data.chords && data.chords.length > 0 &&
-                data.chords.some(function(c) { return typeof c === 'string' ? c.trim() : (c && c.chord && c.chord.trim()); })) {
-                return true;
-            }
-            if (data.measures && data.measures.length > 0 &&
-                data.measures.some(function(m) {
+            if (totalChords >= 5) return true;
+            if (data.measures && data.measures.length > 0) {
+                var measuresWithChords = data.measures.filter(function(m) {
                     return m.chords && m.chords.length > 0 && m.chords.some(function(c) { return c && c.trim && c.trim(); });
-                })) {
-                return true;
+                }).length;
+                // Need chords in at least 10% of measures to be meaningful
+                if (measuresWithChords >= 5 && measuresWithChords / data.measures.length >= 0.1) return true;
             }
             return false;
         }
@@ -4097,7 +4786,9 @@
          *   5. AI chord progression as pills
          *   6. Last resort: "No chord data available"
          */
+        var _loadChordChartVersion = 0; // concurrency guard — each call gets a version, stale calls bail out
         async function loadChordChart(songId) {
+            var myVersion = ++_loadChordChartVersion;
             var chordChart = document.getElementById('chordChart');
             chordChart.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-dim);">Loading chords...</div>';
             chordChart.classList.add('visible');
@@ -4114,14 +4805,113 @@
 
             var songsterrHasTabs = false;
 
-            // --- Step 1: Try Songsterr chords (human-verified) ---
+            // --- Step 0: Songsterr ChordPro CDN — MOVED TO STEP 3.6 (below) ---
+            // Was firing before our own backend chart and returning third-party
+            // data for "Jamiroquai - Alright" that wasn't the same recording the
+            // user uploaded. Now only runs as a fallback when we have no job
+            // and no library match.
+
+            // --- Step 0.5: Check StemScribe chord library ---
+            {
+                var libTitle = '';
+                var libArtist = '';
+                // Prefer DOM title/artist (cleaned by Songsterr or cleanTitle) over raw metadata
+                var _st = document.getElementById('songTitle'); if (_st) libTitle = _st.textContent || '';
+                var _sa = document.getElementById('songArtist'); if (_sa) libArtist = _sa.textContent || '';
+                // Fall back to job metadata if DOM is empty
+                if (!libTitle && currentJob && currentJob.metadata) {
+                    libTitle = currentJob.metadata.title || '';
+                }
+                if (!libArtist && currentJob && currentJob.metadata) {
+                    libArtist = currentJob.metadata.artist || '';
+                }
+                // Clean YouTube junk from title (e.g. "(Official Audio)")
+                libTitle = cleanTitle(libTitle);
+                // Strip "Artist - " prefix from title if present (common in YouTube metadata)
+                if (libArtist && libTitle) {
+                    var artistPrefixPattern = new RegExp('^' + libArtist.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[-–—]\\s*', 'i');
+                    libTitle = libTitle.replace(artistPrefixPattern, '');
+                }
+                if (libTitle) {
+                    try {
+                        var libResp = await fetchWithTimeout(API_BASE + '/chords/library?title=' + encodeURIComponent(libTitle) + '&artist=' + encodeURIComponent(libArtist) + '&_=' + Date.now(), null, 5000);
+                        if (myVersion !== _loadChordChartVersion) { console.log('loadChordChart: stale after chord library fetch, bailing'); return; }
+                        if (libResp.ok) {
+                            var libData = await libResp.json();
+                            if (libData.sections && libData.sections.length > 0) {
+                                console.log('Using StemScribe chord library: ' + libData.title);
+                                currentManualChart = libData;
+                                _chordLibraryLocked = true;
+                                renderManualChordChart(libData);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        if (myVersion !== _loadChordChartVersion) return;
+                        console.log('Chord library lookup failed:', e.message);
+                    }
+                }
+            }
+
+            // --- Step 1: OUR backend chord chart (bass-anchored, stem-aware) ---
+            // This is the authoritative chart for a processed job: built from
+            // the bass stem's pitch-per-bar + the detector's quality. Trusting
+            // this over third-party sources because (a) it's derived from the
+            // actual audio we just processed, (b) third-party sources routinely
+            // return a different "Alright" than the one the user uploaded.
+            if (currentJob && currentJob.job_id) {
+                try {
+                    var chartResp = await fetchWithTimeout(API_BASE + '/chord-sheet/job/' + currentJob.job_id);
+                    if (myVersion !== _loadChordChartVersion) return;
+                    if (chartResp.ok) {
+                        var chartData = await chartResp.json();
+                        if (chartData.sections && chartData.sections.length > 0) {
+                            console.log('Loaded AI chord chart for job: ' + currentJob.job_id);
+                            currentManualChart = chartData;
+                            renderManualChordChart(chartData);
+                            return;
+                        } else if (chartData.chord_events && chartData.chord_events.length > 0) {
+                            renderChordSheetContent(chartData);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.log('Backend chord chart fetch failed:', e.message);
+                }
+            }
+
+            // --- Step 2: Hand-verified chord library (Kozelski originals etc.) ---
+            if (currentJob && currentJob.metadata) {
+                var _libTitle = currentJob.metadata.title || '';
+                var _libArtist = currentJob.metadata.artist || '';
+                if (_libTitle) {
+                    try {
+                        var libResp = await fetchWithTimeout(API_BASE + '/chords/library?title=' + encodeURIComponent(_libTitle) + '&artist=' + encodeURIComponent(_libArtist) + '&_=' + Date.now());
+                        if (libResp.ok) {
+                            var libData = await libResp.json();
+                            if (libData.sections && libData.sections.length > 0 && !libData.error) {
+                                console.log('Loaded chord chart from library for: ' + _libArtist + ' - ' + _libTitle);
+                                renderManualChordChart(libData);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Chord library lookup failed:', e.message);
+                    }
+                }
+            }
+
+            // --- Step 3: Songsterr fallback ONLY if we have no other data ---
+            // Last resort because Songsterr's "Alright by Jamiroquai" may not
+            // be the same recording/arrangement the user uploaded — different
+            // covers and live versions are common.
             if (songId) {
                 try {
                     var resp = await fetchWithTimeout(API_BASE + '/songsterr/chords/' + songId, null, 12000);
+                    if (myVersion !== _loadChordChartVersion) return;
                     if (resp.ok) {
                         var songsterrData = await resp.json();
                         if (songsterrHasChords(songsterrData)) {
-                            // Detect and fix wrong key before rendering
                             var keyFix = detectKeyCorrection(songsterrData.chordEvents);
                             if (keyFix !== 0) {
                                 applyKeyCorrection(songsterrData, keyFix);
@@ -4130,45 +4920,45 @@
                             renderChordChart(currentChordData);
                             return;
                         }
-                        // Songsterr returned data but no chord annotations — tabs only
                         songsterrHasTabs = true;
-                        console.log('Songsterr has tabs but no chord annotations — falling through');
+                        console.log('Songsterr has tabs but no chord annotations — skipping');
                         currentChordData = null;
                     }
                 } catch (e) {
-                    console.log('Songsterr chords failed/timed out:', e.name === 'AbortError' ? 'timeout' : e.message);
+                    console.log('Songsterr chords failed:', e.name === 'AbortError' ? 'timeout' : e.message);
                 }
             }
 
-            // --- Step 3 & 4: Try manual/auto chord chart (always — even when Songsterr has tabs but no chords) ---
-            if (currentJob && currentJob.job_id) {
+            // --- Step 3.5: RAG chord recall — DISABLED 2026-04-21 ---
+            // Matches by lyric similarity, produces wrong-song results; legal cleanup gap.
+
+            // --- Step 3.6: Songsterr ChordPro — last-resort fallback ---
+            // Only reached when we have no backend job data, no library match,
+            // and no direct Songsterr chord track. Useful when someone lands on
+            // the practice page via a Songsterr-only link with no upload.
+            if (songId) {
                 try {
-                    var chartResp = await fetchWithTimeout(API_BASE + '/chord-sheet/job/' + currentJob.job_id);
-                    if (chartResp.ok) {
-                        var chartData = await chartResp.json();
-                        if (chartData.sections && chartData.sections.length > 0) {
-                            renderManualChordChart(chartData);
-                        } else if (chartData.chord_events && chartData.chord_events.length > 0) {
-                            // chord_sheet endpoint returned chord_events + content but no sections
-                            // Render the content as a simple chord sheet with lyrics
-                            renderChordSheetContent(chartData);
+                    var cpResp = await fetchWithTimeout(API_BASE + '/songsterr/chordpro/' + songId, null, 10000);
+                    if (myVersion !== _loadChordChartVersion) return;
+                    if (cpResp.ok) {
+                        var cpData = await cpResp.json();
+                        if (cpData.sections && cpData.sections.length > 0) {
+                            console.log('Using Songsterr ChordPro as fallback (' + cpData.sections.length + ' sections)');
+                            currentManualChart = cpData;
+                            renderManualChordChart(cpData);
                             return;
                         }
                     }
                 } catch (e) {
-                    console.log('Job chord chart failed:', e.message);
+                    console.log('Songsterr ChordPro failed:', e.name === 'AbortError' ? 'timeout' : e.message);
                 }
             }
 
-            // --- Step 5: AI chord progression as pills ---
-            if (currentJob && currentJob.chord_progression && currentJob.chord_progression.length > 0) {
-                renderAIChordView(chordChart, currentJob.chord_progression,
-                    currentJob.metadata?.title || '', currentJob.detected_key || '');
-                return;
-            }
+            // --- Step 5: AI chord detection DISABLED — produces wrong chords ---
+            // AI detection is only useful for drums/piano, not guitar/bass chords
 
-            // --- Step 6: Last resort ---
-            chordChart.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-dim);">No chord data available for this song</div>';
+            // --- Step 6: No chord data available ---
+            chordChart.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-dim);">Chords not available yet for this song.<br><span style="font-size:0.8rem; margin-top:0.5rem; display:inline-block;">We\'re adding new songs every day. Check back soon!</span></div>';
 
             } finally {
                 clearTimeout(_loadingTimeout);
@@ -4608,6 +5398,15 @@
             'Eadd9': {frets: [0,2,2,1,0,2], barres: []},
             'Aadd9': {frets: [-1,0,2,2,2,2], barres: []},
             'Fadd9': {frets: [1,0,3,2,1,1], barres: [1]},
+            // 7#9 (Hendrix chord)
+            'E7#9':  {frets: [0,7,6,7,8,-1], barres: []},
+            'E7+9':  {frets: [0,7,6,7,8,-1], barres: []},
+            'A7#9':  {frets: [-1,0,6,5,6,7], barres: []},
+            'A7+9':  {frets: [-1,0,6,5,6,7], barres: []},
+            'C7#9':  {frets: [-1,3,2,3,4,-1], barres: []},
+            'C7+9':  {frets: [-1,3,2,3,4,-1], barres: []},
+            'G7#9':  {frets: [3,2,0,1,0,1], barres: []},
+            'D7#9':  {frets: [-1,-1,0,5,4,5], barres: []},
             // 9th chords
             'A9':   {frets: [-1,0,2,4,2,3], barres: []},
             'D9':   {frets: [-1,-1,4,2,1,0], barres: []},
@@ -4688,6 +5487,582 @@
             'C#m9': {frets: [-1,4,2,4,4,4], barres: [4]},
         };
 
+        // ── Universal Chord Shape Generator ──
+        // Generates guitar chord diagrams for ANY chord name not in CHORD_SHAPES
+        var CHORD_GENERATOR = (function() {
+            // Semitone values for each note name
+            var NOTE_TO_SEMI = {
+                'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
+                'E': 4, 'Fb': 4, 'F': 5, 'E#': 5, 'F#': 6, 'Gb': 6,
+                'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10,
+                'B': 11, 'Cb': 11, 'B#': 0
+            };
+
+            // Guitar open string semitones (standard tuning EADGBE)
+            var TUNING = [4, 9, 2, 7, 11, 4]; // E A D G B E (mod 12)
+
+            // Quality → interval semitones from root
+            var QUALITY_MAP = {
+                '':       [0, 4, 7],
+                'maj':    [0, 4, 7],
+                'm':      [0, 3, 7],
+                'min':    [0, 3, 7],
+                'dim':    [0, 3, 6],
+                'aug':    [0, 4, 8],
+                '+':      [0, 4, 8],
+                'sus2':   [0, 2, 7],
+                'sus4':   [0, 5, 7],
+                '7':      [0, 4, 7, 10],
+                'maj7':   [0, 4, 7, 11],
+                'M7':     [0, 4, 7, 11],
+                'm7':     [0, 3, 7, 10],
+                'min7':   [0, 3, 7, 10],
+                'dim7':   [0, 3, 6, 9],
+                'hdim7':  [0, 3, 6, 10],
+                'm7b5':   [0, 3, 6, 10],
+                'aug7':   [0, 4, 8, 10],
+                '7#5':    [0, 4, 8, 10],
+                '7b5':    [0, 4, 6, 10],
+                '6':      [0, 4, 7, 9],
+                'm6':     [0, 3, 7, 9],
+                '9':      [0, 4, 7, 10, 14],
+                'maj9':   [0, 4, 7, 11, 14],
+                'M9':     [0, 4, 7, 11, 14],
+                'm9':     [0, 3, 7, 10, 14],
+                'min9':   [0, 3, 7, 10, 14],
+                'add9':   [0, 4, 7, 14],
+                '7#9':    [0, 4, 7, 10, 15],
+                '7+9':    [0, 4, 7, 10, 15],
+                '7b9':    [0, 4, 7, 10, 13],
+                '11':     [0, 4, 7, 10, 14, 17],
+                'm11':    [0, 3, 7, 10, 14, 17],
+                '13':     [0, 4, 7, 10, 14, 21],
+                'm13':    [0, 3, 7, 10, 14, 21],
+                '7sus4':  [0, 5, 7, 10],
+                '7sus2':  [0, 2, 7, 10],
+                'add11':  [0, 4, 7, 17],
+                '6/9':    [0, 4, 7, 9, 14],
+                'madd9':  [0, 3, 7, 14],
+                '5':      [0, 7],
+                'mmaj7':  [0, 3, 7, 11],
+                'mM7':    [0, 3, 7, 11],
+                '9sus4':  [0, 5, 7, 10, 14],
+                '13sus4': [0, 5, 7, 10, 21],
+                'maj7#11': [0, 4, 7, 11, 18],
+                'maj7b5': [0, 4, 6, 11],
+                '7+5':    [0, 4, 8, 10],
+                '7-5':    [0, 4, 6, 10],
+                '7#5#9':  [0, 4, 8, 10, 15],
+                '7b5#9':  [0, 4, 6, 10, 15],
+                '7b5b9':  [0, 4, 6, 10, 13],
+                '7#5b9':  [0, 4, 8, 10, 13],
+                '7b13':   [0, 4, 7, 10, 20],
+                '7#11':   [0, 4, 7, 10, 18],
+                '7+':     [0, 4, 8, 10],
+                '+7':     [0, 4, 8, 10],
+                '-5':     [0, 4, 6],
+                'b5':     [0, 4, 6],
+                '7-9':    [0, 4, 7, 10, 13],
+                'M7':     [0, 4, 7, 11],
+                '7M':     [0, 4, 7, 11],
+                'ma7':    [0, 4, 7, 11],
+                'add2':   [0, 2, 4, 7],
+                'add4':   [0, 4, 5, 7],
+                '7add11': [0, 4, 7, 10, 17],
+                '7add13': [0, 4, 7, 10, 21],
+                '9#11':   [0, 4, 7, 10, 14, 18],
+                '9b5':    [0, 4, 6, 10, 14],
+                'maj13':  [0, 4, 7, 11, 14, 21],
+                'm13':    [0, 3, 7, 10, 14, 21],
+                '6#11':   [0, 4, 7, 9, 18],
+                '6add9':  [0, 4, 7, 9, 14],
+                '6add4':  [0, 4, 5, 7, 9],
+                'm+7':    [0, 3, 7, 11],
+                'm+5':    [0, 3, 8],
+                'Maj':    [0, 4, 7],
+                'maj':    [0, 4, 7],
+                'min':    [0, 3, 7],
+                'o':      [0, 3, 6],
+                'o7':     [0, 3, 6, 9],
+                // Compound add chords
+                '6sus2':  [0, 2, 7, 9],
+                '6sus4':  [0, 5, 7, 9],
+                'm6add9': [0, 3, 7, 9, 14],
+                '6add9':  [0, 4, 7, 9, 14],
+                'm7add4': [0, 3, 5, 7, 10],
+                'm7add11':[0, 3, 7, 10, 17],
+                '7add4':  [0, 4, 5, 7, 10],
+                'madd11': [0, 3, 7, 17],
+                'maj7b5': [0, 4, 6, 11],
+                'maj7#5': [0, 4, 8, 11],
+                'maj7sus2':[0, 2, 7, 11],
+                'maj7sus': [0, 5, 7, 11],
+                'maj7sus4':[0, 5, 7, 11],
+                'maddb6': [0, 3, 7, 8],
+                'addb6':  [0, 4, 7, 8],
+                'add#11': [0, 4, 7, 18],
+                'add+11': [0, 4, 7, 18],
+                'add+9':  [0, 4, 7, 14],
+                'add13':  [0, 4, 7, 21],
+                'madd6':  [0, 3, 7, 9],
+                '7m':     [0, 3, 7, 10],
+                '13b9':   [0, 4, 7, 10, 13, 21],
+                'b5':     [0, 4, 6],
+                '+5':     [0, 4, 8],
+                'm6/9':   [0, 3, 7, 9, 14],
+                'Gm7M':   [0, 3, 7, 11],
+                '7M':     [0, 4, 7, 11],
+                'sus7':   [0, 5, 7, 10],
+                'maj9#11':[0, 4, 7, 11, 14, 18],
+                'm6+11':  [0, 3, 7, 9, 18],
+                'add4add9':[0, 4, 5, 7, 14],
+                'addb13': [0, 4, 7, 20],
+                'add6':   [0, 4, 7, 9],
+                '6sus2b5':[0, 2, 6, 9],
+                'madd4':  [0, 3, 5, 7],
+                'maj7add13':[0, 4, 7, 11, 21],
+                'mmaj9':  [0, 3, 7, 11, 14],
+                '7M':     [0, 4, 7, 11],
+                'm7M':    [0, 3, 7, 11],
+                '6add11': [0, 4, 7, 9, 17]
+            };
+
+            // Common barre shape templates (fret offsets from barre position)
+            // E-shape major: root on low E
+            var BARRE_TEMPLATES = {
+                'E_maj':  { base: [0,2,2,1,0,0], barre: true, rootStr: 0 },
+                'E_min':  { base: [0,2,2,0,0,0], barre: true, rootStr: 0 },
+                'E_7':    { base: [0,2,0,1,0,0], barre: true, rootStr: 0 },
+                'E_m7':   { base: [0,2,0,0,0,0], barre: true, rootStr: 0 },
+                'E_maj7': { base: [0,2,1,1,0,0], barre: true, rootStr: 0 },
+                'A_maj':  { base: [-1,0,2,2,2,0], barre: true, rootStr: 1 },
+                'A_min':  { base: [-1,0,2,2,1,0], barre: true, rootStr: 1 },
+                'A_7':    { base: [-1,0,2,0,2,0], barre: true, rootStr: 1 },
+                'A_m7':   { base: [-1,0,2,0,1,0], barre: true, rootStr: 1 },
+                'A_maj7': { base: [-1,0,2,1,2,0], barre: true, rootStr: 1 }
+            };
+
+            function parseChord(name) {
+                // Handle slash chords: "G/B" → root=G, quality='', bass=B
+                var bass = null;
+                // Find the LAST slash that's followed by a note name (handles D6/9/F#)
+                var lastSlashIdx = name.lastIndexOf('/');
+                if (lastSlashIdx > 0 && lastSlashIdx < name.length - 1) {
+                    var afterSlash = name.substring(lastSlashIdx + 1);
+                    var bassMatch = afterSlash.match(/^([A-G][#b]?)([^/]*)$/);
+                    if (bassMatch) {
+                        bass = bassMatch[1];
+                        name = name.substring(0, lastSlashIdx);
+                    }
+                }
+
+                // Handle German notation: H = B, Hm = Bm
+                if (name.charAt(0) === 'H') {
+                    name = 'B' + name.substring(1);
+                }
+                // Parse root note
+                var m = name.match(/^([A-G][#b]?)(.*)/);
+                if (!m) return null;
+                var root = m[1];
+                var quality = m[2];
+
+                // Normalize common aliases
+                // Strip parentheses: 7(b9) → 7b9, (add9) → add9, m(add9) → madd9
+                quality = quality.replace(/\(([^)]+)\)/g, '$1');
+                quality = quality.replace(/^major$/, 'maj')
+                                 .replace(/^minor$/, 'm')
+                                 .replace(/^mi$/, 'm')
+                                 .replace(/^\+$/, 'aug')
+                                 .replace(/^o$/, 'dim')
+                                 .replace(/^o7$/, 'dim7')
+                                 .replace(/^ø7?$/, 'm7b5')
+                                 .replace(/^half-dim7?$/, 'm7b5')
+                                 .replace(/^\+9$/, '7#9')
+                                 .replace(/^\+7$/, 'aug7')
+                                 .replace(/^Maj7$/, 'maj7')
+                                 .replace(/^Maj9$/, 'maj9')
+                                 .replace(/^Maj$/, 'maj')
+                                 .replace(/^M$/, '')
+                                 .replace(/^mmaj7$/, 'mM7')
+                                 .replace(/^mMaj7$/, 'mM7')
+                                 .replace(/^Dim$/, 'dim')
+                                 .replace(/^Min$/, 'm')
+                                 .replace(/^Min7$/, 'm7')
+                                 .replace(/^7sus$/, '7sus4')
+                                 .replace(/^sus$/, 'sus4')
+                                 .replace(/^9sus$/, '9sus4');
+                // Minus notation → flat: 7-5 → 7b5, 7-9 → 7b9, 7-13 → 7b13
+                quality = quality.replace(/-(\d)/g, 'b$1');
+                // addb13 → add+b13... fix: add-13 should become addb13
+                // Number-only: 2 → sus2, 4 → sus4 (guitar shorthand)
+                if (/^2$/.test(quality)) quality = 'sus2';
+                if (/^s4$/.test(quality)) quality = 'sus4';
+                if (/^4$/.test(quality)) quality = 'sus4';
+                if (/^3$/.test(quality)) quality = '';
+                // # after note name without quality = just root (Em# is unusual)
+                if (/^#$/.test(quality)) quality = '';
+                // Unicode: ° → dim, ∆ → maj7, º → dim
+                quality = quality.replace(/^[°º]7?$/, function(m) { return m.length > 1 ? 'dim7' : 'dim'; })
+                                 .replace(/^∆7?$/, 'maj7');
+                // 7m → m7 (misformatted)
+                if (/^7m$/.test(quality)) quality = 'm7';
+                // 5- → b5 (B5- = Bb5... actually power chord flat 5)
+                quality = quality.replace(/^5-$/, 'b5');
+                // +5 → aug
+                quality = quality.replace(/^\+5$/, 'aug');
+                // E- → Em (minus = minor in some notation)
+                if (quality === '-') quality = 'm';
+                // Compound: m7b5 written as m7(b5)
+                // Handle add chords with extra: 6add9, 6add4, m6add9 etc
+                // Handle compound modifiers: 7Msus2 → maj7 (approx), maj7sus2 → maj7
+                quality = quality.replace(/^7M$/, 'maj7')
+                                 .replace(/^7Msus2$/, 'maj7')
+                                 .replace(/^maj7sus2$/, 'maj7')
+                                 .replace(/^maj7sus$/, 'maj7');
+                // Bare b9 → 7b9 (from stripping parens on "(b9)")
+                if (/^b9$/.test(quality)) quality = '7b9';
+                if (/^b5$/.test(quality) && !QUALITY_MAP[quality]) quality = '7b5';
+                // 79 → 9 (from stripping parens on "7(9)")
+                if (/^79$/.test(quality)) quality = '9';
+                // m# → m (stray sharp after minor)
+                if (/^m#$/.test(quality)) quality = 'm';
+                // German H notation handled at root level
+
+                var rootSemi = NOTE_TO_SEMI[root];
+                if (rootSemi === undefined) return null;
+
+                return { root: root, rootSemi: rootSemi, quality: quality, bass: bass };
+            }
+
+            function getIntervals(quality) {
+                if (QUALITY_MAP[quality]) return QUALITY_MAP[quality];
+                // Try simplification chain
+                var simplify = [
+                    [/^m(\d+)$/, function(m) { return 'm' + m[1]; }],  // already tried
+                    [/^(\d+)$/, function(m) { return '' + m[1]; }],     // already tried
+                ];
+                return null;
+            }
+
+            function findVoicing(rootSemi, intervals, bassNote) {
+                // Convert intervals to pitch classes (mod 12)
+                var pitchClasses = intervals.map(function(i) { return (rootSemi + i) % 12; });
+
+                // For extended chords (9, 11, 13), we can omit the 5th
+                var required = pitchClasses.slice(); // all are desired
+                if (pitchClasses.length > 4) {
+                    // Can omit the 5th (index 2) for extended chords
+                    var essential = [pitchClasses[0], pitchClasses[1]]; // root, 3rd
+                    for (var i = 3; i < pitchClasses.length; i++) essential.push(pitchClasses[i]);
+                    pitchClasses = essential;
+                }
+
+                var best = null;
+                var bestScore = Infinity;
+
+                // Try positions from fret 0 to fret 9
+                for (var startFret = 0; startFret <= 9; startFret++) {
+                    var frets = [];
+                    var valid = true;
+                    var usedPCs = {};
+                    var maxFret = 0, minFret = 99;
+
+                    for (var s = 0; s < 6; s++) {
+                        var bestFret = -1;
+                        var bestPriority = -1;
+
+                        // For bass note, force it on the lowest available string
+                        if (bassNote !== null && s <= 1) {
+                            var bassSemi = NOTE_TO_SEMI[bassNote];
+                            if (bassSemi !== undefined) {
+                                var bf = (bassSemi - TUNING[s] + 12) % 12;
+                                if (bf === 0 && startFret === 0) bf = 0;
+                                else if (bf < startFret) bf += 12;
+                                if (bf <= startFret + 4) {
+                                    bestFret = bf;
+                                    bestPriority = 10;
+                                }
+                            }
+                        }
+
+                        if (bestPriority < 0) {
+                            // Try each fret in range
+                            for (var f = (startFret === 0 ? 0 : startFret); f <= startFret + 4; f++) {
+                                var pc = (TUNING[s] + f) % 12;
+                                var idx = pitchClasses.indexOf(pc);
+                                if (idx >= 0) {
+                                    // Priority: root=3, other chord tones=1
+                                    var pri = (pc === rootSemi) ? 3 : 1;
+                                    if (pri > bestPriority || (pri === bestPriority && f < bestFret)) {
+                                        bestFret = f;
+                                        bestPriority = pri;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (bestPriority > 0) {
+                            frets.push(bestFret);
+                            usedPCs[(TUNING[s] + bestFret) % 12] = true;
+                            if (bestFret > 0) {
+                                maxFret = Math.max(maxFret, bestFret);
+                                minFret = Math.min(minFret, bestFret);
+                            }
+                        } else {
+                            frets.push(-1); // muted
+                        }
+                    }
+
+                    // Check: root must be present, and enough chord tones
+                    if (!usedPCs[rootSemi]) continue;
+                    var coveredCount = 0;
+                    var essentialPCs = [pitchClasses[0]]; // root is essential
+                    if (pitchClasses.length >= 2) essentialPCs.push(pitchClasses[1]); // 3rd/2nd/4th
+                    if (pitchClasses.length >= 4) essentialPCs.push(pitchClasses[pitchClasses.length - 1]); // highest extension
+                    for (var e = 0; e < essentialPCs.length; e++) {
+                        if (usedPCs[essentialPCs[e]]) coveredCount++;
+                    }
+                    if (coveredCount < essentialPCs.length) continue;
+
+                    // Count muted strings
+                    var muted = frets.filter(function(f) { return f === -1; }).length;
+                    if (muted > 3) continue; // too many muted strings
+
+                    // Fret span
+                    var playedFrets = frets.filter(function(f) { return f > 0; });
+                    var span = playedFrets.length > 0 ? (Math.max.apply(null, playedFrets) - Math.min.apply(null, playedFrets)) : 0;
+                    if (span > 4) continue;
+
+                    // Score: prefer open chords, fewer muted strings, lower positions
+                    var score = startFret * 2 + muted * 3 + span * 1;
+                    // Bonus for bass note being root on lowest sounding string
+                    var lowestSounding = -1;
+                    for (var ls = 0; ls < 6; ls++) {
+                        if (frets[ls] >= 0) { lowestSounding = ls; break; }
+                    }
+                    if (lowestSounding >= 0 && (TUNING[lowestSounding] + frets[lowestSounding]) % 12 === rootSemi) {
+                        score -= 5; // bonus for root in bass
+                    }
+
+                    if (score < bestScore) {
+                        bestScore = score;
+                        best = { frets: frets.slice(), barres: [] };
+                    }
+                }
+
+                // Detect barres in the best voicing
+                if (best) {
+                    var fretCounts = {};
+                    best.frets.forEach(function(f) {
+                        if (f > 0) fretCounts[f] = (fretCounts[f] || 0) + 1;
+                    });
+                    Object.keys(fretCounts).forEach(function(f) {
+                        if (fretCounts[f] >= 2) {
+                            var fretNum = parseInt(f);
+                            // Check if it's the minimum fret (typical barre position)
+                            var minPlayed = Math.min.apply(null, best.frets.filter(function(x) { return x > 0; }));
+                            if (fretNum === minPlayed) {
+                                best.barres.push(fretNum);
+                            }
+                        }
+                    });
+                }
+
+                return best;
+            }
+
+            function barreTemplate(templateKey, rootSemi) {
+                var tmpl = BARRE_TEMPLATES[templateKey];
+                if (!tmpl) return null;
+                var openRoot = TUNING[tmpl.rootStr]; // semitone of open string for root
+                var offset = (rootSemi - openRoot + 12) % 12;
+                if (offset === 0) return null; // open chord, should be in CHORD_SHAPES
+
+                var frets = tmpl.base.map(function(f) {
+                    if (f < 0) return -1;
+                    return f + offset;
+                });
+                return { frets: frets, barres: [offset] };
+            }
+
+            // Simplification chain: try progressively simpler versions
+            function simplifyQuality(quality) {
+                var chain = {
+                    '7#9': '7', '7+9': '7', '7b9': '7', '7#5': '7', '7b5': '7',
+                    '7+5': '7', '7-5': '7', '7-9': '7', '7+': '7', '+7': '7',
+                    '7#5#9': '7#9', '7b5#9': '7#9', '7#5b9': '7b9', '7b5b9': '7b9',
+                    '7b13': '7', '7#11': '7', '7add11': '7', '7add13': '7',
+                    'aug7': '7', '9': '7', 'm9': 'm7', 'maj9': 'maj7', 'M9': 'maj7',
+                    '9#11': '9', '9b5': '9', '9sus4': '7sus4',
+                    '11': '9', 'm11': 'm9', '13': '9', 'm13': 'm9',
+                    'maj13': 'maj9', 'maj7#11': 'maj7', 'maj7b5': 'maj7',
+                    '6/9': '6', '6#11': '6', '6add9': '6', '6add4': '6',
+                    'add9': '', 'add2': '', 'add4': '', 'madd9': 'm', 'add11': '',
+                    '13sus4': '7sus4',
+                    '7sus4': 'sus4', '7sus2': 'sus2',
+                    'mmaj7': 'm7', 'mM7': 'm7', 'm+7': 'm7',
+                    'm7b5': 'm7', 'hdim7': 'm7', 'dim7': 'dim',
+                    'aug': '', 'dim': 'm', '-5': '', 'b5': '',
+                    'maj7': '', 'M7': '', 'ma7': '', '7M': '',
+                    'maj7b5': 'maj7', 'maj7#5': 'maj7',
+                    'maj7sus2': 'maj7', 'maj7sus': 'maj7', 'maj7sus4': 'maj7',
+                    'maj9#11': 'maj9',
+                    'm7add4': 'm7', 'm7add11': 'm7', '7add4': '7',
+                    'm6add9': 'm6', '6add9': '6', 'm6+11': 'm6',
+                    '6sus2': '6', '6sus4': '6',
+                    'madd11': 'm', 'maddb6': 'm', 'addb6': '',
+                    'add#11': '', 'add+11': '', 'add+9': 'add9', 'add13': '',
+                    '13b9': '13', '7m': 'm7', 'sus7': '7sus4',
+                    'add4add9': 'add9', 'addb13': '', 'add6': '6', 'madd6': 'm6',
+                    '6sus2b5': '6', 'madd4': 'm',
+                    'maj7add13': 'maj7', 'mmaj9': 'mM7', 'm7M': 'mM7',
+                    '6add11': '6',
+                    'm7': 'm', 'min7': 'm',
+                    '7': '', 'm6': 'm', '6': '',
+                    'sus2': '', 'sus4': '',
+                    'm': '', 'min': '', '5': '', 'm+5': 'm',
+                    'Maj': '', 'maj': '', 'o': 'dim', 'o7': 'dim7'
+                };
+                return chain[quality] !== undefined ? chain[quality] : null;
+            }
+
+            return {
+                generate: function(chordName) {
+                    var parsed = parseChord(chordName);
+                    if (!parsed) return null;
+
+                    var intervals = getIntervals(parsed.quality);
+                    if (!intervals) {
+                        // Try barre template approach for basic qualities
+                        var simpleQ = parsed.quality;
+                        while (simpleQ !== null && !getIntervals(simpleQ)) {
+                            simpleQ = simplifyQuality(simpleQ);
+                        }
+                        if (simpleQ !== null) intervals = getIntervals(simpleQ);
+                        if (!intervals) return null;
+                    }
+
+                    // First try algorithmic voicing
+                    var voicing = findVoicing(parsed.rootSemi, intervals, parsed.bass);
+                    if (voicing) return voicing;
+
+                    // Try barre templates for basic shapes
+                    var templateMap = { '': 'E_maj', 'm': 'E_min', '7': 'E_7', 'm7': 'E_m7', 'maj7': 'E_maj7' };
+                    var baseQ = parsed.quality;
+                    while (baseQ !== null) {
+                        if (templateMap[baseQ]) {
+                            var tmpl = barreTemplate(templateMap[baseQ], parsed.rootSemi);
+                            if (tmpl) return tmpl;
+                            // Try A-shape
+                            var aKey = templateMap[baseQ].replace('E_', 'A_');
+                            if (BARRE_TEMPLATES[aKey]) {
+                                tmpl = barreTemplate(aKey, parsed.rootSemi);
+                                if (tmpl) return tmpl;
+                            }
+                        }
+                        baseQ = simplifyQuality(baseQ);
+                    }
+
+                    return null;
+                },
+
+                // Get chord shape: check CHORD_SHAPES first, then generate
+                getShape: function(name) {
+                    if (CHORD_SHAPES[name]) return CHORD_SHAPES[name];
+
+                    // Normalize: E7+9 → E7#9 etc.
+                    var aliases = {};
+                    aliases[name.replace(/\+9/, '#9')] = true;
+                    aliases[name.replace(/#9/, '+9')] = true;
+                    aliases[name.replace(/\+/, 'aug')] = true;
+                    for (var a in aliases) {
+                        if (CHORD_SHAPES[a]) return CHORD_SHAPES[a];
+                    }
+
+                    var shape = this.generate(name);
+                    if (shape) {
+                        // Cache it for future lookups
+                        CHORD_SHAPES[name] = shape;
+                        return shape;
+                    }
+
+                    // Simplification fallback: Cmaj9 → Cmaj7 → C
+                    var parsed = parseChord(name);
+                    if (parsed) {
+                        var q = parsed.quality;
+                        while (q !== null) {
+                            q = simplifyQuality(q);
+                            if (q === null) break;
+                            var simplified = parsed.root + q;
+                            if (CHORD_SHAPES[simplified]) return CHORD_SHAPES[simplified];
+                            var gen = this.generate(simplified);
+                            if (gen) {
+                                CHORD_SHAPES[name] = gen; // cache under original name
+                                return gen;
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+
+        })();
+
+        // Helper to get chord shape from any source
+        function getChordShape(name) {
+            return CHORD_GENERATOR.getShape(name);
+        }
+
+        // Mini chord diagram for inline placement in lead-sheet bar cells.
+        // Renders just the SVG (no name label, that's already in the bar).
+        function renderMiniChordDiagram(name) {
+            var shape = getChordShape(name);
+            if (!shape) return '';
+            var frets = shape.frets, barres = shape.barres;
+            var w = 42, h = 44, top = 7, pad = 4;
+            var sx = pad, sw = w - pad * 2, sh = h - top - 3;
+            var dx = sw / 5, dy = sh / 4;
+            var minFret = 100, maxFret = 0;
+            frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
+            var offset = (minFret > 3 && maxFret > 4) ? minFret - 1 : 0;
+
+            var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">';
+            if (offset === 0) {
+                svg += '<rect x="' + (sx - 0.5) + '" y="' + (top - 1.5) + '" width="' + (sw + 1) + '" height="2" fill="#2a2a2a"/>';
+            } else {
+                svg += '<text x="' + (sx - 3) + '" y="' + (top + dy / 2 + 2) + '" fill="#888" font-size="6" text-anchor="end">' + (offset + 1) + '</text>';
+            }
+            for (var i = 0; i <= 4; i++) {
+                svg += '<line x1="' + sx + '" y1="' + (top + i * dy) + '" x2="' + (sx + sw) + '" y2="' + (top + i * dy) + '" stroke="#888" stroke-width="0.5"/>';
+            }
+            for (var s = 0; s < 6; s++) {
+                svg += '<line x1="' + (sx + s * dx) + '" y1="' + top + '" x2="' + (sx + s * dx) + '" y2="' + (top + 4 * dy) + '" stroke="#888" stroke-width="0.5"/>';
+            }
+            barres.forEach(function(b) {
+                var bf = b - offset;
+                if (bf >= 1 && bf <= 4) {
+                    var firstStr = 0, lastStr = 5;
+                    frets.forEach(function(f, si) { if (f === b) { firstStr = Math.min(firstStr, si); lastStr = Math.max(lastStr, si); }});
+                    svg += '<rect x="' + (sx + firstStr * dx - 1.5) + '" y="' + (top + (bf - 1) * dy + dy / 2 - 2) + '" width="' + ((lastStr - firstStr) * dx + 3) + '" height="4" rx="2" fill="#d46a3a"/>';
+                }
+            });
+            for (var s = 0; s < 6; s++) {
+                var f = frets[s];
+                if (f < 0) {
+                    svg += '<text x="' + (sx + s * dx) + '" y="' + (top - 2) + '" fill="#888" font-size="6" text-anchor="middle">×</text>';
+                } else if (f === 0) {
+                    svg += '<circle cx="' + (sx + s * dx) + '" cy="' + (top - 3.5) + '" r="1.8" fill="none" stroke="#333" stroke-width="0.8"/>';
+                } else {
+                    var fy = f - offset;
+                    if (fy >= 1 && fy <= 4) {
+                        svg += '<circle cx="' + (sx + s * dx) + '" cy="' + (top + (fy - 1) * dy + dy / 2) + '" r="2.5" fill="#d46a3a"/>';
+                    }
+                }
+            }
+            svg += '</svg>';
+            return svg;
+        }
+
         function renderChordDiagram(name, frets, barres) {
             var w = 60, h = 80, top = 16, pad = 8;
             var sx = pad, sw = w - pad * 2, sh = h - top - 4;
@@ -4758,7 +6133,7 @@
         function renderChordDiagrams(chords) {
             var html = '';
             chords.forEach(function(name) {
-                var shape = CHORD_SHAPES[name];
+                var shape = getChordShape(name);
                 if (shape) {
                     html += renderChordDiagram(name, shape.frets, shape.barres);
                 } else {
@@ -4971,11 +6346,14 @@
                             break;
                         }
                     }
-                    // Fall back to built-in CHORD_SHAPES
+                    // Fall back to built-in CHORD_SHAPES or generator
                     if (diagram) {
                         diagramHtml += renderUGDiagram(name, diagram);
-                    } else if (CHORD_SHAPES[name]) {
-                        diagramHtml += renderChordDiagram(name, CHORD_SHAPES[name].frets, CHORD_SHAPES[name].barres);
+                    } else {
+                        var ugFallback = getChordShape(name);
+                        if (ugFallback) {
+                            diagramHtml += renderChordDiagram(name, ugFallback.frets, ugFallback.barres);
+                        }
                     }
                 });
                 if (diagramHtml) {
@@ -5029,9 +6407,9 @@
             if (!chordChart) return;
             chordChart.classList.add("visible");
 
-            var html = "<div style="padding:1.5rem; font-family:Fira Code,monospace; font-size:0.9rem; line-height:1.8;">";
-            html += "<div style="font-family:Righteous,cursive; font-size:1.4rem; margin-bottom:0.25rem;">" + (data.title || "") + "</div>";
-            html += "<div style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.5rem;">" + (data.artist || "") + " &bull; Key: " + (data.key || "?") + " &bull; Source: " + (data.source || "AI") + "</div>";
+            var html = '<div style="padding:1.5rem; font-family:Fira Code,monospace; font-size:0.9rem; line-height:1.8;">';
+            html += '<div style="font-family:Righteous,cursive; font-size:1.4rem; margin-bottom:0.25rem;">' + (data.title || '') + '</div>';
+            html += '<div style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.5rem;">' + (data.artist || '') + ' &bull; Key: ' + (data.key || '?') + '</div>';
             
             // Parse the content field - replace [ch]X[/ch] with styled chord spans
             var raw = data.content || "";
@@ -5062,6 +6440,315 @@
             chordChart.innerHTML = html;
         }
 
+        /**
+         * Parse a chord-position string (e.g. "Am7      Cm7       Bm7") into
+         * an array of {name, charPos} objects.
+         */
+        function _parseChordsFromString(chordStr) {
+            if (!chordStr) return [];
+            var results = [];
+            // Match chord names and record their character position
+            var re = /([A-G][#b]?(?:m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?)/g;
+            var m;
+            while ((m = re.exec(chordStr)) !== null) {
+                results.push({ name: m[1], charPos: m.index });
+            }
+            return results;
+        }
+
+        /**
+         * Build slash notation for a line — three aligned layers:
+         *   1. Chord names above the beat where they start
+         *   2. Slashes for each beat, bar lines every N beats
+         *   3. Lyrics positioned under the beat they're sung on
+         *
+         * @param {Array} chordBeatsData - [{name, beats}] from API (preferred) or null
+         * @param {Array} parsedChords   - [{name, charPos}] fallback from chord string
+         * @param {number} lineWidth     - character width of chord/lyric strings
+         * @param {number} beatsPerBar   - beats per measure (default 4)
+         * @param {string} lyricText     - lyrics for this line (optional)
+         * @returns {{ chordRow: string, slashRow: string, lyricRow: string }}
+         */
+        function _buildSlashNotation(chordBeatsData, parsedChords, lineWidth, beatsPerBar, lyricText) {
+            beatsPerBar = beatsPerBar || 4;
+
+            // --- Determine beat counts per chord ---
+            var chordBeats = []; // [{name, beats}]
+
+            if (chordBeatsData && chordBeatsData.length > 0) {
+                // Use API-provided beat data (accurate)
+                chordBeats = chordBeatsData.map(function(cb) {
+                    return { name: cb.name, beats: cb.beats || 1 };
+                });
+            } else if (parsedChords && parsedChords.length > 0) {
+                // Fallback: estimate from character spacing using proportional distribution
+                var spans = [];
+                var totalSpan = 0;
+                for (var i = 0; i < parsedChords.length; i++) {
+                    var startPos = parsedChords[i].charPos;
+                    var endPos = (i + 1 < parsedChords.length) ? parsedChords[i + 1].charPos : lineWidth;
+                    var span = Math.max(1, endPos - startPos);
+                    spans.push(span);
+                    totalSpan += span;
+                }
+
+                // Estimate total beats (~5 chars per beat), quantize to bar boundaries
+                var rawTotal = Math.max(parsedChords.length, Math.round(totalSpan / 5));
+                var quantized = Math.max(beatsPerBar, Math.round(rawTotal / beatsPerBar) * beatsPerBar);
+                quantized = Math.min(quantized, 32); // max 8 bars per line
+
+                // Largest-remainder method for accurate proportional beat distribution
+                var rawBeats = [];
+                var fractional = [];
+                var assigned = 0;
+                for (var i = 0; i < spans.length; i++) {
+                    var ideal = (spans[i] / totalSpan) * quantized;
+                    var floored = Math.max(1, Math.floor(ideal));
+                    rawBeats.push({ name: parsedChords[i].name, beats: floored });
+                    fractional.push({ idx: i, remainder: ideal - floored });
+                    assigned += floored;
+                }
+                // Distribute remaining beats to chords with largest fractional remainders
+                fractional.sort(function(a, b) { return b.remainder - a.remainder; });
+                var remaining = quantized - assigned;
+                for (var r = 0; r < remaining && r < fractional.length; r++) {
+                    rawBeats[fractional[r].idx].beats++;
+                }
+                chordBeats = rawBeats;
+            }
+
+            if (chordBeats.length === 0) {
+                return { chordRow: '', slashRow: '', lyricRow: '' };
+            }
+
+            // --- Compute cell width (each beat is one cell) ---
+            var maxChordLen = 0;
+            chordBeats.forEach(function(c) { if (c.name.length > maxChordLen) maxChordLen = c.name.length; });
+            var cellWidth = Math.max(6, maxChordLen + 2);
+
+            // --- Build beat-by-beat arrays ---
+            var totalBeatCount = 0;
+            var beatChordLabel = []; // chord name at each beat position ('' if continuation)
+            var beatPositions = [];  // character position of each beat in the output
+
+            for (var ci = 0; ci < chordBeats.length; ci++) {
+                for (var b = 0; b < chordBeats[ci].beats; b++) {
+                    beatChordLabel.push(b === 0 ? chordBeats[ci].name : '');
+                    totalBeatCount++;
+                }
+            }
+
+            // --- Render chord row and slash row ---
+            var chordRow = '';
+            var slashRow = '';
+            var beatInBar = 0;
+            var charPos = 0;
+
+            // Opening bar line
+            slashRow += '| ';
+            chordRow += '  ';
+            charPos += 2;
+
+            for (var bi = 0; bi < totalBeatCount; bi++) {
+                beatPositions.push(charPos);
+
+                // Chord name or spaces
+                var label = beatChordLabel[bi];
+                if (label) {
+                    chordRow += label;
+                    for (var p = label.length; p < cellWidth; p++) chordRow += ' ';
+                } else {
+                    for (var p2 = 0; p2 < cellWidth; p2++) chordRow += ' ';
+                }
+
+                // Slash
+                slashRow += '/';
+                for (var p3 = 1; p3 < cellWidth; p3++) slashRow += ' ';
+
+                charPos += cellWidth;
+                beatInBar++;
+                if (beatInBar >= beatsPerBar) {
+                    slashRow += '| ';
+                    chordRow += '  ';
+                    charPos += 2;
+                    beatInBar = 0;
+                }
+            }
+
+            // Close if we didn't end on a bar line
+            if (beatInBar > 0) {
+                slashRow += '|';
+                chordRow += ' ';
+                charPos += 1;
+            }
+
+            // --- Build lyric row aligned to beats ---
+            var lyricRow = '';
+            if (lyricText && lyricText.trim()) {
+                var words = lyricText.trim().split(/\s+/);
+                var totalRowWidth = charPos;
+
+                // Distribute words across beats proportionally
+                // Words map to beats based on their fractional position in the lyric string
+                var lyricLen = lyricText.trim().length;
+                var wordPositions = []; // {word, charPosInLyric}
+                var wpos = 0;
+                for (var wi = 0; wi < words.length; wi++) {
+                    wordPositions.push({ word: words[wi], pos: wpos });
+                    wpos += words[wi].length + 1;
+                }
+
+                // Map each word to its target beat position
+                var lyricChars = [];
+                for (var lc = 0; lc < totalRowWidth; lc++) lyricChars.push(' ');
+
+                for (var wi2 = 0; wi2 < wordPositions.length; wi2++) {
+                    var frac = lyricLen > 0 ? wordPositions[wi2].pos / lyricLen : 0;
+                    // Map fraction to beat index
+                    var targetBeat = Math.min(Math.floor(frac * totalBeatCount), totalBeatCount - 1);
+                    targetBeat = Math.max(0, targetBeat);
+                    var targetCharPos = beatPositions[targetBeat] || 0;
+
+                    // Write word at target position, avoiding overlap
+                    var word = wordPositions[wi2].word;
+                    // Find first available position at or after targetCharPos
+                    while (targetCharPos < totalRowWidth && targetCharPos > 0 &&
+                           lyricChars[targetCharPos - 1] !== ' ') {
+                        targetCharPos++;
+                    }
+                    for (var wc = 0; wc < word.length && targetCharPos + wc < totalRowWidth; wc++) {
+                        lyricChars[targetCharPos + wc] = word.charAt(wc);
+                    }
+                }
+
+                lyricRow = lyricChars.join('').replace(/\s+$/, '');
+            }
+
+            return { chordRow: chordRow, slashRow: slashRow, lyricRow: lyricRow };
+        }
+
+        // Chart view preference ('leadsheet' or 'practice') — defaults to leadsheet
+        // Only one chart view now (lead sheet). Legacy localStorage values are ignored.
+        var chartViewMode = (function() {
+            try { return 'leadsheet'; }
+            catch (e) { return 'leadsheet'; }
+        })();
+
+        function setChartView(mode) {
+            chartViewMode = mode;
+            try { localStorage.setItem('chartViewMode', mode); } catch (e) {}
+            if (currentManualChart) renderManualChordChart(currentManualChart);
+        }
+
+        // ─── Lead Sheet renderer (classic music-publishing style) ───
+        function renderLeadSheet(data) {
+            var html = '<div class="lead-sheet">';
+
+            // Header — 3-column layout like classical sheet music (credits | title | metadata)
+            html += '<div class="lead-sheet-header">';
+            html += '<div class="lead-sheet-header-left"></div>';
+            html += '<div class="lead-sheet-header-center">';
+            html += '<div class="lead-sheet-title">' + (data.title || 'Untitled') + '</div>';
+            html += '<div class="lead-sheet-artist">' + (data.artist || '') + '</div>';
+            html += '</div>';
+            html += '<div class="lead-sheet-meta">';
+            if (data.key) html += 'Key of ' + data.key + '<br>';
+            if (data.capo) html += 'Capo ' + data.capo + '<br>';
+            html += '<div class="no-print" style="margin-top:0.7rem; display:flex; gap:0.4rem; justify-content:flex-end; font-style:normal;">';
+            html += '<button onclick="toggleManualChordEdit()" style="padding:0.35rem 0.8rem; background:#2a2a35; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;" id="manualEditBtn">' + (manualChordEditMode ? 'Done' : 'Edit') + '</button>';
+            html += '<button onclick="window.print()" style="padding:0.35rem 0.8rem; background:#2a2a35; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;">Print</button>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // Sections
+            data.sections.forEach(function(section, si) {
+                html += '<div class="ls-section">';
+                var sectionLabel = section.name;
+                if (section.repeat && section.repeat > 1) sectionLabel += '  (x' + section.repeat + ')';
+                html += '<div class="ls-section-label">' + sectionLabel + '</div>';
+
+                section.lines.forEach(function(line, li) {
+                    // PREFERRED PATH: line.segments contains per-chord timing + words.
+                    // Inline layout: each chord sits directly above the words sung under it.
+                    if (line.segments && line.segments.length > 0) {
+                        var hasWords = line.segments.some(function(s) { return (s.words || []).length > 0; });
+                        html += '<div class="ls-line cs-line">';
+                        line.segments.forEach(function(seg) {
+                            var chordName = transposeChordName(seg.chord, transposeAmount);
+                            var t0 = (typeof seg.start === 'number') ? seg.start : '';
+                            var t1 = (typeof seg.end   === 'number') ? seg.end   : '';
+                            html += '<span class="cs-seg" data-start="' + t0 + '" data-end="' + t1 + '">';
+                            html += '<span class="cs-chord">' + chordName + '</span>';
+                            var segWordObjs = seg.words || [];
+                            if (segWordObjs.length > 0) {
+                                html += '<span class="cs-words">';
+                                segWordObjs.forEach(function(w, wi) {
+                                    var wt = (typeof w.t === 'number') ? w.t : '';
+                                    // Word-end falls back to the next word's start, or the segment end.
+                                    var next = segWordObjs[wi + 1];
+                                    var we = (next && typeof next.t === 'number') ? next.t
+                                           : ((typeof t1 === 'number') ? t1 : '');
+                                    html += '<span class="cs-word" data-wstart="' + wt + '" data-wend="' + we + '">'
+                                          + w.w + '</span>';
+                                    if (wi < segWordObjs.length - 1) html += ' ';
+                                });
+                                html += '</span>';
+                            } else if (!hasWords) {
+                                html += '<span class="cs-words cs-instr">&#8203;</span>';
+                            } else {
+                                html += '<span class="cs-words">&nbsp;</span>';
+                            }
+                            html += '</span>';
+                        });
+                        if (line.notes) {
+                            html += '<span class="cs-note">(' + line.notes + ')</span>';
+                        }
+                        html += '</div>';
+                        return;
+                    }
+
+                    // FALLBACK PATH: old-format charts without per-chord word timing.
+                    // Split the lyric evenly across chords as a best-effort approximation.
+                    // Section- or line-level `bars_per_chord` stretches each chord cell
+                    // proportionally so chorus chords (held 2 bars) read visibly longer
+                    // than verse chords (held 1 bar).
+                    var parsedChords = _parseChordsFromString(line.chords);
+                    var barsPerChord = Math.max(1, Math.min(8,
+                        parseInt(line.bars_per_chord, 10) ||
+                        parseInt(section.bars_per_chord, 10) || 1));
+                    if (parsedChords.length > 0) {
+                        var lyricWords = (line.lyrics || '').trim().split(/\s+/).filter(Boolean);
+                        var chunkSize = lyricWords.length && parsedChords.length
+                            ? Math.ceil(lyricWords.length / parsedChords.length)
+                            : 0;
+                        html += '<div class="ls-line cs-line">';
+                        parsedChords.forEach(function(c, idx) {
+                            var chordName = transposeChordName(c.name, transposeAmount);
+                            var chunk = chunkSize
+                                ? lyricWords.slice(idx * chunkSize, (idx + 1) * chunkSize).join(' ')
+                                : '';
+                            html += '<span class="cs-seg">';
+                            html += '<span class="cs-chord">' + chordName + '</span>';
+                            html += '<span class="cs-words">' + (chunk || '&#8203;') + '</span>';
+                            html += '</span>';
+                        });
+                        if (line.notes) {
+                            html += '<span class="cs-note">(' + line.notes + ')</span>';
+                        }
+                        html += '</div>';
+                    } else if (line.lyrics) {
+                        html += '<div class="ls-line"><div class="cs-plain">' + line.lyrics + '</div></div>';
+                    }
+                });
+
+                html += '</div>';
+            });
+
+            html += '</div>';
+            return html;
+        }
+
         function renderManualChordChart(data) {
             var chordChart = document.getElementById('chordChart');
             if (!chordChart || !data || !data.sections) return;
@@ -5069,65 +6756,134 @@
 
             currentManualChart = data;
 
-            var html = '<div style="padding:1.5rem; font-family:\'Fira Code\',monospace; font-size:0.9rem; line-height:1.6;">';
-            html += '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">';
+            // Route to the lead-sheet renderer when preferred
+            if (chartViewMode === 'leadsheet') {
+                chordChart.innerHTML = renderLeadSheet(data);
+                return;
+            }
+
+            var beatsPerBar = 4; // default 4/4 time
+
+            var html = '<div class="gig-chart">';
+
+            // Header
+            html += '<div class="gig-chart-header">';
             html += '<div>';
-            html += '<div style="font-family:Righteous,cursive; font-size:1.4rem; margin-bottom:0.25rem;">' + (data.title || '') + '</div>';
-            html += '<div style="color:var(--text-dim); font-size:0.85rem;">' + (data.artist || '') + '</div>';
+            html += '<div class="gig-chart-title">' + (data.title || 'Untitled') + '</div>';
+            html += '<div class="gig-chart-artist">' + (data.artist || '') + '</div>';
             html += '</div>';
-            html += '<button onclick="toggleManualChordEdit()" style="padding:0.4rem 0.8rem; background:var(--orange); color:#000; border:none; border-radius:6px; cursor:pointer; font-family:inherit; font-size:0.85rem;" id="manualEditBtn">' + (manualChordEditMode ? 'Done Editing' : 'Edit Chords') + '</button>';
+            html += '<div class="gig-chart-meta">';
+            if (data.key) html += 'Key: ' + data.key + '<br>';
+            if (data.capo) html += 'Capo: ' + data.capo + '<br>';
+            // View toggle + Edit + Print buttons
+            html += '<div class="no-print" style="margin-top:0.5rem; display:flex; gap:0.4rem; justify-content:flex-end; align-items:center;">';
+            html += '<button onclick="toggleManualChordEdit()" style="padding:0.3rem 0.7rem; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;" id="manualEditBtn">' + (manualChordEditMode ? 'Done Editing' : 'Edit Chords') + '</button>';
+            html += '<button onclick="window.print()" style="padding:0.3rem 0.7rem; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;">Print / PDF</button>';
+            html += '</div>';
+            html += '</div>';
             html += '</div>';
 
+            // Sections
             data.sections.forEach(function(section, si) {
-                html += '<div class="chord-section-name" style="margin-top:1.5rem; margin-bottom:0.25rem; color:var(--orange); font-weight:600;">[' + section.name + ']</div>';
+                html += '<div class="gig-section">';
+                html += '<div class="gig-section-label">[' + section.name + ']</div>';
+
                 section.lines.forEach(function(line, li) {
-                    if (line.chords) {
-                        html += '<div class="chord-lyric-line">';
+                    var parsedChords = _parseChordsFromString(line.chords);
+                    var lineWidth = Math.max((line.chords || '').length, (line.lyrics || '').length, 40);
+                    var chordBeatsData = line.chord_beats || null;
+
+                    if (parsedChords.length > 0 || (chordBeatsData && chordBeatsData.length > 0)) {
+                        var notation = _buildSlashNotation(chordBeatsData, parsedChords, lineWidth, beatsPerBar, line.lyrics || '');
+
+                        html += '<div class="gig-line-group">';
+
+                        // Layer 1: Chord names
                         if (manualChordEditMode) {
-                            html += '<div class="chord-line ug-chord-edit" style="color:var(--yellow); white-space:pre; cursor:pointer;" onclick="editManualChord(' + si + ',' + li + ',' + JSON.stringify(line.chords).replace(/"/g, '&quot;') + ')" title="Click to edit chords">' + line.chords.replace(/ /g, '\u00A0') + '</div>';
-                            html += '<div class="lyric-line" style="cursor:pointer;" onclick="editManualLyric(' + si + ',' + li + ',' + JSON.stringify(line.lyrics || '').replace(/"/g, '&quot;') + ')" title="Click to edit lyrics">' + (line.lyrics || '\u00A0') + '</div>';
+                            html += '<div class="gig-chord-row" style="cursor:pointer; text-decoration:underline dotted #aaa;" onclick="editManualChord(' + si + ',' + li + ',' + JSON.stringify(line.chords).replace(/"/g, '&quot;') + ')" title="Click to edit chords">' + notation.chordRow + '</div>';
                         } else {
-                            html += '<div class="chord-line" style="color:var(--yellow); white-space:pre;">' + line.chords.replace(/ /g, '\u00A0') + '</div>';
-                            if (line.lyrics) {
-                                html += '<div class="lyric-line">' + line.lyrics + '</div>';
-                            }
+                            html += '<div class="gig-chord-row">' + notation.chordRow + '</div>';
                         }
+
+                        // Layer 2: Slash notation with bar lines
+                        html += '<div class="gig-slash-row">' + notation.slashRow + '</div>';
+
+                        // Layer 3: Lyrics (beat-aligned from notation, or raw fallback)
+                        if (line.lyrics) {
+                            var lyricContent = notation.lyricRow || ('  ' + line.lyrics);
+                            // Append repeat/notes indicator if present
+                            if (line.notes) lyricContent += '  (' + line.notes + ')';
+                            if (manualChordEditMode) {
+                                html += '<div class="gig-lyric-row" style="cursor:pointer; text-decoration:underline dotted #aaa;" onclick="editManualLyric(' + si + ',' + li + ',' + JSON.stringify(line.lyrics).replace(/"/g, '&quot;') + ')" title="Click to edit lyrics">' + lyricContent + '</div>';
+                            } else {
+                                html += '<div class="gig-lyric-row">' + lyricContent + '</div>';
+                            }
+                        } else if (line.notes) {
+                            // No lyrics but has repeat indicator
+                            html += '<div class="gig-lyric-row">  (' + line.notes + ')</div>';
+                        }
+
                         html += '</div>';
                     } else if (line.lyrics) {
+                        // Lyrics-only line (no chords)
+                        html += '<div class="gig-line-group">';
                         if (manualChordEditMode) {
-                            html += '<div class="lyric-line" style="cursor:pointer;" onclick="editManualLyric(' + si + ',' + li + ',' + JSON.stringify(line.lyrics).replace(/"/g, '&quot;') + ')" title="Click to edit">' + line.lyrics + '</div>';
+                            html += '<div class="gig-lyric-row" style="cursor:pointer; text-decoration:underline dotted #aaa;" onclick="editManualLyric(' + si + ',' + li + ',' + JSON.stringify(line.lyrics).replace(/"/g, '&quot;') + ')" title="Click to edit">' + line.lyrics + '</div>';
                         } else {
-                            html += '<div class="lyric-line">' + line.lyrics + '</div>';
+                            html += '<div class="gig-lyric-row">' + line.lyrics + '</div>';
                         }
+                        html += '</div>';
                     }
                 });
+
+                html += '</div>';
             });
 
             html += '</div>';
             chordChart.innerHTML = html;
 
-            // Show chord diagrams
-            var uniqueChords = {};
+            // Show chord diagrams — extract full chord names including 7#9, sus4, maj7, etc.
+            var chordCounts = {};
             data.sections.forEach(function(s) {
                 s.lines.forEach(function(l) {
                     if (l.chords) {
-                        l.chords.match(/[A-G][#b]?m?\d?/g)?.forEach(function(c) { uniqueChords[c] = true; });
+                        var matches = l.chords.match(/[A-G][#b]?(?:m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?/g);
+                        if (matches) {
+                            matches.forEach(function(c) {
+                                c = c.trim();
+                                if (c && c !== 'N.C.' && c !== 'N.C') {
+                                    chordCounts[c] = (chordCounts[c] || 0) + 1;
+                                }
+                            });
+                        }
                     }
                 });
             });
+            var sortedChords = Object.keys(chordCounts).sort(function(a, b) { return chordCounts[b] - chordCounts[a]; });
+            var topChords = sortedChords.slice(0, 10);
             var diagramHtml = '';
-            Object.keys(uniqueChords).forEach(function(name) {
-                if (CHORD_SHAPES[name]) {
-                    diagramHtml += renderChordDiagram(name, CHORD_SHAPES[name].frets, CHORD_SHAPES[name].barres);
+            topChords.forEach(function(name) {
+                var mcShape = getChordShape(name);
+                if (mcShape) {
+                    diagramHtml += renderChordDiagram(name, mcShape.frets, mcShape.barres);
                 }
             });
             if (diagramHtml) {
-                chordChart.innerHTML = '<div class="chord-diagrams-row" style="display:flex; flex-wrap:wrap; gap:0; margin-bottom:0; padding:0.75rem; background:var(--bg-dark); border-radius:8px; border:1px solid var(--border);">' + diagramHtml + '</div>' + chordChart.innerHTML;
+                chordChart.innerHTML = '<div class="chord-diagrams-row" style="display:flex; flex-wrap:wrap; gap:0; margin-bottom:0; padding:0.75rem; background:#eee; border-radius:8px; border:1px solid #ddd;">' + diagramHtml + '</div>' + chordChart.innerHTML;
             }
         }
 
         function renderChordChart(data) {
             var chordChart = document.getElementById('chordChart');
+
+            // === NUCLEAR FIX: chord library always wins ===
+            if (_chordLibraryLocked && currentManualChart) {
+                console.log('Nuclear fix: chord library locked, using library instead of Songsterr/AI chords');
+                renderManualChordChart(currentManualChart);
+                return;
+            }
+            // === END NUCLEAR FIX ===
+
             if (!data || !data.measures) {
                 // No Songsterr data — fall through to AI chords if available
                 if (currentJob && currentJob.chord_progression && currentJob.chord_progression.length > 0) {
@@ -5679,18 +7435,25 @@
                     return;
                 }
 
-                // Auto-load: only if the top result is a reasonable match
+                // Auto-load: ONLY if we have both an artist from the upload AND
+                // that artist actually matches the Songsterr result. Title-only matching
+                // is too dangerous — "Alright" happily matches "The Kids Aren't Alright".
+                // File uploads without ID3 artist tags get no auto-load; user can still
+                // manually pick a track from the search results list below.
                 if (autoLoad && data.results.length > 0) {
                     var best = data.results[0];
 
-                    // Step 1: Artist validation — if we extracted an artist from the query,
-                    // the Songsterr result's artist must fuzzy-match it
-                    if (queryArtist && !artistFuzzyMatch(queryArtist, best.artist)) {
-                        console.log('Songsterr artist mismatch: query artist "' + queryArtist + '" vs result artist "' + best.artist + '", skipping auto-load');
+                    if (!queryArtist) {
+                        console.log('Songsterr auto-load skipped: no artist on upload — use manual search if you want Songsterr tabs');
+                        return false;
+                    }
+                    if (!artistFuzzyMatch(queryArtist, best.artist)) {
+                        console.log('Songsterr auto-load skipped: artist mismatch ("' + queryArtist + '" vs "' + best.artist + '")');
                         return false;
                     }
 
-                    // Step 2: Word-level match validation
+                    // Artist matched — still require a reasonable title word overlap to guard
+                    // against fuzzy-artist false positives (e.g. a cover band).
                     var stopWords = ['the','a','an','and','or','for','from','with','this','that','its','are','was','has','have',
                         'official','video','audio','remaster','remastered','mix','hd','hq','4k',
                         'live','version','full','feat','featuring',
@@ -5701,9 +7464,32 @@
                     var matchCount = 0;
                     queryWords.forEach(function(w) { if (resultText.indexOf(w) >= 0) matchCount++; });
                     var matchRatio = queryWords.length > 0 ? matchCount / queryWords.length : 0;
-                    // Require at least 60% of meaningful words to match
                     if (matchRatio >= 0.6) {
-                        await loadSongsterrTabs(best.songId, -1, null, best.title, best.artist);
+                        // Auto-select guitar track if available, not vocals
+                        var autoTrackIndex = -1;
+                        if (best.tracks && best.tracks.length > 0) {
+                            // Prefer: lead guitar > rhythm guitar > guitar > any non-vocal
+                            var guitarPriority = ['lead guitar', 'rhythm guitar', 'guitar', 'distortion guitar', 'clean guitar', 'acoustic guitar'];
+                            for (var gp = 0; gp < guitarPriority.length; gp++) {
+                                for (var ti = 0; ti < best.tracks.length; ti++) {
+                                    var tname = (best.tracks[ti].name || best.tracks[ti].instrument || '').toLowerCase();
+                                    if (tname.indexOf(guitarPriority[gp]) >= 0) { autoTrackIndex = ti; break; }
+                                }
+                                if (autoTrackIndex >= 0) break;
+                            }
+                            // Fallback: first guitar or bass track (not just any non-vocal)
+                            if (autoTrackIndex < 0) {
+                                for (var ti2 = 0; ti2 < best.tracks.length; ti2++) {
+                                    var tn2 = (best.tracks[ti2].name || best.tracks[ti2].instrument || '').toLowerCase();
+                                    if (tn2.indexOf('guitar') >= 0 || tn2.indexOf('bass') >= 0) { autoTrackIndex = ti2; break; }
+                                }
+                            }
+                            // Last resort: first track (if song has no guitar/bass at all)
+                            if (autoTrackIndex < 0 && best.tracks.length > 0) {
+                                autoTrackIndex = 0;
+                            }
+                        }
+                        await loadSongsterrTabs(best.songId, autoTrackIndex, null, best.title, best.artist);
                         return true;
                     } else {
                         console.log('Songsterr top result "' + best.artist + ' - ' + best.title + '" doesn\'t match query "' + query + '" (match: ' + Math.round(matchRatio*100) + '%), skipping auto-load');
@@ -5712,16 +7498,26 @@
                 }
 
                 results.innerHTML = data.results.map(function(song) {
-                    // Find most popular track
-                    var bestTrack = 0;
+                    // Filter to guitar/bass tracks only
+                    var tabTracks = song.tracks.filter(function(t) {
+                        return isTabInstrument(t.instrument || t.name || '');
+                    });
+                    // Fallback if no guitar/bass found
+                    if (tabTracks.length === 0 && song.tracks.length > 0) tabTracks = [song.tracks[0]];
+
+                    // Find most popular among filtered tracks
+                    var bestTrackIdx = tabTracks.length > 0 ? tabTracks[0].index || 0 : 0;
                     var bestViews = 0;
-                    song.tracks.forEach(function(t, i) {
-                        if (t.views > bestViews) { bestViews = t.views; bestTrack = i; }
+                    tabTracks.forEach(function(t) {
+                        var idx = song.tracks.indexOf(t);
+                        if (t.views > bestViews) { bestViews = t.views; bestTrackIdx = idx; }
                     });
 
-                    var trackList = song.tracks.map(function(t, i) {
-                        var isBest = (i === bestTrack);
-                        var icon = t.instrument.indexOf('Bass') >= 0 ? '<img src="icons/custom/32/bass-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;">' : t.instrument.indexOf('Drum') >= 0 ? '<img src="icons/custom/32/drums-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;">' : '♫';
+                    var trackList = tabTracks.map(function(t) {
+                        var i = song.tracks.indexOf(t);
+                        var isBest = (i === bestTrackIdx);
+                        var instLower = (t.instrument || t.name || '').toLowerCase();
+                        var icon = instLower.indexOf('bass') >= 0 ? '<img src="icons/custom/32/bass-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;">' : '<img src="icons/custom/32/guitar-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;">';
                         var label = t.name || t.instrument;
                         return '<button onclick="loadSongsterrTabs(' + song.songId + ',' + i + ',this)" ' +
                             'style="padding:0.35rem 0.7rem; margin:0.15rem; background:' + (isBest ? 'var(--orange)' : 'var(--bg-dark)') + '; ' +
@@ -5734,11 +7530,6 @@
                     return '<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:0.75rem; margin-bottom:0.5rem;">' +
                         '<div style="font-weight:600; font-size:0.95rem;">' + song.artist + ' — ' + song.title + '</div>' +
                         '<div style="margin-top:0.4rem; display:flex; flex-wrap:wrap; gap:0;">' + trackList + '</div>' +
-                        '<div style="margin-top:0.4rem;">' +
-                            '<button onclick="loadSongsterrTabs(' + song.songId + ',-1,this)" ' +
-                                'style="padding:0.25rem 0.6rem; background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--text-dim); cursor:pointer; font-size:0.75rem; font-family:inherit;">' +
-                                'Load All Tracks</button>' +
-                        '</div>' +
                     '</div>';
                 }).join('');
 
@@ -5764,6 +7555,8 @@
             currentSongsterrId = songId;
             currentChordData = null;
             currentUGData = null;
+            currentManualChart = null;
+            _chordLibraryLocked = false;
 
             // Show view toggle
             var toggle = document.getElementById('viewToggle');
@@ -5809,9 +7602,14 @@
             } catch (err) {
                 var loErr = document.getElementById('loadingOverlay');
                 if (loErr) loErr.classList.add('hidden');
-                var emptyStateErr = document.getElementById('emptyState');
-                if (emptyStateErr) emptyStateErr.style.display = '';
-                showToast('Failed to load tabs: ' + err.message);
+                // Only show empty state if no job is loaded; otherwise fall back to chord chart
+                if (!currentJob) {
+                    var emptyStateErr = document.getElementById('emptyState');
+                    if (emptyStateErr) emptyStateErr.style.display = '';
+                } else {
+                    showToast('Tabs unavailable — showing chords instead.');
+                    switchView('chords');
+                }
                 console.error('Songsterr load failed:', err);
             }
         }
@@ -5923,31 +7721,45 @@
             currentRenderer = 'html-tab';
         }
 
+        // Returns true if an instrument name is guitar or bass (tab-worthy)
+        function isTabInstrument(name) {
+            var n = (name || '').toLowerCase();
+            return n.indexOf('guitar') >= 0 || n.indexOf('bass') >= 0;
+        }
+
         function buildSongsterrTrackTabs(songId, activeTrackIdx) {
             var container = document.getElementById('stemTabs');
             if (!container) return;
             container.innerHTML = '';
             var instrumentIcons = {
                 'guitar': '<img src="icons/custom/32/guitar-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'bass': '<img src="icons/custom/32/bass-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'drums': '<img src="icons/custom/32/drums-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'piano': '<img src="icons/custom/32/piano-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'keyboard': '<img src="icons/custom/32/piano-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'vocals': '<img src="icons/custom/32/vocals-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'voice': '<img src="icons/custom/32/vocals-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'organ': '<img src="icons/custom/32/piano-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'violin': '<img src="icons/custom/32/other-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'cello': '<img src="icons/custom/32/other-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'strings': '<img src="icons/custom/32/other-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">',
-                'synth': '<img src="icons/custom/32/piano-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">'
+                'bass': '<img src="icons/custom/32/bass-vintage.png" width="16" height="16" style="vertical-align:middle;border-radius:2px">'
             };
 
-            songsterrTracks.forEach(function(track) {
+            // Filter to only guitar and bass tracks — per spec, non-guitar instruments
+            // should NOT be shown as guitar tablature
+            var tabTracks = songsterrTracks.filter(function(track) {
+                var instName = (track.instrument || track.name || '').toLowerCase();
+                return isTabInstrument(instName);
+            });
+
+            // Fallback: if filtering removed everything, show first track
+            if (tabTracks.length === 0 && songsterrTracks.length > 0) {
+                console.warn('[Songsterr] No guitar/bass tracks found — showing first track as fallback');
+                tabTracks = [songsterrTracks[0]];
+            }
+
+            var filteredCount = songsterrTracks.length - tabTracks.length;
+            if (filteredCount > 0) {
+                console.log('[Songsterr] Filtered out ' + filteredCount + ' non-guitar/bass tracks (vocals, piano, drums, sax, etc.)');
+            }
+
+            tabTracks.forEach(function(track) {
                 var btn = document.createElement('button');
-                var isActive = (track.index === activeTrackIdx) || (activeTrackIdx < 0 && track.index === 0);
+                var isActive = (track.index === activeTrackIdx) || (activeTrackIdx < 0 && tabTracks.indexOf(track) === 0);
                 btn.className = 'stem-tab' + (isActive ? ' active' : '');
                 var instLower = (track.instrument || track.name || '').toLowerCase();
-                var icon = '♫';
+                var icon = '&#9835;';
                 for (var key in instrumentIcons) {
                     if (instLower.indexOf(key) >= 0) { icon = instrumentIcons[key]; break; }
                 }

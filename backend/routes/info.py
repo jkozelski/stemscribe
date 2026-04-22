@@ -47,11 +47,19 @@ def get_track_info(job_id):
 
         logger.info(f"Fetching track info for job {job_id}: {track_name} by {artist}")
 
-        info = fetch_track_info(
-            track_name=track_name,
-            artist=artist,
-            source_url=job.source_url
-        )
+        # Use embedded track_info from metadata if available (e.g. demo songs)
+        embedded = job.metadata.get('track_info')
+        if embedded:
+            logger.info(f"Using embedded track info for {job_id}")
+            info = dict(embedded)
+            info.setdefault('artist', artist)
+            info.setdefault('track', track_name)
+        else:
+            info = fetch_track_info(
+                track_name=track_name,
+                artist=artist,
+                source_url=job.source_url
+            )
 
         # Enrich with job metadata not available from track_info lookup
         if not info.get('thumbnail'):
@@ -63,10 +71,11 @@ def get_track_info(job_id):
             info['album'] = job.metadata['album']
         info['source_url'] = job.metadata.get('webpage_url') or job.source_url or ''
 
-        # Add instrument-specific tips for each stem
-        info['stem_tips'] = {}
-        for stem_name in job.stems.keys():
-            info['stem_tips'][stem_name] = get_instrument_tips(stem_name, info.get('style'))
+        # Add instrument-specific tips for each stem (skip if embedded info has them)
+        if not info.get('stem_tips'):
+            info['stem_tips'] = {}
+            for stem_name in job.stems.keys():
+                info['stem_tips'][stem_name] = get_instrument_tips(stem_name, info.get('style'))
 
         # Add stereo split recommendation (reuse parsed artist from above)
         artist = artist or info.get('artist')

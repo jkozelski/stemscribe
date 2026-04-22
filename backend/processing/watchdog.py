@@ -19,8 +19,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-STALL_THRESHOLD_SECONDS = 120  # 2 minutes with no progress
-MAX_RETRIES = 2
+STALL_THRESHOLD_SECONDS = 600  # 10 minutes — Modal GPU can take 5+ min for long tracks
+MAX_RETRIES = 3
 CHECK_INTERVAL_SECONDS = 30   # Check every 30 seconds for faster detection
 WATCHDOG_LOG_FILE = Path(__file__).parent.parent / 'watchdog_log.json'
 

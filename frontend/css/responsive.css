@@ -497,11 +497,11 @@ img {
 
     /* Mixer controls — keep touch-friendly */
     .mute-btn, .solo-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 0.55rem;
-        min-width: 28px;
-        min-height: 28px;
+        width: 32px;
+        height: 32px;
+        font-size: 0.6rem;
+        min-width: 44px;
+        min-height: 44px;
     }
 
     .stem-mixer-controls {
@@ -531,9 +531,9 @@ img {
     }
 
     .stem-btn {
-        font-size: 0.55rem;
+        font-size: 0.6rem;
         padding: 0.3rem 0.35rem;
-        min-height: 32px;
+        min-height: 44px;
     }
 
     /* Transport: stacked layout for touch */
@@ -686,7 +686,7 @@ img {
 
     .library-panel {
         width: 100%;
-        right: -100%;
+        left: -100%;
     }
 
     /* Practice CTA: stack buttons vertically */
@@ -753,6 +753,7 @@ img {
         max-width: 100%;
         padding-top: 70px;
         margin: 1.5rem auto 1rem;
+        overflow: hidden;
     }
 
     .city-skyline {
@@ -1118,12 +1119,12 @@ img {
     }
 
     .mute-btn, .solo-btn {
-        min-width: 32px;
-        min-height: 32px;
+        min-width: 44px;
+        min-height: 44px;
     }
 
     .stem-btn {
-        min-height: 36px;
+        min-height: 44px;
     }
 
     .play-btn {

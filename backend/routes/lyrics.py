@@ -7,7 +7,10 @@ import json
 import os
 import re
 import logging
+import subprocess
+from pathlib import Path
 
+import numpy as np
 import requests
 from flask import Blueprint, request, jsonify
 
@@ -322,3 +325,143 @@ def save_lyrics(job_id):
     _save_override(job_id, override)
     logger.info(f"Saved lyrics override for {job_id}: {len(data['synced_lyrics'])} lines")
     return jsonify({'status': 'saved', 'lines': len(data['synced_lyrics'])})
+
+
+def _detect_vocal_onsets(audio_path, min_gap=1.0):
+    """
+    Analyze a vocal stem to find all singing onset times.
+
+    Returns a list of timestamps (in seconds) where singing begins after silence.
+    min_gap: minimum silence gap (seconds) between phrases to count as a new onset.
+    """
+    try:
+        result = subprocess.run([
+            'ffmpeg', '-i', str(audio_path),
+            '-f', 'f32le', '-ac', '1', '-ar', '22050', '-'
+        ], capture_output=True, timeout=60)
+
+        if result.returncode != 0 or len(result.stdout) == 0:
+            return []
+
+        samples = np.frombuffer(result.stdout, dtype=np.float32)
+        sr = 22050
+
+        # Compute RMS energy in 50ms windows
+        window_size = int(sr * 0.05)
+        num_windows = len(samples) // window_size
+        rms = np.array([
+            np.sqrt(np.mean(samples[i * window_size:(i + 1) * window_size] ** 2))
+            for i in range(num_windows)
+        ])
+
+        # Adaptive threshold: 5x the noise floor (first 2 seconds)
+        noise_floor = np.median(rms[:int(sr / window_size * 2)])
+        threshold = max(noise_floor * 5, 0.005)
+
+        # Find all onset points (transitions from below to above threshold)
+        onsets = []
+        in_vocal = False
+        last_offset_time = -min_gap  # allow first onset
+
+        for i in range(len(rms)):
+            t = i * 0.05
+            if not in_vocal and rms[i] > threshold:
+                # Check 2 consecutive windows to avoid blips
+                if i + 1 < len(rms) and rms[i + 1] > threshold:
+                    if t - last_offset_time >= min_gap:
+                        onsets.append(round(t, 2))
+                    in_vocal = True
+            elif in_vocal and rms[i] < threshold * 0.5:
+                # Require sustained silence (3 windows below half-threshold)
+                if i + 2 < len(rms) and rms[i + 1] < threshold * 0.5 and rms[i + 2] < threshold * 0.5:
+                    in_vocal = False
+                    last_offset_time = t
+
+        return onsets
+
+    except Exception as e:
+        logger.error(f"Vocal onset detection failed: {e}")
+        return []
+
+
+@lyrics_bp.route('/api/lyrics/<job_id>/auto-sync', methods=['POST'])
+def auto_sync_lyrics(job_id):
+    """
+    Auto-sync lyrics to the vocal stem using onset detection.
+
+    Analyzes the vocal stem to find when each phrase starts,
+    then maps the provided lyrics to those onset times.
+
+    Body: {"lyrics": ["line 1", "line 2", ...]}
+    Optional: {"lyrics": [...], "min_gap": 1.5}
+    """
+    if not validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+
+    data = request.get_json()
+    if not data or 'lyrics' not in data:
+        return jsonify({'error': 'Request must include lyrics array'}), 400
+
+    lyrics = data['lyrics']
+    min_gap = data.get('min_gap', 1.0)
+
+    # Find vocal stem
+    vocals_path = job.stems.get('vocals_lead') or job.stems.get('vocals')
+    if not vocals_path or not Path(vocals_path).exists():
+        return jsonify({'error': 'No vocal stem found for this job'}), 404
+
+    logger.info(f"Auto-syncing {len(lyrics)} lyrics lines to vocal stem for {job_id}")
+
+    # Detect vocal onsets
+    onsets = _detect_vocal_onsets(vocals_path, min_gap=min_gap)
+
+    if not onsets:
+        return jsonify({'error': 'Could not detect vocal onsets in the stem'}), 500
+
+    logger.info(f"Detected {len(onsets)} vocal onsets: {onsets[:10]}...")
+
+    # Filter out empty lyrics lines
+    text_lines = [l for l in lyrics if l.strip()]
+
+    # Map lyrics to onsets
+    # If more lyrics than onsets, some lines share an onset (multi-line phrase)
+    # If more onsets than lyrics, extra onsets are instrumental phrases (ignored)
+    synced = []
+    onset_idx = 0
+
+    for i, line in enumerate(text_lines):
+        if onset_idx < len(onsets):
+            time = onsets[onset_idx]
+            onset_idx += 1
+        else:
+            # Out of onsets — space remaining lines 3s apart from last
+            time = synced[-1]['time'] + 3.0 if synced else 0.0
+
+        synced.append({'time': time, 'text': line})
+
+    # Save as override
+    override = {
+        'found': True,
+        'has_synced': True,
+        'synced_lyrics': synced,
+        'plain_lyrics': '\n'.join(text_lines),
+        'metadata': {
+            'title': job.metadata.get('title', ''),
+            'artist': job.metadata.get('artist', ''),
+        },
+        'source': 'vocal_onset_sync',
+    }
+
+    _save_override(job_id, override)
+
+    logger.info(f"Auto-synced {len(synced)} lyrics lines for {job_id}")
+
+    return jsonify({
+        'status': 'synced',
+        'lines': len(synced),
+        'onsets_detected': len(onsets),
+        'synced_lyrics': synced,
+    })

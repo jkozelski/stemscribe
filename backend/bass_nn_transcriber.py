@@ -33,9 +33,10 @@ logger = logging.getLogger(__name__)
 # CONSTANTS -- MUST match training CONFIG exactly
 # ============================================================================
 
-CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_bass_v3_model.pt'
+CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_bass_model.pt'
 PIANO_CHECKPOINT_PATH = Path(__file__).parent / 'models' / 'pretrained' / 'best_piano_model.pt'
-MODEL_AVAILABLE = CHECKPOINT_PATH.exists() and PIANO_CHECKPOINT_PATH.exists()
+# Piano checkpoint only needed if bass checkpoint doesn't embed CNN weights
+MODEL_AVAILABLE = CHECKPOINT_PATH.exists()
 
 SAMPLE_RATE = 16000
 HOP_LENGTH = 256
@@ -276,26 +277,36 @@ class BassNNTranscriber:
             'mps' if torch.backends.mps.is_available() else 'cpu'
         )
 
-        # Load piano CNN from piano checkpoint
-        piano_checkpoint = torch.load(
-            PIANO_CHECKPOINT_PATH, map_location=self._device, weights_only=True
-        )
-        piano_model = PianoTranscriptionModel()
-        piano_model.load_state_dict(piano_checkpoint['model_state_dict'])
-        piano_cnn = piano_model.cnn
-        for param in piano_cnn.parameters():
-            param.requires_grad = False
-        piano_cnn.eval()
-
-        # Load bass v3 model
+        # Load bass checkpoint
         bass_checkpoint = torch.load(
             CHECKPOINT_PATH, map_location=self._device, weights_only=True
         )
 
-        self._model = BassTranscriptionModel_v3(num_keys=NUM_KEYS)
-        self._model.cnn = piano_cnn
+        # Check if checkpoint includes CNN weights (newer checkpoints embed them)
+        has_cnn_weights = any(k.startswith('cnn.') for k in bass_checkpoint['model_state_dict'])
 
-        self._model.load_state_dict(bass_checkpoint['model_state_dict'])
+        self._model = BassTranscriptionModel_v3(num_keys=NUM_KEYS)
+
+        if has_cnn_weights:
+            # Checkpoint has CNN embedded — create CNN structure for state_dict loading
+            piano_cnn = PianoTranscriptionModel().cnn
+            self._model.cnn = piano_cnn
+            self._model.load_state_dict(bass_checkpoint['model_state_dict'])
+        else:
+            # Legacy checkpoint — load piano CNN from separate checkpoint
+            piano_checkpoint = torch.load(
+                PIANO_CHECKPOINT_PATH, map_location=self._device, weights_only=True
+            )
+            piano_model = PianoTranscriptionModel()
+            piano_model.load_state_dict(piano_checkpoint['model_state_dict'])
+            self._model.cnn = piano_model.cnn
+            self._model.load_state_dict(bass_checkpoint['model_state_dict'], strict=False)
+
+        # Freeze CNN weights (always frozen for bass inference)
+        for param in self._model.cnn.parameters():
+            param.requires_grad = False
+        self._model.cnn.eval()
+
         self._model.to(self._device)
         self._model.eval()
 

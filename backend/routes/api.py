@@ -171,8 +171,45 @@ def upload_audio():
     audio_path = job_upload_dir / safe_name
     file.save(str(audio_path))
 
+    # ── Extract title/artist from ID3 tags or filename ──
+    try:
+        from tinytag import TinyTag
+        tag = TinyTag.get(str(audio_path))
+        if tag.title:
+            job.metadata['title'] = tag.title.strip()
+        if tag.artist:
+            job.metadata['artist'] = tag.artist.strip()
+        if tag.album:
+            job.metadata['album'] = tag.album.strip()
+        if tag.duration:
+            job.metadata['duration'] = int(tag.duration)
+    except Exception:
+        pass  # ID3 tags not available
+
+    # Fallback: parse filename if no ID3 title found
+    if not job.metadata.get('title'):
+        raw = file.filename or safe_name
+        # Strip extension
+        stem = raw.rsplit('.', 1)[0] if '.' in raw else raw
+        import re as _re
+        # Strip leading track numbers (01, 02, 1-, 01-, etc.) BEFORE the artist-title split,
+        # otherwise "05 - Alright.mp3" gets parsed as artist="05", title="Alright".
+        stem = _re.sub(r'^[\d]{1,3}[\s._-]+', '', stem)
+        # Try "Artist - Title" split on the track-number-stripped stem
+        if ' - ' in stem:
+            parts = stem.split(' - ', 1)
+            artist_candidate = parts[0].replace('_', ' ').strip()
+            # Guard: don't accept a pure-digit artist (leftover track number edge case)
+            if artist_candidate and not artist_candidate.isdigit() and not job.metadata.get('artist'):
+                job.metadata['artist'] = artist_candidate
+            name = parts[1].replace('_', ' ').strip()
+        else:
+            name = stem.replace('_', ' ').replace('-', ' ').strip()
+        # Title-case it
+        job.metadata['title'] = name.title() if name == name.lower() or name == name.upper() else name
+
     mode_str = 'ENSEMBLE' if ensemble_mode else ('MDX' if mdx_model else 'standard')
-    logger.info(f"Created job {job_id} for file {file.filename} - mode: {mode_str}, gp_tabs: {gp_tabs}, chord_detection: {chord_detection}, plan: {plan}")
+    logger.info(f"Created job {job_id} for file {file.filename} - title: {job.metadata.get('title')}, artist: {job.metadata.get('artist')}, mode: {mode_str}, plan: {plan}")
 
     # Start processing in background thread
     thread = threading.Thread(target=process_audio, args=(job, audio_path, enhance_stems, stereo_split, gp_tabs, chord_detection, mdx_model, ensemble_mode))
@@ -216,38 +253,47 @@ def process_url_endpoint():
             'error': 'yt-dlp not installed. Run: brew install yt-dlp'
         }), 500
 
-    # Check if this is a streaming service URL (Spotify/Apple Music)
+    # Spotify/Apple Music/Tidal DRM circumvention path DISABLED —
+    # converting streaming URLs to YouTube downloads is DMCA §1201 anti-circumvention
+    # and cannot be covered by the upload consent attestation. Permanently off.
     streaming_service = is_streaming_url(url)
-    original_url = url
-    track_info = None
-
     if streaming_service:
-        logger.info(f"Detected {streaming_service} URL, extracting track info...")
-
-        if streaming_service == 'spotify':
-            track_info = get_spotify_track_info(url)
-        elif streaming_service == 'apple_music':
-            track_info = get_apple_music_track_info(url)
-
-        if not track_info:
-            return jsonify({
-                'error': f'Could not extract track info from {streaming_service}. Try pasting a direct track link.'
-            }), 400
-
-        youtube_url, yt_data = search_youtube_for_song(track_info['search_query'])
-
-        if not youtube_url:
-            return jsonify({
-                'error': f'Could not find "{track_info["search_query"]}" on YouTube.'
-            }), 404
-
-        logger.info(f"Redirecting {streaming_service} to YouTube: {youtube_url}")
-        url = youtube_url
-
-    elif not is_supported_url(url):
         return jsonify({
-            'error': 'Unsupported URL. Supported: YouTube, Spotify, Apple Music, SoundCloud, Bandcamp, Vimeo, Archive.org'
+            'error': f'{streaming_service.replace("_", " ").title()} URLs are not supported. Upload an audio file you own, or paste a Bandcamp, SoundCloud, or Archive.org URL.'
         }), 400
+
+    if not is_supported_url(url):
+        return jsonify({
+            'error': 'Unsupported URL. Supported: SoundCloud, Bandcamp, Vimeo, Archive.org'
+        }), 400
+
+    # Check URL cache before doing any processing
+    from url_cache import normalize_url, check_cache, clone_job as cache_clone_job
+
+    job_id = str(uuid.uuid4())
+    cached_job_id = check_cache(url)
+    if cached_job_id:
+        cloned = cache_clone_job(cached_job_id, job_id)
+        if cloned:
+            # Tag with owner
+            cloned.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
+            session_id = request.cookies.get('session_id') or str(uuid.uuid4())
+            cloned.session_id = session_id
+            cloned.source_url = original_url
+            jobs[job_id] = cloned
+            logger.info(f"Cache hit for {url} -> cloned from {cached_job_id}")
+            resp = make_response(jsonify({
+                'job_id': job_id,
+                'message': 'Instant results (previously processed)',
+                'cached': True,
+                'filename': cloned.filename,
+                'url': url,
+                'source': streaming_service or 'direct',
+                'track_info': track_info
+            }))
+            if not request.cookies.get('session_id'):
+                resp.set_cookie('session_id', session_id, httponly=True, max_age=86400, samesite='Lax')
+            return resp
 
     # Get selected skills from request data
     skills = data.get('skills', [])
@@ -266,7 +312,6 @@ def process_url_endpoint():
     plan = data.get('plan', 'free')
 
     # Create job with skills
-    job_id = str(uuid.uuid4())
     job = ProcessingJob(job_id, 'Downloading...', source_url=original_url, skills=skills)
     job.metadata['plan'] = plan
 
@@ -452,6 +497,20 @@ def get_transcription_quality(job_id):
 
 
 # ============ DOWNLOAD ============
+
+@api_bp.route('/api/download/<job_id>/thumbnail', methods=['GET'])
+def download_thumbnail(job_id):
+    """Serve a job's thumbnail image."""
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    thumb_path = OUTPUT_DIR / job_id / 'thumbnail.jpg'
+    if not thumb_path.exists():
+        thumb_path = OUTPUT_DIR / job_id / 'thumbnail.png'
+    if not thumb_path.exists():
+        return jsonify({'error': 'No thumbnail'}), 404
+    from flask import send_file
+    return send_file(str(thumb_path), mimetype='image/jpeg')
+
 
 @api_bp.route('/api/download/<job_id>/<file_type>/<filename>', methods=['GET'])
 def download_file(job_id, file_type, filename):
@@ -772,6 +831,18 @@ def list_jobs():
     })
 
 
+# ============ RAG CHORD RECALL ============
+
+@api_bp.route('/api/chord-recall', methods=['POST'])
+def chord_recall():
+    """RAG chord recall — DISABLED 2026-04-21 per Jeff.
+    Index still references 15,000+ scraped songs from pre-Apr-16 cleanup;
+    legal cleanup gap per Alexandra Mayo April 10 call. Endpoint returns 410 Gone
+    so any stale clients fail fast instead of getting wrong-song results.
+    """
+    return jsonify({'match': False, 'disabled': True, 'reason': 'RAG chord recall disabled'}), 410
+
+
 # ============ MANUAL CHORD CHART ============
 
 @api_bp.route('/api/chord-chart/<job_id>', methods=['GET', 'PUT'])
@@ -840,3 +911,12 @@ def cleanup_old_files():
     except Exception as e:
         logger.error(f"Cleanup failed: {e}")
         return jsonify({'error': f'Cleanup failed: {str(e)}'}), 500
+
+
+# ============ URL CACHE STATS ============
+
+@api_bp.route('/api/cache/stats', methods=['GET'])
+def cache_stats():
+    """Return URL cache statistics — cached songs, hit counts, estimated savings."""
+    from url_cache import get_cache_stats
+    return jsonify(get_cache_stats())

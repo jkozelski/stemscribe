@@ -12,7 +12,7 @@ services:
     environment:
       POSTGRES_DB: stemscribe
       POSTGRES_USER: stemscribe
-      POSTGRES_PASSWORD: localdev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev}
     ports:
       - "5432:5432"
     volumes:
@@ -44,8 +44,8 @@ services:
       PORT: "5555"
       APP_URL: http://localhost:5555
       API_URL: http://localhost:5555
-      DATABASE_URL: postgresql://stemscribe:localdev@db:5432/stemscribe
-      JWT_SECRET_KEY: local-dev-secret-do-not-use-in-production
+      DATABASE_URL: postgresql://stemscribe:${POSTGRES_PASSWORD:-localdev}@db:5432/stemscribe
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
       REDIS_URL: redis://redis:6379
       # R2 and Stripe are optional for local dev — app falls back gracefully
     depends_on:

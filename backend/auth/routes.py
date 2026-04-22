@@ -162,9 +162,12 @@ def google_login():
     if not email:
         return jsonify({'error': 'Google account has no email'}), 400
 
-    # Case 1: User exists with this google_id — just log in
+    # Case 1: User exists with this google_id — log in and refresh avatar
     user = get_user_by_google_id(google_id)
     if user:
+        if picture:
+            link_google_account(str(user.id), google_id, picture)
+            user = get_user_by_id(str(user.id))
         tokens = _issue_tokens(user)
         response = jsonify(tokens)
         set_refresh_cookies(response, tokens['refresh_token'])

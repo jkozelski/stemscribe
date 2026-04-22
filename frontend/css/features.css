@@ -348,5 +348,63 @@ body.light-mode h3 {
 }
 
 body.light-mode .highlight {
-    color: var(--psych-blue);
+    color: var(--psych-pink);
+}
+
+body.light-mode .hero-label {
+    color: #3a3a48;
+    border-color: rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .hero p {
+    color: #4a4a58;
+}
+
+body.light-mode .hero h1 {
+    color: #1a1a24;
+}
+
+body.light-mode .practice-cta {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .practice-btn {
+    color: #1a1a24;
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+body.light-mode .stem-name {
+    color: #1a1a24;
+}
+
+body.light-mode .stem-btn {
+    color: #3a3a48;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .time-display {
+    color: #3a3a48;
+}
+
+body.light-mode .play-btn {
+    color: #1a1a24;
+}
+
+body.light-mode .upload-section {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .processing-section {
+    color: #1a1a24;
+}
+
+body.light-mode .stage-text {
+    color: #1a1a24;
+}
+
+body.light-mode .progress-text {
+    color: #1a1a24;
 }

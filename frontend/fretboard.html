@@ -399,6 +399,8 @@
             display: none;
         }
 
+        @keyframes wbp { 0% { transform: scaleY(0.2); } 100% { transform: scaleY(1); } }
+
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -435,11 +437,14 @@
             }
         }
     </style>
+    <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
+    <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
+    <script src="js/analytics.js"></script>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="nav-bar">
-        <a href="/" class="nav-brand">StemScriber ✦</a>
+        <a href="/" class="nav-brand"><span style="display:inline-flex;align-items:flex-end;gap:2px;height:18px;margin-right:6px;vertical-align:middle"><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:45%;animation:wbp 0.8s ease-in-out infinite alternate"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:85%;animation:wbp 0.8s ease-in-out infinite alternate 0.15s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:100%;animation:wbp 0.8s ease-in-out infinite alternate 0.05s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:70%;animation:wbp 0.8s ease-in-out infinite alternate 0.2s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:40%;animation:wbp 0.8s ease-in-out infinite alternate 0.1s"></span></span>StemScriber</a>
         <ul class="nav-links">
             <li><a href="/">Home</a></li>
             <li><a href="/tuner.html">Tuner</a></li>
@@ -482,14 +487,28 @@
                 <label class="control-label">Scale / Mode</label>
                 <div class="select-group">
                     <select id="scaleSelect">
-                        <option value="major">Major</option>
-                        <option value="minor">Minor (Natural)</option>
-                        <option value="minor-pentatonic">Minor Pentatonic</option>
-                        <option value="major-pentatonic">Major Pentatonic</option>
-                        <option value="blues">Blues</option>
-                        <option value="dorian">Dorian</option>
-                        <option value="mixolydian">Mixolydian</option>
-                        <option value="harmonic-minor">Harmonic Minor</option>
+                        <optgroup label="Essential">
+                            <option value="major">Major (Ionian)</option>
+                            <option value="minor">Minor (Natural)</option>
+                            <option value="minor-pentatonic">Minor Pentatonic</option>
+                            <option value="major-pentatonic">Major Pentatonic</option>
+                            <option value="blues">Blues</option>
+                        </optgroup>
+                        <optgroup label="Modes">
+                            <option value="dorian">Dorian</option>
+                            <option value="phrygian">Phrygian</option>
+                            <option value="lydian">Lydian</option>
+                            <option value="mixolydian">Mixolydian</option>
+                            <option value="locrian">Locrian</option>
+                        </optgroup>
+                        <optgroup label="Minor Variants">
+                            <option value="harmonic-minor">Harmonic Minor</option>
+                            <option value="melodic-minor">Melodic Minor</option>
+                        </optgroup>
+                        <optgroup label="Symmetric">
+                            <option value="whole-tone">Whole Tone</option>
+                            <option value="diminished">Diminished (HW)</option>
+                        </optgroup>
                     </select>
                 </div>
             </div>
@@ -599,39 +618,129 @@
     <script>
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        
+
         const SCALES = {
-            major: [0, 2, 4, 5, 7, 9, 11],
-            minor: [0, 2, 3, 5, 7, 8, 10],
+            'major':            [0, 2, 4, 5, 7, 9, 11],
+            'minor':            [0, 2, 3, 5, 7, 8, 10],
             'minor-pentatonic': [0, 3, 5, 7, 10],
             'major-pentatonic': [0, 2, 4, 7, 9],
-            blues: [0, 3, 5, 6, 7, 10],
-            dorian: [0, 2, 3, 5, 7, 9, 10],
-            mixolydian: [0, 2, 4, 5, 7, 9, 10],
-            'harmonic-minor': [0, 2, 3, 5, 7, 8, 11]
+            'blues':            [0, 3, 5, 6, 7, 10],
+            'dorian':           [0, 2, 3, 5, 7, 9, 10],
+            'mixolydian':       [0, 2, 4, 5, 7, 9, 10],
+            'phrygian':         [0, 1, 3, 5, 7, 8, 10],
+            'lydian':           [0, 2, 4, 6, 7, 9, 11],
+            'locrian':          [0, 1, 3, 5, 6, 8, 10],
+            'harmonic-minor':   [0, 2, 3, 5, 7, 8, 11],
+            'melodic-minor':    [0, 2, 3, 5, 7, 9, 11],
+            'whole-tone':       [0, 2, 4, 6, 8, 10],
+            'diminished':       [0, 2, 3, 5, 6, 8, 9, 11]
         };
 
         const INTERVALS = {
-            0: 'R', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7'
+            0: 'R', 1: 'b2', 2: '2', 3: 'b3', 4: '3', 5: '4', 6: 'b5', 7: '5', 8: 'b6', 9: '6', 10: 'b7', 11: '7'
         };
 
+        // MIDI note numbers for open strings (low to high)
         const TUNINGS = {
-            standard: ['E', 'A', 'D', 'G', 'B', 'E'],
-            'drop-d': ['D', 'A', 'D', 'G', 'B', 'E'],
-            'open-g': ['D', 'G', 'D', 'G', 'B', 'D'],
-            'open-d': ['D', 'A', 'D', 'F#', 'A', 'D'],
-            dadgad: ['D', 'A', 'D', 'G', 'A', 'D'],
-            'half-step-down': ['D#', 'G#', 'C#', 'F#', 'A#', 'D#'],
-            'whole-step-down': ['D', 'G', 'C', 'F', 'A', 'D'],
-            bass: ['E', 'A', 'D', 'G']
+            standard:          { notes: ['E', 'A', 'D', 'G', 'B', 'E'], midi: [40, 45, 50, 55, 59, 64] },
+            'drop-d':          { notes: ['D', 'A', 'D', 'G', 'B', 'E'], midi: [38, 45, 50, 55, 59, 64] },
+            'open-g':          { notes: ['D', 'G', 'D', 'G', 'B', 'D'], midi: [38, 43, 50, 55, 59, 62] },
+            'open-d':          { notes: ['D', 'A', 'D', 'F#', 'A', 'D'], midi: [38, 45, 50, 54, 57, 62] },
+            dadgad:            { notes: ['D', 'A', 'D', 'G', 'A', 'D'], midi: [38, 45, 50, 55, 57, 62] },
+            'half-step-down':  { notes: ['D#', 'G#', 'C#', 'F#', 'A#', 'D#'], midi: [39, 44, 49, 54, 58, 63] },
+            'whole-step-down': { notes: ['D', 'G', 'C', 'F', 'A', 'D'], midi: [38, 43, 48, 53, 57, 62] },
+            bass:              { notes: ['E', 'A', 'D', 'G'], midi: [28, 33, 38, 43] }
         };
 
-        const CAGED_POSITIONS = {
-            c: { frets: [0, 3, 2, 0, 0, 0], name: 'C Shape' },
-            a: { frets: [0, 0, 2, 2, 2, 0], name: 'A Shape' },
-            g: { frets: [3, 2, 0, 0, 0, 3], name: 'G Shape' },
-            e: { frets: [0, 2, 2, 1, 0, 0], name: 'E Shape' },
-            d: { frets: [2, 3, 2, 0, 0, 0], name: 'D Shape' }
+        // CAGED chord shapes — major and minor families.
+        // chordFrets = fret per string for the OPEN chord (low E → high E), -1 = muted.
+        // nativeKey = semitone index of the key this open shape naturally plays.
+        const CAGED_MAJOR = {
+            c: { nativeKey: 0,  chordFrets: [-1, 3, 2, 0, 1, 0] },  // C:  x32010
+            a: { nativeKey: 9,  chordFrets: [-1, 0, 2, 2, 2, 0] },  // A:  x02220
+            g: { nativeKey: 7,  chordFrets: [3, 2, 0, 0, 0, 3] },   // G:  320003
+            e: { nativeKey: 4,  chordFrets: [0, 2, 2, 1, 0, 0] },   // E:  022100
+            d: { nativeKey: 2,  chordFrets: [-1, -1, 0, 2, 3, 2] }  // D:  xx0232
+        };
+
+        const CAGED_MINOR = {
+            c: { nativeKey: 0,  chordFrets: [-1, 3, 1, 0, 1, -1] }, // Cm: x3101x
+            a: { nativeKey: 9,  chordFrets: [-1, 0, 2, 2, 1, 0] },  // Am: x02210
+            g: { nativeKey: 7,  chordFrets: [3, 1, 0, 0, 3, 3] },   // Gm: 310033
+            e: { nativeKey: 4,  chordFrets: [0, 2, 2, 0, 0, 0] },   // Em: 022000
+            d: { nativeKey: 2,  chordFrets: [-1, -1, 0, 2, 3, 1] }  // Dm: xx0231
+        };
+
+        // Dominant 7 chord shapes (for Mixolydian, Blues)
+        const CAGED_DOM7 = {
+            c: { nativeKey: 0,  chordFrets: [-1, 3, 2, 3, 1, 0] },  // C7:  x32310
+            a: { nativeKey: 9,  chordFrets: [-1, 0, 2, 0, 2, 0] },  // A7:  x02020
+            g: { nativeKey: 7,  chordFrets: [3, 2, 0, 0, 0, 1] },   // G7:  320001
+            e: { nativeKey: 4,  chordFrets: [0, 2, 0, 1, 0, 0] },   // E7:  020100
+            d: { nativeKey: 2,  chordFrets: [-1, -1, 0, 2, 1, 2] }  // D7:  xx0212
+        };
+
+        // Minor 7 chord shapes (for Dorian, natural minor)
+        const CAGED_MIN7 = {
+            c: { nativeKey: 0,  chordFrets: [-1, 3, 1, 3, 1, -1] }, // Cm7: x3131x
+            a: { nativeKey: 9,  chordFrets: [-1, 0, 2, 0, 1, 0] },  // Am7: x02010
+            g: { nativeKey: 7,  chordFrets: [3, 1, 0, 0, 3, 1] },   // Gm7: 310031
+            e: { nativeKey: 4,  chordFrets: [0, 2, 0, 0, 0, 0] },   // Em7: 020000
+            d: { nativeKey: 2,  chordFrets: [-1, -1, 0, 2, 1, 1] }  // Dm7: xx0211
+        };
+
+        // Major 7 chord shapes (for Lydian, Ionian)
+        const CAGED_MAJ7 = {
+            c: { nativeKey: 0,  chordFrets: [-1, 3, 2, 0, 0, 0] },  // Cmaj7: x32000
+            a: { nativeKey: 9,  chordFrets: [-1, 0, 2, 1, 2, 0] },  // Amaj7: x02120
+            g: { nativeKey: 7,  chordFrets: [3, 2, 0, 0, 0, 2] },   // Gmaj7: 320002
+            e: { nativeKey: 4,  chordFrets: [0, 2, 1, 1, 0, 0] },   // Emaj7: 021100
+            d: { nativeKey: 2,  chordFrets: [-1, -1, 0, 2, 2, 2] }  // Dmaj7: xx0222
+        };
+
+        // MinMaj7 chord shapes (for Harmonic Minor, Melodic Minor)
+        const CAGED_MINMAJ7 = {
+            c: { nativeKey: 0,  chordFrets: [-1, 3, 1, 0, 0, -1] }, // CmM7: x3100x
+            a: { nativeKey: 9,  chordFrets: [-1, 0, 2, 1, 1, 0] },  // AmM7: x02110
+            g: { nativeKey: 7,  chordFrets: [3, 1, 0, 0, 3, 2] },   // GmM7: 310032
+            e: { nativeKey: 4,  chordFrets: [0, 2, 1, 0, 0, 0] },   // EmM7: 021000
+            d: { nativeKey: 2,  chordFrets: [-1, -1, 0, 2, 2, 1] }  // DmM7: xx0221
+        };
+
+        // Which chord family to use for each scale
+        const SCALE_CHORD_FAMILY = {
+            'major':            'maj7',
+            'major-pentatonic': 'major',
+            'lydian':           'maj7',
+            'mixolydian':       'dom7',
+            'minor':            'min7',
+            'minor-pentatonic': 'minor',
+            'blues':            'dom7',
+            'dorian':           'min7',
+            'phrygian':         'minor',
+            'locrian':          'minor',
+            'harmonic-minor':   'minmaj7',
+            'melodic-minor':    'minmaj7',
+            'whole-tone':       'major',
+            'diminished':       'minor'
+        };
+
+        const CHORD_SETS = {
+            major:   CAGED_MAJOR,
+            minor:   CAGED_MINOR,
+            dom7:    CAGED_DOM7,
+            min7:    CAGED_MIN7,
+            maj7:    CAGED_MAJ7,
+            minmaj7: CAGED_MINMAJ7
+        };
+
+        const FAMILY_LABELS = {
+            major:   '',
+            minor:   'm',
+            dom7:    '7',
+            min7:    'm7',
+            maj7:    'maj7',
+            minmaj7: 'mMaj7'
         };
 
         const COLORS = {
@@ -639,6 +748,10 @@
             scale: '#00ff88',
             other: '#404550'
         };
+
+        // Fret dot markers (standard inlays)
+        const FRET_DOTS = [3, 5, 7, 9, 15, 17, 19, 21];
+        const DOUBLE_DOTS = [12];
 
         let state = {
             key: 'C',
@@ -658,51 +771,59 @@
             return NOTES.indexOf(noteName);
         }
 
-        function noteIndexToFrequency(noteIndex) {
-            const A4 = 440;
-            const semitones = noteIndex - 9;
-            return A4 * Math.pow(2, semitones / 12);
+        function midiToFrequency(midi) {
+            return 440 * Math.pow(2, (midi - 69) / 12);
         }
 
         function getScaleNotes() {
             const keyIndex = getNoteIndex(state.key);
-            const scaleOffsets = SCALES[state.scale];
-            return scaleOffsets.map(offset => (keyIndex + offset) % 12);
+            return SCALES[state.scale].map(offset => (keyIndex + offset) % 12);
         }
 
         function getTuningNotes() {
-            const baseNotes = TUNINGS[state.tuning];
-            return baseNotes.map(note => {
-                const noteIndex = getNoteIndex(note);
-                return (noteIndex + state.capo) % 12;
+            const t = TUNINGS[state.tuning];
+            return t.notes.map(note => {
+                return (getNoteIndex(note) + state.capo) % 12;
             });
         }
 
-        function getColorForNote(noteIndex) {
-            const scaleNotes = getScaleNotes();
-            const keyIndex = getNoteIndex(state.key);
+        function getTuningMidi() {
+            const t = TUNINGS[state.tuning];
+            return t.midi.map(m => m + state.capo);
+        }
 
-            if ((noteIndex - keyIndex + 12) % 12 === 0) {
-                return COLORS.root;
-            }
-            if (scaleNotes.includes(noteIndex)) {
-                return COLORS.scale;
-            }
+        function getColorForNote(noteIndex) {
+            const keyIndex = getNoteIndex(state.key);
+            if ((noteIndex - keyIndex + 12) % 12 === 0) return COLORS.root;
+            if (getScaleNotes().includes(noteIndex)) return COLORS.scale;
             return COLORS.other;
         }
 
-        function playNote(noteIndex, duration = 0.3) {
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.cr%ateGain();
+        // Get the transposed chord frets for a CAGED shape in the current key.
+        // Returns { chordFrets, offset, minFret, maxFret, family }
+        function getTransposedShape(shape) {
+            const family = SCALE_CHORD_FAMILY[state.scale] || 'major';
+            const shapeSet = CHORD_SETS[family] || CAGED_MAJOR;
+            const s = shapeSet[shape];
+            const keyIndex = getNoteIndex(state.key);
+            const offset = (keyIndex - s.nativeKey + 12) % 12;
+            const chordFrets = s.chordFrets.map(f => f === -1 ? -1 : f + offset);
+            const active = chordFrets.filter(f => f >= 0);
+            const minFret = Math.min(...active);
+            const maxFret = Math.max(...active);
+            return { chordFrets, offset, minFret, maxFret, family };
+        }
 
+        function playNote(midiNote, duration = 0.5) {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
             osc.connect(gain);
             gain.connect(audioContext.destination);
 
-            const frequency = noteIndexToFrequency(noteIndex);
-            osc.frequency.value = frequency;
-            osc.type = 'sine';
+            osc.frequency.value = midiToFrequency(midiNote);
+            osc.type = 'triangle';
 
-            gain.gain.setValueAtTime(0.4, audioContext.currentTime);
+            gain.gain.setValueAtTime(0.35, audioContext.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
 
             osc.start(audioContext.currentTime);
@@ -711,18 +832,16 @@
 
         function startDrone() {
             if (state.droneOscillator) stopDrone();
-
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-
             osc.connect(gain);
             gain.connect(audioContext.destination);
 
+            // Drone at the root note, octave 3
             const keyIndex = getNoteIndex(state.key);
-            const frequency = noteIndexToFrequency(keyIndex);
-            osc.frequency.value = frequency;
+            const midiNote = 48 + keyIndex; // C3 = 48
+            osc.frequency.value = midiToFrequency(midiNote);
             osc.type = 'sine';
-
             gain.gain.setValueAtTime(0.1, audioContext.currentTime);
 
             osc.start();
@@ -741,70 +860,54 @@
         function playScale() {
             if (state.isPlaying) return;
             state.isPlaying = true;
-
             document.getElementById('playScaleBtn').style.display = 'none';
             document.getElementById('stopPlayBtn').style.display = 'block';
 
             const scaleNotes = getScaleNotes();
-            const tuningNotes = getTuningNotes();
-            const notesToPlay = [];
+            const tuningMidi = getTuningMidi();
+            const midiSet = new Set();
 
-            for (let stringIndex = 0; stringIndex < tuningNotes.length; stringIndex++) {
-                const stringNote = tuningNotes[stringIndex];
+            // Collect all scale notes on the fretboard as MIDI values
+            for (let s = 0; s < tuningMidi.length; s++) {
                 for (let fret = state.capo; fret <= 22; fret++) {
-                    const noteIndex = (stringNote + fret) % 12;
-                    if (scaleNotes.includes(noteIndex)) {
-                        notesToPlay.push(noteIndexToFrequency(noteIndex));
-                    }
+                    const midi = tuningMidi[s] + fret;
+                    const noteIndex = midi % 12;
+                    if (scaleNotes.includes(noteIndex)) midiSet.add(midi);
                 }
             }
 
-            const uniqueFreqs = [...new Set(notesToPlay)].sort((a, b) => a - b);
+            const sorted = [...midiSet].sort((a, b) => a - b);
+            // Play one octave ascending from the lowest root
+            const keyIndex = getNoteIndex(state.key);
+            const oneOctave = sorted.filter(m => m % 12 === keyIndex);
+            const startMidi = oneOctave[0] || sorted[0];
+            const endMidi = startMidi + 12;
+            const toPlay = sorted.filter(m => m >= startMidi && m <= endMidi);
 
             let index = 0;
             function playNext() {
-                if (index >= uniqueFreqs.length || !state.isPlaying) {
+                if (index >= toPlay.length || !state.isPlaying) {
                     state.isPlaying = false;
                     document.getElementById('playScaleBtn').style.display = 'block';
                     document.getElementById('stopPlayBtn').style.display = 'none';
                     return;
                 }
-
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-
-                osc.connect(gain);
-                gain.connect(audioContext.destination);
-
-                osc.frequency.value = uniqueFreqs[index];
-                osc.type = 'sine';
-
-                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-
-                osc.start(audioContext.currentTime);
-                osc.stop(audioContext.currentTime + 0.4);
-
+                playNote(toPlay[index], 0.4);
                 index++;
-                setTimeout(playNext, 500);
+                setTimeout(playNext, 400);
             }
-
             playNext();
         }
 
         function metronomeClick() {
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-
             osc.connect(gain);
             gain.connect(audioContext.destination);
-
             osc.frequency.value = 800;
             osc.type = 'sine';
-
             gain.gain.setValueAtTime(0.3, audioContext.currentTime);
             gain.gain.exponentialRampToValueAtTime(0, audioContext.currentTime + 0.05);
-
             osc.start(audioContext.currentTime);
             osc.stop(audioContext.currentTime + 0.05);
         }
@@ -813,7 +916,6 @@
             if (state.metronomeRunning) return;
             state.metronomeRunning = true;
             document.getElementById('metronomeBtn').textContent = '⏹ Stop';
-
             function tick() {
                 if (!state.metronomeRunning) {
                     document.getElementById('metronomeBtn').textContent = '♩ Start';
@@ -822,7 +924,6 @@
                 metronomeClick();
                 setTimeout(tick, (60 / state.bpm) * 1000);
             }
-
             tick();
         }
 
@@ -835,153 +936,299 @@
             const svg = document.getElementById('fretboard');
             svg.innerHTML = '';
 
-            const stringCount = TUNINGS[state.tuning].length;
+            const tuning = TUNINGS[state.tuning];
+            const stringCount = tuning.notes.length;
             const fretCount = 22;
-            const stringSpacing = 40;
-            const fretSpacing = 50;
-            const startX = 80;
-            const startY = 50;
+            const stringSpacing = 30;
+            const startX = 50;
+            const startY = 40;
+            const nutWidth = 4;
+            const totalFretboardHeight = stringSpacing * (stringCount - 1);
 
-            svg.setAttribute('width', startX + fretSpacing * (fretCount + 0.5));
-            svg.setAttribute('height', startY * 2 + stringSpacing * (stringCount - 1));
+            // Uniform fret spacing
+            const fretSpacing = 48;
+            const totalWidth = startX + nutWidth + fretSpacing * fretCount + 20;
+            svg.setAttribute('width', totalWidth);
+            svg.setAttribute('height', startY + totalFretboardHeight + 50);
 
-            for (let fret = 0; fret <= fretCount; fret++) {
-                let x;
-                if (fret === 0) {
-                    x = startX;
-                } else {
-                    x = startX + fretSpacing * Math.log(fret + 1) / Math.log(fretCount + 1) * fretCount;
-                }
-
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', x);
-                line.setAttribute('y1', startY);
-                line.setAttribute('x2', x);
-                line.setAttribute('y2', startY + stringSpacing * (stringCount - 1));
-                line.setAttribute('stroke', fret === 0 ? COLORS.root : '#3a3a45');
-                line.setAttribute('stroke-width', fret === 0 ? 3 : 1);
-                svg.appendChild(line);
-
-                if (fret > 0) {
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    text.setAttribute('x', x);
-                    text.setAttribute('y', startY - 20);
-                    text.setAttribute('text-anchor', 'middle');
-                    text.setAttribute('class', 'fret-label');
-                    text.textContent = fret;
-                    svg.appendChild(text);
-                }
+            function fretX(fret) {
+                if (fret === 0) return startX;
+                return startX + nutWidth + fretSpacing * fret;
             }
 
-            if (state.capo > 0) {
-                let capoX;
-                if (state.capo === 0) {
-                    capoX = startX;
-                } else {
-                    capoX = startX + fretSpacing * Math.log(state.capo + 1) / Math.log(fretCount + 1) * fretCount;
-                }
+            // Fretboard background
+            const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bg.setAttribute('x', startX);
+            bg.setAttribute('y', startY - 8);
+            bg.setAttribute('width', fretX(fretCount) - startX + fretSpacing * 0.5);
+            bg.setAttribute('height', totalFretboardHeight + 16);
+            bg.setAttribute('fill', '#1e1e28');
+            bg.setAttribute('rx', 4);
+            svg.appendChild(bg);
 
+            // Fret dot inlays
+            FRET_DOTS.forEach(f => {
+                if (f > fretCount) return;
+                const cx = fretX(f) - fretSpacing / 2;
+                const cy = startY + totalFretboardHeight / 2;
+                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dot.setAttribute('cx', cx);
+                dot.setAttribute('cy', cy);
+                dot.setAttribute('r', 4);
+                dot.setAttribute('fill', '#2a2a38');
+                svg.appendChild(dot);
+            });
+            DOUBLE_DOTS.forEach(f => {
+                if (f > fretCount) return;
+                const cx = fretX(f) - fretSpacing / 2;
+                [-1, 1].forEach(dir => {
+                    const cy = startY + totalFretboardHeight / 2 + dir * (totalFretboardHeight * 0.3);
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('r', 4);
+                    dot.setAttribute('fill', '#2a2a38');
+                    svg.appendChild(dot);
+                });
+            });
+
+            // Nut
+            const nut = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            nut.setAttribute('x', startX);
+            nut.setAttribute('y', startY - 5);
+            nut.setAttribute('width', nutWidth);
+            nut.setAttribute('height', totalFretboardHeight + 10);
+            nut.setAttribute('fill', '#d4cfc8');
+            nut.setAttribute('rx', 1);
+            svg.appendChild(nut);
+
+            // Fret wires
+            for (let fret = 1; fret <= fretCount; fret++) {
+                const x = fretX(fret);
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', startY - 5);
+                line.setAttribute('x2', x);
+                line.setAttribute('y2', startY + totalFretboardHeight + 5);
+                line.setAttribute('stroke', '#4a4a55');
+                line.setAttribute('stroke-width', 1.5);
+                svg.appendChild(line);
+
+                // Fret number
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x - fretSpacing / 2);
+                text.setAttribute('y', startY - 15);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('class', 'fret-label');
+                text.textContent = fret;
+                svg.appendChild(text);
+            }
+
+            // Capo bar
+            if (state.capo > 0) {
+                const cx = fretX(state.capo) - fretSpacing / 2;
                 const capoBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                capoBar.setAttribute('x', capoX - 8);
-                capoBar.setAttribute('y', startY - 8);
-                capoBar.setAttribute('width', 16);
-                capoBar.setAttribute('height', stringSpacing * (stringCount - 1) + 16);
-                capoBar.setAttribute('fill', 'rgba(255, 107, 157, 0.3)');
-                capoBar.setAttribute('stroke', COLORS.root);
+                capoBar.setAttribute('x', cx - 6);
+                capoBar.setAttribute('y', startY - 10);
+                capoBar.setAttribute('width', 12);
+                capoBar.setAttribute('height', totalFretboardHeight + 20);
+                capoBar.setAttribute('fill', 'rgba(255, 107, 157, 0.25)');
+                capoBar.setAttribute('stroke', '#ff6b9d');
                 capoBar.setAttribute('stroke-width', 2);
-                capoBar.setAttribute('rx', 3);
+                capoBar.setAttribute('rx', 4);
                 capoBar.setAttribute('class', 'capo-bar');
                 svg.appendChild(capoBar);
             }
 
+            // Strings
             const tuningNotes = getTuningNotes();
-            for (let string = 0; string < stringCount; string++) {
-                const y = startY + stringSpacing * (stringCount - 1 - string);
+            const tuningMidi = getTuningMidi();
+            for (let s = 0; s < stringCount; s++) {
+                const y = startY + stringSpacing * (stringCount - 1 - s);
+                // String thickness varies: thicker for bass strings
+                const thickness = 1 + (stringCount - 1 - s) * 0.3;
 
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('x1', startX);
                 line.setAttribute('y1', y);
-                line.setAttribute('x2', startX + fretSpacing * Math.log(fretCount + 1) / Math.log(fretCount + 1) * fretCount);
+                line.setAttribute('x2', fretX(fretCount) + fretSpacing * 0.3);
                 line.setAttribute('y2', y);
-                line.setAttribute('stroke', '#5a5a65');
-                line.setAttribute('stroke-width', 2);
+                line.setAttribute('stroke', '#8a8a95');
+                line.setAttribute('stroke-width', thickness);
                 svg.appendChild(line);
 
-                const stringLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                stringLabel.setAttribute('x', startX - 30);
-                stringLabel.setAttribute('y', y + 5);
-                stringLabel.setAttribute('text-anchor', 'end');
-                stringLabel.setAttribute('class', 'string-label');
-                stringLabel.textContent = NOTES[tuningNotes[string]];
-                svg.appendChild(stringLabel);
+                // String label
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', startX - 12);
+                label.setAttribute('y', y + 4);
+                label.setAttribute('text-anchor', 'end');
+                label.setAttribute('class', 'string-label');
+                label.textContent = tuning.notes[s];
+                svg.appendChild(label);
             }
 
+            // Build chord tone lookup if a CAGED shape is selected
             const scaleNotes = getScaleNotes();
-            const cagedShape = state.cagedShape;
+            const keyIndex = getNoteIndex(state.key);
+            let transposed = null;
+            let chordToneMap = null; // string → fret for the chord tones
+            let scaleRangeMin = 0, scaleRangeMax = 22;
 
-            for (let string = 0; string < stringCount; string++) {
-                const stringNote = tuningNotes[string];
-                const y = startY + stringSpacing * (stringCount - 1 - string);
+            if (state.cagedShape !== 'all') {
+                transposed = getTransposedShape(state.cagedShape);
+                chordToneMap = new Map();
+                for (let s = 0; s < Math.min(stringCount, transposed.chordFrets.length); s++) {
+                    const f = transposed.chordFrets[s];
+                    if (f >= 0) chordToneMap.set(s + ':' + f, true);
+                }
+                // Show scale tones in the area around the chord shape (± 2 frets)
+                scaleRangeMin = Math.max(0, transposed.minFret - 1);
+                scaleRangeMax = transposed.maxFret + 2;
+            }
+
+            // Draw scale tones first (behind chord tones)
+            for (let s = 0; s < stringCount; s++) {
+                const y = startY + stringSpacing * (stringCount - 1 - s);
+                const openMidi = tuningMidi[s];
 
                 for (let fret = 0; fret <= fretCount; fret++) {
-                    const noteIndex = (stringNote + fret) % 12;
-                    let x;
+                    const midi = openMidi + fret;
+                    const noteIndex = midi % 12;
+                    if (!scaleNotes.includes(noteIndex)) continue;
 
+                    // When CAGED shape is active, skip chord tones here (drawn later)
+                    // and only show scale tones within the shape's fret range
+                    if (chordToneMap) {
+                        if (chordToneMap.has(s + ':' + fret)) continue; // drawn as chord tone
+                        if (fret < scaleRangeMin || fret > scaleRangeMax) continue;
+                        // Don't show scale tones on muted strings for this shape
+                        if (transposed.chordFrets[s] === -1) continue;
+                    }
+
+                    let cx;
                     if (fret === 0) {
-                        x = startX;
+                        cx = startX - 6;
                     } else {
-                        x = startX + fretSpacing * Math.log(fret + 1) / Math.log(fretCount + 1) * fretCount;
+                        cx = fretX(fret) - fretSpacing / 2;
                     }
 
-                    const isInScale = scaleNotes.includes(noteIndex);
-
-                    if (!isInScale) continue;
-
-                    let showDot = true;
-                    if (cagedShape !== 'all') {
-                        const position = CAGED_POSITIONS[cagedShape];
-                        if (position.frets[string] !== undefined) {
-                            const shapeRootFret = position.frets[string];
-                            const fretRange = 5;
-                            showDot = fret >= shapeRootFret && fret <= shapeRootFret + fretRange;
-                        }
-                    }
-
-                    if (!showDot) continue;
+                    const isRoot = (noteIndex - keyIndex + 12) % 12 === 0;
+                    const color = isRoot ? COLORS.root : COLORS.scale;
+                    // Scale tones are smaller/dimmer when a CAGED shape is selected
+                    const r = chordToneMap ? 8 : (isRoot ? 13 : 11);
+                    const opacity = chordToneMap ? 0.4 : 1;
 
                     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cx', cx);
                     circle.setAttribute('cy', y);
-                    circle.setAttribute('r', 12);
-                    circle.setAttribute('fill', getColorForNote(noteIndex));
+                    circle.setAttribute('r', r);
+                    circle.setAttribute('fill', color);
+                    circle.setAttribute('opacity', opacity);
                     circle.setAttribute('class', 'note-dot');
-                    circle.setAttribute('data-fret', fret);
-                    circle.setAttribute('data-string', string);
-                    circle.setAttribute('data-note-index', noteIndex);
                     circle.style.cursor = 'pointer';
 
                     circle.addEventListener('click', () => {
-                        playNote(noteIndex);
+                        playNote(midi, 0.6);
+                        circle.style.filter = 'brightness(1.5)';
+                        setTimeout(() => { circle.style.filter = ''; }, 200);
                     });
-
                     svg.appendChild(circle);
 
                     if (state.showNoteLabels || state.showIntervals) {
                         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                        label.setAttribute('x', x);
+                        label.setAttribute('x', cx);
                         label.setAttribute('y', y + 4);
                         label.setAttribute('text-anchor', 'middle');
                         label.setAttribute('class', 'note-label');
                         label.setAttribute('fill', '#000');
-
+                        label.setAttribute('opacity', opacity);
                         if (state.showIntervals) {
-                            label.textContent = INTERVALS[noteIndex] || '';
+                            label.textContent = INTERVALS[(noteIndex - keyIndex + 12) % 12] || '';
                         } else {
                             label.textContent = NOTES[noteIndex];
                         }
-
                         svg.appendChild(label);
                     }
+                }
+            }
+
+            // Draw chord tones on top (big, bright, with white outline)
+            if (chordToneMap) {
+                for (let s = 0; s < Math.min(stringCount, transposed.chordFrets.length); s++) {
+                    const fret = transposed.chordFrets[s];
+                    if (fret < 0) continue; // muted string
+                    if (fret > fretCount) continue;
+
+                    const y = startY + stringSpacing * (stringCount - 1 - s);
+                    const midi = tuningMidi[s] + fret;
+                    const noteIndex = midi % 12;
+                    const isRoot = (noteIndex - keyIndex + 12) % 12 === 0;
+
+                    let cx;
+                    if (fret === 0) {
+                        cx = startX - 6;
+                    } else {
+                        cx = fretX(fret) - fretSpacing / 2;
+                    }
+
+                    // White outline ring to make chord tones pop
+                    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    ring.setAttribute('cx', cx);
+                    ring.setAttribute('cy', y);
+                    ring.setAttribute('r', 15);
+                    ring.setAttribute('fill', 'none');
+                    ring.setAttribute('stroke', isRoot ? '#ff7b54' : '#ffffff');
+                    ring.setAttribute('stroke-width', 2.5);
+                    ring.setAttribute('opacity', 0.8);
+                    svg.appendChild(ring);
+
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', cx);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', 13);
+                    circle.setAttribute('fill', isRoot ? COLORS.root : '#ffffff');
+                    circle.setAttribute('class', 'note-dot');
+                    circle.style.cursor = 'pointer';
+
+                    circle.addEventListener('click', () => {
+                        playNote(midi, 0.6);
+                        circle.style.filter = 'brightness(1.5)';
+                        setTimeout(() => { circle.style.filter = ''; }, 200);
+                    });
+                    svg.appendChild(circle);
+
+                    if (state.showNoteLabels || state.showIntervals) {
+                        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        label.setAttribute('x', cx);
+                        label.setAttribute('y', y + 4);
+                        label.setAttribute('text-anchor', 'middle');
+                        label.setAttribute('class', 'note-label');
+                        label.setAttribute('fill', isRoot ? '#fff' : '#000');
+                        label.setAttribute('font-weight', '700');
+                        if (state.showIntervals) {
+                            label.textContent = INTERVALS[(noteIndex - keyIndex + 12) % 12] || '';
+                        } else {
+                            label.textContent = NOTES[noteIndex];
+                        }
+                        svg.appendChild(label);
+                    }
+                }
+
+                // Draw X marks for muted strings
+                for (let s = 0; s < Math.min(stringCount, transposed.chordFrets.length); s++) {
+                    if (transposed.chordFrets[s] !== -1) continue;
+                    const y = startY + stringSpacing * (stringCount - 1 - s);
+                    const x = startX - 6;
+                    const xmark = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    xmark.setAttribute('x', x);
+                    xmark.setAttribute('y', y + 5);
+                    xmark.setAttribute('text-anchor', 'middle');
+                    xmark.setAttribute('fill', '#ff4757');
+                    xmark.setAttribute('font-size', '14');
+                    xmark.setAttribute('font-weight', '700');
+                    xmark.setAttribute('font-family', 'Outfit, sans-serif');
+                    xmark.textContent = 'X';
+                    svg.appendChild(xmark);
                 }
             }
 
@@ -990,20 +1237,25 @@
 
         function updateCAGEDInfo() {
             const info = document.getElementById('cagedInfo');
+            const scaleName = document.getElementById('scaleSelect').selectedOptions[0].text;
             if (state.cagedShape === 'all') {
-                info.textContent = 'Showing all scale positions on the fretboard.';
+                info.textContent = `Showing all ${state.key} ${scaleName} positions. Click any note to hear it.`;
             } else {
-                const shape = CAGED_POSITIONS[state.cagedShape];
-                info.textContent = `${shape.name} highlighted. Root position varies by tuning. Explore different keys to master this shape across the fretboard.`;
+                const t = getTransposedShape(state.cagedShape);
+                const shapeLetter = state.cagedShape.toUpperCase();
+                const familyLabel = FAMILY_LABELS[t.family] || '';
+                const openChordName = shapeLetter + familyLabel;
+                const targetChordName = state.key + familyLabel;
+                const fretStr = t.minFret === 0 ? 'open position' : `fret ${t.minFret}`;
+                info.innerHTML = `<strong>${openChordName}-shape ${targetChordName} chord</strong> — the open ${openChordName} form moved to ${fretStr}. ` +
+                    `Scale: ${state.key} ${scaleName}. White dots = chord tones, dimmed = scale tones. Click to hear.`;
             }
         }
 
+        // ── Event listeners ──
         document.getElementById('keySelect').addEventListener('change', (e) => {
             state.key = e.target.value;
-            if (state.droneOscillator) {
-                stopDrone();
-                startDrone();
-            }
+            if (state.droneOscillator) { stopDrone(); startDrone(); }
             drawFretboard();
         });
 
@@ -1050,11 +1302,8 @@
         });
 
         document.getElementById('droneToggle').addEventListener('change', (e) => {
-            if (e.target.checked) {
-                startDrone();
-            } else {
-                stopDrone();
-            }
+            if (e.target.checked) startDrone();
+            else stopDrone();
         });
 
         document.getElementById('bpmSlider').addEventListener('input', (e) => {
@@ -1063,19 +1312,14 @@
         });
 
         document.getElementById('metronomeBtn').addEventListener('click', () => {
-            if (state.metronomeRunning) {
-                stopMetronome();
-            } else {
-                startMetronome();
-            }
+            if (state.metronomeRunning) stopMetronome();
+            else startMetronome();
         });
 
         drawFretboard();
 
         document.addEventListener('click', () => {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+            if (audioContext.state === 'suspended') audioContext.resume();
         }, { once: true });
     </script>
 </body>

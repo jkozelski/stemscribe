@@ -22,6 +22,7 @@ from dependencies import (
     GUITAR_TAB_MODEL_AVAILABLE, BASS_MODEL_AVAILABLE, PIANO_MODEL_AVAILABLE,
     CHORD_DETECTOR_AVAILABLE, CHORD_DETECTOR_VERSION,
     GP_CONVERTER_AVAILABLE, NOTATION_CONVERTER_AVAILABLE, MUSIC21_AVAILABLE,
+    TRIMPLEXX_MODEL_AVAILABLE,
 )
 
 # Import callable objects only when available (these are used directly in this module)
@@ -69,6 +70,12 @@ try:
     )
 except ImportError:
     pass
+
+# Trimplexx guitar tablature model (string+fret output, highest priority for guitar)
+if TRIMPLEXX_MODEL_AVAILABLE:
+    from trimplexx_transcriber import (
+        TrimplexxTranscriber, transcribe_trimplexx,  # noqa: F401
+    )
 
 
 # ============ TRANSCRIPTION FUNCTIONS ============
@@ -324,7 +331,52 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
             # ==== MELODIC INSTRUMENTS ====
             stem_type = stem_name.lower().split('_')[0]  # Handle guitar_left, bass_right, etc.
 
-            # ---- HIGHEST PRIORITY: Guitar v3 NN model ----
+            # ---- HIGHEST PRIORITY: Trimplexx CRNN (string+fret output) ----
+            if stem_type == 'guitar' and TRIMPLEXX_MODEL_AVAILABLE:
+                logger.info(f"Transcribing {stem_name} with trimplexx CRNN (string+fret)...")
+                job.stage = f'Transcribing {stem_name} (trimplexx tablature)'
+
+                try:
+                    trimplexx = TrimplexxTranscriber()
+                    trimplexx_result = trimplexx.transcribe(
+                        audio_path=stem_path,
+                        output_dir=str(midi_output_dir),
+                        tempo_hint=job.metadata.get('tempo'),
+                    )
+
+                    if (trimplexx_result.midi_path
+                            and Path(trimplexx_result.midi_path).exists()
+                            and trimplexx_result.quality_score > 0.3):
+                        job.midi_files[stem_name] = trimplexx_result.midi_path
+                        job.transcription_quality[stem_name] = trimplexx_result.quality_score
+                        job.transcription_mode[stem_name] = 'trimplexx'
+
+                        # Store tab_data on the job for downstream Guitar Pro generation
+                        if not hasattr(job, 'tab_data'):
+                            job.tab_data = {}
+                        job.tab_data[stem_name] = trimplexx_result.tab_data
+
+                        logger.info(
+                            f"Trimplexx MIDI for {stem_name}: "
+                            f"{trimplexx_result.num_notes} notes, "
+                            f"range={trimplexx_result.pitch_range}, "
+                            f"polyphony={trimplexx_result.polyphony_avg:.1f}, "
+                            f"quality: {trimplexx_result.quality_score:.2f}, "
+                            f"tab_data: {len(trimplexx_result.tab_data)} notes with string+fret"
+                        )
+                        successful += 1
+                        job.progress = 60 + int((idx + 1) / total_stems * 35)
+                        continue
+                    else:
+                        quality = trimplexx_result.quality_score if trimplexx_result else 0
+                        logger.info(
+                            f"  Trimplexx quality too low ({quality:.2f}), "
+                            f"falling back to guitar v3 NN"
+                        )
+                except Exception as e:
+                    logger.warning(f"Trimplexx failed for {stem_name}: {e}")
+
+            # ---- FALLBACK: Guitar v3 NN model ----
             if stem_type == 'guitar' and GUITAR_NN_MODEL_AVAILABLE:
                 logger.info(f"Transcribing {stem_name} with guitar v3 NN model...")
                 job.stage = f'Transcribing {stem_name} (guitar v3 NN)'
@@ -690,12 +742,78 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
     return successful > 0
 
 
+def _store_progression_on_job(job: ProcessingJob, progression, detector_version: str):
+    """Store a ChordProgression result onto the job object."""
+    tuning_info = progression.tuning_info
+
+    job.chord_progression = []
+    for c in progression.chords:
+        chord_data = {
+            'time': c.time,
+            'duration': c.duration,
+            'chord': c.chord,
+            'root': c.root,
+            'quality': c.quality,
+            'confidence': c.confidence
+        }
+        if hasattr(c, 'bass') and c.bass:
+            chord_data['bass'] = c.bass
+        chord_data['detector_version'] = detector_version
+        if tuning_info and tuning_info.get('tuning_offset_semitones', 0) != 0:
+            chord_data['tuning_offset'] = tuning_info['tuning_offset_semitones']
+        job.chord_progression.append(chord_data)
+
+    job.detected_key = progression.key
+    if tuning_info:
+        job.tuning_info = {
+            'offset_semitones': tuning_info.get('tuning_offset_semitones', 0),
+            'tuning_name': tuning_info.get('tuning_name', 'Standard (E)'),
+            'detection_method': tuning_info.get('detection_method', 'none'),
+            'effective_a4': tuning_info.get('effective_a4', 440.0),
+        }
+
+
 def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
     """
-    Detect chord progression from original audio or mix of stems.
+    Detect chord progression — tries stem-aware detection first (multi-pitch
+    estimation on separated stems), falls back to BTC/V8 hybrid if that fails.
 
     Stores chords in job.chord_progression with timestamps.
     """
+    artist = job.metadata.get('artist', '') if job.metadata else ''
+    title = job.metadata.get('title', '') if job.metadata else ''
+
+    # ---- PRIMARY: Stem-aware chord detection (note assembly from separated stems) ----
+    has_guitar = 'guitar' in job.stems and Path(job.stems['guitar']).exists()
+    has_bass = 'bass' in job.stems and Path(job.stems['bass']).exists()
+    has_piano = 'piano' in job.stems and Path(job.stems['piano']).exists()
+
+    if has_guitar or has_piano:
+        try:
+            from stem_chord_detector import StemAwareChordDetector
+            job.stage = 'Detecting chords (stem-aware multi-pitch)'
+            logger.info("🎸 Stem-aware chord detection: analyzing individual stems with Basic Pitch...")
+
+            stem_detector = StemAwareChordDetector(min_duration=0.15)
+            progression = stem_detector.detect_from_stems(
+                guitar_path=job.stems.get('guitar') if has_guitar else None,
+                bass_path=job.stems.get('bass') if has_bass else None,
+                piano_path=job.stems.get('piano') if has_piano else None,
+                audio_path=str(audio_path),
+                artist=artist,
+                title=title,
+            )
+
+            if progression.chords and len(progression.chords) >= 3:
+                _store_progression_on_job(job, progression, 'stem_aware')
+                logger.info(f"✅ Stem-aware detection: {len(job.chord_progression)} chords, key: {progression.key}")
+                return
+            else:
+                logger.info(f"Stem-aware detection found only {len(progression.chords)} chords — falling back to BTC/V8")
+        except Exception as e:
+            logger.warning(f"Stem-aware chord detection failed, falling back to BTC/V8: {e}")
+
+    # ---- FALLBACK: BTC/V8/basic pattern-matching chord detection ----
     if not CHORD_DETECTOR_AVAILABLE:
         logger.info("Chord detector not available - skipping")
         return
@@ -708,14 +826,12 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
 
         # Prefer harmonic stems over full mix — drums/vocals confuse chord detection
         harmonic_stems = []
-        # Note: 'other' stem excluded — it contains noise/effects that confuse chord detection
         for stem_key in ('guitar', 'guitar_left', 'piano', 'bass'):
             if stem_key in job.stems and Path(job.stems[stem_key]).exists():
                 harmonic_stems.append(job.stems[stem_key])
 
         analyze_path = None
         if harmonic_stems:
-            # Mix harmonic stems together for cleaner chord signal
             try:
                 import librosa
                 import soundfile as sf
@@ -726,18 +842,15 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
                     if mixed is None:
                         mixed = y
                     else:
-                        # Pad to same length
                         max_len = max(len(mixed), len(y))
                         if len(mixed) < max_len:
                             mixed = np.pad(mixed, (0, max_len - len(mixed)))
                         if len(y) < max_len:
                             y = np.pad(y, (0, max_len - len(y)))
                         mixed = mixed + y
-                # Normalize
                 peak = np.max(np.abs(mixed))
                 if peak > 0:
                     mixed = mixed / peak * 0.9
-                # Write temp file
                 mix_path = Path(job.stems[harmonic_stems[0]]).parent / 'harmonic_mix.wav'
                 sf.write(str(mix_path), mixed, target_sr)
                 analyze_path = str(mix_path)
@@ -745,7 +858,6 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
             except Exception as e:
                 logger.warning(f"Harmonic stem mixing failed, falling back to original: {e}")
 
-        # Fallback to original audio
         if not analyze_path:
             if audio_path.exists():
                 analyze_path = str(audio_path)
@@ -754,46 +866,8 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
                 logger.info("No suitable source for chord detection")
                 return
 
-        # Pass artist/title for vocabulary-constrained detection
-        artist = job.metadata.get('artist', '') if job.metadata else ''
-        title = job.metadata.get('title', '') if job.metadata else ''
         progression = detector.detect(analyze_path, artist=artist, title=title)
-
-        # Tuning detection & correction is now handled inside ChordDetector.detect()
-        # so any caller gets corrected chords automatically. Extract tuning_info
-        # from the result for job metadata.
-        tuning_info = progression.tuning_info
-
-        # Store results - V8 includes bass note for inversions, older versions don't
-        job.chord_progression = []
-        for c in progression.chords:
-            chord_data = {
-                'time': c.time,
-                'duration': c.duration,
-                'chord': c.chord,
-                'root': c.root,
-                'quality': c.quality,
-                'confidence': c.confidence
-            }
-            # V8 adds bass note for chord inversions (e.g., C/E -> bass='E')
-            if hasattr(c, 'bass'):
-                chord_data['bass'] = c.bass
-            chord_data['detector_version'] = CHORD_DETECTOR_VERSION
-            # Store tuning info if detected
-            if tuning_info and tuning_info.get('tuning_offset_semitones', 0) != 0:
-                chord_data['tuning_offset'] = tuning_info['tuning_offset_semitones']
-            job.chord_progression.append(chord_data)
-
-        job.detected_key = progression.key
-        # Store tuning metadata on the job
-        if tuning_info:
-            job.tuning_info = {
-                'offset_semitones': tuning_info.get('tuning_offset_semitones', 0),
-                'tuning_name': tuning_info.get('tuning_name', 'Standard (E)'),
-                'detection_method': tuning_info.get('detection_method', 'none'),
-                'effective_a4': tuning_info.get('effective_a4', 440.0),
-            }
-
+        _store_progression_on_job(job, progression, CHORD_DETECTOR_VERSION)
         logger.info(f"✅ Detected {len(job.chord_progression)} chord changes, key: {progression.key} (model: {CHORD_DETECTOR_VERSION})")
 
     except Exception as e:

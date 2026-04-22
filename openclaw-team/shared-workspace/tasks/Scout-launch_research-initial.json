@@ -1,0 +1,18 @@
+{
+  "id": "task-initial-001",
+  "from": "Human",
+  "to": "Scout",
+  "type": "research_request",
+  "priority": "high",
+  "title": "Launch Day Research: Full Competitive Landscape Analysis",
+  "context": "This is the first task for the StemScribe agent team. Scout, run a comprehensive competitive analysis covering Moises, Chordify, LALAL.AI, and any new entrants in the stem separation / music transcription space. Check current pricing, recent feature launches, app store reviews, and Reddit sentiment. Save your report to shared-workspace/reports/competitor-analysis-initial.md. Then create tasks for Wordsmith and Megaphone based on your findings.",
+  "data": {
+    "competitors": ["Moises", "Chordify", "LALAL.AI", "RipX", "Melody Scanner"],
+    "platforms_to_check": ["reddit", "app_store", "play_store", "product_hunt"],
+    "keywords": ["stem separation", "chord recognition", "music transcription", "AI music"]
+  },
+  "created": "2026-02-10T19:00:00Z",
+  "status": "pending",
+  "completed_at": null,
+  "result": null
+}

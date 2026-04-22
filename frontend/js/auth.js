@@ -192,6 +192,7 @@ window.StemScribe = window.StemScribe || {};
                 }
                 if (notification.isSkippedMoment()) {
                     console.log('[Auth] Google prompt skipped:', notification.getSkippedReason());
+                    _renderAndClickGoogleButton();
                 }
             });
         }
@@ -290,16 +291,32 @@ window.StemScribe = window.StemScribe || {};
             signInBtns.forEach(function(btn) { btn.style.display = 'none'; });
             profileDropdowns.forEach(function(dd) {
                 dd.style.display = 'flex';
-                // Update avatar — show Google G icon as fallback when no profile picture
+                // Update avatar — letter-initial fallback when no profile picture or image fails
                 var avatar = dd.querySelector('.auth-profile-avatar');
                 var gIcon = dd.querySelector('.auth-google-profile-icon');
+                var letterAvatar = dd.querySelector('.auth-letter-avatar');
+
+                function _showLetterAvatar() {
+                    if (avatar) avatar.style.display = 'none';
+                    if (gIcon) gIcon.style.display = 'none';
+                    if (!letterAvatar) {
+                        letterAvatar = document.createElement('span');
+                        letterAvatar.className = 'auth-letter-avatar';
+                        letterAvatar.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ff7b54,#ff6b9d);color:#fff;font-weight:700;font-size:0.85rem;flex-shrink:0;';
+                        if (avatar) avatar.parentNode.insertBefore(letterAvatar, avatar);
+                    }
+                    letterAvatar.textContent = (SS.currentUser.display_name || SS.currentUser.email || '?')[0].toUpperCase();
+                    letterAvatar.style.display = 'inline-flex';
+                }
+
                 if (avatar && SS.currentUser.avatar_url) {
                     avatar.src = SS.currentUser.avatar_url;
                     avatar.style.display = 'block';
                     if (gIcon) gIcon.style.display = 'none';
-                } else if (avatar) {
-                    avatar.style.display = 'none';
-                    if (gIcon) gIcon.style.display = 'inline-block';
+                    if (letterAvatar) letterAvatar.style.display = 'none';
+                    avatar.onerror = function() { _showLetterAvatar(); };
+                } else {
+                    _showLetterAvatar();
                 }
                 // Update name
                 var nameEl = dd.querySelector('.auth-profile-name');

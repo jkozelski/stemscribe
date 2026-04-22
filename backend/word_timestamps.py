@@ -10,7 +10,13 @@ from typing import List, Dict, Optional
 logger = logging.getLogger(__name__)
 
 _model = None
-_model_size = "large-v3"
+
+# Use medium model on CPU (large-v3 OOMs on 8GB VPS with float32)
+# medium still gives excellent word timestamps at ~1.5GB RAM vs ~6GB for large
+import torch as _torch
+_model_size = "large-v3" if _torch.cuda.is_available() or (hasattr(_torch.backends, 'mps') and _torch.backends.mps.is_available()) else "medium"
+_compute_type = "float16" if _torch.cuda.is_available() else "int8" if _model_size == "medium" else "float32"
+del _torch
 
 
 def _get_model():
@@ -18,8 +24,8 @@ def _get_model():
     global _model
     if _model is None:
         from faster_whisper import WhisperModel
-        logger.info(f"Loading faster-whisper model ({_model_size})...")
-        _model = WhisperModel(_model_size, device="cpu", compute_type="float32")
+        logger.info(f"Loading faster-whisper model ({_model_size}, compute_type={_compute_type})...")
+        _model = WhisperModel(_model_size, device="cpu", compute_type=_compute_type)
         logger.info("faster-whisper model loaded")
     return _model
 

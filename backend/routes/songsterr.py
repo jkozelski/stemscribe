@@ -4,6 +4,7 @@ Songsterr integration — search for professional tabs and serve them as GP5 fil
 
 import io
 import logging
+import re as _re
 import urllib.parse
 import requests
 from flask import Blueprint, request, jsonify, send_file
@@ -14,6 +15,7 @@ songsterr_bp = Blueprint("songsterr", __name__)
 
 SONGSTERR_API = "https://www.songsterr.com/api"
 SONGSTERR_CDN = "https://dqsljvtekg760.cloudfront.net"
+CHORDPRO_CDN = "https://chordpro1.songsterr.com"
 
 
 @songsterr_bp.route('/api/songsterr/search', methods=['GET'])
@@ -183,13 +185,72 @@ DEFAULT_TUNING = [64, 59, 55, 50, 45, 40]  # standard guitar MIDI
 
 
 def _frets_to_notes(frets, tuning):
-    """Convert (string_index, fret) pairs to sorted (midi, note_name) list."""
+    """Convert (string_index, fret) pairs to sorted (midi, note_name) list.
+
+    Args:
+        frets: list of (string_index, fret) where string_index is 0-based
+               (0 = string 1 / high E in standard, 5 = string 6 / low E).
+        tuning: list of MIDI note numbers, index 0 = string 1, index 5 = string 6.
+                Default standard tuning: [64, 59, 55, 50, 45, 40].
+
+    Returns:
+        List of (midi_number, note_name) sorted by pitch (lowest first).
+    """
     result = []
     for string_idx, fret in frets:
-        if string_idx < len(tuning):
-            midi = tuning[string_idx] + fret
+        string_idx = int(string_idx)
+        fret = int(fret)
+        if 0 <= string_idx < len(tuning):
+            midi = int(tuning[string_idx]) + fret
             result.append((midi, NOTE_NAMES[midi % 12]))
     result.sort()  # lowest pitch first
+    return result
+
+
+def _notes_from_tab(tab_str, tuning=None):
+    """Convert a tab fret string to note names, one per string (6 to 1).
+
+    Args:
+        tab_str: Fret numbers as a string, one char per string from string 6
+                 (low E) to string 1 (high E). Use 'x' or 'X' for muted.
+                 Examples: "x02220" (A major), "022100" (E major).
+                 For frets >= 10, use a list of ints/strings instead.
+        tuning:  List of 6 MIDI note numbers [string6, string5, ..., string1]
+                 (low to high, i.e. the musician's perspective).
+                 If None, uses standard tuning E-A-D-G-B-E = [40, 45, 50, 55, 59, 64].
+
+    Returns:
+        List of note name strings from string 6 to string 1.
+        Muted strings are represented as 'x'.
+    """
+    # Standard tuning in low-to-high order (musician perspective)
+    if tuning is None:
+        tuning_low_to_high = [40, 45, 50, 55, 59, 64]
+    else:
+        tuning_low_to_high = list(tuning)
+
+    num_strings = len(tuning_low_to_high)
+
+    # Parse fret data
+    if isinstance(tab_str, str):
+        fret_chars = list(tab_str)
+    else:
+        fret_chars = [str(f) for f in tab_str]
+
+    if len(fret_chars) != num_strings:
+        raise ValueError(
+            f"Tab has {len(fret_chars)} entries but tuning has {num_strings} strings"
+        )
+
+    result = []
+    for i, fret_val in enumerate(fret_chars):
+        if fret_val.lower() == 'x':
+            result.append('x')
+        else:
+            fret = int(fret_val)
+            midi = tuning_low_to_high[i] + fret
+            result.append(NOTE_NAMES[midi % 12])
+
     return result
 
 
@@ -208,24 +269,63 @@ def _identify_chord(midi_notes):
         intervals = set((NOTE_NAMES.index(n) - root_midi) % 12 for n in note_names)
 
         name = None
-        priority = 0  # higher = better
+        priority = 0  # higher = better; complex chords score higher
 
-        # Major
-        if {0, 4, 7} <= intervals:
+        # --- Complex chords first (most intervals → highest priority) ---
+        has_fifth = 7 in intervals
+
+        # 7#9 / Hendrix chord: root + major 3rd + minor 7th + #9 (= minor 3rd)
+        # 5th often omitted in this voicing
+        if {0, 3, 4, 10} <= intervals:
+            name = root + '7#9'
+            priority = 7 if has_fifth else 6
+
+        # 9th: dominant 7th + major 9th (interval 2)
+        elif {0, 2, 4, 7, 10} <= intervals:
+            name = root + '9'
+            priority = 6
+
+        # 7sus4: sus4 + minor 7th
+        elif {0, 5, 7, 10} <= intervals:
+            name = root + '7sus4'
+            priority = 5
+
+        # m6: minor triad + major 6th (interval 9)
+        elif {0, 3, 7, 9} <= intervals:
+            name = root + 'm6'
+            priority = 5
+
+        # 6th: major triad + major 6th (interval 9)
+        elif {0, 4, 7, 9} <= intervals:
+            name = root + '6'
+            priority = 5
+
+        # add9: major triad + major 9th (interval 2), NO 7th
+        elif {0, 2, 4, 7} <= intervals and 10 not in intervals and 11 not in intervals:
+            name = root + 'add9'
+            priority = 5
+
+        # Major with extensions (5th may be omitted in 7th chords)
+        elif {0, 4, 7} <= intervals or ({0, 4} <= intervals and (10 in intervals or 11 in intervals)):
             if 10 in intervals:
                 name = root + '7'
+                priority = 4
             elif 11 in intervals:
                 name = root + 'maj7'
-            else:
+                priority = 4
+            elif has_fifth:
                 name = root
-            priority = 3
-        # Minor
-        elif {0, 3, 7} <= intervals:
+                priority = 3
+
+        # Minor with extensions (5th may be omitted in m7 chords)
+        elif {0, 3, 7} <= intervals or ({0, 3} <= intervals and 10 in intervals):
             if 10 in intervals:
                 name = root + 'm7'
-            else:
+                priority = 4
+            elif has_fifth:
                 name = root + 'm'
-            priority = 3
+                priority = 3
+
         # Sus4
         elif {0, 5, 7} <= intervals:
             name = root + 'sus4'
@@ -271,14 +371,18 @@ def _identify_chord(midi_notes):
 def _extract_chords_from_tracks(all_track_data):
     """Extract chord progression from Songsterr track data.
 
-    Uses native chord annotations (beat.chord.text) only.
+    Strategy:
+    1. Try native chord annotations (beat.chord.text) — most accurate
+    2. Fall back to identifying chords from the actual fret/note data
     """
     if not all_track_data:
         return []
 
     max_measures = max(len(t.get('measures', [])) for t in all_track_data)
     result = []
+    has_native_chords = False
 
+    # Pass 1: try native chord annotations
     for mi in range(max_measures):
         measure_chords = []
         sig = [4, 4]
@@ -300,6 +404,61 @@ def _extract_chords_from_tracks(all_track_data):
                         chord_name = chord_data['text'].strip()
                         if chord_name and (not measure_chords or measure_chords[-1] != chord_name):
                             measure_chords.append(chord_name)
+                            has_native_chords = True
+
+        result.append({
+            'measure': mi + 1,
+            'signature': sig,
+            'chords': measure_chords,
+        })
+
+    if has_native_chords:
+        return result
+
+    # Pass 2: no native annotations — identify chords from notes
+    # Pick the guitar track with the MOST chord beats (2+ simultaneous notes)
+    best_track = None
+    best_chord_count = 0
+    for tdata in all_track_data:
+        meta = tdata.get('_meta', {})
+        inst = (meta.get('instrument') or meta.get('name') or '').lower()
+        if 'drum' in inst or 'perc' in inst or 'bass' in inst or 'vocal' in inst or 'voice' in inst:
+            continue
+        chord_count = 0
+        for m in tdata.get('measures', []):
+            for v in m.get('voices', []):
+                for b in v.get('beats', []):
+                    if len(b.get('notes', [])) >= 2:
+                        chord_count += 1
+        if chord_count > best_chord_count:
+            best_chord_count = chord_count
+            best_track = tdata
+    rhythm_track = best_track
+
+    if not rhythm_track:
+        return result
+
+    tuning = (rhythm_track.get('_meta', {}).get('tuning') or DEFAULT_TUNING)
+    result = []
+
+    for mi, m in enumerate(rhythm_track.get('measures', [])):
+        sig = m.get('signature', [4, 4])
+        measure_chords = []
+
+        for v in m.get('voices', []):
+            for b in v.get('beats', []):
+                notes = b.get('notes', [])
+                if len(notes) < 2:
+                    continue
+                frets = []
+                for n in notes:
+                    if n.get('string') is not None and n.get('fret') is not None:
+                        frets.append((n['string'] - 1, n['fret']))
+                if len(frets) >= 2:
+                    midi_notes = _frets_to_notes(frets, tuning)
+                    chord_name = _identify_chord(midi_notes)
+                    if chord_name and (not measure_chords or measure_chords[-1] != chord_name):
+                        measure_chords.append(chord_name)
 
         result.append({
             'measure': mi + 1,
@@ -308,6 +467,215 @@ def _extract_chords_from_tracks(all_track_data):
         })
 
     return result
+
+
+_CHORDPRO_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/plain, application/json, */*',
+    'Accept-Encoding': 'gzip, deflate',
+}
+
+
+def fetch_chordpro(song_id):
+    """Fetch ChordPro text from Songsterr's ChordPro CDN.
+
+    Returns a tuple (raw_text, metadata_dict) where metadata_dict has
+    artist/title/songId from the chords API, or (None, None) if unavailable.
+    """
+    try:
+        # Step 1: get the chordpro hash and chordsRevisionId
+        resp = requests.get(
+            f"{SONGSTERR_API}/chords/{song_id}",
+            headers=_CHORDPRO_HEADERS,
+            timeout=(5, 8),  # (connect, read) timeouts
+        )
+        if resp.status_code == 404:
+            return None, None
+        resp.raise_for_status()
+        info = resp.json()
+
+        chordpro_hash = info.get('chordpro')
+        chords_revision_id = info.get('chordsRevisionId')
+        if not chordpro_hash or chords_revision_id is None:
+            return None, None
+
+        # Extract metadata from this same response (avoid second API call)
+        meta = {
+            'title': info.get('title', ''),
+            'artist': info.get('artist', ''),
+            'songId': song_id,
+        }
+
+        # Step 2: fetch the .chordpro file from the CDN
+        url = f"{CHORDPRO_CDN}/{song_id}/{chords_revision_id}/{chordpro_hash}.chordpro"
+        cp_resp = requests.get(url, headers=_CHORDPRO_HEADERS, timeout=(5, 8))
+        if cp_resp.status_code == 404:
+            return None, meta
+        cp_resp.raise_for_status()
+
+        text = cp_resp.text.strip()
+        return (text if text else None), meta
+
+    except requests.RequestException as e:
+        logger.debug(f"ChordPro fetch failed for song {song_id}: {e}")
+        return None, None
+
+
+def parse_chordpro(text):
+    """Parse ChordPro text into structured data for renderManualChordChart().
+
+    Returns a dict like:
+    {
+        "capo": 2,
+        "tuning": "Standard (EADGBE)",
+        "sections": [
+            {
+                "name": "Verse",
+                "lines": [
+                    {"chords": "Em7  G        Dsus4     A7sus4", "lyrics": "Today is gonna be the day"}
+                ]
+            }
+        ],
+        "source": "songsterr_chordpro"
+    }
+
+    Returns None if the ChordPro text has no actual chord content.
+    """
+    if not text:
+        return None
+
+    capo = None
+    tuning = None
+    sections = []
+    current_section = None
+    has_any_chords = False
+
+    for raw_line in text.split('\n'):
+        line = raw_line.rstrip()
+
+        # Parse directives: {key: value}
+        directive_match = _re.match(r'^\{(\w+):\s*(.*?)\}$', line.strip())
+        if directive_match:
+            key = directive_match.group(1).lower()
+            value = directive_match.group(2).strip()
+            if key == 'capo':
+                try:
+                    capo = int(value)
+                except ValueError:
+                    capo = value
+            elif key == 'tuning':
+                tuning = value
+            elif key == 'section':
+                current_section = {'name': value, 'lines': []}
+                sections.append(current_section)
+            continue
+
+        # Skip empty lines (but preserve structure)
+        if not line.strip():
+            continue
+
+        # Ensure we have a section container
+        if current_section is None:
+            current_section = {'name': 'Intro', 'lines': []}
+            sections.append(current_section)
+
+        # Parse chord+lyric lines: extract [Chord] markers
+        if '[' in line:
+            has_any_chords = True
+            # Build aligned chord line and lyric line
+            chords_line = ''
+            lyrics_line = ''
+            pos = 0
+            first_chord = True
+
+            for match in _re.finditer(r'\[([^\]]+)\]', line):
+                # Text before this chord marker (lyrics between chords)
+                pre_text = line[pos:match.start()]
+                # Remove any chord markers from pre_text (shouldn't be any, but safe)
+                clean_pre = _re.sub(r'\[([^\]]*)\]', '', pre_text)
+                lyrics_line += clean_pre
+
+                # Pad chord line to current lyrics position
+                while len(chords_line) < len(lyrics_line):
+                    chords_line += ' '
+
+                # Ensure minimum spacing between chords when separator is whitespace-only
+                if not first_chord and len(chords_line) > 0 and chords_line[-1] != ' ':
+                    # Separator text was shorter than chord name — add min gap
+                    min_gap = max(len(clean_pre), 3) if clean_pre.strip() == '' else 0
+                    target = len(chords_line) + min_gap
+                    while len(chords_line) < target:
+                        chords_line += ' '
+                    # Keep lyrics_line in sync so future chord positions align
+                    while len(lyrics_line) < len(chords_line):
+                        lyrics_line += ' '
+
+                chord_name = match.group(1)
+                chords_line += chord_name
+                first_chord = False
+
+                pos = match.end()
+
+            # Remaining text after last chord
+            remainder = line[pos:]
+            clean_remainder = _re.sub(r'\[([^\]]*)\]', '', remainder)
+            lyrics_line += clean_remainder
+
+            # Pad chords line if lyrics is longer
+            while len(chords_line) < len(lyrics_line):
+                chords_line += ' '
+
+            lyrics_stripped = lyrics_line.strip()
+            chords_stripped = chords_line.rstrip()
+
+            current_section['lines'].append({
+                'chords': chords_stripped,
+                'lyrics': lyrics_stripped if lyrics_stripped else None,
+            })
+        else:
+            # Pure lyrics line (no chords)
+            current_section['lines'].append({
+                'lyrics': line.strip(),
+            })
+
+    if not has_any_chords:
+        return None
+
+    result = {
+        'sections': sections,
+        'source': 'songsterr_chordpro',
+    }
+    if capo is not None:
+        result['capo'] = capo
+    if tuning:
+        result['tuning'] = tuning
+
+    return result
+
+
+@songsterr_bp.route('/api/songsterr/chordpro/<int:song_id>', methods=['GET'])
+def songsterr_chordpro(song_id):
+    """Fetch and parse ChordPro data from Songsterr CDN."""
+    try:
+        raw, meta = fetch_chordpro(song_id)
+        if not raw:
+            return jsonify({'error': 'No ChordPro data available'}), 404
+
+        parsed = parse_chordpro(raw)
+        if not parsed:
+            return jsonify({'error': 'ChordPro has no chord content'}), 404
+
+        # Add song metadata (already extracted from the chords API in fetch_chordpro)
+        if meta:
+            parsed['title'] = meta.get('title', '')
+            parsed['artist'] = meta.get('artist', '')
+            parsed['songId'] = meta.get('songId', song_id)
+
+        return jsonify(parsed)
+
+    except Exception as e:
+        logger.error(f"ChordPro endpoint error for song {song_id}: {e}", exc_info=True)
+        return jsonify({'error': 'ChordPro fetch failed', 'details': str(e)}), 500
 
 
 def fetch_chord_data(song_id):

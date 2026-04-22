@@ -3,6 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // Nuke ALL service worker caches and unregister SW
+    if ('caches' in window) {
+        caches.keys().then(function(names) {
+            names.forEach(function(name) { caches.delete(name); });
+        });
+    }
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { r.unregister(); });
+        });
+    }
+    </script>
     <title>StemScriber — Tear The Sound Apart</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff7b54">
@@ -14,7 +27,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
-    <meta name="description" content="Stem separation, practice tools, and karaoke. Upload any song and tear the sound apart.">
+    <meta name="description" content="Upload any song and separate it into stems. Practice with a professional chord chart, tuner, and fretboard visualizer.">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
@@ -27,6 +40,9 @@
     <link rel="stylesheet" href="css/karaoke.css">
     <link rel="stylesheet" href="css/auth.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
+    <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
+    <script src="js/analytics.js"></script>
 </head>
 <body>
 <!-- Beta gate disabled — open access for testing -->
@@ -44,9 +60,9 @@
         </div>
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
         <nav class="nav-links" id="navLinks">
-            <a href="practice.html">Practice Mode</a>
-            <button class="library-btn" id="libraryBtn">📚 Library</button>
-            <button class="settings-btn" id="settingsBtn">⚙️ Settings</button>
+            <a href="practice.html" class="library-btn" style="text-decoration: none;"><img src="/images/icons/practice.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Practice</a>
+            <button class="library-btn" id="libraryBtn"><img src="/images/icons/library.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Library</button>
+            <button class="settings-btn" id="settingsBtn"><img src="/images/icons/settings.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Settings</button>
             <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">🌙</button>
             <!-- Auth: Sign-In Button -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
@@ -170,41 +186,31 @@
             <div class="status-card" style="padding: 0.75rem;">
                 <div style="font-size: 0.75rem; color: var(--text-dim);">
                     <strong style="color: var(--neon-green);">Smart Mode:</strong> StemScriber automatically detects complexity and extracts every instrument. Dense mixes get deep extraction — simple tracks finish fast.<br><br>
-                    <strong style="color: var(--text-main);">One button, best result every time.</strong> No configuration needed.
+                    <strong style="color: var(--text-main);">One button. Best result every time.</strong> No configuration needed.
                 </div>
             </div>
 
             <!-- Notation Options -->
             <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <h5 style="margin: 0 0 0.75rem 0; color: var(--psych-blue);">📝 Notation Options</h5>
             </div>
+
+            <!-- GP5 tab generation hidden — Songsterr provides better tabs -->
+            <input type="hidden" id="gpTabsToggle">
 
             <div class="toggle-setting">
-                <div class="toggle-label">
-                    <span class="title"><img src="icons/custom/32/guitar-vintage.png" width="20" height="20" style="vertical-align:middle; border-radius:3px;"> Guitar Pro Tabs</span>
-                    <span class="desc">Generate .gp5 files with real tablature (+2-3 min)</span>
-                </div>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="gpTabsToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div class="toggle-setting" style="margin-top: 1rem;">
                 <div class="toggle-label">
                     <span class="title">♫ Chord Detection</span>
                     <span class="desc">Analyze chord progressions and key (+1-2 min)</span>
                 </div>
                 <label class="toggle-switch">
-                    <input type="checkbox" id="chordDetectionToggle" checked>
+                    <input type="checkbox" id="chordDetectionToggle">
                     <span class="toggle-slider"></span>
                 </label>
             </div>
 
             <div class="status-card" style="margin-top: 0.5rem; padding: 0.75rem;">
                 <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--psych-green);">💡 Quick Mode:</strong> Disable these options for faster processing (~5-7 min total).<br>
-                    You'll still get stems, MIDI, and standard notation.
+                    <strong style="color: var(--psych-green);">💡 Default:</strong> Off for fastest processing (~3-5 min). Enable to get a chord chart with diagrams &amp; lyrics.
                 </div>
             </div>
         </div>
@@ -236,7 +242,7 @@
     <div class="library-overlay" id="libraryOverlay"></div>
     <div class="library-panel" id="libraryPanel">
         <div class="library-header">
-            <h3>📚 Your Library</h3>
+            <h3><img src="/images/icons/library.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px;border-radius:4px;"> Your Library</h3>
             <button class="close-library" id="closeLibrary">×</button>
         </div>
         <div class="library-content">
@@ -254,9 +260,9 @@
 
     <div class="container">
         <section class="hero">
-            <span class="hero-label">Stem Separation & Transcription</span>
+            <span class="hero-label">Stem Separation & Practice Tools</span>
             <h1>Tear The <span class="highlight">Sound</span> Apart</h1>
-            <p>Drop any track and watch it split into pristine stems. Get tabs, sheet music, and practice tools. Learn from the masters.</p>
+            <p>Upload any song and split it into individual stems. Practice with a professional chord chart, a built-in tuner, and a fretboard visualizer.</p>
         </section>
 
         <section class="upload-section" id="uploadSection">
@@ -264,34 +270,44 @@
                 <button class="mode-btn active" data-mode="file">
                     <span>📁</span> Upload File
                 </button>
-                <button class="mode-btn" data-mode="url">
-                    <span>🔗</span> Paste Link
-                </button>
                 <button class="mode-btn" data-mode="archive">
                     <span><img src="icons/custom/32/vocals-vintage.png" width="18" height="18" style="vertical-align:middle; border-radius:3px;"></span> Live Music
                 </button>
             </div>
 
-            <div class="drop-zone" id="dropZone">
-                <div class="drop-icon">♫</div>
-                <div class="drop-title">Drop your track here</div>
-                <div class="drop-subtitle">MP3, WAV, FLAC, M4A, OGG • Up to 500MB</div>
-                <input type="file" class="file-input" id="fileInput" accept=".mp3,.wav,.flac,.m4a,.ogg,.aiff,.webm,.opus">
+            <!-- Hidden file input — outside the drop zone so clicks aren't swallowed -->
+            <input type="file" class="file-input" id="fileInput" accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg,.aiff,.webm,.opus,.wma" style="display:none">
+
+            <!-- Drop zone — drag-and-drop + click via label wrapping the whole zone -->
+            <label for="fileInput" style="display: block; cursor: pointer;">
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-icon">♫</div>
+                    <div class="drop-title">Got a song? We'll split it.</div>
+                    <div class="drop-subtitle">Drag & drop your audio file here — or click to browse<br>MP3, WAV, FLAC, M4A, AAC, OGG, AIFF • Up to 500MB</div>
+                </div>
+            </label>
+
+            <!-- Browse Files — label triggers file input natively, no JS needed -->
+            <div style="margin-top: 1.25rem; display: flex; justify-content: center; position: relative; z-index: 10;">
+                <label for="fileInput" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink)); border: none; border-radius: 12px; color: #fff; cursor: pointer; font-family: 'Righteous', cursive; font-size: 1rem; letter-spacing: 0.5px; box-shadow: 0 4px 20px rgba(255,123,84,0.3); transition: all 0.2s;">
+                    📁 Browse Files
+                </label>
             </div>
 
-            <div class="url-section" id="urlSection">
-                <div class="url-input-wrapper">
-                    <input type="text" class="url-input" id="urlInput" placeholder="Paste a Spotify, Apple Music, YouTube, SoundCloud, or Archive.org link...">
+            <!-- Where to find music — each is a real link to the actual service -->
+            <div style="margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-dim); line-height: 2; text-align: center; max-width: 500px; margin-left: auto; margin-right: auto;">
+                <div style="color: var(--text); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Need a file? Check these spots:</div>
+                <div style="text-align: left; max-width: 440px; margin: 0 auto; line-height: 2;">
+                    🍎 <strong>Music app</strong> (Mac) — right-click any song → Show in Finder<br>
+                    💿 <strong>iTunes purchases</strong> — already on your computer as MP3/AAC files<br>
+                    🎵 <strong>Bandcamp</strong> — re-download anything you've bought<br>
+                    📂 <strong>Cloud storage</strong> — check Google Drive, iCloud, or Dropbox for audio files<br>
+                    🛒 <strong>Amazon purchases</strong> — open Amazon Music app → My Music → download
                 </div>
-                <div class="platforms">
-                    <span class="platform-pill" style="border-color: #1DB954; color: #1DB954;">♪ Spotify</span>
-                    <span class="platform-pill" style="border-color: #fc3c44; color: #fc3c44;">🍎 Apple Music</span>
-                    <span class="platform-pill" style="border-color: #FF0000; color: #FF0000;">▶️ YouTube</span>
-                    <span class="platform-pill" style="border-color: #FF7700; color: #FF7700;">☁️ SoundCloud</span>
-                    <span class="platform-pill" style="border-color: #1DA0C3; color: #1DA0C3;">♫ Bandcamp</span>
-                    <span class="platform-pill clickable" style="border-color: var(--psych-teal); color: var(--psych-teal);" onclick="document.querySelector('[data-mode=archive]').click()"><img src="icons/custom/32/vocals-vintage.png" width="18" height="18" style="vertical-align:middle; border-radius:3px;"> Archive.org</span>
-                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-dim); font-style: italic;">Any MP3, WAV, FLAC, or M4A file you own will work.</div>
             </div>
+
+            <!-- URL input removed -->
 
             <!-- Archive.org Live Music Browser -->
             <div class="archive-section" id="archiveSection">
@@ -304,10 +320,9 @@
                     <div class="archive-filters">
                         <input type="text" class="archive-year-input" id="archiveYearInput" placeholder="Year" maxlength="4">
                         <span class="archive-filter" data-collection="GratefulDead">Grateful Dead</span>
-                        <span class="archive-filter" data-collection="UmphreysMcGee">Umphrey's</span>
                         <span class="archive-filter" data-collection="WidespreadPanic">Widespread Panic</span>
-                        <span class="archive-filter" data-collection="StringCheeseIncident">String Cheese</span>
-                        <span class="archive-filter" data-collection="mloaf">moe.</span>
+                        <span class="archive-filter" data-collection="TedeschiTrucksBand">Tedeschi Trucks</span>
+                        <span class="archive-filter" data-collection="LittleFeat">Little Feat</span>
                         <span class="archive-filter" data-collection="etree">All Bands</span>
                     </div>
                     <div id="archiveResults" class="archive-results">
@@ -333,7 +348,7 @@
                 <div class="vinyl"></div>
                 <div class="vinyl-label">♫</div>
             </div>
-            <div class="stage-text" id="stageText">Separating stems (6-stem model)</div>
+            <div class="stage-text" id="stageText">Tuning up...</div>
             <div class="progress-container">
                 <!-- City Skyline - Cross Country Tour -->
                 <div class="city-skyline">
@@ -622,7 +637,8 @@
                             <p id="artistBio"></p>
                             <a id="wikiLink" href="#" target="_blank" style="display: none;">Read more on Wikipedia →</a>
                             <a id="wikiSearchLink" href="#" target="_blank" style="display: none; color: var(--psych-blue); text-decoration: none; font-size: 0.9em; margin-left: 8px;">Search Wikipedia →</a>
-                            <a id="artistWebsiteLink" href="#" target="_blank" style="display: none; color: var(--psych-orange); text-decoration: none; font-size: 0.9em; margin-left: 8px;">Visit Artist Website →</a>
+                            <a id="artistWebsiteLink" href="#" target="_blank" style="display: none; color: var(--psych-orange); text-decoration: none; font-size: 0.9em; margin-left: 8px;">Artist Website →</a>
+                            <a id="spotifyLink" href="#" target="_blank" style="display: none; color: #1DB954; text-decoration: none; font-size: 0.9em; margin-left: 8px;">Spotify →</a>
                         </div>
                         <div class="info-section" id="songInfoSection" style="display: none;">
                             <h4>♫ About the Song</h4>
@@ -639,7 +655,7 @@
                             <div id="personnelList"></div>
                         </div>
                         <div class="info-section" id="learningTipsSection">
-                            <h4>📚 Learning Tips</h4>
+                            <h4>🎧 Learning Tips</h4>
                             <p id="learningTips"></p>
                         </div>
                         <div class="info-section" id="stemTipsSection">
@@ -698,11 +714,18 @@
 
             <div class="practice-cta">
                 <p style="margin-bottom: 1rem; color: var(--text-dim);">Ready to learn this track?</p>
-                <button class="practice-btn" id="practiceBtn" onclick="openPracticeMode()">
-                    🎯 Open Practice Mode
+                <button class="practice-btn" id="practiceBtn" onclick="var jid = (window.StemScribe && (StemScribe.currentJobId || (StemScribe.currentJob && StemScribe.currentJob.job_id))); window.open('practice.html' + (jid ? '?job=' + jid : ''), '_blank');">
+                    <img src="/images/icons/practice.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Open Practice Mode
                 </button>
-                <button class="practice-btn" id="karaokeBtn" onclick="window.location.href='/karaoke.html?job=' + StemScribe.currentJobId" style="margin-left: 1rem; background: linear-gradient(135deg, #00ff88, #00ccff); color: #0d0d12;">
+                <!-- Karaoke hidden until lyrics licensing is in place -->
+                <button class="practice-btn" id="karaokeBtn" onclick="window.location.href='/karaoke.html?job=' + (StemScribe.currentJobId || (StemScribe.currentJob && StemScribe.currentJob.job_id))" style="display:none; margin-left: 1rem; background: linear-gradient(135deg, #00ff88, #00ccff); color: #0d0d12;">
                     <img src="icons/custom/32/vocals-vintage.png" width="18" height="18" style="vertical-align:middle; border-radius:3px;"> Karaoke Mode
+                </button>
+                <button class="practice-btn" id="downloadZipBtn" onclick="StemScribe.downloadStemsZip()" style="margin-left: 1rem; background: linear-gradient(135deg, #ff7b54, #ffcc47); color: #0d0d12;">
+                    <span id="downloadZipIcon">&#x1F4E6;</span> <span id="downloadZipLabel">Download Stems (ZIP)</span>
+                </button>
+                <button class="practice-btn" id="exportDriveBtn" onclick="StemScribe.exportToDrive(StemScribe.currentJobId || (StemScribe.currentJob &amp;&amp; StemScribe.currentJob.job_id), this)" style="margin-left: 1rem; background: linear-gradient(135deg, #4285f4, #34a853); color: #fff;">
+                    <span>☁</span> <span>Export to Drive</span>
                 </button>
             </div>
 
@@ -751,22 +774,63 @@
         </div>
     </div>
 
-    <footer class="footer">
-        <div style="display:flex; justify-content:center; gap:1.25rem; margin-bottom:1rem;">
-            <a href="https://twitter.com/stemscribe" target="_blank" rel="noopener" title="X / Twitter" style="color:var(--text-dim); transition:color 0.2s;" onmouseover="this.style.color='#e8e4df'" onmouseout="this.style.color='var(--text-dim)'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.258 5.63 5.906-5.63Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
-            </a>
-            <a href="https://facebook.com/stemscribe" target="_blank" rel="noopener" title="Facebook" style="color:var(--text-dim); transition:color 0.2s;" onmouseover="this.style.color='#e8e4df'" onmouseout="this.style.color='var(--text-dim)'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </a>
-            <a href="https://instagram.com/stemscribe" target="_blank" rel="noopener" title="Instagram" style="color:var(--text-dim); transition:color 0.2s;" onmouseover="this.style.color='#e8e4df'" onmouseout="this.style.color='var(--text-dim)'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-            </a>
-            <a href="https://tiktok.com/@stemscribe" target="_blank" rel="noopener" title="TikTok" style="color:var(--text-dim); transition:color 0.2s;" onmouseover="this.style.color='#e8e4df'" onmouseout="this.style.color='var(--text-dim)'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.55V6.79a4.85 4.85 0 01-1.07-.1z"/></svg>
-            </a>
+    <style>
+        .site-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 3rem 2rem 1.5rem; margin-top: 3rem; }
+        .site-footer .footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr; gap: 2.5rem; align-items: start; }
+        .site-footer .footer-brand-block { display: flex; flex-direction: column; gap: 0.5rem; }
+        .site-footer .footer-brand { display: flex; align-items: center; gap: 0.5rem; }
+        .site-footer .footer-brand img { width: 28px; height: 28px; border-radius: 4px; object-fit: contain; }
+        .site-footer .footer-brand .logo-text { font-family: 'Righteous', cursive; font-size: 1.1rem; color: var(--text-dim); }
+        .site-footer .footer-tagline { font-size: 0.75rem; color: var(--text-dim); margin: 0; }
+        .site-footer .footer-col { display: flex; flex-direction: column; gap: 0.5rem; }
+        .site-footer .footer-col-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); font-weight: 600; margin-bottom: 0.5rem; opacity: 0.85; }
+        .site-footer .footer-col a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s; line-height: 1.6; }
+        .site-footer .footer-col a:hover { color: var(--text); }
+        .site-footer .footer-bottom { max-width: 1100px; margin: 2.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.04); font-size: 0.75rem; color: var(--text-dim); text-align: center; }
+        @media (max-width: 900px) { .site-footer .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem 1.5rem; } .site-footer .footer-brand-block { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 1rem; } .site-footer .footer-tagline { margin: 0; } }
+        @media (max-width: 500px) { .site-footer .footer-grid { grid-template-columns: 1fr; } }
+    </style>
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-brand-block">
+                <div class="footer-brand">
+                    <img src="/images/logomark.png" alt="StemScriber logo" width="28" height="28">
+                    <span class="logo-text">StemScriber</span>
+                </div>
+                <p class="footer-tagline">Tear The Sound Apart</p>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Product</div>
+                <a href="/landing.html#features">Features</a>
+                <a href="/landing.html#how-it-works">How It Works</a>
+                <a href="/landing.html#pricing">Pricing</a>
+                <a href="/app">Launch App</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Help</div>
+                <a href="/help.html">Help Center</a>
+                <a href="mailto:support@stemscriber.com">Contact us</a>
+                <a href="tel:+18447915323">(844) 791-5323</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Legal</div>
+                <a href="/terms.html">Terms of Service</a>
+                <a href="/privacy.html">Privacy Policy</a>
+                <a href="/dmca.html">DMCA</a>
+                <a href="/billing-faq.html">Billing FAQ</a>
+                <a href="/credits.html">Open Source Credits</a>
+            </div>
+            <div class="footer-col">
+                <div class="footer-col-title">Connect</div>
+                <a href="https://www.facebook.com/profile.php?id=61582164772137" target="_blank" rel="noopener">Facebook</a>
+                <a href="https://www.instagram.com/stemscriber" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://x.com/stemscriber" target="_blank" rel="noopener">X</a>
+                <a href="https://www.tiktok.com/@stemscriber" target="_blank" rel="noopener">TikTok</a>
+            </div>
         </div>
-        <p>&copy; 2026 StemScriber &nbsp;|&nbsp; <a href="/contact.html" style="color: var(--text-dim); text-decoration: none;">Support</a></p>
+        <div class="footer-bottom">
+            &copy; 2026 StemScriber
+        </div>
     </footer>
 
     <!-- Wavesurfer.js CDN + Regions plugin (for A-B looping) -->
@@ -829,7 +893,7 @@
     })();
     </script>
 
-    <!-- StemScribe JS Modules -->
+    <!-- StemScriber JS Modules -->
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/utils.js"></script>
@@ -848,9 +912,11 @@
     <script>
         // Register service worker for PWA
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(function(err) {
-                console.log('SW registration skipped:', err.message);
-            });
+            /* SW disabled — cache was causing stale JS issues */
+            // navigator.serviceWorker.register('/sw.js').catch(function(err) {
+            //     console.log('SW registration skipped:', err.message);
+            // });
+            void(0);
         }
     </script>
 </body>

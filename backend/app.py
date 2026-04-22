@@ -60,12 +60,12 @@ def create_app():
         response.headers['Permissions-Policy'] = 'camera=(), microphone=(self), geolocation=()'
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com accounts.google.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com accounts.google.com plausible.io; "
             "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com cdnjs.cloudflare.com accounts.google.com; "
             "font-src 'self' fonts.gstatic.com cdn.jsdelivr.net cdnjs.cloudflare.com; "
             "img-src 'self' data: blob: *.googleusercontent.com *.ytimg.com i.scdn.co *.mzstatic.com; "
             "media-src 'self' blob:; "
-            "connect-src 'self' accounts.google.com; "
+            "connect-src 'self' accounts.google.com plausible.io; "
             "frame-src 'self' accounts.google.com; "
             "worker-src 'self' blob: cdn.jsdelivr.net; "
         )
@@ -88,6 +88,19 @@ def create_app():
 
     @app.route("/sitemap.xml")
     def serve_sitemap():
+        """Sitemap index pointing to static pages + chord pages sitemaps."""
+        from flask import Response
+        xml = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            '  <sitemap><loc>https://stemscriber.com/sitemap-static.xml</loc></sitemap>\n'
+            '  <sitemap><loc>https://stemscriber.com/sitemap-chords.xml</loc></sitemap>\n'
+            '</sitemapindex>'
+        )
+        return Response(xml, mimetype="application/xml")
+
+    @app.route("/sitemap-static.xml")
+    def serve_sitemap_static():
         return send_from_directory(FRONTEND_DIR, "sitemap.xml", mimetype="application/xml")
 
     @app.route("/")
@@ -163,6 +176,10 @@ def create_app():
     from routes.feedback import feedback_bp
     from routes.accuracy import accuracy_bp
     from routes.jazz_chords import jazz_bp
+    from chord_lookup import chord_library_bp
+    from routes.waitlist import waitlist_bp
+    # SEO chord pages DISABLED — served lyrics publicly (NMPA/Genius lawsuit risk)
+    # from routes.seo_chords import seo_chords_bp
 
     app.register_blueprint(api_bp)
     app.register_blueprint(library_bp)
@@ -183,6 +200,9 @@ def create_app():
     app.register_blueprint(feedback_bp)
     app.register_blueprint(accuracy_bp)
     app.register_blueprint(jazz_bp)
+    app.register_blueprint(chord_library_bp)
+    app.register_blueprint(waitlist_bp)
+    # app.register_blueprint(seo_chords_bp)  # DISABLED — lyric copyright exposure
 
     # Auth blueprint (JWT-protected endpoints)
     try:

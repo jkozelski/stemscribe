@@ -1,0 +1,114 @@
+{
+  "name": "StemScribe — Error Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "error-alert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-error",
+      "name": "Webhook — Error Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "error-alert"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Incoming error event payload\nconst errorData = $json.body || $json;\n\n// Track errors in static data with a rolling 1-hour window\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.errors) staticData.errors = [];\n\nconst now = Date.now();\nconst ONE_HOUR = 60 * 60 * 1000;\n\n// Add this error\nstaticData.errors.push({\n  timestamp: now,\n  type: errorData.error_type || errorData.type || 'unknown',\n  message: errorData.message || errorData.error || 'No message',\n  endpoint: errorData.endpoint || errorData.path || 'unknown'\n});\n\n// Prune errors older than 1 hour\nstaticData.errors = staticData.errors.filter(e => now - e.timestamp < ONE_HOUR);\n\nconst errorCount = staticData.errors.length;\nconst shouldAlert = errorCount > 3;\n\n// Get unique error types for summary\nconst errorTypes = [...new Set(staticData.errors.map(e => e.type))];\nconst latestError = staticData.errors[staticData.errors.length - 1];\n\nreturn [{\n  json: {\n    shouldAlert,\n    errorCount,\n    errorTypes: errorTypes.join(', '),\n    latestMessage: latestError.message,\n    latestEndpoint: latestError.endpoint,\n    windowStart: new Date(now - ONE_HOUR).toISOString(),\n    checkedAt: new Date(now).toISOString()\n  }\n}];"
+      },
+      "id": "count-errors",
+      "name": "Count Errors (1hr Window)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "threshold-check",
+              "leftValue": "={{ $json.shouldAlert }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-threshold",
+      "name": "IF > 3 Errors in 1hr",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "from": "+18447915323",
+        "to": "+18034149454",
+        "message": "=🚨 StemScribe alert: {{ $json.errorCount }} errors in the last hour.\nTypes: {{ $json.errorTypes }}\nLatest: {{ $json.latestMessage }}\nEndpoint: {{ $json.latestEndpoint }}\nCheck /api/errors/patterns"
+      },
+      "id": "sms-error-alert",
+      "name": "SMS Error Alert",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [960, 220],
+      "credentials": {
+        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScribe" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'received', errorCount: $json.errorCount, alerted: $json.shouldAlert }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-ok",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1200, 300]
+    }
+  ],
+  "connections": {
+    "Webhook — Error Event": {
+      "main": [
+        [{ "node": "Count Errors (1hr Window)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Count Errors (1hr Window)": {
+      "main": [
+        [{ "node": "IF > 3 Errors in 1hr", "type": "main", "index": 0 }]
+      ]
+    },
+    "IF > 3 Errors in 1hr": {
+      "main": [
+        [{ "node": "SMS Error Alert", "type": "main", "index": 0 }],
+        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+      ]
+    },
+    "SMS Error Alert": {
+      "main": [
+        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "errors": []
+    }
+  },
+  "tags": [{ "name": "StemScribe" }, { "name": "Alerts" }],
+  "triggerCount": 1,
+  "pinData": {},
+  "versionId": "1"
+}

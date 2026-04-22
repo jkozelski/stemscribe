@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StemScriber — Clip-On Tuner</title>
+    <title>StemScriber — Chromatic Tuner</title>
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
@@ -27,6 +27,7 @@
             --text: #e8e4df;
             --text-dim: #7a7a85;
             --border: #2a2a35;
+            --led-off: #2a2a35;
         }
 
         body {
@@ -92,167 +93,176 @@
             gap: 1.5rem;
         }
 
-        /* ── Tuner Card ── */
-        .tuner-card {
+        /* ── Tuner Housing ── */
+        .tuner-housing {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
             width: 100%;
-            max-width: 420px;
+            max-width: 520px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 2rem;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+            gap: 1.5rem;
         }
 
         /* ── Note Display ── */
-        .note-display {
+        .note-section {
             text-align: center;
+        }
+        .note-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 0.15rem;
         }
         .note-name {
             font-family: 'Righteous', cursive;
-            font-size: 6rem;
+            font-size: 4.5rem;
             line-height: 1;
-            color: var(--text);
+            color: var(--text-dim);
+            min-width: 2ch;
+            text-align: center;
             transition: color 0.15s;
-            min-height: 6rem;
+        }
+        .note-name.active { color: var(--text); }
+        .note-name.in-tune { color: var(--green); text-shadow: 0 0 20px rgba(0,255,136,0.4); }
+        .note-octave {
+            font-size: 1.8rem;
+            color: var(--text-dim);
+            font-family: 'Righteous', cursive;
+            transition: color 0.15s;
+        }
+        .note-freq {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-family: 'Outfit', sans-serif;
+            margin-top: 0.25rem;
+        }
+
+        /* ── LED Strip ── */
+        .led-section {
+            padding: 0.5rem 0;
+        }
+        .led-strip {
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .note-name.in-tune { color: var(--green); }
-        .note-name.flat { color: var(--blue); }
-        .note-name.sharp { color: var(--orange); }
-        .note-name.listening {
-            color: var(--text-dim);
-            font-size: 2.5rem;
-        }
-
-        .note-freq {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            margin-top: 0.25rem;
-            font-family: 'Outfit', sans-serif;
-            min-height: 1.3rem;
-        }
-        .note-octave {
-            font-size: 2rem;
-            color: var(--lavender);
-            font-family: 'Righteous', cursive;
-            vertical-align: super;
-            line-height: 1;
-        }
-
-        /* ── Meter ── */
-        .meter-wrap {
-            width: 100%;
-        }
-        .meter-label-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.72rem;
-            color: var(--text-dim);
-            margin-bottom: 0.5rem;
-            letter-spacing: 0.08em;
-        }
-        .meter-track {
-            position: relative;
-            height: 12px;
-            background: var(--bg-card2);
-            border-radius: 6px;
-            overflow: visible;
+            gap: 4px;
+            padding: 1rem 0.5rem;
+            background: var(--bg-deep);
+            border-radius: 12px;
             border: 1px solid var(--border);
         }
-        /* center marker */
-        .meter-track::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: -4px;
-            width: 2px;
-            height: 20px;
-            background: var(--text-dim);
-            border-radius: 1px;
-            transform: translateX(-50%);
-        }
-        .meter-needle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 16px;
-            height: 16px;
-            background: var(--text-dim);
+        .led {
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: left 0.08s ease-out, background 0.15s;
-            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            background: var(--led-off);
+            transition: background 0.08s, box-shadow 0.08s, opacity 0.08s;
+            flex-shrink: 0;
         }
-        .meter-needle.in-tune {
-            background: var(--green);
-            box-shadow: 0 0 12px var(--green);
+        .led.center {
+            width: 18px;
+            height: 18px;
         }
-        .meter-needle.flat { background: var(--blue); }
-        .meter-needle.sharp { background: var(--orange); }
-
-        .cents-display {
-            text-align: center;
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
+        /* Flat side labels */
+        .led-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0.5rem 0;
+            font-size: 0.65rem;
             color: var(--text-dim);
-            min-height: 1rem;
             font-family: 'Outfit', sans-serif;
         }
 
-        /* ── Status bar ── */
-        .status-bar {
+        /* ── Cents Display ── */
+        .cents-section {
+            text-align: center;
+        }
+        .cents-badge {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+            transition: color 0.15s;
+        }
+        .cents-badge.in-tune { color: var(--green); }
+        .cents-badge.flat { color: var(--blue); }
+        .cents-badge.sharp { color: var(--orange); }
+
+        /* ── Chromatic Strip ── */
+        .chromatic-strip {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .chromatic-note {
+            font-family: 'Righteous', cursive;
+            font-size: 0.8rem;
+            color: #444;
+            padding: 0.25rem 0.35rem;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+        .chromatic-note.active {
+            color: var(--text);
+            background: var(--bg-card2);
+        }
+        .chromatic-note.in-tune {
+            color: var(--green);
+            background: rgba(0,255,136,0.1);
+        }
+
+        /* ── Guitar String Buttons ── */
+        .string-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.4rem;
+        }
+        .string-btn {
+            background: var(--bg-card2);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-family: 'Righteous', cursive;
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+            cursor: default;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .string-btn.highlight {
+            background: rgba(0,255,136,0.15);
+            border-color: var(--green);
+            color: var(--green);
+            box-shadow: 0 0 10px rgba(0,255,136,0.2);
+        }
+        .string-btn.close {
+            background: rgba(255,123,84,0.12);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* ── Controls Row ── */
+        .controls-row {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-dim);
+            justify-content: space-between;
+            gap: 0.75rem;
         }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-dim);
-            flex-shrink: 0;
-        }
-        .status-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
-        .status-dot.error { background: var(--red); }
-
-        /* ── Start Button ── */
-        .start-btn {
-            background: linear-gradient(135deg, var(--orange), var(--pink));
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 0.85rem 2.5rem;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
-            letter-spacing: 0.04em;
-        }
-        .start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .start-btn:active { transform: translateY(0); }
-        .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        .start-btn.stop {
-            background: linear-gradient(135deg, #444, #333);
-        }
-
-        /* ── Reference pitch ── */
         .ref-row {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             font-size: 0.82rem;
             color: var(--text-dim);
         }
-        .ref-row label { white-space: nowrap; }
         .ref-input {
             background: var(--bg-card2);
             border: 1px solid var(--border);
@@ -261,41 +271,49 @@
             font-family: 'Space Grotesk', sans-serif;
             font-size: 0.82rem;
             padding: 0.3rem 0.5rem;
-            width: 70px;
+            width: 60px;
             text-align: center;
         }
-        .ref-input:focus { outline: none; border-color: var(--lavender); }
+        .ref-input:focus { outline: none; border-color: var(--orange); }
 
-        /* ── Note grid (standard guitar tuning reference) ── */
-        .string-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 0.4rem;
-            width: 100%;
+        .start-btn {
+            background: linear-gradient(135deg, #1a6a3a, #2a8a4a);
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.6rem 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.04em;
         }
-        .string-btn {
-            background: var(--bg-card2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+        .start-btn:hover { filter: brightness(1.15); }
+        .start-btn:active { transform: translateY(1px); }
+        .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .start-btn.stop { background: linear-gradient(135deg, #7a2a1a, #9a3a2a); }
+
+        /* Status */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
             color: var(--text-dim);
-            font-family: 'Righteous', cursive;
-            font-size: 1rem;
-            padding: 0.5rem 0;
-            cursor: default;
-            text-align: center;
         }
-        .string-btn.highlight {
-            background: rgba(0, 255, 136, 0.12);
-            border-color: var(--green);
-            color: var(--green);
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #444;
+            flex-shrink: 0;
         }
-        .string-btn.close {
-            background: rgba(255, 123, 84, 0.1);
-            border-color: var(--orange);
-            color: var(--orange);
-        }
+        .status-dot.active { background: var(--green); box-shadow: 0 0 6px rgba(0,255,136,0.5); }
+        .status-dot.error { background: var(--red); }
 
-        /* ── Error message ── */
+        /* Error */
         .error-msg {
             display: none;
             background: rgba(255, 71, 87, 0.12);
@@ -305,17 +323,26 @@
             font-size: 0.82rem;
             color: #ff8a95;
             text-align: center;
-            max-width: 420px;
+            max-width: 520px;
             width: 100%;
         }
         .error-msg.visible { display: block; }
 
-        /* ── Responsive ── */
+        /* Responsive */
         @media (max-width: 480px) {
-            .tuner-card { padding: 1.75rem 1.25rem; }
-            .note-name { font-size: 5rem; }
+            .tuner-housing { border-radius: 10px; padding: 1.25rem 1rem; gap: 1rem; }
+            .note-name { font-size: 3.5rem; }
+            .led { width: 11px; height: 11px; }
+            .led.center { width: 14px; height: 14px; }
+            .led-strip { gap: 3px; padding: 0.75rem 0.25rem; }
+            .chromatic-note { font-size: 0.7rem; padding: 0.2rem 0.25rem; }
+            .string-btn { font-size: 0.8rem; padding: 0.4rem 0; }
+            .start-btn { padding: 0.5rem 1.5rem; font-size: 0.82rem; }
         }
     </style>
+    <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
+    <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
+    <script src="js/analytics.js"></script>
 </head>
 <body>
 
@@ -324,7 +351,7 @@
         <span class="waveform-icon" aria-hidden="true"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
         <span class="logo-text">StemScriber</span>
     </a>
-    <span class="page-title">Clip-On Tuner</span>
+    <span class="page-title">Chromatic Tuner</span>
     <nav class="nav-links">
         <a href="/">Home</a>
         <a href="practice.html">Practice</a>
@@ -334,28 +361,48 @@
 
 <main class="main">
 
-    <div class="tuner-card">
+    <div class="tuner-housing">
 
-        <!-- Note display -->
-        <div class="note-display">
-            <div class="note-name listening" id="noteName">—</div>
-            <div class="note-freq" id="noteFreq"></div>
+        <!-- Note Display -->
+        <div class="note-section">
+            <div class="note-display">
+                <div class="note-name" id="noteName">--</div>
+                <span class="note-octave" id="noteOctave"></span>
+            </div>
+            <span class="note-freq" id="noteFreq"></span>
         </div>
 
-        <!-- Meter -->
-        <div class="meter-wrap">
-            <div class="meter-label-row">
-                <span>♭ FLAT</span>
-                <span>IN TUNE</span>
-                <span>SHARP ♯</span>
+        <!-- LED Strip -->
+        <div class="led-section">
+            <div class="led-strip" id="ledStrip"></div>
+            <div class="led-labels">
+                <span>FLAT</span>
+                <span>SHARP</span>
             </div>
-            <div class="meter-track">
-                <div class="meter-needle" id="needle"></div>
-            </div>
-            <div class="cents-display" id="centsDisplay"></div>
         </div>
 
-        <!-- Guitar string reference -->
+        <!-- Cents Display -->
+        <div class="cents-section">
+            <div class="cents-badge" id="centsBadge">--</div>
+        </div>
+
+        <!-- Chromatic Strip -->
+        <div class="chromatic-strip" id="chromaticStrip">
+            <span class="chromatic-note" data-note="C">C</span>
+            <span class="chromatic-note" data-note="C#">C#</span>
+            <span class="chromatic-note" data-note="D">D</span>
+            <span class="chromatic-note" data-note="D#">D#</span>
+            <span class="chromatic-note" data-note="E">E</span>
+            <span class="chromatic-note" data-note="F">F</span>
+            <span class="chromatic-note" data-note="F#">F#</span>
+            <span class="chromatic-note" data-note="G">G</span>
+            <span class="chromatic-note" data-note="G#">G#</span>
+            <span class="chromatic-note" data-note="A">A</span>
+            <span class="chromatic-note" data-note="A#">A#</span>
+            <span class="chromatic-note" data-note="B">B</span>
+        </div>
+
+        <!-- Guitar Strings -->
         <div class="string-grid" id="stringGrid">
             <div class="string-btn" data-note="E2">E2</div>
             <div class="string-btn" data-note="A2">A2</div>
@@ -365,15 +412,15 @@
             <div class="string-btn" data-note="E4">E4</div>
         </div>
 
-        <!-- Reference pitch -->
-        <div class="ref-row">
-            <label for="refPitch">Reference A4 =</label>
-            <input type="number" id="refPitch" class="ref-input" value="440" min="420" max="460" step="1">
-            <span>Hz</span>
+        <!-- Controls -->
+        <div class="controls-row">
+            <div class="ref-row">
+                <label for="refPitch">A4 =</label>
+                <input type="number" id="refPitch" class="ref-input" value="440" min="420" max="460" step="1">
+                <span>Hz</span>
+            </div>
+            <button class="start-btn" id="startBtn" onclick="toggleTuner()">Start</button>
         </div>
-
-        <!-- Start/Stop -->
-        <button class="start-btn" id="startBtn" onclick="toggleTuner()">Start Tuner</button>
 
         <!-- Status -->
         <div class="status-bar">
@@ -383,7 +430,6 @@
 
     </div>
 
-    <!-- Error message outside card -->
     <div class="error-msg" id="errorMsg"></div>
 
 </main>
@@ -391,7 +437,21 @@
 <script>
 'use strict';
 
-// ── State ──────────────────────────────────────────────────────────
+// ── Constants ──
+const LED_COUNT = 21;
+const CENTER_LED = 10; // 0-indexed, middle of 21
+
+// ── Build LED strip ──
+const ledStripEl = document.getElementById('ledStrip');
+const leds = [];
+for (let i = 0; i < LED_COUNT; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'led' + (i === CENTER_LED ? ' center' : '');
+    ledStripEl.appendChild(dot);
+    leds.push(dot);
+}
+
+// ── State ──
 let audioContext = null;
 let analyser = null;
 let mediaStream = null;
@@ -400,7 +460,6 @@ let isRunning = false;
 
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
-// Standard guitar strings (E2, A2, D3, G3, B3, E4) for highlight
 const GUITAR_NOTES = [
     { name: 'E2', midi: 40 },
     { name: 'A2', midi: 45 },
@@ -410,19 +469,20 @@ const GUITAR_NOTES = [
     { name: 'E4', midi: 64 },
 ];
 
-// ── DOM refs ───────────────────────────────────────────────────────
-const noteNameEl   = document.getElementById('noteName');
-const noteFreqEl   = document.getElementById('noteFreq');
-const needleEl     = document.getElementById('needle');
-const centsEl      = document.getElementById('centsDisplay');
-const statusDotEl  = document.getElementById('statusDot');
-const statusTextEl = document.getElementById('statusText');
-const startBtn     = document.getElementById('startBtn');
-const errorMsgEl   = document.getElementById('errorMsg');
-const refPitchEl   = document.getElementById('refPitch');
-const stringBtns   = document.querySelectorAll('.string-btn');
+// ── DOM refs ──
+const noteNameEl    = document.getElementById('noteName');
+const noteOctaveEl  = document.getElementById('noteOctave');
+const noteFreqEl    = document.getElementById('noteFreq');
+const centsBadgeEl  = document.getElementById('centsBadge');
+const statusDotEl   = document.getElementById('statusDot');
+const statusTextEl  = document.getElementById('statusText');
+const startBtn      = document.getElementById('startBtn');
+const errorMsgEl    = document.getElementById('errorMsg');
+const refPitchEl    = document.getElementById('refPitch');
+const stringBtns    = document.querySelectorAll('.string-btn');
+const chromaticNotes = document.querySelectorAll('.chromatic-note');
 
-// ── Helpers ────────────────────────────────────────────────────────
+// ── Helpers ──
 function getA4() {
     return parseFloat(refPitchEl.value) || 440;
 }
@@ -439,18 +499,16 @@ function freqToNoteInfo(freq) {
     return { name: NOTE_NAMES[noteIndex], octave, cents, midi, targetFreq };
 }
 
-// ── Pitch detection: autocorrelation ──────────────────────────────
+// ── Pitch detection: autocorrelation ──
 function detectPitch(buf, sampleRate) {
     const SIZE = buf.length;
     const MAX_SAMPLES = Math.floor(SIZE / 2);
 
-    // Find RMS — bail if signal too quiet
     let rms = 0;
     for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
     rms = Math.sqrt(rms / SIZE);
-    if (rms < 0.01) return -1;
+    if (rms < 0.005) return -1;
 
-    // Autocorrelation
     const corr = new Float32Array(MAX_SAMPLES);
     for (let lag = 0; lag < MAX_SAMPLES; lag++) {
         let s = 0;
@@ -460,7 +518,6 @@ function detectPitch(buf, sampleRate) {
         corr[lag] = s;
     }
 
-    // Find first dip, then first peak after it
     let d = 0;
     while (d < MAX_SAMPLES && corr[d] > corr[d + 1]) d++;
 
@@ -470,7 +527,6 @@ function detectPitch(buf, sampleRate) {
     }
     if (maxPos === -1 || maxVal < 0.01) return -1;
 
-    // Parabolic interpolation for sub-sample accuracy
     let x1 = maxPos - 1, x2 = maxPos, x3 = maxPos + 1;
     if (x1 < 0) x1 = 0;
     if (x3 >= MAX_SAMPLES) x3 = MAX_SAMPLES - 1;
@@ -479,94 +535,167 @@ function detectPitch(buf, sampleRate) {
     const refinedPos = a !== 0 ? x2 - b / (2 * a) : x2;
 
     const freq = sampleRate / refinedPos;
-    // Instrument range sanity check: ~27 Hz (A0) to ~5000 Hz
     if (freq < 27 || freq > 5000) return -1;
     return freq;
 }
 
-// ── Smoothing ─────────────────────────────────────────────────────
+// ── Smoothing ──
 let smoothedFreq = -1;
-const SMOOTH = 0.25; // lower = more smoothing
+const FREQ_SMOOTH = 0.4;
 
 function smoothFreq(raw) {
     if (raw < 0) return smoothedFreq;
     if (smoothedFreq < 0) { smoothedFreq = raw; return raw; }
-    smoothedFreq = smoothedFreq * (1 - SMOOTH) + raw * SMOOTH;
+    smoothedFreq = smoothedFreq * (1 - FREQ_SMOOTH) + raw * FREQ_SMOOTH;
     return smoothedFreq;
 }
 
-// ── UI update ─────────────────────────────────────────────────────
+// ── LED rendering ──
+function updateLEDs(cents) {
+    // cents: -50 to +50, or null for silent
+    if (cents === null) {
+        // All LEDs off
+        for (let i = 0; i < LED_COUNT; i++) {
+            leds[i].style.background = 'var(--led-off)';
+            leds[i].style.boxShadow = 'none';
+        }
+        return;
+    }
+
+    const absCents = Math.abs(cents);
+    const inTune = absCents <= 5;
+
+    // Map cents to LED position: -50 = led 0, 0 = led 10, +50 = led 20
+    const pos = CENTER_LED + (cents / 50) * CENTER_LED;
+    const clamped = Math.max(0, Math.min(LED_COUNT - 1, pos));
+
+    for (let i = 0; i < LED_COUNT; i++) {
+        const dist = Math.abs(i - clamped);
+
+        if (dist < 1.5) {
+            // This LED is lit
+            const brightness = Math.max(0, 1 - dist / 1.5);
+
+            if (inTune && i === CENTER_LED) {
+                // Center LED in tune — bright green
+                leds[i].style.background = 'var(--green)';
+                leds[i].style.boxShadow = '0 0 12px rgba(0,255,136,0.8), 0 0 24px rgba(0,255,136,0.4)';
+            } else if (inTune) {
+                // Near center, in tune zone — dimmer green
+                const a = brightness * 0.6;
+                leds[i].style.background = 'rgba(0,255,136,' + a + ')';
+                leds[i].style.boxShadow = '0 0 6px rgba(0,255,136,' + (a * 0.5) + ')';
+            } else if (cents < 0) {
+                // Flat — blue
+                const a = brightness;
+                leds[i].style.background = 'rgba(97,175,239,' + a + ')';
+                leds[i].style.boxShadow = '0 0 8px rgba(97,175,239,' + (a * 0.6) + ')';
+            } else {
+                // Sharp — orange
+                const a = brightness;
+                leds[i].style.background = 'rgba(255,123,84,' + a + ')';
+                leds[i].style.boxShadow = '0 0 8px rgba(255,123,84,' + (a * 0.6) + ')';
+            }
+        } else if (i === CENTER_LED && !inTune) {
+            // Center marker always dimly visible when not in tune
+            leds[i].style.background = '#1a3a2a';
+            leds[i].style.boxShadow = 'none';
+        } else {
+            // LED off
+            leds[i].style.background = 'var(--led-off)';
+            leds[i].style.boxShadow = 'none';
+        }
+    }
+}
+
+// ── UI update ──
 function updateUI(freq) {
     if (freq < 0) {
-        noteNameEl.textContent = '—';
-        noteNameEl.className = 'note-name listening';
+        noteNameEl.textContent = '--';
+        noteNameEl.className = 'note-name';
+        noteOctaveEl.textContent = '';
         noteFreqEl.textContent = '';
-        needleEl.style.left = '50%';
-        needleEl.className = 'meter-needle';
-        centsEl.textContent = '';
+        centsBadgeEl.textContent = '--';
+        centsBadgeEl.className = 'cents-badge';
+        updateLEDs(null);
         clearStringHighlights();
+        clearChromaticHighlights();
         return;
     }
 
     const { name, octave, cents, midi } = freqToNoteInfo(freq);
+    const absCents = Math.abs(cents);
+    const inTune = absCents <= 5;
 
-    // Note name + octave
-    noteNameEl.innerHTML = name + '<span class="note-octave">' + octave + '</span>';
+    // Note name
+    noteNameEl.textContent = name;
+    noteNameEl.className = 'note-name active' + (inTune ? ' in-tune' : '');
+    noteOctaveEl.textContent = octave;
     noteFreqEl.textContent = freq.toFixed(1) + ' Hz';
 
-    // Tuning class
-    const absCents = Math.abs(cents);
-    let tuneClass = '';
-    if (absCents <= 5) tuneClass = 'in-tune';
-    else if (cents < 0) tuneClass = 'flat';
-    else tuneClass = 'sharp';
-
-    noteNameEl.className = 'note-name ' + tuneClass;
-    needleEl.className = 'meter-needle ' + tuneClass;
-
-    // Meter needle position — clamp cents to ±50
-    const clampedCents = Math.max(-50, Math.min(50, cents));
-    const pct = ((clampedCents + 50) / 100) * 100;
-    needleEl.style.left = pct + '%';
-
-    // Cents label
-    if (absCents <= 5) {
-        centsEl.textContent = 'In tune';
+    // Cents badge
+    if (inTune) {
+        centsBadgeEl.textContent = 'IN TUNE';
+        centsBadgeEl.className = 'cents-badge in-tune';
+    } else if (cents < 0) {
+        centsBadgeEl.textContent = cents + 'c';
+        centsBadgeEl.className = 'cents-badge flat';
     } else {
-        centsEl.textContent = (cents > 0 ? '+' : '') + cents + ' cents ' + (cents < 0 ? '(flat)' : '(sharp)');
+        centsBadgeEl.textContent = '+' + cents + 'c';
+        centsBadgeEl.className = 'cents-badge sharp';
     }
 
-    // Highlight guitar strings
+    // LEDs
+    updateLEDs(cents);
+
+    // Chromatic strip
+    highlightChromatic(name, inTune);
+
+    // Guitar strings
     highlightStrings(midi, absCents);
 }
 
+function clearChromaticHighlights() {
+    chromaticNotes.forEach(function(n) { n.className = 'chromatic-note'; });
+}
+
+function highlightChromatic(noteName, inTune) {
+    chromaticNotes.forEach(function(n) {
+        if (n.dataset.note === noteName) {
+            n.className = 'chromatic-note active' + (inTune ? ' in-tune' : '');
+        } else {
+            n.className = 'chromatic-note';
+        }
+    });
+}
+
 function clearStringHighlights() {
-    stringBtns.forEach(b => b.className = 'string-btn');
+    stringBtns.forEach(function(b) { b.className = 'string-btn'; });
 }
 
 function highlightStrings(midi, absCents) {
-    stringBtns.forEach(b => {
-        const target = GUITAR_NOTES.find(n => n.name === b.dataset.note);
+    stringBtns.forEach(function(b) {
+        var target = GUITAR_NOTES.find(function(n) { return n.name === b.dataset.note; });
         if (!target) return;
-        const diff = Math.abs(midi - target.midi);
+        var diff = Math.abs(midi - target.midi);
         if (diff === 0 && absCents <= 5) b.className = 'string-btn highlight';
         else if (diff === 0) b.className = 'string-btn close';
         else b.className = 'string-btn';
     });
 }
 
-// ── Audio loop ────────────────────────────────────────────────────
+// ── Audio loop ──
 let silenceCount = 0;
-const SILENCE_THRESHOLD = 8; // frames of silence before clearing display
+const SILENCE_THRESHOLD = 10;
 
 function loop() {
     if (!isRunning) return;
     animFrameId = requestAnimationFrame(loop);
 
-    const buf = new Float32Array(analyser.fftSize);
+    var buf = new Float32Array(analyser.fftSize);
     analyser.getFloatTimeDomainData(buf);
 
-    const rawFreq = detectPitch(buf, audioContext.sampleRate);
+    var rawFreq = detectPitch(buf, audioContext.sampleRate);
 
     if (rawFreq < 0) {
         silenceCount++;
@@ -576,34 +705,25 @@ function loop() {
         }
     } else {
         silenceCount = 0;
-        const freq = smoothFreq(rawFreq);
+        var freq = smoothFreq(rawFreq);
         updateUI(freq);
     }
 }
 
-// ── Start / Stop ──────────────────────────────────────────────────
+// ── Start / Stop ──
 async function toggleTuner() {
-    if (isRunning) {
-        stopTuner();
-    } else {
-        await startTuner();
-    }
+    if (isRunning) { stopTuner(); }
+    else { await startTuner(); }
 }
 
 async function startTuner() {
     hideError();
     startBtn.disabled = true;
-    setStatus('Requesting microphone…', false);
+    setStatus('Requesting microphone...', false);
 
     try {
-        // Request mic — must be user gesture
         mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: false,
-                autoGainControl: false,
-                noiseSuppression: false,
-                latency: 0,
-            },
+            audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false, latency: 0 },
             video: false,
         });
     } catch (err) {
@@ -612,7 +732,6 @@ async function startTuner() {
         return;
     }
 
-    // Create / resume AudioContext
     if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -624,7 +743,7 @@ async function startTuner() {
     analyser.fftSize = 4096;
     analyser.smoothingTimeConstant = 0;
 
-    const source = audioContext.createMediaStreamSource(mediaStream);
+    var source = audioContext.createMediaStreamSource(mediaStream);
     source.connect(analyser);
 
     isRunning = true;
@@ -634,7 +753,7 @@ async function startTuner() {
     startBtn.textContent = 'Stop';
     startBtn.classList.add('stop');
     startBtn.disabled = false;
-    setStatus('Listening…', true);
+    setStatus('Listening...', true);
 
     loop();
 }
@@ -642,50 +761,33 @@ async function startTuner() {
 function stopTuner() {
     isRunning = false;
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+    if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
     if (analyser) { analyser.disconnect(); analyser = null; }
 
     updateUI(-1);
-    startBtn.textContent = 'Start Tuner';
+    startBtn.textContent = 'Start';
     startBtn.classList.remove('stop');
     setStatus('Click Start to enable microphone', false);
 }
 
-// ── Error handling ────────────────────────────────────────────────
+// ── Error handling ──
 function handleMicError(err) {
-    let msg = 'Could not access microphone.';
-    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        msg = 'Microphone permission denied. Please allow microphone access in your browser settings and try again.';
-    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        msg = 'No microphone found. Please connect a microphone and try again.';
-    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-        msg = 'Microphone is already in use by another app. Close it and try again.';
-    } else if (err.name === 'OverconstrainedError') {
-        msg = 'Microphone constraints not satisfied. Try a different device.';
-    } else if (err.name === 'SecurityError') {
-        msg = 'Microphone access blocked. This page must be served over HTTPS.';
-    }
+    var msg = 'Could not access microphone.';
+    if (err.name === 'NotAllowedError') msg = 'Microphone permission denied. Allow access in browser settings.';
+    else if (err.name === 'NotFoundError') msg = 'No microphone found. Connect one and try again.';
+    else if (err.name === 'NotReadableError') msg = 'Microphone in use by another app.';
     showError(msg);
     setStatus('Microphone error', false, true);
 }
 
-function showError(msg) {
-    errorMsgEl.textContent = msg;
-    errorMsgEl.classList.add('visible');
-}
-
-function hideError() {
-    errorMsgEl.classList.remove('visible');
-    errorMsgEl.textContent = '';
-}
-
+function showError(msg) { errorMsgEl.textContent = msg; errorMsgEl.classList.add('visible'); }
+function hideError() { errorMsgEl.classList.remove('visible'); errorMsgEl.textContent = ''; }
 function setStatus(text, active, error) {
     statusTextEl.textContent = text;
     statusDotEl.className = 'status-dot' + (active ? ' active' : '') + (error ? ' error' : '');
 }
 
-// ── Cleanup on page hide ──────────────────────────────────────────
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', function() {
     if (document.hidden && isRunning) stopTuner();
 });
 </script>

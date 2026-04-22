@@ -198,16 +198,16 @@
 
 .hero-headline {
     font-family: 'Bebas Neue', 'Space Grotesk', sans-serif;
-    font-size: 4rem;
-    line-height: 1.1;
+    font-size: 5.5rem;
+    line-height: 1.05;
     color: var(--text);
     margin-bottom: 1.5rem;
-    letter-spacing: 2px;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.05), 0 -1px 0 rgba(0,0,0,0.3);
+    letter-spacing: 4px;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.05), 0 -1px 0 rgba(0,0,0,0.3);
 }
 
 .hero-headline .highlight {
-    font-size: 5rem;
+    font-size: 7rem;
     display: block;
     background: linear-gradient(90deg, var(--psych-orange), var(--psych-pink), var(--psych-purple));
     -webkit-background-clip: text;
@@ -319,6 +319,196 @@
     margin-top: 1.5rem;
     font-size: 0.85rem;
     color: var(--text-dim);
+}
+
+/* Hero secondary subtitle */
+.hero-sub2 {
+    font-family: 'Outfit', 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    color: var(--text-dim);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    opacity: 0.7;
+}
+
+/* --- Stem Separation Demo Animation --- */
+
+.stem-demo {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stem-demo-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+}
+
+.stem-track {
+    width: 100%;
+    height: 32px;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.stem-track .stem-label {
+    position: absolute;
+    left: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.7);
+    z-index: 2;
+}
+
+.stem-waveform {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.stem-waveform svg {
+    display: block;
+    width: 200%;
+    height: 100%;
+    animation: waveform-scroll 8s linear infinite;
+}
+
+@keyframes waveform-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Mix track — white waveform on dark */
+.stem-mix {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 40px;
+}
+
+.stem-mix .stem-waveform svg {
+    animation-duration: 6s;
+}
+
+.stem-arrow {
+    color: var(--psych-orange);
+    animation: arrow-bounce 2s ease-in-out infinite;
+    margin: 0.25rem 0;
+}
+
+@keyframes arrow-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(4px); opacity: 1; }
+}
+
+.stem-tracks-split {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: stems-fan-in 1.5s ease-out both;
+}
+
+@keyframes stems-fan-in {
+    0% { opacity: 0; transform: scaleY(0.5); }
+    100% { opacity: 1; transform: scaleY(1); }
+}
+
+/* Individual stem colors */
+.stem-vocals  { background: rgba(255, 107, 157, 0.15); border: 1px solid rgba(255, 107, 157, 0.25); }
+.stem-guitar  { background: rgba(255, 123, 84,  0.15); border: 1px solid rgba(255, 123, 84,  0.25); }
+.stem-bass    { background: rgba(97,  175, 239, 0.15); border: 1px solid rgba(97,  175, 239, 0.25); }
+.stem-drums   { background: rgba(229, 192, 123, 0.15); border: 1px solid rgba(229, 192, 123, 0.25); }
+.stem-piano   { background: rgba(198, 120, 221, 0.15); border: 1px solid rgba(198, 120, 221, 0.25); }
+.stem-other   { background: rgba(86,  182, 194, 0.15); border: 1px solid rgba(86,  182, 194, 0.25); }
+
+/* Per-stem waveform scroll speeds (varied to feel organic) */
+.stem-vocals .stem-waveform svg { animation-duration: 7s; }
+.stem-guitar .stem-waveform svg { animation-duration: 9s; }
+.stem-bass   .stem-waveform svg { animation-duration: 12s; }
+.stem-drums  .stem-waveform svg { animation-duration: 6s; }
+.stem-piano  .stem-waveform svg { animation-duration: 10s; }
+.stem-other  .stem-waveform svg { animation-duration: 11s; }
+
+/* --- Email Capture --- */
+
+.email-capture {
+    margin-top: 2.5rem;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+}
+
+.email-capture-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.email-capture-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.email-capture-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.email-capture-input:focus {
+    border-color: var(--psych-orange);
+}
+
+.email-capture-input::placeholder {
+    color: var(--text-dim);
+}
+
+.email-capture-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+
+.email-capture-btn:hover { opacity: 0.9; }
+.email-capture-btn:disabled { opacity: 0.6; cursor: default; }
+
+.email-capture-msg {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    min-height: 1.2em;
 }
 
 /* --- Section Shared --- */
@@ -802,10 +992,70 @@
 
 .landing-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 3rem 2rem;
+    padding: 3rem 2rem 1.5rem;
+}
+
+.footer-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+.footer-brand-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer-tagline {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer-col-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    opacity: 0.85;
+}
+
+.footer-col a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+    line-height: 1.6;
+}
+
+.footer-col a:hover {
+    color: var(--text);
+}
+
+.footer-bottom {
+    max-width: 1100px;
+    margin: 2.5rem auto 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.75rem;
+    color: var(--text-dim);
     text-align: center;
 }
 
+/* Legacy footer-inner for back-compat — older flex layout if still used */
 .footer-inner {
     max-width: 1100px;
     margin: 0 auto;
@@ -814,6 +1064,32 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1.5rem;
+}
+
+/* Footer grid responsive breakpoints */
+@media (max-width: 900px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem 1.5rem;
+    }
+    .footer-brand-block {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+    .footer-tagline {
+        margin: 0;
+    }
+}
+
+@media (max-width: 500px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+    .footer-brand-block {
+        flex-direction: row;
+    }
 }
 
 .footer-brand {
@@ -937,6 +1213,34 @@
 
     .hero-subtitle {
         font-size: 1rem;
+    }
+
+    .hero-sub2 {
+        font-size: 0.9rem;
+    }
+
+    .stem-demo {
+        max-width: 100%;
+    }
+
+    .stem-track {
+        height: 26px;
+    }
+
+    .stem-mix {
+        height: 34px;
+    }
+
+    .email-capture-form {
+        flex-direction: column;
+    }
+
+    .email-capture-input {
+        font-size: 16px;  /* prevent iOS zoom */
+    }
+
+    .email-capture-btn {
+        min-height: 48px;
     }
 
     .steps-grid {

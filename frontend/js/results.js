@@ -8,6 +8,7 @@ window.StemScribe = window.StemScribe || {};
         document.getElementById('processingSection').classList.remove('active');
         document.getElementById('resultsSection').classList.add('active');
         SS.currentJob = job;
+        SS.currentJobId = job.job_id; // FIXED: always set so openPracticeMode has the ID
 
         // Reset mixer state
         Object.values(SS.stemAudios).forEach(function(s) { s.audio.pause(); });
@@ -177,6 +178,7 @@ window.StemScribe = window.StemScribe || {};
                         '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/stem/' + name + '" class="stem-btn raw" download title="Raw stem">\u2B07 Raw</a>' :
                         '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/stem/' + name + '" class="stem-btn" download>\u2B07 DL</a>'
                     ) +
+                    '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/stem/' + name + '/mp3" class="stem-btn mp3-dl" download title="Download as MP3">\u2B07 MP3</a>' +
                     ((job.musicxml_files?.[name] || job.gp_files?.[name]) ? '<button class="stem-btn notation" onclick="StemScribe.openNotationForStem(\'' + name + '\')" title="Open in Practice Mode">\u25B6 TAB</button>' : '') +
                     (job.musicxml_files?.[name] ? '<button class="stem-btn notation" onclick="StemScribe.exportPDFForStem(\'' + name + '\')" title="Export sheet music as PDF">\u{1F4C4} PDF</button>' : '') +
                     (hasMidi ? '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/midi/' + name + '" class="stem-btn midi" download title="Download MIDI file">\u{1F3B9}</a>' : '') +
@@ -379,25 +381,85 @@ window.StemScribe = window.StemScribe || {};
 
     // Navigation helpers
     SS.openPracticeMode = function() {
-        if (SS.currentJobId) {
-            window.open('practice.html?job=' + SS.currentJobId, '_blank');
+        if (window.SS_Analytics) SS_Analytics.practiceModeOpened();
+        var jobId = SS.currentJobId || (SS.currentJob && SS.currentJob.job_id);
+        if (jobId) {
+            window.open('practice.html?job=' + jobId, '_blank');
         } else {
             window.open('practice.html', '_blank');
         }
     };
 
     SS.openNotationForStem = function(stemName) {
-        if (SS.currentJobId) {
-            window.open('practice.html?job=' + SS.currentJobId + '&stem=' + stemName, '_blank');
+        var jobId = SS.currentJobId || (SS.currentJob && SS.currentJob.job_id);
+        if (jobId) {
+            window.open('practice.html?job=' + jobId + '&stem=' + stemName, '_blank');
         } else {
             window.open('practice.html', '_blank');
         }
     };
 
     SS.exportPDFForStem = function(stemName) {
-        if (SS.currentJobId) {
-            window.open('practice.html?job=' + SS.currentJobId + '&stem=' + stemName + '&autoExportPDF=true', '_blank');
+        var jobId = SS.currentJobId || (SS.currentJob && SS.currentJob.job_id);
+        if (jobId) {
+            window.open('practice.html?job=' + jobId + '&stem=' + stemName + '&autoExportPDF=true', '_blank');
         }
+    };
+
+    // Download all stems as ZIP
+    SS.downloadStemsZip = function() {
+        var jobId = SS.currentJobId || (SS.currentJob && SS.currentJob.job_id);
+        if (!jobId) return;
+
+        var btn = document.getElementById('downloadZipBtn');
+        var icon = document.getElementById('downloadZipIcon');
+        var label = document.getElementById('downloadZipLabel');
+        if (!btn) return;
+
+        // Show loading state
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.style.pointerEvents = 'none';
+        icon.textContent = '\u23F3';
+        label.textContent = 'Preparing ZIP...';
+
+        // Use fetch to track download, then trigger via blob URL
+        fetch(SS.API_BASE + '/download/' + jobId + '/zip', {
+            headers: SS.authHeaders ? SS.authHeaders() : {}
+        })
+        .then(function(response) {
+            if (!response.ok) throw new Error('Download failed');
+            return response.blob();
+        })
+        .then(function(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = (SS.currentJob && SS.currentJob.title ? SS.currentJob.title : 'stems') + '.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Reset button
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = '';
+            icon.textContent = '\uD83D\uDCE6';
+            label.textContent = 'Download Stems (ZIP)';
+        })
+        .catch(function(err) {
+            console.error('ZIP download error:', err);
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = '';
+            icon.textContent = '\u26A0\uFE0F';
+            label.textContent = 'Download Failed — Retry';
+            setTimeout(function() {
+                icon.textContent = '\uD83D\uDCE6';
+                label.textContent = 'Download Stems (ZIP)';
+            }, 3000);
+        });
     };
 
     // Expose globally for onclick handlers
