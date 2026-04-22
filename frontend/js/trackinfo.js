@@ -1,5 +1,5 @@
-// StemScribe — Track Info Panel & Player Name Mapping
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Track Info Panel & Player Name Mapping
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -69,7 +69,7 @@ window.StemScribe = window.StemScribe || {};
                 '<span style="color: var(--psych-pink);">' +
                     (isTimeout ? '\u23F1\uFE0F Request timed out (10s)' : '\u274C ' + SS.escapeHtml(error.message)) +
                 '</span>' +
-                '<button onclick="StemScribe.fetchTrackInfo()" style="margin-top: 10px; padding: 5px 15px; background: var(--psych-orange); border: none; border-radius: 4px; cursor: pointer; color: white;">Retry</button>';
+                '<button onclick="StemScriber.fetchTrackInfo()" style="margin-top: 10px; padding: 5px 15px; background: var(--psych-orange); border: none; border-radius: 4px; cursor: pointer; color: white;">Retry</button>';
         }
     };
 
@@ -301,4 +301,4 @@ window.StemScribe = window.StemScribe || {};
     // Expose globally for onclick handlers
     window.toggleTrackInfo = SS.toggleTrackInfo;
 
-})(window.StemScribe);
+})(window.StemScriber);

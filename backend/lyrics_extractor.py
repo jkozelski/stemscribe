@@ -2,7 +2,7 @@
 Lyrics Extractor — extracts timestamped lyrics from a vocals stem using faster-whisper.
 
 Produces line-level lyrics with start/end times for use in chord chart assembly,
-karaoke mode, and the StemScribe lyrics pipeline.
+karaoke mode, and the StemScriber lyrics pipeline.
 
 Uses the isolated vocals stem for much cleaner transcription than full mix.
 

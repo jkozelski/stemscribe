@@ -1,4 +1,4 @@
-# StemScribe UI Design Research
+# StemScriber UI Design Research
 **Date:** 2026-03-16
 **Palette:** Dark background, orange (#FF8800), yellow accents
 **Vibe:** Aged, weathered, vintage gear — realistic and premium
@@ -10,7 +10,7 @@
 ### Style 1: Weathered Vintage Gear (SELECTED - Primary)
 Instruments rendered with visible age, patina, and wear — road-worn guitar finishes, oxidized brass, cracked tolex, scratched chrome hardware. Sits between photorealism and stylized illustration. Musicians connect emotionally to gear that looks played and loved.
 
-**Why it works for StemScribe:** Warm-toned patina (aged brass, amber lacquer, worn sunburst finishes) naturally complements the orange (#FF8800) palette. Vintage gear has warm amber/honey tones that feel native to the app.
+**Why it works for StemScriber:** Warm-toned patina (aged brass, amber lacquer, worn sunburst finishes) naturally complements the orange (#FF8800) palette. Vintage gear has warm amber/honey tones that feel native to the app.
 
 **Scalability:** Best at 48px+. Below 32px, texture detail fades. Use simplified variants for sidebar.
 
@@ -117,7 +117,7 @@ Solid orange fill with gradient, inner glass highlight, soft glow halo. For prim
 - **Tech:** `linear-gradient`, `::after` pseudo-element highlight, box-shadow glow
 - **CSS:** `background: linear-gradient(180deg, #ffa033 0%, #FF8800 50%, #e67700 100%)`
 
-### Implementation Priority for StemScribe
+### Implementation Priority for StemScriber
 
 | Control | Best Approach | Priority |
 |---------|--------------|----------|
@@ -263,4 +263,4 @@ The design industry is moving toward **"Multi-Material & Luxe Finishes"** — la
 
 For music apps specifically, the industry has settled on **neo-skeuomorphic** — not the full photorealistic textures of 2010-era plugins, but enough 3D depth and hardware metaphor to feel tactile and familiar to musicians. Neural DSP and Native Instruments (Kontakt 7) lead this hybrid approach.
 
-StemScribe's aged/weathered direction is a strong differentiator — most music apps go pristine/modern. The vintage gear aesthetic speaks directly to working musicians who value instruments with history.
+StemScriber's aged/weathered direction is a strong differentiator — most music apps go pristine/modern. The vintage gear aesthetic speaks directly to working musicians who value instruments with history.

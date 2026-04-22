@@ -1,4 +1,4 @@
-# StemScribe Chord Detection Pipeline Audit
+# StemScriber Chord Detection Pipeline Audit
 
 **Date:** 2026-03-16
 **Auditor:** Agent 2 (Code Auditor)
@@ -274,7 +274,7 @@ These are more conservative thresholds but still produce garbage for guitar.
     "key": "Am",
     "chords_used": ["Am", "G", "F", "C"],
     "content": "[ch]Am[/ch]  [ch]G[/ch]\n[ch]F[/ch]  [ch]C[/ch]",
-    "source": "StemScribe AI (v10)",
+    "source": "StemScriber AI (v10)",
     "chord_events": [{"time": 0.0, "chord": "Am"}, ...]
 }
 ```

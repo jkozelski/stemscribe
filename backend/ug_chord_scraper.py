@@ -2,7 +2,7 @@
 UG Chord Scraper — bulk extract chord vocabularies from Ultimate Guitar.
 
 Scrapes chord sheets, extracts the chord names used in each song,
-and builds our own chord database (StemScribe format).
+and builds our own chord database (StemScriber format).
 
 Usage:
     python ug_chord_scraper.py --step search   # Build song URL list from popular artists

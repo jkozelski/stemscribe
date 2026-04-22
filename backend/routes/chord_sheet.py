@@ -4,7 +4,7 @@ into UG-style formatted chord sheets with chords positioned above lyrics.
 
 Supports two sources:
   1. Songsterr song_id → fetches chords from Songsterr
-  2. StemScribe job_id → uses our own BTC v10 chord detection
+  2. StemScriber job_id → uses our own BTC v10 chord detection
 
 Uses faster-whisper word-level timestamps when audio is available
 for accurate chord-over-word placement.
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 chord_sheet_bp = Blueprint("chord_sheet", __name__)
 
-# Directory where StemScribe stores job outputs
+# Directory where StemScriber stores job outputs
 OUTPUTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "outputs")
 
 
@@ -375,7 +375,7 @@ def generate_chord_sheet(song_id):
 
 @chord_sheet_bp.route("/api/chord-sheet/job/<job_id>", methods=["GET"])
 def generate_chord_sheet_from_job(job_id):
-    """Generate a chord sheet from a StemScribe job's own chord detection (BTC v10)."""
+    """Generate a chord sheet from a StemScriber job's own chord detection (BTC v10)."""
     if not validate_job_id(job_id):
         return jsonify({"error": "Invalid job ID"}), 400
     job = get_job(job_id)

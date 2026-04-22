@@ -4,8 +4,8 @@
   "to": "Wordsmith",
   "type": "content_request",
   "priority": "high",
-  "title": "Write Launch Blog Post: 'Free AI Stem Separation: How StemScribe Works'",
-  "context": "Write the first blog post for StemScribe's website. Target keyword: 'free stem separation tool 2026'. This should explain what stem separation is, how StemScribe works, and why it's different (cheaper than Moises, better jazz chord recognition, transposition). Include a clear CTA to try the free tier. Save to shared-workspace/content/blog/. Then create a task for Megaphone to distribute it.",
+  "title": "Write Launch Blog Post: 'Free AI Stem Separation: How StemScriber Works'",
+  "context": "Write the first blog post for StemScriber's website. Target keyword: 'free stem separation tool 2026'. This should explain what stem separation is, how StemScriber works, and why it's different (cheaper than Moises, better jazz chord recognition, transposition). Include a clear CTA to try the free tier. Save to shared-workspace/content/blog/. Then create a task for Megaphone to distribute it.",
   "data": {
     "target_keyword": "free stem separation tool 2026",
     "word_count": "1200-1500",

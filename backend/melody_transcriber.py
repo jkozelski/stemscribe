@@ -1,5 +1,5 @@
 """
-Monophonic Melody/Lead Transcriber for StemScribe
+Monophonic Melody/Lead Transcriber for StemScriber
 ===================================================
 Dedicated pipeline for extracting clean single-note lead lines from
 isolated stems (guitar, vocals, bass). Produces much cleaner tabs and
@@ -939,7 +939,7 @@ class MelodyExtractor:
 
 
 # ============================================================================
-# Convenience function (matches pattern of other StemScribe modules)
+# Convenience function (matches pattern of other StemScriber modules)
 # ============================================================================
 
 def transcribe_melody(audio_path: str, output_dir: str,

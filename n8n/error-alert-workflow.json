@@ -1,5 +1,5 @@
 {
-  "name": "StemScribe — Error Alert",
+  "name": "StemScriber — Error Alert",
   "nodes": [
     {
       "parameters": {
@@ -50,7 +50,7 @@
       "parameters": {
         "from": "+18447915323",
         "to": "+18034149454",
-        "message": "=🚨 StemScribe alert: {{ $json.errorCount }} errors in the last hour.\nTypes: {{ $json.errorTypes }}\nLatest: {{ $json.latestMessage }}\nEndpoint: {{ $json.latestEndpoint }}\nCheck /api/errors/patterns"
+        "message": "=🚨 StemScriber alert: {{ $json.errorCount }} errors in the last hour.\nTypes: {{ $json.errorTypes }}\nLatest: {{ $json.latestMessage }}\nEndpoint: {{ $json.latestEndpoint }}\nCheck /api/errors/patterns"
       },
       "id": "sms-error-alert",
       "name": "SMS Error Alert",
@@ -58,7 +58,7 @@
       "typeVersion": 1,
       "position": [960, 220],
       "credentials": {
-        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScribe" }
+        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScriber" }
       }
     },
     {
@@ -107,7 +107,7 @@
       "errors": []
     }
   },
-  "tags": [{ "name": "StemScribe" }, { "name": "Alerts" }],
+  "tags": [{ "name": "StemScriber" }, { "name": "Alerts" }],
   "triggerCount": 1,
   "pinData": {},
   "versionId": "1"

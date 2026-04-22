@@ -1,4 +1,4 @@
-# StemScribe Security Hardening Summary
+# StemScriber Security Hardening Summary
 
 **Date:** 2026-03-19
 **Context:** Beta hardening sprint — changes made by Agents 1-3, audited by Agent 4

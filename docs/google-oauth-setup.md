@@ -1,9 +1,9 @@
-# Google OAuth Setup for StemScribe
+# Google OAuth Setup for StemScriber
 
 ## 1. Create Google Cloud Project
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project named **StemScribe** (or select existing)
+2. Create a new project named **StemScriber** (or select existing)
 3. Enable **Google Identity Services** (no specific API needed for Sign-In with ID tokens)
 
 ## 2. Create OAuth Credentials
@@ -11,7 +11,7 @@
 1. Go to **APIs & Services > Credentials**
 2. Click **Create Credentials > OAuth Client ID**
 3. Application type: **Web application**
-4. Name: **StemScribe Web**
+4. Name: **StemScriber Web**
 5. **Authorized JavaScript origins:**
    - `https://stemscribe.io`
    - `http://localhost:5555`
@@ -24,7 +24,7 @@
 
 1. Go to **APIs & Services > OAuth consent screen**
 2. User type: **External**
-3. App name: **StemScribe**
+3. App name: **StemScriber**
 4. Support email: jeff@tidepoolartist.com
 5. Scopes: `email`, `profile`, `openid`
 6. Add test users if in testing mode

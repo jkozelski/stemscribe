@@ -70,7 +70,7 @@
             </button>
             <!-- Auth: Profile Dropdown -->
             <div class="auth-profile-dropdown">
-                <button class="auth-profile-btn" onclick="StemScribe.toggleProfileMenu(event)">
+                <button class="auth-profile-btn" onclick="StemScriber.toggleProfileMenu(event)">
                     <img class="auth-profile-avatar" src="" alt="">
                     <svg class="auth-google-profile-icon" viewBox="0 0 24 24" style="display:none;width:24px;height:24px;flex-shrink:0;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     <span class="auth-profile-name"></span>
@@ -85,7 +85,7 @@
                     <a href="/app" class="auth-menu-item">My Library</a>
                     <div class="auth-beta-input-row">
                         <input type="text" class="auth-beta-input" placeholder="STEM-XXXX-XXXX" maxlength="14">
-                        <button class="auth-beta-submit" onclick="StemScribe.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
+                        <button class="auth-beta-submit" onclick="StemScriber.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
                     </div>
                     <div class="auth-menu-divider"></div>
                     <button class="auth-menu-item danger" onclick="logout()">Sign Out</button>
@@ -713,13 +713,13 @@
 
             <div class="practice-cta">
                 <p style="margin-bottom: 1rem; color: var(--text-dim);">Ready to learn this track?</p>
-                <button class="practice-btn" id="practiceBtn" onclick="var jid = (window.StemScribe && (StemScribe.currentJobId || (StemScribe.currentJob && StemScribe.currentJob.job_id))); window.open('practice.html' + (jid ? '?job=' + jid : ''), '_blank');">
+                <button class="practice-btn" id="practiceBtn" onclick="var jid = (window.StemScriber && (StemScriber.currentJobId || (StemScriber.currentJob && StemScriber.currentJob.job_id))); window.open('practice.html' + (jid ? '?job=' + jid : ''), '_blank');">
                     <img src="/images/icons/practice.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Open Practice Mode
                 </button>
-                <button class="practice-btn" id="downloadZipBtn" onclick="StemScribe.downloadStemsZip()" style="margin-left: 1rem; background: linear-gradient(135deg, #ff7b54, #ffcc47); color: #0d0d12;">
+                <button class="practice-btn" id="downloadZipBtn" onclick="StemScriber.downloadStemsZip()" style="margin-left: 1rem; background: linear-gradient(135deg, #ff7b54, #ffcc47); color: #0d0d12;">
                     <span id="downloadZipIcon">&#x1F4E6;</span> <span id="downloadZipLabel">Download Stems (ZIP)</span>
                 </button>
-                <button class="practice-btn" id="exportDriveBtn" onclick="StemScribe.exportToDrive(StemScribe.currentJobId || (StemScribe.currentJob &amp;&amp; StemScribe.currentJob.job_id), this)" style="margin-left: 1rem; background: linear-gradient(135deg, #4285f4, #34a853); color: #fff;">
+                <button class="practice-btn" id="exportDriveBtn" onclick="StemScriber.exportToDrive(StemScriber.currentJobId || (StemScriber.currentJob &amp;&amp; StemScriber.currentJob.job_id), this)" style="margin-left: 1rem; background: linear-gradient(135deg, #4285f4, #34a853); color: #fff;">
                     <span>☁</span> <span>Export to Drive</span>
                 </button>
             </div>
@@ -728,11 +728,11 @@
 
     <!-- Keyboard Shortcuts Modal -->
     <div class="shortcuts-modal" id="shortcutsModal">
-        <div class="shortcuts-backdrop" onclick="StemScribe.hideShortcutsModal()"></div>
+        <div class="shortcuts-backdrop" onclick="StemScriber.hideShortcutsModal()"></div>
         <div class="shortcuts-content">
             <div class="shortcuts-header">
                 <h3>Keyboard Shortcuts</h3>
-                <button class="shortcuts-close" onclick="StemScribe.hideShortcutsModal()">&#215;</button>
+                <button class="shortcuts-close" onclick="StemScriber.hideShortcutsModal()">&#215;</button>
             </div>
             <div class="shortcuts-grid">
                 <div class="shortcut-group">

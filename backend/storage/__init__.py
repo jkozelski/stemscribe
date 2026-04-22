@@ -1,1 +1,1 @@
-"""StemScribe storage — Cloudflare R2 (production) and local filesystem (development)."""
+"""StemScriber storage — Cloudflare R2 (production) and local filesystem (development)."""

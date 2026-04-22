@@ -1,4 +1,4 @@
-# n8n Support Ticket Workflow — StemScribe
+# n8n Support Ticket Workflow — StemScriber
 
 **Version:** 1.0
 **Last updated:** 2026-03-16
@@ -75,13 +75,13 @@ Set these up in n8n **Settings > Credentials** before building the workflow.
 
 | Credential Name | Type | Details |
 |---|---|---|
-| `Twilio StemScribe` | Twilio API | Account SID: `AC61b4ba568a01c65bf90d98655261161b`, Auth Token from Twilio console |
-| `Gmail StemScribe` | Gmail OAuth2 | Account: `stemscribe.io@gmail.com`, enable Gmail API in Google Cloud Console |
-| `Google Sheets StemScribe` | Google Sheets OAuth2 | Same Google account, enable Sheets API |
+| `Twilio StemScriber` | Twilio API | Account SID: `AC61b4ba568a01c65bf90d98655261161b`, Auth Token from Twilio console |
+| `Gmail StemScriber` | Gmail OAuth2 | Account: `stemscribe.io@gmail.com`, enable Gmail API in Google Cloud Console |
+| `Google Sheets StemScriber` | Google Sheets OAuth2 | Same Google account, enable Sheets API |
 
 ### Google Cloud Setup (one-time)
 1. Go to https://console.cloud.google.com
-2. Create project "StemScribe n8n"
+2. Create project "StemScriber n8n"
 3. Enable APIs: Gmail API, Google Sheets API
 4. Create OAuth2 credentials (Desktop app type)
 5. Download client_id and client_secret
@@ -92,7 +92,7 @@ Set these up in n8n **Settings > Credentials** before building the workflow.
 
 ## Google Sheet Template
 
-**Spreadsheet name:** `StemScribe Support Tickets`
+**Spreadsheet name:** `StemScriber Support Tickets`
 
 ### Tab 1: "All Tickets"
 
@@ -159,7 +159,7 @@ https://n8n.yourdomain.com/webhook/support-ticket
 
 - **Type:** Google Sheets
 - **Operation:** Append Row
-- **Credential:** `Google Sheets StemScribe`
+- **Credential:** `Google Sheets StemScriber`
 - **Document ID:** `{your spreadsheet ID}`
 - **Sheet Name:** `All Tickets`
 - **Mapping Mode:** Map Each Column
@@ -185,7 +185,7 @@ https://n8n.yourdomain.com/webhook/support-ticket
 
 - **Type:** Twilio
 - **Operation:** Send SMS
-- **Credential:** `Twilio StemScribe`
+- **Credential:** `Twilio StemScriber`
 
 **Parameters:**
 
@@ -197,24 +197,24 @@ https://n8n.yourdomain.com/webhook/support-ticket
 
 **Message expression:**
 ```
-{{ $json.body.priority === "high" || $json.body.subject.toLowerCase().includes("billing") || $json.body.subject.toLowerCase().includes("refund") ? "⚠️ HIGH PRIORITY\n" : "" }}🎫 New StemScribe ticket from {{ $json.body.name }}: {{ $json.body.subject }} — {{ $json.body.message.substring(0, 100) }}{{ $json.body.message.length > 100 ? "..." : "" }}
+{{ $json.body.priority === "high" || $json.body.subject.toLowerCase().includes("billing") || $json.body.subject.toLowerCase().includes("refund") ? "⚠️ HIGH PRIORITY\n" : "" }}🎫 New StemScriber ticket from {{ $json.body.name }}: {{ $json.body.subject }} — {{ $json.body.message.substring(0, 100) }}{{ $json.body.message.length > 100 ? "..." : "" }}
 ```
 
 **Example SMS output (normal):**
 ```
-🎫 New StemScribe ticket from Dave Grohl: Audio Processing — My stems sound weird when I separate track 3. The vocals bleed into the guitar stem.
+🎫 New StemScriber ticket from Dave Grohl: Audio Processing — My stems sound weird when I separate track 3. The vocals bleed into the guitar stem.
 ```
 
 **Example SMS output (high priority):**
 ```
 ⚠️ HIGH PRIORITY
-🎫 New StemScribe ticket from Karen Manager: Billing/Refund — I was charged twice for my subscription last month and need a refund processed immediately...
+🎫 New StemScriber ticket from Karen Manager: Billing/Refund — I was charged twice for my subscription last month and need a refund processed immediately...
 ```
 
 **Twilio API equivalent (for reference):**
 ```bash
 curl -X POST "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d98655261161b/Messages.json" \
-  --data-urlencode "Body=🎫 New StemScribe ticket from Dave Grohl: Audio Processing — My stems sound weird..." \
+  --data-urlencode "Body=🎫 New StemScriber ticket from Dave Grohl: Audio Processing — My stems sound weird..." \
   --data-urlencode "From=+18447915323" \
   --data-urlencode "To=+18034149454" \
   -u "AC61b4ba568a01c65bf90d98655261161b:{AUTH_TOKEN}"
@@ -226,14 +226,14 @@ curl -X POST "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d9
 
 - **Type:** Gmail
 - **Operation:** Send Email
-- **Credential:** `Gmail StemScribe`
+- **Credential:** `Gmail StemScriber`
 
 **Parameters:**
 
 | Field | Value |
 |---|---|
 | To | `{{ $json.body.email }}` |
-| Subject | `We got your message — StemScribe Support` |
+| Subject | `We got your message — StemScriber Support` |
 | Email Format | HTML |
 | Body | See HTML template below |
 
@@ -256,7 +256,7 @@ curl -X POST "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d9
           <tr>
             <td style="background: linear-gradient(135deg, #e94560 0%, #ff6b35 100%); padding:30px 40px; text-align:center;">
               <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:700; letter-spacing:1px;">
-                StemScribe
+                StemScriber
               </h1>
               <p style="margin:8px 0 0; color:rgba(255,255,255,0.85); font-size:13px; letter-spacing:2px; text-transform:uppercase;">
                 Support
@@ -293,7 +293,7 @@ curl -X POST "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d9
               </p>
               <p style="color:#b0b0b0; font-size:14px; line-height:1.6; margin:0;">
                 Keep making music,<br>
-                <strong style="color:#e0e0e0;">The StemScribe Team</strong>
+                <strong style="color:#e0e0e0;">The StemScriber Team</strong>
               </p>
             </td>
           </tr>
@@ -302,7 +302,7 @@ curl -X POST "https://api.twilio.com/2010-04-01/Accounts/AC61b4ba568a01c65bf90d9
           <tr>
             <td style="background-color:#0f3460; padding:20px 40px; text-align:center; border-top:1px solid #1a3a6e;">
               <p style="color:#606080; font-size:12px; margin:0;">
-                StemScribe &mdash; Stems, chords, and tabs from any song.
+                StemScriber &mdash; Stems, chords, and tabs from any song.
               </p>
             </td>
           </tr>
@@ -403,7 +403,7 @@ This is a second n8n workflow triggered when you respond to a ticket.
 
 - **Type:** Gmail
 - **To:** `{{ $json.body.customerEmail }}`
-- **Subject:** `Re: {{ $json.body.subject }} — StemScribe Support`
+- **Subject:** `Re: {{ $json.body.subject }} — StemScriber Support`
 - **Body (HTML):**
 
 ```html
@@ -423,7 +423,7 @@ This is a second n8n workflow triggered when you respond to a ticket.
           <tr>
             <td style="background: linear-gradient(135deg, #e94560 0%, #ff6b35 100%); padding:24px 40px; text-align:center;">
               <h1 style="margin:0; color:#ffffff; font-size:22px; font-weight:700;">
-                StemScribe Support
+                StemScriber Support
               </h1>
             </td>
           </tr>
@@ -453,7 +453,7 @@ This is a second n8n workflow triggered when you respond to a ticket.
                 Still need help? Just reply to this email or text <strong style="color:#e0e0e0;">(843) 874-8999</strong>.
               </p>
               <p style="color:#b0b0b0; font-size:14px; margin:0;">
-                <strong style="color:#e0e0e0;">The StemScribe Team</strong>
+                <strong style="color:#e0e0e0;">The StemScriber Team</strong>
               </p>
             </td>
           </tr>
@@ -462,7 +462,7 @@ This is a second n8n workflow triggered when you respond to a ticket.
           <tr>
             <td style="background-color:#0f3460; padding:16px 40px; text-align:center; border-top:1px solid #1a3a6e;">
               <p style="color:#606080; font-size:12px; margin:0;">
-                StemScribe &mdash; Stems, chords, and tabs from any song.
+                StemScriber &mdash; Stems, chords, and tabs from any song.
               </p>
             </td>
           </tr>
@@ -479,7 +479,7 @@ This is a second n8n workflow triggered when you respond to a ticket.
 
 ## Backend Integration
 
-Add this to the StemScribe backend to call the webhook. Drop it wherever your support form POST handler lives.
+Add this to the StemScriber backend to call the webhook. Drop it wherever your support form POST handler lives.
 
 ```python
 import httpx
@@ -607,8 +607,8 @@ All branches --> Respond to Webhook
 
 | Scenario | Template |
 |---|---|
-| Normal ticket | `🎫 New StemScribe ticket from {name}: {subject} — {message[:100]}` |
-| High priority | `⚠️ HIGH PRIORITY\n🎫 New StemScribe ticket from {name}: {subject} — {message[:100]}` |
+| Normal ticket | `🎫 New StemScriber ticket from {name}: {subject} — {message[:100]}` |
+| High priority | `⚠️ HIGH PRIORITY\n🎫 New StemScriber ticket from {name}: {subject} — {message[:100]}` |
 | Billing alert | `🚨 BILLING/REFUND TICKET — {name} ({email})\n{message[:200]}\nReply needed ASAP.` |
 
 ---
@@ -634,7 +634,7 @@ Even at 50 tickets/month, total cost is under $1/month.
 
 ## Purpose
 
-Polls the StemScribe backend every 30 minutes and sends Jeff an SMS if there is new beta tester activity (code redemptions or songs processed).
+Polls the StemScriber backend every 30 minutes and sends Jeff an SMS if there is new beta tester activity (code redemptions or songs processed).
 
 ## Node-by-Node
 
@@ -688,7 +688,7 @@ Polls the StemScribe backend every 30 minutes and sends Jeff an SMS if there is 
 - **Message template:**
 
 ```
-📊 StemScribe Beta Activity
+📊 StemScriber Beta Activity
 🆕 2 new code redemption(s) (total: 5)
 🎵 3 new song(s) processed (total: 12)
 Checked: 2026-03-17T10:30:00Z
@@ -720,7 +720,7 @@ Schedule (30min) --> [parallel]
 
 ## Purpose
 
-Receives error events via webhook from the StemScribe error tracker. Maintains a rolling 1-hour window of errors using n8n static data. If the count exceeds 3 in that window, sends an SMS alert to Jeff.
+Receives error events via webhook from the StemScriber error tracker. Maintains a rolling 1-hour window of errors using n8n static data. If the count exceeds 3 in that window, sends an SMS alert to Jeff.
 
 ## Node-by-Node
 
@@ -769,7 +769,7 @@ http://localhost:5678/webhook/error-alert
 - **Message template:**
 
 ```
-🚨 StemScribe alert: 5 errors in the last hour.
+🚨 StemScriber alert: 5 errors in the last hour.
 Types: TranscriptionError, SeparationError
 Latest: MIDI conversion failed for job abc123
 Endpoint: /api/process

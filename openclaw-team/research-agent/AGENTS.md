@@ -21,7 +21,7 @@ Run every 6 hours. On each heartbeat:
 ### Weekly Deep Dive (Mondays)
 - Full competitor pricing comparison
 - App store rating trends (are competitors improving or declining?)
-- Feature gap analysis: what do competitors offer that StemScribe doesn't?
+- Feature gap analysis: what do competitors offer that StemScriber doesn't?
 - User sentiment analysis from Reddit/forums
 - SEO landscape: what keywords are competitors ranking for?
 

@@ -1,12 +1,12 @@
-# StemScribe AI Agent Team Configuration
+# StemScriber AI Agent Team Configuration
 # ========================================
 # This config defines all agents, their roles, and task workflows
-# for the StemScribe research + marketing operation.
+# for the StemScriber research + marketing operation.
 
 company:
-  name: "StemScribe"
+  name: "StemScriber"
   tagline: "AI-Powered Stem Separation & Music Transcription"
-  url: "https://stemscribe.app"
+  url: "https://stemscriber.com"
   product_type: "SaaS / Music Tool"
   target_audiences:
     - jazz_musicians
@@ -71,7 +71,7 @@ content_pillars:
   - "music_learning_tips"           # Practice with stems
   - "chord_recognition_demos"       # AI chord detection showcases
   - "genre_spotlights"              # Jazz, bluegrass, rock, country
-  - "musician_stories"              # How musicians use StemScribe
+  - "musician_stories"              # How musicians use StemScriber
   - "product_updates"               # New features, improvements
 
 social_channels:
@@ -103,7 +103,7 @@ social_channels:
 email_sequences:
   welcome:
     - day: 0
-      subject: "Welcome to StemScribe"
+      subject: "Welcome to StemScriber"
       content_type: "onboarding"
     - day: 2
       subject: "Try separating your first song"

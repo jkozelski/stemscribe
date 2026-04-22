@@ -1,4 +1,4 @@
-# StemScribe Deployment Guide
+# StemScriber Deployment Guide
 
 ## Architecture Overview
 
@@ -55,7 +55,7 @@ Best for: MVP launch, first 100-500 users
 | Database | Supabase (free tier) | Free |
 | File Storage | Cloudflare R2 (10GB free) | Free |
 | Payments | Stripe (2.9% + $0.30/txn) | Per transaction |
-| Domain | stemscribe.app | ~$12/year |
+| Domain | stemscriber.com | ~$12/year |
 | Email | Brevo (free tier) | Free |
 | **TOTAL** | | **~$20 + GPU costs** |
 
@@ -93,7 +93,7 @@ Best for: Maximum control, lowest per-song cost
 
 ### 1. Domain & DNS
 ```bash
-# Register stemscribe.app (or .com, .io)
+# Register stemscriber.com (or .com, .io)
 # Point DNS to Cloudflare (free plan)
 # Set up SSL (automatic with Cloudflare)
 ```
@@ -145,11 +145,11 @@ print(output)
 ```
 1. Create Stripe account at stripe.com
 2. Create Products:
-   - StemScribe Premium ($4.99/mo)
-   - StemScribe Pro ($14.99/mo)
-   - StemScribe Premium Annual ($39.99/yr) -- save 33%
-   - StemScribe Pro Annual ($119.99/yr) -- save 33%
-3. Set up webhook endpoint: https://api.stemscribe.app/webhooks/stripe
+   - StemScriber Premium ($4.99/mo)
+   - StemScriber Pro ($14.99/mo)
+   - StemScriber Premium Annual ($39.99/yr) -- save 33%
+   - StemScriber Pro Annual ($119.99/yr) -- save 33%
+3. Set up webhook endpoint: https://api.stemscriber.com/webhooks/stripe
 4. Listen for events:
    - checkout.session.completed
    - customer.subscription.updated

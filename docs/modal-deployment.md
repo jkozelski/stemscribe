@@ -2,7 +2,7 @@
 
 ## Overview
 
-StemScribe can offload stem separation to Modal's cloud GPUs (T4) instead of
+StemScriber can offload stem separation to Modal's cloud GPUs (T4) instead of
 running on the local M3 Max. This is useful for production where you want
 consistent GPU availability without tying up the local machine.
 

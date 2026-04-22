@@ -164,7 +164,7 @@ With 7th extensions: Ebm7, F#maj7, Abm7, Bbm7, etc.
 - Good for a "second opinion" or ensemble approach
 - Beat-synchronous mode available for cleaner output
 
-### For StemScribe production use:
+### For StemScriber production use:
 
 1. **Primary:** Use Essentia `ChordsDetection` for initial chord detection
 2. **Enhancement:** Post-process with music theory rules:

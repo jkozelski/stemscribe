@@ -599,8 +599,8 @@ The legal risk for a stem separation app comes from:
 - Personal offline backup is "legally grey" and unlikely to result in action
 - Redistributing, monetizing, or republishing is clearly infringement
 
-### Implications for StemScribe
-Accepting YouTube URLs puts StemScribe in the position of being the tool that downloads copyrighted content from a platform that prohibits it. This is the highest-risk feature from a legal standpoint.
+### Implications for StemScriber
+Accepting YouTube URLs puts StemScriber in the position of being the tool that downloads copyrighted content from a platform that prohibits it. This is the highest-risk feature from a legal standpoint.
 
 **Sources:**
 - [Third-Party YouTube Downloads Create Copyright Risks - MediaNama](https://www.medianama.com/2026/02/223-dmca-ruling-third-party-youtube-downloads-legal-risks-creators/)
@@ -609,7 +609,7 @@ Accepting YouTube URLs puts StemScribe in the position of being the tool that do
 
 ---
 
-## DMCA Safe Harbor: What StemScribe Needs
+## DMCA Safe Harbor: What StemScriber Needs
 
 To qualify for DMCA safe harbor protection as an online service provider:
 
@@ -620,11 +620,11 @@ To qualify for DMCA safe harbor protection as an online service provider:
 5. **Don't financially benefit directly** from infringing activity you have the ability to control
 6. **Don't be the direct infringer** -- safe harbor only applies when someone OTHER than the service provider is the infringer
 
-**Critical distinction:** If StemScribe downloads YouTube videos server-side, StemScribe itself is the entity performing the download (potential direct infringement). If users upload files, users are the ones who obtained the files (StemScribe is the service provider, eligible for safe harbor).
+**Critical distinction:** If StemScriber downloads YouTube videos server-side, StemScriber itself is the entity performing the download (potential direct infringement). If users upload files, users are the ones who obtained the files (StemScriber is the service provider, eligible for safe harbor).
 
 ---
 
-## Safest Model for StemScribe: Specific Recommendations
+## Safest Model for StemScriber: Specific Recommendations
 
 ### Tier 1: Minimum Viable Legal Protection (Do Immediately)
 
@@ -633,8 +633,8 @@ To qualify for DMCA safe harbor protection as an online service provider:
 2. **Add clear ToS language** modeled on Moises/LALAL.AI:
    - "You are solely responsible for ensuring you have all necessary rights and permissions to upload and process content"
    - "You must only process music you own or have legal permission to modify"
-   - "StemScribe does not store, distribute, or claim rights to your uploaded content"
-   - "StemScribe does not use uploaded content for AI training"
+   - "StemScriber does not store, distribute, or claim rights to your uploaded content"
+   - "StemScriber does not use uploaded content for AI training"
 
 3. **Register a DMCA agent** with the U.S. Copyright Office ($6 filing fee). This is required for safe harbor protection.
 
@@ -666,7 +666,7 @@ To qualify for DMCA safe harbor protection as an online service provider:
 
 ### What NOT to Do
 
-- **Do NOT accept YouTube URLs server-side** -- this makes StemScribe the direct downloader, not a neutral tool
+- **Do NOT accept YouTube URLs server-side** -- this makes StemScriber the direct downloader, not a neutral tool
 - **Do NOT build a library of pre-separated copyrighted songs** -- this turns you from a tool into a content distributor
 - **Do NOT scrape Songsterr/Ultimate Guitar content at scale** without a license
 - **Do NOT advertise the ability to "rip" or "download" from any streaming service
@@ -674,7 +674,7 @@ To qualify for DMCA safe harbor protection as an online service provider:
 
 ### The Bottom Line
 
-Every major competitor in this space uses the same model: **users upload files they already have, the app processes them, and responsibility for copyright compliance falls on the user.** No stem separation app has been sued. The RIAA's focus is on generative AI, not processing tools. The risk for StemScribe at its current scale (11 testers, 24 songs) is negligible, but building the right legal foundation now avoids problems at scale.
+Every major competitor in this space uses the same model: **users upload files they already have, the app processes them, and responsibility for copyright compliance falls on the user.** No stem separation app has been sued. The RIAA's focus is on generative AI, not processing tools. The risk for StemScriber at its current scale (11 testers, 24 songs) is negligible, but building the right legal foundation now avoids problems at scale.
 
 The single most important change: **shift from YouTube URL input to file upload as the primary flow.** Everything else is icing.
 

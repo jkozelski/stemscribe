@@ -1,5 +1,5 @@
 """
-Onsets and Frames (OaF) Drum Transcription for StemScribe
+Onsets and Frames (OaF) Drum Transcription for StemScriber
 =========================================================
 Uses the Magenta OaF Drums model trained on the E-GMD dataset
 for high-quality drum transcription.

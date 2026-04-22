@@ -44,7 +44,7 @@
 - Steps: 100K (~10 epochs) with 0.9 LR decay every 10K steps
 - Augmentation: Random transposition +/- 2 semitones
 
-**Why this works for StemScribe:**
+**Why this works for StemScriber:**
 - MAESTRO piano model is freely available
 - Only needs ~4 hours of guitar data for fine-tuning
 - The model already understands note onsets, frames, velocity from piano
@@ -124,7 +124,7 @@
 
 ---
 
-## 3. Recommended Strategy for StemScribe
+## 3. Recommended Strategy for StemScriber
 
 ### Short-Term: Use Pre-Trained Models (Weeks, not months)
 

@@ -1,4 +1,4 @@
-# StemScribe Financial Model
+# StemScriber Financial Model
 **Last Updated:** 2026-03-03
 
 ---
@@ -81,7 +81,7 @@
 |---|---|---|
 | Realistic Mix (70/30) | **10 paid users** | Comfortably covers all costs |
 
-**Verdict:** StemScribe has an extremely low break-even point. The infrastructure costs are minimal, and even a small number of paying customers makes this profitable. The real cost is customer acquisition, not infrastructure.
+**Verdict:** StemScriber has an extremely low break-even point. The infrastructure costs are minimal, and even a small number of paying customers makes this profitable. The real cost is customer acquisition, not infrastructure.
 
 ---
 
@@ -131,7 +131,7 @@
 
 | Competitor | Free Tier | Entry Price | Pro Price | Model | Primary Feature |
 |---|---|---|---|---|---|
-| **StemScribe** | 3 songs/mo | $4.99/mo | $14.99/mo | Subscription | Full Guitar Pro transcription |
+| **StemScriber** | 3 songs/mo | $4.99/mo | $14.99/mo | Subscription | Full Guitar Pro transcription |
 | **Moises.ai** | 2 songs/mo | $3.99/mo | $9.99/mo | Subscription | Stem separation + practice tools |
 | **LALAL.AI** | Limited | $7.50/mo or $20 pack | $15/mo or $70 pack | Hybrid | Stem separation only |
 | **AnthemScore** | 30s trial | $19.97 one-time | $39.99 one-time | One-time | Desktop transcription |
@@ -291,7 +291,7 @@ A la carte option to test:
 
 **At scale infrastructure ($75/mo fixed):** Need ~10 paid users = achievable by Month 3-4.
 
-**This is the most attractive aspect of StemScribe's financial model:** The extremely low fixed costs mean there is virtually no "cash runway" risk. You are not burning $5K-50K/month like typical SaaS startups. The question is not "can we survive?" but "how fast can we grow?"
+**This is the most attractive aspect of StemScriber's financial model:** The extremely low fixed costs mean there is virtually no "cash runway" risk. You are not burning $5K-50K/month like typical SaaS startups. The question is not "can we survive?" but "how fast can we grow?"
 
 ---
 

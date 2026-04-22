@@ -1,4 +1,4 @@
-# StemScribe Legal Analysis: Copyright, Fair Use, and Stem Separation
+# StemScriber Legal Analysis: Copyright, Fair Use, and Stem Separation
 
 **Prepared:** March 9, 2026
 **Purpose:** Internal reference document (NOT for publication)
@@ -14,7 +14,7 @@
 4. [Tabs and Sheet Music: How UG, Songsterr, and Chordify Operate](#4-tabs-and-sheet-music)
 5. [User-Generated vs. Automated Transcriptions](#5-user-generated-vs-automated-transcriptions)
 6. [Lawsuits and Legal Challenges](#6-lawsuits-and-legal-challenges)
-7. [Recommendations for StemScribe](#7-recommendations-for-stemscribe)
+7. [Recommendations for StemScriber](#7-recommendations-for-stemscribe)
 
 ---
 
@@ -22,7 +22,7 @@
 
 ### Moises.ai
 
-Moises is the closest direct competitor and the best model for StemScribe's legal posture. Key elements of their approach:
+Moises is the closest direct competitor and the best model for StemScriber's legal posture. Key elements of their approach:
 
 - **User responsibility model:** Users affirm they own or have legal rights to any audio they upload. Moises' ToS states users "are solely responsible for their User Content and the consequences of providing User Content via the Service."
 - **No hosting of copyrighted music:** Moises does not host a library of songs. Users must provide their own audio files. They explicitly block streaming service URLs (Spotify, Apple Music, etc.) to avoid facilitating piracy.
@@ -53,7 +53,7 @@ The Supreme Court ruled that Sony was not liable for contributory copyright infr
 
 > "The sale of copying equipment, like the sale of other articles of commerce, does not constitute contributory infringement if the product is **widely used for legitimate, unobjectionable purposes**, or need merely be **capable of substantial noninfringing uses**."
 
-**Application to StemScribe:** Stem separation has abundant legitimate uses:
+**Application to StemScriber:** Stem separation has abundant legitimate uses:
 - Musicians practicing along with isolated instruments
 - Music students studying arrangements and instrumentation
 - Producers creating authorized remixes
@@ -70,8 +70,8 @@ The "substantial noninfringing use" standard is easily met.
 
 The Supreme Court held that **inducement** of infringement can create liability, even for a tool with substantial noninfringing uses. Grokster was liable because it **actively promoted** its service as a way to download copyrighted music for free, replacing Napster.
 
-**Application to StemScribe:** This case highlights what NOT to do:
-- Never market StemScribe as a way to "get free music" or "rip songs"
+**Application to StemScriber:** This case highlights what NOT to do:
+- Never market StemScriber as a way to "get free music" or "rip songs"
 - Never encourage users to process music they don't own
 - Never build features specifically designed to facilitate piracy (e.g., YouTube ripping, streaming service integration)
 
@@ -81,7 +81,7 @@ The Supreme Court held that **inducement** of infringement can create liability,
 
 A use is more likely fair when it "adds something new, with a different purpose or different character" rather than merely superseding the original. The Court emphasized that commercial use doesn't automatically defeat fair use if the use is sufficiently transformative.
 
-**Application to StemScribe:** Stem separation is arguably transformative — it takes a complete mix and deconstructs it into component parts for analysis, practice, or creative reuse. The output (individual stems) serves a fundamentally different purpose than the original (a complete song for listening).
+**Application to StemScriber:** Stem separation is arguably transformative — it takes a complete mix and deconstructs it into component parts for analysis, practice, or creative reuse. The output (individual stems) serves a fundamentally different purpose than the original (a complete song for listening).
 
 ### Andy Warhol Foundation v. Goldsmith (2023)
 
@@ -89,7 +89,7 @@ A use is more likely fair when it "adds something new, with a different purpose 
 
 The Supreme Court held that when the original work and the new use share the same purpose (in that case, magazine illustrations), the first fair use factor weighs against the copier. The "transformative" label requires more than just adding new expression — the new use must have a genuinely different purpose.
 
-**Application to StemScribe:** This actually helps StemScribe's case. Separated stems serve a different purpose (practice, education, production) than the original song (entertainment/listening). A vocal-removed track for karaoke practice is functionally different from the original commercial recording.
+**Application to StemScriber:** This actually helps StemScriber's case. Separated stems serve a different purpose (practice, education, production) than the original song (entertainment/listening). A vocal-removed track for karaoke practice is functionally different from the original commercial recording.
 
 ---
 
@@ -125,7 +125,7 @@ The Supreme Court held that when the original work and the new use share the sam
 
 **Arguments in favor:**
 - Stem separation doesn't replace the market for the original song
-- No one buys a StemScribe subscription instead of buying songs
+- No one buys a StemScriber subscription instead of buying songs
 - The tool requires the user to already have the audio file
 
 **Arguments against:**
@@ -139,7 +139,7 @@ Stem separation as a process likely qualifies as fair use when:
 - The purpose is practice, education, or authorized creative production
 - The separated stems are not redistributed commercially
 
-The tool provider (StemScribe) has even stronger protection than individual users because StemScribe itself doesn't choose what to process — users do. This puts StemScribe in the same position as a photocopier or VCR manufacturer.
+The tool provider (StemScriber) has even stronger protection than individual users because StemScriber itself doesn't choose what to process — users do. This puts StemScriber in the same position as a photocopier or VCR manufacturer.
 
 **The key academic reference:** The Northwestern Journal of Technology and Intellectual Property published "AI Stem Extraction: A Creative Tool or Facilitator of Mass Infringement?" (2022), which analyzes stem extraction through all four fair use factors and concludes that the legality depends heavily on the end use rather than the separation process itself.
 
@@ -166,7 +166,7 @@ The tool provider (StemScribe) has even stronger protection than individual user
 - **No publisher licensing:** Unlike UG, Chordify does not appear to maintain licensing deals with publishers.
 - **Audio source:** Chordify analyzes audio from YouTube/Spotify (linked, not downloaded) and extracts only chord symbols — not melodies, lyrics, or detailed notation.
 
-### Key Takeaway for StemScribe
+### Key Takeaway for StemScriber
 
 Generating tablature/sheet music is legally murkier than stem separation because it creates a written representation of a copyrighted composition. Different approaches carry different risk levels:
 
@@ -177,7 +177,7 @@ Generating tablature/sheet music is legally murkier than stem separation because
 | Automated full transcription (melody + rhythm) | Higher | Creates derivative work of the composition |
 | AI-generated tabs from user audio | Medium | User provides source; tool is neutral processor |
 
-StemScribe's transcription feature (audio → MIDI → Guitar Pro) falls into the "automated full transcription" category. Risk mitigation: ensure the user provides the audio, the transcription is for personal use, and no transcriptions are publicly hosted or shared.
+StemScriber's transcription feature (audio → MIDI → Guitar Pro) falls into the "automated full transcription" category. Risk mitigation: ensure the user provides the audio, the transcription is for personal use, and no transcriptions are publicly hosted or shared.
 
 ---
 
@@ -204,7 +204,7 @@ Neither category has been definitively adjudicated in US courts. The practical r
 - Publishers have pursued platforms that host and distribute transcriptions at scale without licensing
 - The risk sits with the platform, not the individual user
 
-**StemScribe's position:** StemScribe generates transcriptions from user-provided audio, for the user's personal use. Transcriptions are not hosted publicly or shared between users. This is the lowest-risk posture for automated transcription.
+**StemScriber's position:** StemScriber generates transcriptions from user-provided audio, for the user's personal use. Transcriptions are not hosted publicly or shared between users. This is the lowest-risk posture for automated transcription.
 
 ---
 
@@ -225,7 +225,7 @@ This is significant — these services have operated for years, process millions
 - Record labels (Sony, UMG, Warner) sued AI music generation services Suno and Udio for training their models on copyrighted recordings without authorization.
 - Suno admitted using copyrighted music for training and argued fair use.
 - UMG settled with Udio in 2025.
-- **Relevance to StemScribe:** These cases target AI music *generation* (creating new music that sounds like copyrighted works), NOT audio processing/separation. StemScribe doesn't generate new music — it processes existing audio that users provide. Different legal theory entirely.
+- **Relevance to StemScriber:** These cases target AI music *generation* (creating new music that sounds like copyrighted works), NOT audio processing/separation. StemScriber doesn't generate new music — it processes existing audio that users provide. Different legal theory entirely.
 
 **Stem-related sampling disputes (2024-2025):**
 - Multiple lawsuits between labels and producers over unauthorized use of stems, loops, and beats in hit songs.
@@ -235,11 +235,11 @@ This is significant — these services have operated for years, process millions
 **Music Publisher Association v. Tab Sites (2006-2010):**
 - MPA sent cease-and-desist letters to guitar tab sites including OLGA, MXTabs, Guitar Tab Universe, and others.
 - Most sites shut down or removed content. UG survived by negotiating licensing deals.
-- **Relevance:** Establishes that hosting/distributing transcriptions of copyrighted music at scale requires licensing. StemScribe should NOT host a public library of transcriptions.
+- **Relevance:** Establishes that hosting/distributing transcriptions of copyrighted music at scale requires licensing. StemScriber should NOT host a public library of transcriptions.
 
 ---
 
-## 7. Recommendations for StemScribe
+## 7. Recommendations for StemScriber
 
 ### Tier 1: Must-Do (Legal Essentials)
 
@@ -265,7 +265,7 @@ This is significant — these services have operated for years, process millions
 
 8. **Rate Limiting:** Implement reasonable processing limits to prevent bulk/industrial use that could look like a piracy operation.
 
-9. **Positioning:** Always market StemScribe as a practice/education/production tool. Never use language that implies it's for getting free music, ripping songs, or bypassing copyright.
+9. **Positioning:** Always market StemScriber as a practice/education/production tool. Never use language that implies it's for getting free music, ripping songs, or bypassing copyright.
 
 10. **Block Known Piracy Sources:** If feasible, detect and reject audio files that appear to be direct rips from streaming services (e.g., files with streaming service metadata).
 
@@ -273,11 +273,11 @@ This is significant — these services have operated for years, process millions
 
 ### Tier 3: Future Considerations
 
-12. **Publisher Licensing (if hosting transcriptions publicly):** If StemScribe ever adds a public tab/transcription library (like UG), licensing deals with HFA or individual publishers would be necessary. For now, keeping transcriptions private to each user avoids this requirement.
+12. **Publisher Licensing (if hosting transcriptions publicly):** If StemScriber ever adds a public tab/transcription library (like UG), licensing deals with HFA or individual publishers would be necessary. For now, keeping transcriptions private to each user avoids this requirement.
 
 13. **Content Identification:** Consider implementing audio fingerprinting to detect and flag obvious copyrighted content if the platform grows large enough to attract industry attention.
 
-14. **Legal Entity:** Operate StemScribe through an LLC or corporation to limit personal liability.
+14. **Legal Entity:** Operate StemScriber through an LLC or corporation to limit personal liability.
 
 15. **Insurance:** Consider errors & omissions (E&O) or intellectual property insurance as the business scales.
 
@@ -295,7 +295,7 @@ This is significant — these services have operated for years, process millions
 
 ### Bottom Line
 
-StemScribe's current architecture — user uploads audio, gets stems + transcription for personal use, nothing is hosted publicly — is the safest legal posture. This mirrors what Moises and LALAL.AI do, and neither has faced legal challenge. The Betamax doctrine protects the tool, and the DMCA safe harbor protects the platform, as long as StemScribe:
+StemScriber's current architecture — user uploads audio, gets stems + transcription for personal use, nothing is hosted publicly — is the safest legal posture. This mirrors what Moises and LALAL.AI do, and neither has faced legal challenge. The Betamax doctrine protects the tool, and the DMCA safe harbor protects the platform, as long as StemScriber:
 
 1. Registers a DMCA agent
 2. Responds to takedown notices

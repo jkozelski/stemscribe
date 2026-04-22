@@ -1,5 +1,5 @@
 """
-PDF Music Parser for StemScribe Training Data
+PDF Music Parser for StemScriber Training Data
 ==============================================
 Extracts musical notation from PDF sheet music files.
 
@@ -534,7 +534,7 @@ class TrainingDataGenerator:
     Generates training data pairs from parsed sheet music.
 
     For training a transcription model, we need:
-    1. Audio files (stems from StemScribe)
+    1. Audio files (stems from StemScriber)
     2. Aligned notation (from PDF parser)
     """
 

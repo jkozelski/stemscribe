@@ -85,6 +85,11 @@ stripe==14.4.0                  # Stripe API client
 boto3                           # S3-compatible R2 client
 
 # =============================================================================
+# Environment variables
+# =============================================================================
+python-dotenv                   # Loads backend/.env and /opt/stemscribe/.env at startup
+
+# =============================================================================
 # Email (password resets, notifications)
 # =============================================================================
 resend==2.23.0                  # Resend email API

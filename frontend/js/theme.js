@@ -1,5 +1,5 @@
-// StemScribe — Light/Dark Theme Toggle
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Light/Dark Theme Toggle
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -51,4 +51,4 @@ window.StemScribe = window.StemScribe || {};
         }
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

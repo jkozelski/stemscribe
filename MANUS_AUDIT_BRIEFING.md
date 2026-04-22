@@ -1,7 +1,7 @@
-# StemScribe - Manus 1.7 Audit Briefing
+# StemScriber - Manus 1.7 Audit Briefing
 
 ## Project Overview
-**StemScribe** is a self-hosted, AI-powered audio intelligence app that:
+**StemScriber** is a self-hosted, AI-powered audio intelligence app that:
 1. Separates songs into stems (vocals, drums, bass, guitar, piano, other)
 2. Transcribes stems to MIDI/MusicXML
 3. Converts to Guitar Pro tabs with playback-synced cursor

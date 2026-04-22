@@ -1,7 +1,7 @@
-# StemScribe - Audio Stem Separation & Music Learning Platform
+# StemScriber - Audio Stem Separation & Music Learning Platform
 
 ## Overview
-StemScribe is a web-based tool that separates audio tracks into individual stems (vocals, guitar, bass, drums, keys, other) and transcribes them to MIDI/tablature for music learning. It's designed with a focus on jam bands like the Grateful Dead, with special features for dual-guitar and dual-drummer bands.
+StemScriber is a web-based tool that separates audio tracks into individual stems (vocals, guitar, bass, drums, keys, other) and transcribes them to MIDI/tablature for music learning. It's designed with a focus on jam bands like the Grateful Dead, with special features for dual-guitar and dual-drummer bands.
 
 ## Tech Stack
 - **Backend**: Python/Flask API (`~/stemscribe/backend/app.py`)

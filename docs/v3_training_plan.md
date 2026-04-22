@@ -1,4 +1,4 @@
-# StemScribe v3 Training Plan: Guitar & Bass Transcription via Piano Transfer Learning
+# StemScriber v3 Training Plan: Guitar & Bass Transcription via Piano Transfer Learning
 
 **Author:** ML Architect (Claude)
 **Date:** 2026-02-27
@@ -712,7 +712,7 @@ Any GPU with 8+ GB VRAM will work. A100/V100 are ideal but even a T4 (16 GB) is 
 | Week 1-2 | 1-2 days | Guitar v3 training (Phases 1-3 on A100) |
 | Week 2 | 1 day | Evaluate guitar v3, tune thresholds |
 | Week 2 | 1 day | Bass v3 training (A100) |
-| Week 2 | 1 day | Integration testing with StemScribe backend |
+| Week 2 | 1 day | Integration testing with StemScriber backend |
 | **Total** | **~8-10 days** | |
 
 ---
@@ -747,7 +747,7 @@ Any GPU with 8+ GB VRAM will work. A100/V100 are ideal but even a T4 (16 GB) is 
    - Per-track F1, averaged
    - Report by playing style (comp, solo, fingerpicking)
 
-2. **Real-world test** on StemScribe user audio (5-10 diverse songs)
+2. **Real-world test** on StemScriber user audio (5-10 diverse songs)
    - Qualitative: does the MIDI sound right?
    - Guitar Pro export: are the tabs playable?
 

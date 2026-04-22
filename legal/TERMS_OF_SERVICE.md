@@ -1,15 +1,15 @@
-# StemScribe - Terms of Service
+# StemScriber - Terms of Service
 
 **Effective Date:** [INSERT DATE]
 **Last Updated:** February 2026
 
 ## 1. Acceptance of Terms
 
-By accessing or using StemScribe ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, do not use the Service.
+By accessing or using StemScriber ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, do not use the Service.
 
 ## 2. Description of Service
 
-StemScribe is an AI-powered audio processing tool that provides:
+StemScriber is an AI-powered audio processing tool that provides:
 - Audio stem separation (isolating individual instruments from a mixed recording)
 - MIDI transcription
 - Chord recognition and music theory analysis
@@ -25,15 +25,15 @@ StemScribe is an AI-powered audio processing tool that provides:
 
 4.1. **You are solely responsible** for ensuring you have the legal right to upload, process, and use any audio content submitted to the Service.
 
-4.2. By uploading audio to StemScribe, you represent and warrant that:
+4.2. By uploading audio to StemScriber, you represent and warrant that:
    - You own the audio content, OR
    - You have obtained all necessary licenses, rights, and permissions from the copyright holder(s) to process the audio, OR
    - The audio is in the public domain, OR
    - Your use constitutes fair use under applicable law
 
-4.3. **StemScribe does not grant you any rights** to copyrighted material. The Service is a tool — it does not license music.
+4.3. **StemScriber does not grant you any rights** to copyrighted material. The Service is a tool — it does not license music.
 
-4.4. StemScribe is not responsible for determining whether your use of audio content is authorized or constitutes infringement.
+4.4. StemScriber is not responsible for determining whether your use of audio content is authorized or constitutes infringement.
 
 4.5. You agree not to use the Service to:
    - Infringe on any third party's intellectual property rights
@@ -52,7 +52,7 @@ StemScribe is an AI-powered audio processing tool that provides:
 
 ## 6. Subscription and Payments
 
-6.1. StemScribe offers both free and paid subscription tiers.
+6.1. StemScriber offers both free and paid subscription tiers.
 
 6.2. Paid subscriptions are billed [monthly/annually] and automatically renew unless cancelled.
 
@@ -71,13 +71,13 @@ You agree not to:
 
 ## 8. DMCA / Copyright Complaints
 
-8.1. StemScribe respects the intellectual property rights of others and complies with the Digital Millennium Copyright Act (DMCA).
+8.1. StemScriber respects the intellectual property rights of others and complies with the Digital Millennium Copyright Act (DMCA).
 
 8.2. If you believe your copyrighted work has been infringed through our Service, please send a DMCA takedown notice to our designated agent (see DMCA Policy).
 
 8.3. DMCA Agent contact information:
    - **Name:** [YOUR NAME / COMPANY NAME]
-   - **Email:** [dmca@stemscribe.app]
+   - **Email:** [dmca@stemscriber.com]
    - **Address:** [YOUR BUSINESS ADDRESS]
 
 ## 9. Disclaimer of Warranties
@@ -97,7 +97,7 @@ OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE TWELVE (12
 
 ## 11. Indemnification
 
-You agree to indemnify and hold harmless StemScribe, its owners, employees, and affiliates from any claims, damages, losses, or expenses (including reasonable attorney's fees) arising from:
+You agree to indemnify and hold harmless StemScriber, its owners, employees, and affiliates from any claims, damages, losses, or expenses (including reasonable attorney's fees) arising from:
 - Your use of the Service
 - Your violation of these Terms
 - Your infringement of any third party's rights, including copyright
@@ -113,8 +113,8 @@ These Terms shall be governed by and construed in accordance with the laws of th
 ## 14. Contact
 
 For questions about these Terms, contact us at:
-- **Email:** [support@stemscribe.app]
-- **Website:** [https://stemscribe.app]
+- **Email:** [support@stemscriber.com]
+- **Website:** [https://stemscriber.com]
 
 ---
 

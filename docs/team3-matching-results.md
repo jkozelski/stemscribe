@@ -88,8 +88,8 @@
 ### Recommended Fallback Waterfall
 ```
 1. Songsterr API (primary — best quality, legal, has rhythm data)
-2. Emil's Tabs (Phish-only — fork GitHub repo, parse text → StemScribe format)
-3. StemScribe auto-detection (universal fallback — already built)
+2. Emil's Tabs (Phish-only — fork GitHub repo, parse text → StemScriber format)
+3. StemScriber auto-detection (universal fallback — already built)
 4. UG manual link ("Find chords on Ultimate Guitar" as last resort)
 ```
 

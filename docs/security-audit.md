@@ -1,4 +1,4 @@
-# StemScribe Security Audit Report
+# StemScriber Security Audit Report
 
 **Date:** 2026-03-19
 **Auditor:** Agent 4 (Security Audit & Test)

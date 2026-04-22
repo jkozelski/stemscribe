@@ -1,5 +1,5 @@
 """
-Essentia-based chord detection for StemScribe.
+Essentia-based chord detection for StemScriber.
 
 Provides standalone Essentia ChordsDetection as a complementary detector
 to BTC v10. Can be used as:

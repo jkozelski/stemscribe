@@ -1,4 +1,4 @@
-# StemScribe Training Sprint Runbook
+# StemScriber Training Sprint Runbook
 ## Guitar & Bass Transcription Model Training
 
 **Goal:** Replace Basic Pitch fallback with domain-adapted CRNN models achieving 85%+ onset F1 on GuitarSet.
@@ -14,7 +14,7 @@
 2. [Guitar Model Training](#2-guitar-model-training)
 3. [Bass Model Training](#3-bass-model-training)
 4. [Colab vs RunPod](#4-colab-vs-runpod)
-5. [Integration into StemScribe](#5-integration-into-stemscribe)
+5. [Integration into StemScriber](#5-integration-into-stemscribe)
 6. [Validation & Testing](#6-validation--testing)
 
 ---
@@ -511,7 +511,7 @@ if epoch % 5 == 0:
 
 ---
 
-## 5. Integration into StemScribe
+## 5. Integration into StemScriber
 
 ### Step 5.1: Create `guitar_nn_transcriber.py`
 

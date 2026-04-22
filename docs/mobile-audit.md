@@ -1,4 +1,4 @@
-# StemScribe Mobile Layout Audit
+# StemScriber Mobile Layout Audit
 
 **Date:** 2026-03-18
 **Tested by:** Automated Playwright Agent
@@ -35,7 +35,7 @@ Screenshots saved to: `~/stemscribe/docs/screenshots/`
 | Element | Size | Severity | Notes |
 |---------|------|----------|-------|
 | Hamburger menu `"☰"` | 21x29 | **HIGH** | Way too small for mobile tap target |
-| `"StemScribe"` nav link | 161x36 | MEDIUM | Width fine, height 36px is borderline |
+| `"StemScriber"` nav link | 161x36 | MEDIUM | Width fine, height 36px is borderline |
 | Footer links (Contact, Facebook, Instagram, etc.) | ~53-108 x 18 | **HIGH** | All footer links only 18px tall |
 | `"Request access"` mailto link | 99x16 | **HIGH** | Only 16px tall |
 | `"DMCA"` footer link | 38x18 | **HIGH** | Both too narrow and too short |
@@ -75,7 +75,7 @@ Screenshots saved to: `~/stemscribe/docs/screenshots/`
 | Element | Size | Severity | Notes |
 |---------|------|----------|-------|
 | Hamburger menu `"☰"` | 21x29 | **HIGH** | Same as index |
-| `"StemScribe"` nav link | 161x36 | MEDIUM | Height borderline |
+| `"StemScriber"` nav link | 161x36 | MEDIUM | Height borderline |
 | All footer links | ~9-108 x 18 | **HIGH** | 18px tall across the board |
 | `"X"` (Twitter/X link) | 9x18 | **CRITICAL** | Only 9px wide - virtually untappable |
 | `"TikTok"` | 41x18 | **HIGH** | Below 44px on both dimensions |

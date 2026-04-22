@@ -1,4 +1,4 @@
-# StemScribe Scaling & Launch Playbook
+# StemScriber Scaling & Launch Playbook
 **Last updated:** March 2026
 
 ---
@@ -304,7 +304,7 @@ RQ (Redis Queue) is simpler than Celery for this use case:
 - Failed jobs automatically retry
 - Dashboard via `rq-dashboard`
 
-**Don't use Celery** unless you need scheduled tasks, complex routing, or multiple broker support. RQ does everything StemScribe needs with 1/3 the complexity.
+**Don't use Celery** unless you need scheduled tasks, complex routing, or multiple broker support. RQ does everything StemScriber needs with 1/3 the complexity.
 
 **Managed Redis options:**
 - Upstash: Free tier (10,000 commands/day), $0.2/100K commands after
@@ -529,7 +529,7 @@ At 5,000+ users, you're processing 2,000-5,000 songs/day. Infrastructure becomes
 | 2,500 users | $2,350 | $1,500-3,500 | -$1,150 to +$850 | Marginal |
 | 5,000 users | $4,690 | $3,250-8,700 | -$4,010 to +$1,440 | Depends on GPU costs |
 
-**Key insight:** StemScribe is profitable at small scale (100-500 users) because infrastructure costs are low. At 2,500-5,000 users, GPU costs grow faster than revenue unless conversion rates are above 10%. **The critical lever is conversion rate, not user count.**
+**Key insight:** StemScriber is profitable at small scale (100-500 users) because infrastructure costs are low. At 2,500-5,000 users, GPU costs grow faster than revenue unless conversion rates are above 10%. **The critical lever is conversion rate, not user count.**
 
 Ways to improve conversion:
 - Generous free tier hooks users (3 songs is good)
@@ -539,7 +539,7 @@ Ways to improve conversion:
 
 ### Competitive Moat
 
-What keeps users on StemScribe vs Moises, LALAL.AI, etc:
+What keeps users on StemScriber vs Moises, LALAL.AI, etc:
 
 1. **Unique feature combination:** Stem separation + chord detection + Guitar Pro export. No competitor does all three. This is the moat.
 
@@ -582,7 +582,7 @@ What keeps users on StemScribe vs Moises, LALAL.AI, etc:
 
 ### Option 1: PWA (Progressive Web App)
 
-StemScribe already works in mobile Safari and Chrome. A PWA adds:
+StemScriber already works in mobile Safari and Chrome. A PWA adds:
 
 | Pro | Con |
 |-----|-----|
@@ -635,7 +635,7 @@ Wrap the existing web app in a native shell using Capacitor:
 **Implementation:**
 ```bash
 npm install @capacitor/core @capacitor/cli
-npx cap init StemScribe io.stemscribe.app --web-dir frontend
+npx cap init StemScriber io.stemscriber.com --web-dir frontend
 npx cap add ios
 npx cap add android
 npx cap sync
@@ -675,7 +675,7 @@ npx cap open ios  # Opens in Xcode
 
 Musicians learn from video. Create:
 
-1. **"How to learn guitar solos with StemScribe"** (tutorial, 5-10 min)
+1. **"How to learn guitar solos with StemScriber"** (tutorial, 5-10 min)
    - Screen recording: upload song → isolate guitar → slow down → practice
    - Target keywords: "learn guitar solos," "isolate guitar from song," "slow down guitar solo"
    - This is your #1 discovery video
@@ -703,7 +703,7 @@ Target these high-intent keywords:
 | remove vocals from song | 20,000-50,000 | High | "Remove Vocals from Any Song (Free Tool)" |
 | learn guitar by ear | 5,000-10,000 | Medium | "Why Learning by Ear is Overrated (Use This Instead)" |
 
-Publish on stemscribe.io/blog. Each post ends with a CTA to try StemScribe.
+Publish on stemscribe.io/blog. Each post ends with a CTA to try StemScriber.
 
 ### Social Proof (Start Now)
 
@@ -726,7 +726,7 @@ Publish on stemscribe.io/blog. Each post ends with a CTA to try StemScribe.
 
 **Reddit strategy (highest ROI for early stage):**
 - Don't spam links. Answer questions genuinely.
-- When someone asks "how do I learn this solo?" — explain the process, mention StemScribe naturally
+- When someone asks "how do I learn this solo?" — explain the process, mention StemScriber naturally
 - Post your own demos in r/guitar: "I isolated the guitar from [song] and made a practice track"
 - r/guitarlessons, r/Luthier, r/Bass are also relevant
 

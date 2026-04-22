@@ -1,4 +1,4 @@
-# StemScribe Billing & Refund Policy — Internal Reference
+# StemScriber Billing & Refund Policy — Internal Reference
 
 **Last updated:** 2026-03-16
 

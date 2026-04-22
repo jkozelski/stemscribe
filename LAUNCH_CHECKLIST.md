@@ -1,4 +1,4 @@
-# StemScribe Launch Checklist
+# StemScriber Launch Checklist
 
 ## Phase 1: Legal Foundation (Week 1)
 - [ ] Form LLC in your state (or Delaware)
@@ -10,7 +10,7 @@
 - [ ] Finalize Privacy Policy (see `legal/PRIVACY_POLICY.md`)
 - [ ] Finalize DMCA Policy (see `legal/DMCA_POLICY.md`)
 - [ ] Verify third-party licenses (see `legal/THIRD_PARTY_LICENSES.md`)
-- [ ] Register domain: stemscribe.app (or .com)
+- [ ] Register domain: stemscriber.com (or .com)
 
 ## Phase 2: Product Ready (Week 2-3)
 - [ ] Fix Demucs async processing (see MANUS_AUDIT_BRIEFING.md)
@@ -51,7 +51,7 @@
   - [ ] "AI chord recognition for jazz standards"
   - [ ] "Learn Grateful Dead songs - isolate Jerry/Bob guitars"
   - [ ] "Free stem separation vs Moises vs LALAL.AI"
-  - [ ] "How worship teams use StemScribe for chord charts"
+  - [ ] "How worship teams use StemScriber for chord charts"
 - [ ] Set up YouTube channel
 - [ ] Set up TikTok account
 - [ ] Write 3 launch blog posts

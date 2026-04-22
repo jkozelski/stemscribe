@@ -1,6 +1,6 @@
 # Third-Party Licenses
 
-StemScribe uses the following open-source software:
+StemScriber uses the following open-source software:
 
 ---
 
@@ -123,7 +123,7 @@ POSSIBILITY OF SUCH DAMAGE.
 ## FFmpeg
 - **License**: LGPL 2.1+ / GPL 2+ (depending on build configuration)
 - **Repository**: https://github.com/FFmpeg/FFmpeg
-- **Note**: StemScribe uses FFmpeg as an external tool (not linked as a library). FFmpeg is invoked as a subprocess for audio format conversion.
+- **Note**: StemScriber uses FFmpeg as an external tool (not linked as a library). FFmpeg is invoked as a subprocess for audio format conversion.
 
 ---
 

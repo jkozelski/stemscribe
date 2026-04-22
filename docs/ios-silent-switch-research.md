@@ -11,7 +11,7 @@
 1. [The Core Problem](#the-core-problem)
 2. [The Official Fix: navigator.audioSession.type (iOS 16.4+)](#the-official-fix)
 3. [The Legacy Fix: Silent HTMLAudioElement Trick](#the-legacy-fix)
-4. [Complete Implementation for StemScribe](#complete-implementation)
+4. [Complete Implementation for StemScriber](#complete-implementation)
 5. [Answers to All Research Questions](#answers)
 6. [Data URIs for Silent Audio](#data-uris)
 7. [Sources](#sources)
@@ -146,13 +146,13 @@ function enableIOSPlaybackMode() {
 
 ---
 
-## Complete Implementation for StemScribe {#complete-implementation}
+## Complete Implementation for StemScriber {#complete-implementation}
 
 This is a belt-and-suspenders approach: try the modern API first, fall back to the legacy trick.
 
 ```javascript
 /**
- * iOS Silent Switch Bypass for StemScribe
+ * iOS Silent Switch Bypass for StemScriber
  *
  * Call this ONCE on first user interaction (e.g., Play button click).
  * Must be called from a user gesture handler.
@@ -326,7 +326,7 @@ The silent switch behavior is identical for both — it's an OS-level routing de
 
 ### 10. Any working code examples from 2025-2026 that reliably play through the silent switch?
 
-**Yes.** The "Complete Implementation for StemScribe" section above is a working example that combines all three strategies. The key innovation since 2024 is the `navigator.audioSession.type = 'playback'` API, which is the cleanest solution.
+**Yes.** The "Complete Implementation for StemScriber" section above is a working example that combines all three strategies. The key innovation since 2024 is the `navigator.audioSession.type = 'playback'` API, which is the cleanest solution.
 
 ### 11. What exactly triggers the switch from "ambient" to "playback" category?
 
@@ -369,7 +369,7 @@ data:audio/ogg;base64,T2dnUwACAAAAAAAAAAAyzN3NAAAAAGFf2X8BM39GTEFDAQAAAWZMYUMAAA
 | [swevans/unmute](https://github.com/swevans/unmute) | Silent HTML audio + visibility handling | ~150 | Maintained |
 | [Tonejs/unmute](https://github.com/Tonejs/unmute) | Silent audio + Tone.js integration | ~100 | Maintained |
 
-All three use the same core technique. For StemScribe, we don't need a library — the code above does everything they do.
+All three use the same core technique. For StemScriber, we don't need a library — the code above does everything they do.
 
 ---
 

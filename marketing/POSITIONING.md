@@ -1,4 +1,4 @@
-# StemScribe — Competitive Positioning & Market Analysis
+# StemScriber — Competitive Positioning & Market Analysis
 
 **Last updated:** 2026-03-03
 
@@ -6,13 +6,13 @@
 
 ## Positioning Statement
 
-StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: upload any song, get AI-separated stems for 6 instruments, MIDI transcription, chord detection, and downloadable Guitar Pro tabs — all in one pipeline. No other product combines stem separation and tab generation into a single workflow.
+StemScriber is the only end-to-end audio-to-Guitar-Pro transcription platform: upload any song, get AI-separated stems for 6 instruments, MIDI transcription, chord detection, and downloadable Guitar Pro tabs — all in one pipeline. No other product combines stem separation and tab generation into a single workflow.
 
 ---
 
 ## Competitive Feature Matrix
 
-| Feature | StemScribe | Moises.ai | LALAL.AI | Klangio (Guitar2Tabs) | Tabtify | Splitter.ai | BandLab Splitter | Songsterr | AnthemScore | Songscription |
+| Feature | StemScriber | Moises.ai | LALAL.AI | Klangio (Guitar2Tabs) | Tabtify | Splitter.ai | BandLab Splitter | Songsterr | AnthemScore | Songscription |
 |---|---|---|---|---|---|---|---|---|---|---|
 | **Stem Separation** | 6 stems (RoFormer/Demucs) | 5+ stems (HiFi) | 10+ stems (Phoenix AI) | No (isolates for transcription) | No | 2-5 stems | 4-6 stems | No | No | No |
 | **Guitar Tab Generation** | Yes (auto, from stems) | No | No | Yes (single instrument) | Yes (single instrument) | No | No | Yes (AI from YouTube) | Sheet music only | Guitar tabs (basic) |
@@ -62,7 +62,7 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 - **Strengths:** Guitar Pro export, MusicXML, PDF, MIDI. Edit mode for corrections. Polyphonic chord detection. Multiple apps (Piano2Notes, Drums2Tabs, etc.)
 - **Weaknesses:** No stem separation — works on isolated instruments only. Struggles with full-band recordings. One instrument per transcription. Ticket-based limits.
 - **Positioning:** "Turn your music into notes" — AI transcription studio for individual instruments
-- **Threat level:** MEDIUM — they do tab generation but can't handle mixed audio. StemScribe's stem separation is the differentiator.
+- **Threat level:** MEDIUM — they do tab generation but can't handle mixed audio. StemScriber's stem separation is the differentiator.
 
 ### 4. Tabtify — Lightweight Tab Generator
 
@@ -114,18 +114,18 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 
 ---
 
-## StemScribe's Unique Value Proposition
+## StemScriber's Unique Value Proposition
 
 **The Gap in the Market:** Every competitor does EITHER stem separation OR tab transcription. Nobody does both in a single pipeline.
 
-| User Need | Current Solution (Without StemScribe) | StemScribe Solution |
+| User Need | Current Solution (Without StemScriber) | StemScriber Solution |
 |---|---|---|
 | "I want to learn the guitar part from this song" | 1. Upload to Moises ($3.99/mo) for stems → 2. Download guitar stem → 3. Upload to Klangio ($11.99/mo) for tabs → 4. Download Guitar Pro file | Upload song → Download Guitar Pro file with all instruments |
 | "I need drum tabs for my cover band" | 1. Try to find tabs on Songsterr → 2. If not found, manually transcribe or hire someone | Upload song → Get drum tabs automatically |
 | "I want to transcribe all instruments from a YouTube video" | Not possible in any single tool | Paste YouTube URL → Get 6-instrument Guitar Pro file |
 
 **Cost comparison for the multi-tool workflow:**
-- Moises Pro ($24.99) + Klangio Studio Pro ($11.99) = $36.98/mo for what StemScribe Pro does at $14.99/mo
+- Moises Pro ($24.99) + Klangio Studio Pro ($11.99) = $36.98/mo for what StemScriber Pro does at $14.99/mo
 
 ---
 
@@ -134,49 +134,49 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 ### 1. Cover Band Musicians — HIGHEST willingness to pay ($15-25/mo)
 - **Who:** Musicians in active cover/tribute bands who need to learn 20-50 new songs per year
 - **Pain point:** Hours of manual transcription per song, or paying $20-50 per song for professional transcription services (Fiverr, etc.)
-- **StemScribe value:** Upload the song, get all parts in Guitar Pro format. Save 2-5 hours per song.
+- **StemScriber value:** Upload the song, get all parts in Guitar Pro format. Save 2-5 hours per song.
 - **Messaging:** "Learn any song in minutes, not hours. Get Guitar Pro tabs for every instrument — guitar, bass, drums, keys — from a single upload."
 - **Plan:** Pro ($14.99/mo) — they need Guitar Pro export and unlimited songs
 
 ### 2. Music Teachers / Private Instructors — HIGH willingness to pay ($10-20/mo)
 - **Who:** Guitar/bass/piano/drum teachers who create custom arrangements for students
 - **Pain point:** Manually transcribing student song requests, finding accurate tabs, creating practice materials
-- **StemScribe value:** Generate tabs + isolated stems for any song a student requests. Perfect for creating practice-along tracks.
+- **StemScriber value:** Generate tabs + isolated stems for any song a student requests. Perfect for creating practice-along tracks.
 - **Messaging:** "Give your students perfect tabs and isolated stems for any song they want to learn. No more hunting for inaccurate tabs online."
 - **Plan:** Pro ($14.99/mo) — Guitar Pro export + unlimited songs for a teaching business
 
 ### 3. Intermediate Self-Taught Musicians — MEDIUM-HIGH willingness to pay ($5-15/mo)
 - **Who:** Hobbyist guitarists/bassists/drummers who learn by ear but want help with complex parts
 - **Pain point:** Struggling with fast passages, can't hear the bass line clearly in a mix, existing tabs online are inaccurate
-- **StemScribe value:** Isolate the instrument + get tab notation. See exactly what's being played.
-- **Messaging:** "Can't figure out that riff? StemScribe isolates it AND shows you the tab. Every note, every instrument."
+- **StemScriber value:** Isolate the instrument + get tab notation. See exactly what's being played.
+- **Messaging:** "Can't figure out that riff? StemScriber isolates it AND shows you the tab. Every note, every instrument."
 - **Plan:** Premium ($4.99/mo) for stem separation + MIDI, or Pro ($14.99/mo) for Guitar Pro
 
 ### 4. Worship/Church Musicians — MEDIUM willingness to pay ($5-15/mo)
 - **Who:** Church band members, worship leaders, volunteer musicians
 - **Pain point:** Weekly set lists with 4-6 new songs, limited rehearsal time, musicians at varying skill levels need charts/tabs
-- **StemScribe value:** Generate chord charts and tabs for the whole band from one upload, isolate stems for individual practice
+- **StemScriber value:** Generate chord charts and tabs for the whole band from one upload, isolate stems for individual practice
 - **Messaging:** "Prepare your whole band for Sunday. Upload the recording, get tabs for every instrument and chord charts for your team."
 - **Plan:** Pro ($14.99/mo) — unlimited songs for weekly rotation
 
 ### 5. Producers / Remixers — MEDIUM willingness to pay ($5-15/mo)
 - **Who:** Bedroom producers, remix artists, sample-based musicians
 - **Pain point:** Need stems for remixes/samples, want to understand harmonic structure of reference tracks
-- **StemScribe value:** High-quality stem separation + MIDI for re-creation in DAW
+- **StemScriber value:** High-quality stem separation + MIDI for re-creation in DAW
 - **Messaging:** "Separate any song into stems, get MIDI for every part. Remix, sample, or recreate in your DAW."
 - **Plan:** Premium ($4.99/mo) — stems + MIDI is sufficient, Guitar Pro less relevant
 
 ### 6. Music Students (College/Conservatory) — LOWER willingness to pay ($0-5/mo)
 - **Who:** College music majors doing ear training, jazz students transcribing solos
 - **Pain point:** Required transcription assignments, learning standard repertoire by ear
-- **StemScribe value:** Verify their own transcriptions, isolate parts for ear training
+- **StemScriber value:** Verify their own transcriptions, isolate parts for ear training
 - **Messaging:** "Check your transcription work instantly. Isolate any part for focused ear training."
 - **Plan:** Free tier (3 songs/mo may be enough) or Premium ($4.99/mo)
 
 ### 7. Casual Listeners / Karaoke Enthusiasts — LOWEST willingness to pay ($0-3/mo)
 - **Who:** People who want karaoke tracks, vocals removed, or just stems for fun
 - **Pain point:** Want instrumental versions of songs
-- **StemScribe value:** Stem separation works great for this, but it's not our core differentiator
+- **StemScriber value:** Stem separation works great for this, but it's not our core differentiator
 - **Messaging:** N/A — don't target this segment. Let Moises and BandLab serve them.
 - **Plan:** Free tier only — low conversion potential
 
@@ -188,7 +188,7 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 
 | Product | Entry Paid Tier | Full-Featured Tier | Model |
 |---|---|---|---|
-| **StemScribe** | $4.99/mo (Premium) | $14.99/mo (Pro) | Subscription |
+| **StemScriber** | $4.99/mo (Premium) | $14.99/mo (Pro) | Subscription |
 | Moises.ai | $3.99/mo (Premium) | $24.99/mo (Pro) | Subscription |
 | Songscription | $9.99/mo (Plus) | $29.99/mo (Pro) | Subscription |
 | Klangio Studio Pro | $11.99/mo | $29.99/mo (list) | Subscription |
@@ -198,16 +198,16 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 
 ### Analysis
 
-**StemScribe's Premium at $4.99/mo is well-positioned:**
+**StemScriber's Premium at $4.99/mo is well-positioned:**
 - Undercuts Songscription Plus ($9.99) and Klangio ($11.99) significantly
 - Matches Moises Premium ($3.99) — the anchor price for musicians' monthly AI tool spend
 - Offers MORE features at this price (6-stem separation + chord detection + MIDI) than any competitor at a similar price
 
-**StemScribe's Pro at $14.99/mo is a strong value:**
+**StemScriber's Pro at $14.99/mo is a strong value:**
 - Guitar Pro export (unique at this price) — Klangio charges $11.99-29.99 for GP export alone with NO stems
 - Cheaper than Moises Pro ($24.99) which doesn't even do tabs
 - Cheaper than Songscription Pro ($29.99) which doesn't do stems
-- To replicate StemScribe Pro's feature set, a user would need Moises ($24.99) + Klangio ($11.99) = $36.98/mo
+- To replicate StemScriber Pro's feature set, a user would need Moises ($24.99) + Klangio ($11.99) = $36.98/mo
 
 **Recommendation:** Current pricing is aggressive and defensible. Consider:
 - A **launch discount** (first 3 months at $2.99 Premium / $9.99 Pro) to drive adoption
@@ -228,23 +228,23 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 
 ### Weaknesses
 - **No mobile app:** Moises has 70M users largely through mobile. Web-only limits reach.
-- **No community/library:** Songsterr has 400K songs. StemScribe starts from zero — every song must be individually processed.
+- **No community/library:** Songsterr has 400K songs. StemScriber starts from zero — every song must be individually processed.
 - **Guitar/bass transcription quality:** Basic Pitch is good but not great. Custom CRNN for guitar was a dead end. Accuracy lags behind human transcription.
 - **Single developer:** vs. Moises (70+ employees, $50M funding), Klangio (funded startup), Songsterr (established company)
 - **No brand recognition:** Zero users, zero reviews, no press coverage yet
 - **Compute costs:** Stem separation + transcription is GPU-intensive. Free tier users cost money with zero revenue.
 
 ### Opportunities
-- **Underserved "cover band" niche:** No tool specifically targets musicians who need to learn complete songs (all parts). This is StemScribe's core audience.
+- **Underserved "cover band" niche:** No tool specifically targets musicians who need to learn complete songs (all parts). This is StemScriber's core audience.
 - **Guitar Pro format is a moat:** The GP format is the standard for tab sharing. Few competitors export it. Musicians who use Guitar Pro are high-value, high-retention users.
 - **Music education market:** Teachers need custom materials. Schools/conservatories would pay for classroom licenses.
-- **YouTube creator partnerships:** Guitar/music YouTubers need tabs for their tutorials. StemScribe could auto-generate them.
+- **YouTube creator partnerships:** Guitar/music YouTubers need tabs for their tutorials. StemScriber could auto-generate them.
 - **API/B2B licensing:** Sell the pipeline as an API to other music apps that want tab generation without building their own ML models.
-- **Songsterr/UG replacement:** If AI-generated tabs reach 85%+ accuracy, StemScribe could build a searchable tab library (generate on first request, cache for future users).
-- **BandLab MIDI feature is nascent:** They just launched stem-to-MIDI. If StemScribe moves fast, we can own the "stems + tabs" space before BandLab matures.
+- **Songsterr/UG replacement:** If AI-generated tabs reach 85%+ accuracy, StemScriber could build a searchable tab library (generate on first request, cache for future users).
+- **BandLab MIDI feature is nascent:** They just launched stem-to-MIDI. If StemScriber moves fast, we can own the "stems + tabs" space before BandLab matures.
 
 ### Threats
-- **Moises adds tab generation:** With $50M and 70M users, if Moises ships Guitar Pro export, StemScribe's unique value erodes overnight. Their 2025 roadmap hints at "notation" features.
+- **Moises adds tab generation:** With $50M and 70M users, if Moises ships Guitar Pro export, StemScriber's unique value erodes overnight. Their 2025 roadmap hints at "notation" features.
 - **Open-source catches up:** Projects like Demucs (Meta), basic-pitch (Spotify) are free. If someone open-sources a good tab generator, the pipeline becomes commoditized.
 - **Compute economics:** GPU costs for free-tier users may not be sustainable without strong paid conversion.
 - **Accuracy ceiling:** If AI tabs are only 70-80% accurate, power users will dismiss the product. The "last 20%" of accuracy is extremely hard.
@@ -260,18 +260,18 @@ StemScribe is the only end-to-end audio-to-Guitar-Pro transcription platform: up
 > Upload any song. Get stems, tabs, and Guitar Pro files for every instrument — powered by AI.
 
 ### Google Ads (Search)
-> "AI Guitar Tab Generator" — Upload a song, get Guitar Pro tabs for guitar, bass, drums & piano in minutes. Free tier available. Try StemScribe.
+> "AI Guitar Tab Generator" — Upload a song, get Guitar Pro tabs for guitar, bass, drums & piano in minutes. Free tier available. Try StemScriber.
 > "Song to Guitar Pro" — Turn any recording into Guitar Pro tabs automatically. 6-stem separation + AI transcription. No other tool does both.
 
 ### Social (Reddit r/guitar, r/Bass, r/drums)
-> Sick of inaccurate tabs online? I built StemScribe — it separates a song into stems, then AI-transcribes each instrument into Guitar Pro tabs. No more hunting through 5 different tab sites for a decent transcription.
+> Sick of inaccurate tabs online? I built StemScriber — it separates a song into stems, then AI-transcribes each instrument into Guitar Pro tabs. No more hunting through 5 different tab sites for a decent transcription.
 
 ### YouTube Music Creator Outreach
 > "Hey [creator], I built a tool that auto-generates Guitar Pro tabs from any song — stems + transcription in one pipeline. Would love for you to try it on one of your tutorial songs and see how it compares to manual transcription."
 
 ### Music Teacher Email
 > Subject: Generate tabs + practice tracks for any song your students request
-> Body: StemScribe separates songs into individual instruments AND generates Guitar Pro tabs automatically. Upload a student's song request → download tabs + isolated stems for practice. No more manually transcribing. Pro plan: $14.99/mo for unlimited songs.
+> Body: StemScriber separates songs into individual instruments AND generates Guitar Pro tabs automatically. Upload a student's song request → download tabs + isolated stems for practice. No more manually transcribing. Pro plan: $14.99/mo for unlimited songs.
 
 ---
 

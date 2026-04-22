@@ -1,9 +1,9 @@
-# StemScribe Chord Detection Analysis
+# StemScriber Chord Detection Analysis
 
 **Date:** 2026-03-09
 **Test case:** "The Time Comes" by Kozelski
 **Ground truth (songwriter's chart):** F#m, A, Bm, E, B, D, C#m, G — key of F#m / A major
-**StemScribe output:** Key of G, chords mostly G and C with one F — completely wrong
+**StemScriber output:** Key of G, chords mostly G and C with one F — completely wrong
 
 ---
 
@@ -97,8 +97,8 @@ The BTC model outputs per-frame predictions but the v10 code does minimal post-p
 ### Key Insights from Recent Research
 
 1. **Tuning estimation is critical.** Top-performing MIREX systems pre-estimate tuning and compensate before feature extraction.
-2. **CQT > Chroma for neural models.** Raw CQT features (like BTC uses) preserve more harmonic information than collapsed chroma vectors. StemScribe's fallback detectors (v7, v8, basic) use chroma — this is strictly worse.
-3. **Source separation helps.** A 2020 study showed that running chord detection on separated stems (specifically harmonic stems without drums/vocals) significantly improves accuracy. StemScribe already does this, which is good.
+2. **CQT > Chroma for neural models.** Raw CQT features (like BTC uses) preserve more harmonic information than collapsed chroma vectors. StemScriber's fallback detectors (v7, v8, basic) use chroma — this is strictly worse.
+3. **Source separation helps.** A 2020 study showed that running chord detection on separated stems (specifically harmonic stems without drums/vocals) significantly improves accuracy. StemScriber already does this, which is good.
 4. **Class imbalance is the #1 unsolved problem.** Rare chords (F#m, C#m, Bbm, etc.) are systematically misclassified. Data augmentation via pitch shifting during training partially addresses this.
 5. **Post-processing matters.** HMM/CRF temporal smoothing, key-constrained filtering, and beat-aligned chord changes all provide 2-5% accuracy gains on top of any neural model.
 

@@ -61,7 +61,7 @@ backend/
 
 ### What stays in app.py (thin shell):
 ```python
-"""StemScribe - Audio Stem Separation & Transcription API"""
+"""StemScriber - Audio Stem Separation & Transcription API"""
 from flask import Flask
 from flask_cors import CORS
 

@@ -1,4 +1,4 @@
-"""StemScribe middleware — rate limiting, request guards, and input validation."""
+"""StemScriber middleware — rate limiting, request guards, and input validation."""
 
 from middleware.rate_limit import init_limiter, limiter
 

@@ -1,4 +1,4 @@
-# StemScribe Landing Page Copy
+# StemScriber Landing Page Copy
 
 **Last updated:** 2026-03-03
 **Voice reference:** See BRAND_GUIDE.md — write like you're explaining to a bandmate, not a customer.
@@ -8,14 +8,14 @@
 ## SEO Meta
 
 ```html
-<title>StemScribe — AI Song to Guitar Pro Tabs | Stems + MIDI + Tab Transcription</title>
+<title>StemScriber — AI Song to Guitar Pro Tabs | Stems + MIDI + Tab Transcription</title>
 <meta name="description" content="Upload any song and get Guitar Pro tabs for guitar, bass, drums, and piano. AI-powered stem separation + automatic MIDI transcription in one pipeline. Free to try.">
 <meta name="keywords" content="guitar pro tabs, AI tab generator, stem separation, audio to MIDI, song transcription, guitar tabs from audio, bass tabs, drum tabs, learn songs by ear">
 ```
 
 **Open Graph / Social:**
 ```html
-<meta property="og:title" content="StemScribe — Tear The Sound Apart">
+<meta property="og:title" content="StemScriber — Tear The Sound Apart">
 <meta property="og:description" content="Upload a song. Get stems, MIDI, and Guitar Pro tabs for every instrument. The only tool that does it all in one pipeline.">
 <meta property="og:type" content="website">
 ```
@@ -140,7 +140,7 @@ Not 2 stems. Not 4. Six. Every time.
 **Headline:** Real tabs. Not approximations.
 **Copy:**
 ```
-StemScribe doesn't just detect notes — it maps them to actual fret positions
+StemScriber doesn't just detect notes — it maps them to actual fret positions
 on a real guitar neck. Download .gp5 files that open in Guitar Pro, TuxGuitar,
 or any GP-compatible editor. Edit, print, or share with your band.
 
@@ -180,7 +180,7 @@ Just paste the link.
 **Headline:** See the harmony. Not just the notes.
 **Copy:**
 ```
-StemScribe identifies chords and key signature across the full track.
+StemScriber identifies chords and key signature across the full track.
 See chord changes overlaid on the waveform. Useful for writing charts,
 understanding song structure, or finally settling the argument about
 whether that chord is a Dm7 or an Fmaj9.
@@ -202,7 +202,7 @@ Most tools do one thing. You need three.
 
 ### Comparison Table
 
-| What you need | Moises | LALAL.AI | Klangio | Songsterr | StemScribe |
+| What you need | Moises | LALAL.AI | Klangio | Songsterr | StemScriber |
 |---|---|---|---|---|---|
 | Stem separation | Yes | Yes | No | No | **Yes** |
 | Tab generation | No | No | Yes | Yes | **Yes** |
@@ -214,8 +214,8 @@ Most tools do one thing. You need three.
 
 ### Kicker Line
 ```
-To get what StemScribe Pro offers, you'd need Moises ($24.99/mo) plus Klangio ($11.99/mo).
-That's $37/mo. StemScribe Pro is $14.99.
+To get what StemScriber Pro offers, you'd need Moises ($24.99/mo) plus Klangio ($11.99/mo).
+That's $37/mo. StemScriber Pro is $14.99.
 ```
 
 ---
@@ -317,7 +317,7 @@ follow and the stem to play along with. You save hours of prep.
 ```
 That fast run in the bridge? Slow the stem to 25%, read the tab, and
 practice it on loop until your fingers catch up. Online tabs are wrong
-half the time. StemScribe generates them fresh from the actual audio.
+half the time. StemScriber generates them fresh from the actual audio.
 ```
 
 ### Use Case 4: Worship Musicians
@@ -349,7 +349,7 @@ THE TECH BEHIND THE MAGIC
 
 ### Copy
 ```
-StemScribe isn't a wrapper around someone else's API. We built the pipeline.
+StemScriber isn't a wrapper around someone else's API. We built the pipeline.
 
 Stem separation uses an ensemble of BS-RoFormer and Demucs htdemucs_6s —
 the same models used in academic research and professional audio engineering.
@@ -396,7 +396,7 @@ how many songs you can process per month.
 
 **Q: What about copyright?**
 ```
-A: StemScribe is a tool for personal learning and practice, similar to
+A: StemScriber is a tool for personal learning and practice, similar to
 slowing down a record or transcribing by ear. We don't host or distribute
 copyrighted content. Your processed files are stored in your private
 library and not shared with anyone.
@@ -417,7 +417,7 @@ it's your file. MIDI exports work in any DAW.
 
 **Q: Do you have a mobile app?**
 ```
-A: Not yet. StemScribe is web-based and works on any device with a browser.
+A: Not yet. StemScriber is web-based and works on any device with a browser.
 A mobile app is on our roadmap.
 ```
 
@@ -439,7 +439,7 @@ Your next song is waiting.
 
 ### Subheadline
 ```
-Upload a track. See what StemScribe can do. No signup required.
+Upload a track. See what StemScriber can do. No signup required.
 ```
 
 ### CTA Button
@@ -458,14 +458,14 @@ Premium starts at $4.99/mo when you're ready.
 ## 12. Footer
 
 ```
-StemScribe — Tear The Sound Apart
+StemScriber — Tear The Sound Apart
 
 [Product]  [Pricing]  [FAQ]  [Blog]
 
 Built by musicians, for musicians.
 A Tidepool Artists project.
 
-© 2026 StemScribe. All rights reserved.
+© 2026 StemScriber. All rights reserved.
 Terms  •  Privacy  •  Contact
 ```
 
@@ -514,10 +514,10 @@ Terms  •  Privacy  •  Contact
 **Key metric:** Monthly active users, songs processed per user per month
 
 ### Stage 6: Referral
-**Goal:** Users recommend StemScribe to bandmates and music friends
+**Goal:** Users recommend StemScriber to bandmates and music friends
 **Tactics:**
 - Shareable Guitar Pro files — when a user shares a GP file, it's a natural product demo
-- "Processed with StemScribe" watermark option on MIDI exports (opt-out for Pro users)
+- "Processed with StemScriber" watermark option on MIDI exports (opt-out for Pro users)
 - Referral program: Give a friend 5 extra free songs, get 5 extra yourself
 - Band sharing: Pro users can invite bandmates to view (not download) their library
 **Key metric:** Referral signups, viral coefficient

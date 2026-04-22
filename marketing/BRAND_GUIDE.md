@@ -1,13 +1,13 @@
-# StemScribe Brand Guide
+# StemScriber Brand Guide
 
 ## Brand Personality & Voice
 
-StemScribe talks like a seasoned musician who happens to be a tech wizard -- the sound engineer at your favorite venue who knows every pedal on your board and can explain FFT transforms over a beer. The voice is:
+StemScriber talks like a seasoned musician who happens to be a tech wizard -- the sound engineer at your favorite venue who knows every pedal on your board and can explain FFT transforms over a beer. The voice is:
 
 - **Knowledgeable but never pretentious.** We say "stems" not "audio source separation outputs." We explain complex ML as "the AI does its thing."
 - **Enthusiastic but not performative.** Genuine excitement about music, not marketing-speak excitement about features.
 - **Casual with earned authority.** We can drop technical terms because we've earned the right -- but we always prioritize clarity over showing off.
-- **Community-first.** StemScribe exists because musicians deserve better tools. We're builders who play, not suits who ship.
+- **Community-first.** StemScriber exists because musicians deserve better tools. We're builders who play, not suits who ship.
 
 **Voice principles:**
 1. Write like you're explaining something to a bandmate, not a customer
@@ -22,7 +22,7 @@ StemScribe talks like a seasoned musician who happens to be a tech wizard -- the
 
 ### The Aesthetic: Record Store Meets Control Room
 
-StemScribe lives at the intersection of two spaces musicians know by heart:
+StemScriber lives at the intersection of two spaces musicians know by heart:
 
 1. **The record store** -- gig poster textures, hand-lettered type, ink grain, paper warmth, the smell of vinyl
 2. **The control room** -- the Neve console, LED meters, warm tube glow, the precision of professional gear
@@ -156,7 +156,7 @@ These map to per-instrument themes in the mixer and future practice mode:
 
 ## Per-Instrument Visual Themes
 
-Each instrument in StemScribe has a distinct visual personality. These apply to the mixer channel strips, practice mode, and future instrument-specific pages.
+Each instrument in StemScriber has a distinct visual personality. These apply to the mixer channel strips, practice mode, and future instrument-specific pages.
 
 ### Drums: Bold, Punchy, High-Energy
 - **Color:** Red/orange spectrum (`#ff5252` to `#ff7b54`)
@@ -220,7 +220,7 @@ The hero section should feel like you just walked into a legendary venue -- dark
 
 1. **Background layer:** The existing psychedelic orbs stay, but add a subtle noise grain overlay (poster texture). The orbs should feel like stage lighting hitting fog.
 
-2. **Logo:** `StemScribe` in Righteous, gradient stays (orange > pink > purple). The rotating four-pointed star symbol stays. Below the logo, the tagline "Tear The Sound Apart" in Outfit, 0.85rem, `--text-dim`, letter-spacing 2px.
+2. **Logo:** `StemScriber` in Righteous, gradient stays (orange > pink > purple). The rotating four-pointed star symbol stays. Below the logo, the tagline "Tear The Sound Apart" in Outfit, 0.85rem, `--text-dim`, letter-spacing 2px.
 
 3. **Hero headline:** Full width, centered. Two lines:
    - Line 1: "Tear The" in Righteous, white, 4rem
@@ -268,9 +268,9 @@ The hero section should feel like you just walked into a legendary venue -- dark
 
 ## Tidepool Artists Cross-Pollination
 
-### StemScribe x Tidepool: Shared DNA
+### StemScriber x Tidepool: Shared DNA
 
-Both projects serve musicians. StemScribe helps them learn and practice; Tidepool helps them get discovered and booked. The brand connection should feel like two products from the same family -- not identical twins, but siblings who share DNA.
+Both projects serve musicians. StemScriber helps them learn and practice; Tidepool helps them get discovered and booked. The brand connection should feel like two products from the same family -- not identical twins, but siblings who share DNA.
 
 **Shared visual elements:**
 - Both use dark themes with warm accents
@@ -278,11 +278,11 @@ Both projects serve musicians. StemScribe helps them learn and practice; Tidepoo
 - Both use Righteous as a display font
 - The psychedelic orb background could appear on Tidepool as well (in each band's accent color)
 
-**StemScribe integration on Tidepool:**
-- Each band page on tidepoolartist.com could have a "Learn This Song" CTA that links to StemScribe with a pre-loaded track
+**StemScriber integration on Tidepool:**
+- Each band page on tidepoolartist.com could have a "Learn This Song" CTA that links to StemScriber with a pre-loaded track
 - The visual language should make this transition feel natural -- same grain texture, same card style, same type hierarchy
 
-**Tidepool visibility on StemScribe:**
+**Tidepool visibility on StemScriber:**
 - "Powered by Tidepool Artists" in the footer, small but present
 - When a user processes a track by a Tidepool-represented band (KODA, Kozelski, Spare Kings, King Hippo, The Outervention), the track info panel could show a "This artist is on Tidepool" badge with a link
 
@@ -301,7 +301,7 @@ The current problem: all 5 band pages use the same `ArtistPage` component with c
 - **Style:** Vintage-classic meets artistic. Warm sepia tones, analog photography feel.
 - **Texture:** Film grain, light leaks, aged paper edges on photos
 - **Layout:** Magazine editorial -- large type callouts, pull quotes, generous whitespace
-- **Unique element:** A vinyl record illustration that rotates slowly behind the hero content (reuse StemScribe's vinyl CSS)
+- **Unique element:** A vinyl record illustration that rotates slowly behind the hero content (reuse StemScriber's vinyl CSS)
 - **Background:** Dark brown-black (`#1a1410`) with warm amber orb
 
 **Spare Kings:**
@@ -330,7 +330,7 @@ The current problem: all 5 band pages use the same `ArtistPage` component with c
 ## Logo Refinement
 
 ### Current Logo
-`<span class="logo-symbol">✦</span> StemScribe` -- The four-pointed star symbol rotates continuously. "StemScribe" is in Righteous with an orange-to-pink-to-purple gradient.
+`<span class="logo-symbol">✦</span> StemScriber` -- The four-pointed star symbol rotates continuously. "StemScriber" is in Righteous with an orange-to-pink-to-purple gradient.
 
 ### Refinements
 
@@ -359,7 +359,7 @@ The current problem: all 5 band pages use the same `ArtistPage` component with c
 > Just shipped A-B looping in Practice Mode. Set your loop points, slow it down to 25%, and woodshed that solo until your fingers remember it. No more rewinding. No more guessing. Just you and the riff.
 
 **Post 2 -- Community / enthusiasm:**
-> Someone just ran Cornell '77 Scarlet > Fire through StemScribe and isolated Jerry's guitar for the entire 24-minute jam. We didn't build this for that. But we're glad we did.
+> Someone just ran Cornell '77 Scarlet > Fire through StemScriber and isolated Jerry's guitar for the entire 24-minute jam. We didn't build this for that. But we're glad we did.
 
 **Post 3 -- Educational / helpful:**
 > Pro tip: Export the bass stem as MIDI, drop it into your DAW, and re-amp it through your favorite plugin. You now have the exact bass line from the record, played through YOUR tone. That's what stem separation is actually for.

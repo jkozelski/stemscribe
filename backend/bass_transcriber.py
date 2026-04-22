@@ -1,5 +1,5 @@
 """
-Neural Bass Transcriber for StemScribe
+Neural Bass Transcriber for StemScriber
 ======================================
 Uses Basic Pitch (Google/Spotify) for pitch detection, then applies
 bass-specific post-processing for high-quality bass tablature MIDI.

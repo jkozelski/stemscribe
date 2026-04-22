@@ -1,5 +1,5 @@
 """
-URL-based result caching for StemScribe.
+URL-based result caching for StemScriber.
 
 When someone processes a YouTube URL that's already been processed before,
 serve the cached results instantly instead of reprocessing.

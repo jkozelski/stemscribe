@@ -1,5 +1,5 @@
 """
-Chord Detection V8 for StemScribe
+Chord Detection V8 for StemScriber
 ==================================
 Advanced chord detection using a Transformer-based neural network.
 Trained with 93.61% accuracy on 337 chord classes including:

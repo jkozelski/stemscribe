@@ -1,5 +1,5 @@
-// StemScribe — Authentication Module (Google Sign-In + JWT)
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Authentication Module (Google Sign-In + JWT)
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -380,4 +380,4 @@ window.StemScribe = window.StemScribe || {};
         await SS.checkAuth();
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

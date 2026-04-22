@@ -1,7 +1,7 @@
 # Client-Side YouTube Audio Extraction Research
 
 **Date:** 2026-03-26
-**Purpose:** Evaluate whether the user's browser can download/process YouTube audio WITHOUT the server touching YouTube, shifting legal liability away from StemScribe.
+**Purpose:** Evaluate whether the user's browser can download/process YouTube audio WITHOUT the server touching YouTube, shifting legal liability away from StemScriber.
 
 ---
 
@@ -156,7 +156,7 @@ const recorder = new MediaRecorder(stream);
 - Firefox: Ignores the audio parameter entirely
 - Safari: Same as Firefox -- audio not supported in getDisplayMedia
 
-### Could This Work for StemScribe?
+### Could This Work for StemScriber?
 
 Theoretically: User plays a YouTube video, shares the tab, waits for the song to finish, then the recorded audio blob is sent to the server for stem separation. But the UX is terrible -- multi-step, confusing, slow, and only works on Chrome/Edge.
 
@@ -194,7 +194,7 @@ Google explicitly prohibits extensions that download from YouTube:
 
 Extensions like "Video & Audio Downloader" and "Audio Downloader Prime" explicitly state they do NOT work with YouTube due to these policies.
 
-**An extension that captures YouTube tab audio and sends it to StemScribe would be rejected from the Chrome Web Store.**
+**An extension that captures YouTube tab audio and sends it to StemScriber would be rejected from the Chrome Web Store.**
 
 ### Firefox Add-ons
 
@@ -203,7 +203,7 @@ Firefox is more permissive. Multiple YouTube audio download extensions exist on 
 - YouTube Audio Downloader
 - YouTube to MP3
 
-A Firefox extension could capture audio and pass it to StemScribe. However, Firefox's market share is ~3%, making this impractical as a primary solution.
+A Firefox extension could capture audio and pass it to StemScriber. However, Firefox's market share is ~3%, making this impractical as a primary solution.
 
 ### Sideloaded Extension (No Store)
 
@@ -238,13 +238,13 @@ Service workers can only intercept requests within their own origin scope. A ser
 
 - **Cannot intercept YouTube's media requests** (different origin)
 - **Cannot intercept requests made by YouTube's iframe** (cross-origin)
-- YouTube's media is served from `*.googlevideo.com`, completely outside StemScribe's scope
+- YouTube's media is served from `*.googlevideo.com`, completely outside StemScriber's scope
 
 ### What Service Workers CAN Do
 
-- Cache audio files that users upload to StemScribe (useful for offline playback of stems)
+- Cache audio files that users upload to StemScriber (useful for offline playback of stems)
 - Serve cached stems and chord charts
-- Handle range requests for audio playback from StemScribe's own resources
+- Handle range requests for audio playback from StemScriber's own resources
 
 ### Bottom Line
 
@@ -338,10 +338,10 @@ Users who want to practice along with songs likely have music from:
 
 ### Legal Advantages
 
-- **StemScribe never touches YouTube** -- the user provides their own legally obtained audio
+- **StemScriber never touches YouTube** -- the user provides their own legally obtained audio
 - **Fair use is strongest** when users process their own purchased music for personal practice
-- **No DMCA liability** -- StemScribe is a tool processing user-provided content, similar to how Photoshop processes user-provided images
-- **DMCA Safe Harbor applies** if StemScribe implements takedown procedures
+- **No DMCA liability** -- StemScriber is a tool processing user-provided content, similar to how Photoshop processes user-provided images
+- **DMCA Safe Harbor applies** if StemScriber implements takedown procedures
 
 **Sources:**
 - [MDN: File System API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API)
@@ -364,16 +364,16 @@ Cobalt (cobalt.tools) acts as a server-side proxy:
 
 It "works like a fancy proxy" -- the actual downloading happens on Cobalt's servers, not in the user's browser.
 
-### Could StemScribe Use a Service Like This?
+### Could StemScriber Use a Service Like This?
 
-You could direct users to download audio via Cobalt, then upload it to StemScribe. But:
+You could direct users to download audio via Cobalt, then upload it to StemScriber. But:
 - Adds friction to the workflow (download elsewhere, then upload)
 - Cobalt could shut down at any time (these services frequently get taken down)
 - You'd be recommending users violate YouTube's ToS, which could create contributory liability
 
 ### Self-Hosted Proxy
 
-Running your own CORS proxy (e.g., a Cloudflare Worker that fetches from YouTube on behalf of the client) technically makes the request "client-initiated" but the proxy server is still downloading from YouTube. This is exactly what StemScribe currently does -- it doesn't change the legal picture at all.
+Running your own CORS proxy (e.g., a Cloudflare Worker that fetches from YouTube on behalf of the client) technically makes the request "client-initiated" but the proxy server is still downloading from YouTube. This is exactly what StemScriber currently does -- it doesn't change the legal picture at all.
 
 **Sources:**
 - [Cobalt GitHub](https://github.com/imputnet/cobalt)
@@ -395,7 +395,7 @@ This applies to USERS, not just service providers. Both server-side and client-s
 
 **Short answer: Not significantly.**
 
-- If StemScribe provides JavaScript code that extracts audio from YouTube (even if it runs in the user's browser), StemScribe is still facilitating the violation of YouTube's ToS
+- If StemScriber provides JavaScript code that extracts audio from YouTube (even if it runs in the user's browser), StemScriber is still facilitating the violation of YouTube's ToS
 - Courts look at whether the service provider is "inducing" or "contributing to" infringement (see MGM v. Grokster)
 - Providing a tool specifically designed to extract YouTube audio signals intent, regardless of where the code executes
 - The DMCA's anti-circumvention provisions (Section 1201) may apply if any DRM/protection measures are bypassed
@@ -408,12 +408,12 @@ Safe Harbor (Section 512) protects service providers when:
 3. The provider **doesn't benefit financially** from the infringement in a way tied to specific infringing material
 4. The provider implements a **takedown procedure** and **repeat infringer policy**
 
-**Key distinction:** Safe Harbor applies when StemScribe processes user-UPLOADED files. It does NOT apply when StemScribe (or its client-side code) actively downloads from YouTube, because then StemScribe is the direct actor, not a passive platform.
+**Key distinction:** Safe Harbor applies when StemScriber processes user-UPLOADED files. It does NOT apply when StemScriber (or its client-side code) actively downloads from YouTube, because then StemScriber is the direct actor, not a passive platform.
 
 ### The Strongest Legal Position
 
 1. **User uploads their own audio file** (purchased MP3, CD rip, etc.)
-2. StemScribe processes it (stem separation, chord detection) as a tool
+2. StemScriber processes it (stem separation, chord detection) as a tool
 3. This is analogous to Photoshop, Audacity, or any other media processing tool
 4. Fair use for personal practice/education is the strongest argument
 
@@ -438,7 +438,7 @@ The AHRA does NOT protect internet-based downloads. It was written for analog an
 
 #### A. User File Upload (Primary Path)
 - **How:** `<input type="file" accept="audio/*">` + drag-and-drop zone
-- **Legal risk:** Minimal -- StemScribe is a tool processing user-provided content
+- **Legal risk:** Minimal -- StemScriber is a tool processing user-provided content
 - **UX:** Simple, universally understood
 - **Implementation:** Trivial -- standard HTML/JS, works in all browsers
 - **Messaging:** "Upload your own music to practice with" / "Bring your own tracks"
@@ -459,7 +459,7 @@ The AHRA does NOT protect internet-based downloads. It was written for analog an
   - Add a DMCA takedown page to stemscribe.io
   - Add a repeat infringer policy to ToS
   - Consult with Lindsay Spiller or Jesse Morris (already planned)
-- **Why keep it:** It's the killer UX feature that differentiates StemScribe
+- **Why keep it:** It's the killer UX feature that differentiates StemScriber
 
 #### D. Hybrid: YouTube Playback + User Upload for Processing
 - **How:** Use YouTube IFrame API for reference playback (legal), but require user to upload their own audio file for stem separation

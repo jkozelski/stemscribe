@@ -1,5 +1,5 @@
 """
-Chord Detection V7 for StemScribe
+Chord Detection V7 for StemScriber
 ==================================
 Advanced chord detection using a Transformer-based neural network.
 Trained on real audio data with 99.20% accuracy.

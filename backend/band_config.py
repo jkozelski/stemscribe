@@ -1,5 +1,5 @@
 """
-Band Configuration for StemScribe
+Band Configuration for StemScriber
 ==================================
 Easy-to-edit band configurations. Add new bands here!
 

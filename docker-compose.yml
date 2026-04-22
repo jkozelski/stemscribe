@@ -1,6 +1,6 @@
 version: "3.8"
 
-# Local development stack: Postgres + Redis + StemScribe API
+# Local development stack: Postgres + Redis + StemScriber API
 # Usage:
 #   docker compose up          — start all services
 #   docker compose up -d db    — start just Postgres (for running app locally)

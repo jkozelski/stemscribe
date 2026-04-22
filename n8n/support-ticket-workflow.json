@@ -1,5 +1,5 @@
 {
-  "name": "StemScribe — Support Ticket Handler",
+  "name": "StemScriber — Support Ticket Handler",
   "nodes": [
     {
       "parameters": {
@@ -66,14 +66,14 @@
       "typeVersion": 4.5,
       "position": [700, 160],
       "credentials": {
-        "googleSheetsOAuth2Api": { "id": "CREDENTIAL_ID", "name": "Google Sheets StemScribe" }
+        "googleSheetsOAuth2Api": { "id": "CREDENTIAL_ID", "name": "Google Sheets StemScriber" }
       }
     },
     {
       "parameters": {
         "from": "+18447915323",
         "to": "+18034149454",
-        "message": "={{ $json.priority === 'high' || $json.subject.toLowerCase().includes('billing') || $json.subject.toLowerCase().includes('refund') ? '⚠️ HIGH PRIORITY\\n' : '' }}🎫 New StemScribe ticket from {{ $json.name }}: {{ $json.subject }} — {{ $json.message.substring(0, 100) }}{{ $json.message.length > 100 ? '...' : '' }}"
+        "message": "={{ $json.priority === 'high' || $json.subject.toLowerCase().includes('billing') || $json.subject.toLowerCase().includes('refund') ? '⚠️ HIGH PRIORITY\\n' : '' }}🎫 New StemScriber ticket from {{ $json.name }}: {{ $json.subject }} — {{ $json.message.substring(0, 100) }}{{ $json.message.length > 100 ? '...' : '' }}"
       },
       "id": "sms-jeff",
       "name": "SMS to Jeff (Twilio)",
@@ -81,15 +81,15 @@
       "typeVersion": 1,
       "position": [700, 300],
       "credentials": {
-        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScribe" }
+        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScriber" }
       }
     },
     {
       "parameters": {
         "sendTo": "={{ $json.email }}",
-        "subject": "We got your message — StemScribe Support",
+        "subject": "We got your message — StemScriber Support",
         "emailType": "html",
-        "message": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body style=\"margin:0;padding:0;background-color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#1a1a2e;\"><tr><td align=\"center\" style=\"padding:40px 20px;\"><table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#16213e;border-radius:12px;overflow:hidden;\"><tr><td style=\"background:linear-gradient(135deg,#e94560 0%,#ff6b35 100%);padding:30px 40px;text-align:center;\"><h1 style=\"margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:1px;\">StemScribe</h1><p style=\"margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:13px;letter-spacing:2px;text-transform:uppercase;\">Support</p></td></tr><tr><td style=\"padding:40px;\"><p style=\"color:#e0e0e0;font-size:16px;line-height:1.6;margin:0 0 20px;\">Hey {{ $json.name }}, thanks for reaching out!</p><p style=\"color:#b0b0b0;font-size:15px;line-height:1.6;margin:0 0 25px;\">We got your message about <strong style=\"color:#ff6b35;\">{{ $json.subject }}</strong> and we'll get back to you within 24 hours.</p><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 25px;\"><tr><td style=\"background-color:#0f3460;border-left:4px solid #ff6b35;border-radius:6px;padding:16px 20px;\"><p style=\"color:#808080;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;\">Your Ticket ID</p><p style=\"color:#ffffff;font-size:16px;font-family:'Courier New',monospace;margin:0;\">{{ $json.id }}</p></td></tr></table><p style=\"color:#b0b0b0;font-size:14px;line-height:1.6;margin:0 0 10px;\">If it's urgent, text us at <strong style=\"color:#e0e0e0;\">(843) 874-8999</strong></p><p style=\"color:#b0b0b0;font-size:14px;line-height:1.6;margin:0;\">Keep making music,<br><strong style=\"color:#e0e0e0;\">The StemScribe Team</strong></p></td></tr><tr><td style=\"background-color:#0f3460;padding:20px 40px;text-align:center;border-top:1px solid #1a3a6e;\"><p style=\"color:#606080;font-size:12px;margin:0;\">StemScribe &mdash; Stems, chords, and tabs from any song.</p></td></tr></table></td></tr></table></body></html>",
+        "message": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body style=\"margin:0;padding:0;background-color:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;\"><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#1a1a2e;\"><tr><td align=\"center\" style=\"padding:40px 20px;\"><table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#16213e;border-radius:12px;overflow:hidden;\"><tr><td style=\"background:linear-gradient(135deg,#e94560 0%,#ff6b35 100%);padding:30px 40px;text-align:center;\"><h1 style=\"margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:1px;\">StemScriber</h1><p style=\"margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:13px;letter-spacing:2px;text-transform:uppercase;\">Support</p></td></tr><tr><td style=\"padding:40px;\"><p style=\"color:#e0e0e0;font-size:16px;line-height:1.6;margin:0 0 20px;\">Hey {{ $json.name }}, thanks for reaching out!</p><p style=\"color:#b0b0b0;font-size:15px;line-height:1.6;margin:0 0 25px;\">We got your message about <strong style=\"color:#ff6b35;\">{{ $json.subject }}</strong> and we'll get back to you within 24 hours.</p><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 0 25px;\"><tr><td style=\"background-color:#0f3460;border-left:4px solid #ff6b35;border-radius:6px;padding:16px 20px;\"><p style=\"color:#808080;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;\">Your Ticket ID</p><p style=\"color:#ffffff;font-size:16px;font-family:'Courier New',monospace;margin:0;\">{{ $json.id }}</p></td></tr></table><p style=\"color:#b0b0b0;font-size:14px;line-height:1.6;margin:0 0 10px;\">If it's urgent, text us at <strong style=\"color:#e0e0e0;\">(843) 874-8999</strong></p><p style=\"color:#b0b0b0;font-size:14px;line-height:1.6;margin:0;\">Keep making music,<br><strong style=\"color:#e0e0e0;\">The StemScriber Team</strong></p></td></tr><tr><td style=\"background-color:#0f3460;padding:20px 40px;text-align:center;border-top:1px solid #1a3a6e;\"><p style=\"color:#606080;font-size:12px;margin:0;\">StemScriber &mdash; Stems, chords, and tabs from any song.</p></td></tr></table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "email-customer",
@@ -98,7 +98,7 @@
       "typeVersion": 2.1,
       "position": [700, 460],
       "credentials": {
-        "gmailOAuth2": { "id": "CREDENTIAL_ID", "name": "Gmail StemScribe" }
+        "gmailOAuth2": { "id": "CREDENTIAL_ID", "name": "Gmail StemScriber" }
       }
     },
     {
@@ -162,7 +162,7 @@
       "typeVersion": 4.5,
       "position": [1180, 80],
       "credentials": {
-        "googleSheetsOAuth2Api": { "id": "CREDENTIAL_ID", "name": "Google Sheets StemScribe" }
+        "googleSheetsOAuth2Api": { "id": "CREDENTIAL_ID", "name": "Google Sheets StemScriber" }
       }
     },
     {
@@ -177,7 +177,7 @@
       "typeVersion": 1,
       "position": [1180, 220],
       "credentials": {
-        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScribe" }
+        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScriber" }
       }
     },
     {
@@ -249,7 +249,7 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "tags": [{ "name": "StemScribe" }, { "name": "Support" }],
+  "tags": [{ "name": "StemScriber" }, { "name": "Support" }],
   "triggerCount": 1,
   "pinData": {},
   "versionId": "1"

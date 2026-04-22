@@ -64,7 +64,7 @@ def send_reset_email(email: str, user_id: str) -> bool:
 
     try:
         resend.Emails.send({
-            'from': 'StemScriber <noreply@stemscribe.app>',
+            'from': 'StemScriber <noreply@stemscriber.com>',
             'to': [email],
             'subject': 'Reset your StemScriber password',
             'html': f"""

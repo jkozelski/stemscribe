@@ -1,5 +1,5 @@
 """
-MIDI to MusicXML Converter for StemScribe
+MIDI to MusicXML Converter for StemScriber
 ==========================================
 Converts MIDI files to MusicXML using music21.
 MusicXML can then be rendered in the browser using OpenSheetMusicDisplay.

@@ -1,5 +1,5 @@
-// StemScribe — Archive.org Live Music Browser
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Archive.org Live Music Browser
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -91,7 +91,7 @@ window.StemScribe = window.StemScribe || {};
             }
 
             archiveResults.innerHTML = data.results.map(function(show) {
-                return '<div class="archive-show-card" onclick="StemScribe.loadArchiveShow(\'' + SS.escapeJsString(show.identifier) + '\')">' +
+                return '<div class="archive-show-card" onclick="StemScriber.loadArchiveShow(\'' + SS.escapeJsString(show.identifier) + '\')">' +
                     '<div class="archive-show-title">' + SS.escapeHtml(show.title) + '</div>' +
                     '<div class="archive-show-meta">' +
                         (show.date ? '<span>\u{1F4C5} ' + SS.escapeHtml(show.date) + '</span>' : '') +
@@ -153,13 +153,13 @@ window.StemScribe = window.StemScribe || {};
                     return '<div class="archive-track-row">' +
                         '<span class="archive-track-num">' + (track.track_number || (i + 1)) + '</span>' +
                         '<span class="archive-track-title">' + SS.escapeHtml(displayTitle) + '</span>' +
-                        '<button class="archive-track-btn" onclick="StemScribe.processArchiveTrack(\'' + SS.escapeJsString(identifier) + '\', \'' + SS.escapeJsString(track.filename) + '\', \'' + SS.escapeJsString(displayTitle) + '\')">' +
+                        '<button class="archive-track-btn" onclick="StemScriber.processArchiveTrack(\'' + SS.escapeJsString(identifier) + '\', \'' + SS.escapeJsString(track.filename) + '\', \'' + SS.escapeJsString(displayTitle) + '\')">' +
                             '\u2726 Process' +
                         '</button>' +
                     '</div>';
                 }).join('');
 
-                html += '<button class="archive-process-all-btn" onclick="StemScribe.processArchiveBatch(\'' + SS.escapeJsString(identifier) + '\')">' +
+                html += '<button class="archive-process-all-btn" onclick="StemScriber.processArchiveBatch(\'' + SS.escapeJsString(identifier) + '\')">' +
                     '\u2726 Process All ' + data.tracks.length + ' Tracks' +
                 '</button>';
             } else {
@@ -257,4 +257,4 @@ window.StemScribe = window.StemScribe || {};
     // Expose globally for onclick handlers
     window.loadArchiveShow = SS.loadArchiveShow;
 
-})(window.StemScribe);
+})(window.StemScriber);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple SQL migration runner for StemScribe.
+Simple SQL migration runner for StemScriber.
 
 Usage:
     python migrate.py              # Apply all pending migrations

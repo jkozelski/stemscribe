@@ -1,4 +1,4 @@
-# YouTube Audio Licensing Research for StemScribe
+# YouTube Audio Licensing Research for StemScriber
 **Date:** 2026-03-26
 **Status:** URGENT -- product viability depends on this
 **Budget constraint:** Solo founder, <$1,000/month
@@ -9,7 +9,7 @@
 
 **The hard truth:** There is NO legal way to download/extract audio from YouTube for processing in a third-party app. YouTube's API Terms of Service explicitly prohibit it. Every app in this space either (a) uses embedded YouTube players without downloading, (b) requires users to upload their own files, or (c) has direct licensing deals worth six figures+.
 
-**The realistic path for StemScribe:** A hybrid model combining user-uploaded audio (BYOA) with embedded YouTube playback for discovery, plus free/CC-licensed content to seed the library. This can be built in 30 days.
+**The realistic path for StemScriber:** A hybrid model combining user-uploaded audio (BYOA) with embedded YouTube playback for discovery, plus free/CC-licensed content to seed the library. This can be built in 30 days.
 
 ---
 
@@ -52,7 +52,7 @@
 - 2026 lawsuit invokes DMCA Section 1201, arguing YouTube's technological measures qualify as effective access controls
 - The RIAA previously issued a DMCA takedown against youtube-dl on GitHub (later reversed by EFF)
 
-### Risk Assessment for StemScribe
+### Risk Assessment for StemScriber
 - **HIGH RISK** for commercial use. Using yt-dlp in a paid product that processes copyrighted music is exactly the use case major labels are suing over
 - Not a gray area -- it's the specific thing being litigated right now
 - A solo founder in Charleston SC would be an easy target for a cease-and-desist
@@ -106,10 +106,10 @@
 
 ---
 
-## 4. Realistic Options for StemScribe
+## 4. Realistic Options for StemScriber
 
 ### Option A: BYOA (Bring Your Own Audio) -- RECOMMENDED
-**How it works:** Users upload MP3/WAV/FLAC files they already own. StemScribe processes them.
+**How it works:** Users upload MP3/WAV/FLAC files they already own. StemScriber processes them.
 
 | Aspect | Detail |
 |--------|--------|
@@ -220,7 +220,7 @@
 ### Phase 2: 90 Days
 4. **Indie Artist Partnerships**
    - Reach out to local Charleston musicians
-   - Offer: "Get your songs on StemScribe, fans practice along"
+   - Offer: "Get your songs on StemScriber, fans practice along"
    - Artists provide stems directly (many already have them from recording)
    - Simple agreement: non-exclusive, artist retains rights, can withdraw anytime
    - **Cost: $0 (mutual benefit)**
@@ -367,7 +367,7 @@ The product is NOT dead. It just needs to change HOW users get songs into it.
 **Instead of:** Paste YouTube URL -> download -> separate stems
 **Switch to:** Upload your own MP3 -> separate stems (+ YouTube embed for chord-only practice)
 
-Moises built a $10M+ company on exactly this model. Chordify built a 36M-song service on embedded YouTube + chord analysis. StemScribe can combine both approaches.
+Moises built a $10M+ company on exactly this model. Chordify built a 36M-song service on embedded YouTube + chord analysis. StemScriber can combine both approaches.
 
 The BYOA model actually has advantages:
 - Higher audio quality (user's own files vs. YouTube compression)

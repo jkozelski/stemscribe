@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Threshold Experiment for StemScribe v10 Chord Detection
+Threshold Experiment for StemScriber v10 Chord Detection
 ========================================================
 Investigates whether the BTC model is filtering out useful signal via:
 1. min_duration thresholds

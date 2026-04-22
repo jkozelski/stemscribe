@@ -1,4 +1,4 @@
-"""StemScribe authentication module (JWT-based)."""
+"""StemScriber authentication module (JWT-based)."""
 
 from auth.routes import auth_bp
 

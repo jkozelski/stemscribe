@@ -59,7 +59,7 @@
 ### Mango Song (Phish) — PASS
 - **Artist:** Shows "Phish" — NOT MandoPony
 - **Chords (AI):** E, D, G, A — reasonable for the song
-- **Source:** StemScribe AI (v10)
+- **Source:** StemScriber AI (v10)
 - **Note:** Two duplicate entries in library (different job_ids with slightly different chord events)
 
 ### Bertha (Grateful Dead) — PASS (with notes)

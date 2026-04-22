@@ -1,5 +1,5 @@
 """
-Extended Band Database for StemScribe
+Extended Band Database for StemScriber
 ======================================
 Deep coverage for jam bands and classic rock artists.
 Includes:

@@ -10,9 +10,9 @@
 ## Reddit Engagement Protocol
 
 1. Browse target subreddits for questions about stem separation, music learning, chords
-2. Write a genuinely helpful comment first (no StemScribe mention)
+2. Write a genuinely helpful comment first (no StemScriber mention)
 3. Build karma in each subreddit before ANY promotional activity
-4. After 2+ weeks of helpful engagement, occasionally mention StemScribe naturally
+4. After 2+ weeks of helpful engagement, occasionally mention StemScriber naturally
 5. ALWAYS disclose affiliation when directly promoting
 
 ## Content Distribution Workflow

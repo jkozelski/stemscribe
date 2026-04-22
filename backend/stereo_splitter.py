@@ -1,5 +1,5 @@
 """
-Stereo Splitter for StemScribe
+Stereo Splitter for StemScriber
 
 Splits any stereo stem into left-panned and right-panned components.
 Works with any instrument that's been panned in the mix:

@@ -1,8 +1,8 @@
-# StemScribe Self-Healing & Learning System
+# StemScriber Self-Healing & Learning System
 
 ## Overview
 
-Four independent subsystems that make StemScribe learn from errors and user corrections:
+Four independent subsystems that make StemScriber learn from errors and user corrections:
 
 1. **User Correction Feedback Loop** — captures chord/lyrics edits as training data
 2. **Processing Failure Recovery** — watchdog detects stalled jobs and auto-retries

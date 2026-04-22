@@ -1,5 +1,5 @@
 """
-Enhanced Drum Transcription Module for StemScribe v2
+Enhanced Drum Transcription Module for StemScriber v2
 =====================================================
 Major improvements over v1:
 - Ghost note detection (low velocity hits)

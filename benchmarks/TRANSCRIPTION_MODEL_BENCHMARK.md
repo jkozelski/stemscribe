@@ -3,7 +3,7 @@
 ## ML Research Agent — February 2026
 
 This report benchmarks transcription models for guitar and bass against
-StemScribe's current Basic Pitch implementation, using published results
+StemScriber's current Basic Pitch implementation, using published results
 on the GuitarSet benchmark (the standard evaluation dataset for guitar AMT).
 
 ---
@@ -17,7 +17,7 @@ This is the most realistic evaluation for real-world generalization.
 
 | Model | Onset F1 | Precision | Recall | Training Data | Notes |
 |-------|----------|-----------|--------|---------------|-------|
-| **Basic Pitch** (current StemScribe) | **79.0%** | — | — | Proprietary (Spotify/Google) | General-purpose AMT, not guitar-specific |
+| **Basic Pitch** (current StemScriber) | **79.0%** | — | — | Proprietary (Spotify/Google) | General-purpose AMT, not guitar-specific |
 | Omnizart | 59.0% | — | — | Mixed | General-purpose, Intel-only |
 | Kong et al. (piano model) | 54.8% | 67.5% | 49.7% | MAESTRO (piano) | Pure piano model, no guitar adaptation |
 | Kong et al. (w/ augmentation) | 50.3% | 80.6% | 44.0% | MAESTRO + aug | High precision but misses many notes |
@@ -38,7 +38,7 @@ may not generalize as well to real-world audio.
 | **GAPS + GuitarSet** | **91.2%** | GAPS (14h) + GuitarSet | Current SOTA on GuitarSet |
 | YourMT3+ | 91.4% | Multi-dataset mix (no GuitarSet-specific) | Transformer, multi-instrument |
 | MT3 | 89.1% | Multi-dataset mix | Seq2seq transformer |
-| StemScribe Guitar CRNN | 5.2% | GuitarSet (288 tracks) | FAILED: class imbalance collapse |
+| StemScriber Guitar CRNN | 5.2% | GuitarSet (288 tracks) | FAILED: class imbalance collapse |
 
 ### Key Takeaways for Guitar
 
@@ -63,7 +63,7 @@ These models transcribe all instruments simultaneously from a mix:
 
 YourMT3+ is strong but requires significant compute (T5-like transformer) and
 is designed for multi-instrument transcription from a mix, not single-instrument
-tablature generation. Not directly applicable to StemScribe's pipeline which
+tablature generation. Not directly applicable to StemScriber's pipeline which
 already separates stems first.
 
 ---
@@ -75,8 +75,8 @@ Less benchmarking data is available for bass-specific transcription:
 | Model | Dataset | Notes |
 |-------|---------|-------|
 | Basic Pitch (current) | General | Reasonable for monophonic bass, struggles with fast passages |
-| StemScribe Bass CRNN v1 | Slakh2100 | FAILED: collapsed to all-zeros (plain BCELoss) |
-| StemScribe Bass CRNN v2 | Slakh2100 | Fixed loss (Focal + pos_weight), training script ready |
+| StemScriber Bass CRNN v1 | Slakh2100 | FAILED: collapsed to all-zeros (plain BCELoss) |
+| StemScriber Bass CRNN v2 | Slakh2100 | Fixed loss (Focal + pos_weight), training script ready |
 | MT3 / YourMT3+ | Multi-dataset | Can transcribe bass but no bass-specific evaluation |
 
 **Slakh2100 has 1000+ bass stems with aligned MIDI** — this is sufficient
@@ -86,9 +86,9 @@ training data. The v2 script should work; it just needs to be run on RunPod.
 
 ## 4. Drum Transcription (Reference)
 
-StemScribe already has drum transcription working. For comparison:
+StemScriber already has drum transcription working. For comparison:
 
-| Model | Method | Status in StemScribe |
+| Model | Method | Status in StemScriber |
 |-------|--------|---------------------|
 | OaF Drum NN | Custom CRNN | Deployed, working |
 | Basic Pitch | General AMT | Fallback |

@@ -1,11 +1,11 @@
-# StemScribe — Lawyer Call Prep Sheet
+# StemScriber — Lawyer Call Prep Sheet
 
 **Jeff Kozelski | Kozelski Enterprises LLC (SC) | stemscriber.com**
 **jeff@tidepoolartist.com | 803-414-9454**
 
 ---
 
-## What StemScribe Does (30-second pitch)
+## What StemScriber Does (30-second pitch)
 
 Music practice app. Users upload a song → AI separates it into individual instruments (vocals, guitar, bass, drums, piano) → they can mute/solo instruments, see chord charts, practice along at any speed. Think "karaoke machine meets guitar teacher."
 
@@ -42,7 +42,7 @@ Music practice app. Users upload a song → AI separates it into individual inst
 ---
 
 ### 2. Chord Chart Library (2,665 songs)
-**What we did:** Scraped free (not Pro) chord charts from Ultimate Guitar. These are user-submitted chord interpretations — someone typed "E7#9, G, A" and uploaded it. We transformed everything into our own JSON format, removed all attribution and UG references. Stored as static files, served as "StemScribe Library."
+**What we did:** Scraped free (not Pro) chord charts from Ultimate Guitar. These are user-submitted chord interpretations — someone typed "E7#9, G, A" and uploaded it. We transformed everything into our own JSON format, removed all attribution and UG references. Stored as static files, served as "StemScriber Library."
 
 **My concern:** The chords themselves aren't copyrightable (Spirit v. Page/Plant confirms this). But scraping past UG's ToS could be a contract issue. We also stripped attribution.
 

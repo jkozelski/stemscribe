@@ -3,7 +3,7 @@
 **Date:** 2026-03-18
 
 ## Problem
-iOS Safari plays Web Audio through the "ambient" audio category by default. When the physical silent/ringer switch is ON, ambient audio is muted. This means StemScribe stems and karaoke play no sound on iPhones with the silent switch engaged.
+iOS Safari plays Web Audio through the "ambient" audio category by default. When the physical silent/ringer switch is ON, ambient audio is muted. This means StemScriber stems and karaoke play no sound on iPhones with the silent switch engaged.
 
 ## Solution (belt-and-suspenders)
 

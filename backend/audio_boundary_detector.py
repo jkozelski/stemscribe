@@ -1,5 +1,5 @@
 """
-Audio Boundary Detector for StemScribe
+Audio Boundary Detector for StemScriber
 =======================================
 Pure audio-feature-based boundary detection. Does NOT label sections (verse/chorus).
 Outputs boundary timestamps with confidence scores based on multiple audio features:

@@ -1,5 +1,5 @@
 """
-StemScribe Chord Library — fast filesystem-based chord chart lookup.
+StemScriber Chord Library — fast filesystem-based chord chart lookup.
 
 Checks chord_library/{artist-slug}/{song-slug}.json for pre-scraped chord charts.
 """
@@ -221,7 +221,7 @@ def _load_json(path: Path) -> dict | None:
 
 @chord_library_bp.route("/api/chords/library", methods=["GET"])
 def chord_library_lookup():
-    """Look up a song in the StemScribe chord library."""
+    """Look up a song in the StemScriber chord library."""
     title = request.args.get("title", "").strip()
     artist = request.args.get("artist", "").strip()
 

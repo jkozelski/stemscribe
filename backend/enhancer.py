@@ -1,5 +1,5 @@
 """
-Stem Enhancement Module for StemScribe
+Stem Enhancement Module for StemScriber
 
 Cleans up separated stems to sound more natural and isolated:
 - Spectral gating to remove quiet instrument bleed

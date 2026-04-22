@@ -1,4 +1,4 @@
-# Serverless GPU Pricing Comparison for StemScribe
+# Serverless GPU Pricing Comparison for StemScriber
 **Last updated:** 2026-03-19
 **Use case:** Audio stem separation with RoFormer model (~1GB weights, ~3 min GPU per song)
 **Target GPU:** T4 / L4 equivalent (16-24GB VRAM is plenty)

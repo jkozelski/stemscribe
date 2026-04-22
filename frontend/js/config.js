@@ -1,5 +1,5 @@
-// StemScribe — Configuration & Global State
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Configuration & Global State
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -99,4 +99,4 @@ window.StemScribe = window.StemScribe || {};
         keys_synth: '#c678dd'
     };
 
-})(window.StemScribe);
+})(window.StemScriber);

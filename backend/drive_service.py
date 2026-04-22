@@ -1,5 +1,5 @@
 """
-Google Drive Integration for StemScribe
+Google Drive Integration for StemScriber
 Handles uploading transcriptions and cleaning up old files
 """
 
@@ -31,7 +31,7 @@ _CONFIG_DIR = Path(os.environ.get('STEMSCRIBE_CONFIG_DIR', Path.home() / '.confi
 CREDENTIALS_FILE = _CONFIG_DIR / 'credentials.json'
 TOKEN_FILE = _CONFIG_DIR / 'token.json'
 
-# StemScribe folder name in Google Drive
+# StemScriber folder name in Google Drive
 DRIVE_FOLDER_NAME = 'StemScriber Transcriptions'
 
 
@@ -167,7 +167,7 @@ def upload_job_to_drive(job, keep_stems=False):
         return None
 
     try:
-        # Get or create main StemScribe folder
+        # Get or create main StemScriber folder
         main_folder_id = get_or_create_folder(service, DRIVE_FOLDER_NAME)
 
         # Create folder for this song
@@ -332,7 +332,7 @@ def cleanup_old_stems(output_dir, max_age_days=7):
 
 
 def get_drive_stats():
-    """Get info about StemScribe folder in Google Drive"""
+    """Get info about StemScriber folder in Google Drive"""
     service = get_drive_service()
     if not service:
         return None

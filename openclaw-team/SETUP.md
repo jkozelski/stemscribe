@@ -1,9 +1,9 @@
-# StemScribe OpenClaw Agent Team - Setup Guide
+# StemScriber OpenClaw Agent Team - Setup Guide
 
 ## Overview
 
 This is a **5-agent AI team** running on OpenClaw that handles all research
-and marketing for StemScribe. Each agent runs as its own OpenClaw instance
+and marketing for StemScriber. Each agent runs as its own OpenClaw instance
 with dedicated skills and a shared workspace for inter-agent communication.
 
 ## The Team

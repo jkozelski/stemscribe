@@ -1,1 +1,1 @@
-"""StemScribe processing — separation, transcription, pipeline orchestration."""
+"""StemScriber processing — separation, transcription, pipeline orchestration."""

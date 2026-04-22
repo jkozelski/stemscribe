@@ -1,5 +1,5 @@
 """
-StemScribe AI Agent Teams
+StemScriber AI Agent Teams
 =========================
 Two teams of AI agents powered by CrewAI:
 1. Research Team - Market analysis, competitor tracking, user insights
@@ -48,7 +48,7 @@ class ResearchTeam:
             role="Market Research Analyst",
             goal=(
                 "Analyze the music technology market to identify trends, "
-                "opportunities, and threats for StemScribe. Track competitor "
+                "opportunities, and threats for StemScriber. Track competitor "
                 "movements and pricing changes."
             ),
             backstory=(
@@ -88,7 +88,7 @@ class ResearchTeam:
         return Agent(
             role="Pricing & Revenue Strategist",
             goal=(
-                "Optimize StemScribe's pricing model for maximum revenue "
+                "Optimize StemScriber's pricing model for maximum revenue "
                 "and user acquisition. Analyze competitor pricing, identify "
                 "willingness-to-pay segments, and recommend pricing experiments."
             ),
@@ -108,7 +108,7 @@ class ResearchTeam:
     def competitor_analysis_task(self) -> Task:
         return Task(
             description=(
-                "Conduct a comprehensive competitor analysis for StemScribe. "
+                "Conduct a comprehensive competitor analysis for StemScriber. "
                 "Research the following competitors: Moises, Chordify, LALAL.AI, "
                 "RipX, iZotope RX, and any new entrants. For each, identify:\n"
                 "1. Current pricing and any recent changes\n"
@@ -116,7 +116,7 @@ class ResearchTeam:
                 "3. User reviews and common complaints\n"
                 "4. App store ratings and download trends\n"
                 "5. Marketing strategies they're using\n"
-                "6. Gaps that StemScribe could exploit\n\n"
+                "6. Gaps that StemScriber could exploit\n\n"
                 "Output a structured markdown report."
             ),
             expected_output="A detailed competitor analysis report in markdown format.",
@@ -146,7 +146,7 @@ class ResearchTeam:
     def pricing_optimization_task(self) -> Task:
         return Task(
             description=(
-                f"Analyze StemScribe's proposed pricing:\n"
+                f"Analyze StemScriber's proposed pricing:\n"
                 f"- Free: {CONFIG['pricing_tiers']['free']['features']}\n"
                 f"- Premium: ${CONFIG['pricing_tiers']['premium']['price']}/mo\n"
                 f"- Pro: ${CONFIG['pricing_tiers']['pro']['price']}/mo\n\n"
@@ -202,7 +202,7 @@ class MarketingTeam:
             role="Content Strategist & Writer",
             goal=(
                 "Create compelling blog posts, tutorials, and educational "
-                "content that drives organic traffic and positions StemScribe "
+                "content that drives organic traffic and positions StemScriber "
                 "as the go-to tool for musicians who want to learn songs, "
                 "separate stems, and analyze chord progressions."
             ),
@@ -224,7 +224,7 @@ class MarketingTeam:
         return Agent(
             role="Social Media Manager",
             goal=(
-                "Grow StemScribe's social media presence across YouTube, "
+                "Grow StemScriber's social media presence across YouTube, "
                 "TikTok, Reddit, Instagram, and Twitter. Create engaging "
                 "posts that showcase stem separation demos, chord recognition "
                 "features, and musician stories."
@@ -245,7 +245,7 @@ class MarketingTeam:
         return Agent(
             role="SEO Specialist",
             goal=(
-                "Optimize StemScribe's web presence for organic search. "
+                "Optimize StemScriber's web presence for organic search. "
                 "Target high-intent keywords like 'stem separation', "
                 "'AI music transcription', and 'chord recognition app'. "
                 "Build topical authority in music technology."
@@ -294,7 +294,7 @@ class MarketingTeam:
                 "about music. You know the culture of music communities "
                 "and never come across as spammy or salesy. You provide "
                 "value first - answering questions, sharing tips - and "
-                "mention StemScribe only when genuinely relevant."
+                "mention StemScriber only when genuinely relevant."
             ),
             tools=[self.web_search, self.web_scrape],
             llm=self.llm,
@@ -307,7 +307,7 @@ class MarketingTeam:
         keywords = CONFIG["seo_keywords"]["long_tail"]
         return Task(
             description=(
-                "Write an SEO-optimized blog post for StemScribe's website. "
+                "Write an SEO-optimized blog post for StemScriber's website. "
                 "Choose one of these target keywords and write a 1200-1500 "
                 "word article:\n"
                 f"Keywords: {keywords}\n\n"
@@ -316,8 +316,8 @@ class MarketingTeam:
                 "2. Meta description (155 chars max)\n"
                 "3. Introduction that hooks the reader\n"
                 "4. 3-5 H2 sections with clear structure\n"
-                "5. Naturally mention StemScribe as a solution (not salesy)\n"
-                "6. Include a CTA to try StemScribe free\n"
+                "5. Naturally mention StemScriber as a solution (not salesy)\n"
+                "6. Include a CTA to try StemScriber free\n"
                 "7. Internal links to other blog posts (suggest placeholders)\n"
                 "8. Output as markdown with frontmatter"
             ),
@@ -329,7 +329,7 @@ class MarketingTeam:
     def social_media_calendar_task(self) -> Task:
         return Task(
             description=(
-                "Create a 2-week social media content calendar for StemScribe. "
+                "Create a 2-week social media content calendar for StemScriber. "
                 "Include posts for:\n"
                 "- YouTube (2 videos): Demo videos showing stem separation\n"
                 "- TikTok/Reels (5 posts): Short viral clips\n"
@@ -352,7 +352,7 @@ class MarketingTeam:
     def seo_audit_task(self) -> Task:
         return Task(
             description=(
-                "Create an SEO content strategy for StemScribe targeting "
+                "Create an SEO content strategy for StemScriber targeting "
                 "these keyword clusters:\n\n"
                 f"Primary keywords: {CONFIG['seo_keywords']['primary']}\n"
                 f"Secondary keywords: {CONFIG['seo_keywords']['secondary']}\n"
@@ -373,7 +373,7 @@ class MarketingTeam:
     def email_sequence_task(self) -> Task:
         return Task(
             description=(
-                "Write the complete welcome email sequence for new StemScribe "
+                "Write the complete welcome email sequence for new StemScriber "
                 "users (free tier signups). Create 5 emails:\n\n"
                 "Email 1 (Day 0): Welcome + quick start guide\n"
                 "Email 2 (Day 2): Tutorial - separate your first song\n"
@@ -396,11 +396,11 @@ class MarketingTeam:
     def community_outreach_task(self) -> Task:
         return Task(
             description=(
-                "Create a community outreach plan for StemScribe. Include:\n\n"
+                "Create a community outreach plan for StemScriber. Include:\n\n"
                 "1. Reddit strategy:\n"
                 "   - Which subreddits to engage in (with subscriber counts)\n"
                 "   - Sample helpful comments (provide value, not spam)\n"
-                "   - Thread ideas to post that would naturally showcase StemScribe\n\n"
+                "   - Thread ideas to post that would naturally showcase StemScriber\n\n"
                 "2. Partnership opportunities:\n"
                 "   - Music education YouTube channels to collaborate with\n"
                 "   - Music blogs that review tools\n"
@@ -449,7 +449,7 @@ if __name__ == "__main__":
 
     console = Console()
 
-    parser = argparse.ArgumentParser(description="StemScribe AI Agent Teams")
+    parser = argparse.ArgumentParser(description="StemScriber AI Agent Teams")
     parser.add_argument(
         "--team",
         choices=["research", "marketing", "both"],

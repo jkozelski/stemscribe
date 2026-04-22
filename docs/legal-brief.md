@@ -1,15 +1,15 @@
-# StemScribe Legal Brief
+# StemScriber Legal Brief
 
 **Prepared:** March 25, 2026
 **For:** Jeff Kozelski, Kozelski Enterprises LLC (South Carolina)
-**Product:** StemScribe (stemscribe.io) — AI-powered music practice tool
+**Product:** StemScriber (stemscribe.io) — AI-powered music practice tool
 **Status:** Live with paying customers (Free / Pro $10/mo / Premium $20/mo)
 
 ---
 
 ## 1. Executive Summary
 
-StemScribe is an AI-powered music practice tool that:
+StemScriber is an AI-powered music practice tool that:
 - Accepts user-uploaded audio files or YouTube URLs
 - Separates audio into individual stems (vocals, guitar, bass, drums, piano) using AI on cloud GPU (Modal)
 - Displays chord charts and guitar tablature sourced from Songsterr API
@@ -24,7 +24,7 @@ StemScribe is an AI-powered music practice tool that:
 - 6 legal pages deployed (ToS, Privacy, Security, Cookies, DMCA, Refund)
 - Stripe payments live with refund policy
 
-**Bottom line:** StemScribe has several significant legal vulnerabilities that need to be addressed before scaling further. Three areas are HIGH risk and require immediate action. The good news: competitors like Moises (70M users, $50M raised) have solved these problems — StemScribe can follow their playbook.
+**Bottom line:** StemScriber has several significant legal vulnerabilities that need to be addressed before scaling further. Three areas are HIGH risk and require immediate action. The good news: competitors like Moises (70M users, $50M raised) have solved these problems — StemScriber can follow their playbook.
 
 ---
 
@@ -39,7 +39,7 @@ StemScribe is an AI-powered music practice tool that:
 - Federal court rulings have found circumventing YouTube's protections can violate DMCA anti-circumvention provisions
 - Under MGM v. Grokster (2005), providing a YouTube URL input field could constitute "inducement" of infringement
 - **Moises explicitly REFUSES streaming URLs** — their docs state: "Attempting to extract or modify audio from a streaming service without permission can lead to legal consequences"
-- The commercial nature of StemScribe weakens any personal-use defense
+- The commercial nature of StemScriber weakens any personal-use defense
 - This feature also undermines DMCA safe harbor eligibility (inducement disqualifies safe harbor)
 
 **Action:** Remove YouTube URL feature. Require users to upload their own audio files only.
@@ -48,20 +48,20 @@ StemScribe is an AI-powered music practice tool that:
 **Risk: HIGH** | Priority: IMMEDIATE
 
 - UG has explicit anti-scraping clauses in their ToS
-- UG has proper licensing deals with publishers and pays royalties — StemScribe scraped this licensed content without authorization
+- UG has proper licensing deals with publishers and pays royalties — StemScriber scraped this licensed content without authorization
 - Attribution was removed, making it worse — eliminates any fair use or citation argument
 - Under hiQ v. LinkedIn, ToS violations can support breach of contract claims ($500K+ judgments)
 - UG has previously pursued legal action against unauthorized tab services
 - Chord progressions themselves are NOT copyrightable (Spirit v. Page/Plant confirmed this), but the specific arrangements, voicings, and notation in tabs may be
 
-**Action:** Delete the scraped library entirely. Use AI-generated chord detection only (which StemScribe already has). Alternatively, license content from publishers directly.
+**Action:** Delete the scraped library entirely. Use AI-generated chord detection only (which StemScriber already has). Alternatively, license content from publishers directly.
 
 #### 2c. Server-Side Stem Caching
 **Risk: HIGH** | Priority: 30 DAYS
 
 - **UMG v. MP3.com (2000) is directly on point:** Server-side copies of copyrighted music = infringement, even for user convenience. MP3.com paid $53M.
 - Stem-separated audio qualifies as a derivative work under 17 U.S.C. Section 103
-- URL-based caching means one user's upload could serve cached stems to another user — this transforms StemScribe from a "processing tool" into a "distribution platform"
+- URL-based caching means one user's upload could serve cached stems to another user — this transforms StemScriber from a "processing tool" into a "distribution platform"
 - Every music tech service that stored/cached copyrighted content server-side without licenses was eventually sued
 
 **Action:** Process ephemerally — deliver stems to client, delete from server. If caching is needed, make it per-user only with 24-48 hour auto-expiration. Never serve one user's cached stems to another user.
@@ -74,12 +74,12 @@ StemScribe is an AI-powered music practice tool that:
 **Risk: MEDIUM** | Priority: 60 DAYS
 
 - No definitive ruling yet on AI stem separation — RIAA v. Suno/Udio (filed June 2024) expected to produce guidance by summer 2026
-- StemScribe's strongest argument: stem separation is *transformative* (changes purpose from entertainment to educational practice)
+- StemScriber's strongest argument: stem separation is *transformative* (changes purpose from entertainment to educational practice)
 - However, Northwestern JTIP analysis concluded stem extraction "likely qualifies as a derivative work" requiring copyright owner authorization
 - Audio Home Recording Act does NOT apply — it covers physical consumer hardware, not cloud-based processing
 - **Moises's approach (70M users, not sued):** Users upload own files, ToS places all copyright liability on users, no caching/redistribution
 
-**Action:** Strengthen ToS to follow Moises model — users warrant they own or have rights to uploaded content. StemScribe is a processing tool, not a content provider.
+**Action:** Strengthen ToS to follow Moises model — users warrant they own or have rights to uploaded content. StemScriber is a processing tool, not a content provider.
 
 #### 2e. Songsterr API Usage
 **Risk: MEDIUM** | Priority: 60 DAYS
@@ -87,7 +87,7 @@ StemScribe is an AI-powered music practice tool that:
 - Songsterr's API is publicly accessible and they encourage third-party apps
 - However, their ToS prohibits commercial use without "express advance written permission"
 - Songsterr has legitimate licensing deals with publishers — they have standing to enforce
-- StemScribe charges subscription fees, making this clearly commercial use
+- StemScriber charges subscription fees, making this clearly commercial use
 
 **Action:** Contact Songsterr about a commercial API license, or ensure data is used within their permitted guidelines with proper attribution.
 
@@ -103,7 +103,7 @@ DMCA-1070849 is registered, but safe harbor requires ALL of these:
 6. No direct financial benefit from infringement you can control
 7. Renewal every 3 years
 
-**Critical issue:** Safe harbor protects passive hosts of user content. StemScribe actively processes and transforms content — it may not qualify as a passive host at all. The YouTube URL feature especially undermines safe harbor eligibility.
+**Critical issue:** Safe harbor protects passive hosts of user content. StemScriber actively processes and transforms content — it may not qualify as a passive host at all. The YouTube URL feature especially undermines safe harbor eligibility.
 
 **Action:** Ensure all 6 requirements are met. Publish clear DMCA policy, repeat infringer policy, and takedown procedure on the website. Removing the YouTube feature significantly strengthens safe harbor arguments.
 
@@ -121,21 +121,21 @@ DMCA-1070849 is registered, but safe harbor requires ALL of these:
 
 ---
 
-## 3. What Happened to Companies Like StemScribe
+## 3. What Happened to Companies Like StemScriber
 
 | Company | What They Did | Outcome |
 |---------|--------------|---------|
 | **MP3.com** | Server-side copies of CDs | **$53M damages** |
 | **Grooveshark** | Streaming without licenses | **$75M penalty, shut down, forfeited all assets** |
 | **LimeWire** | P2P with inducement | **$105M settlement, shut down** |
-| **Jammit** | Licensed multitrack play-along (closest to StemScribe) | Shut down — even WITH licenses, couldn't sustain financially |
+| **Jammit** | Licensed multitrack play-along (closest to StemScriber) | Shut down — even WITH licenses, couldn't sustain financially |
 | **Napster** | P2P file sharing | Shut down, bankruptcy |
 | **Moises** (70M users) | User-uploads-only stem separation | **NOT sued** — no streaming URLs, no caching, users bear liability |
 | **Chordify** | Auto-extract chords | Operating — retraction process for rights holders, personal use only |
 | **Yousician** (10K+ songs) | Licensed play-along | Operating — **full licensing deals with publishers** |
 | **AudioShake** | B2B stem separation | Operating — **licensed by Warner, Universal, Sony, Disney** |
 
-**Pattern:** Services without licenses that stored/distributed copyrighted content were all shut down or paid $30M-$105M. Survivors either (1) have licenses or (2) carefully avoid doing what StemScribe currently does.
+**Pattern:** Services without licenses that stored/distributed copyrighted content were all shut down or paid $30M-$105M. Survivors either (1) have licenses or (2) carefully avoid doing what StemScriber currently does.
 
 ---
 
@@ -148,9 +148,9 @@ DMCA-1070849 is registered, but safe harbor requires ALL of these:
 | **Yousician** | N/A | Licensed | YES (publishers) | NO |
 | **AudioShake** | N/A (B2B) | Licensed | YES (labels) | NO |
 | **Chordify** | Analyzes URLs | No audio storage | Retraction process | NO |
-| **StemScribe** | YES (YouTube) | YES (server) | NO | YES (2,665 UG charts) |
+| **StemScriber** | YES (YouTube) | YES (server) | NO | YES (2,665 UG charts) |
 
-StemScribe is the only app doing ALL four risky things simultaneously.
+StemScriber is the only app doing ALL four risky things simultaneously.
 
 ---
 
@@ -180,7 +180,7 @@ StemScribe is the only app doing ALL four risky things simultaneously.
 #### 1. Rosenberg, Giger & Perala P.C. — TOP PICK
 - **Location:** New York City (nationwide)
 - **Website:** rglawpc.com
-- **Why:** They literally advise music tech startups on structuring platforms to avoid DMCA litigation. Clients include "some of the most significant and innovative entrepreneurs involved in the digital delivery of online content." This is exactly what StemScribe needs.
+- **Why:** They literally advise music tech startups on structuring platforms to avoid DMCA litigation. Clients include "some of the most significant and innovative entrepreneurs involved in the digital delivery of online content." This is exactly what StemScriber needs.
 - **Free consult:** Contact via website
 
 #### 2. Daniel Schacht — Donahue Fitzgerald LLP
@@ -232,7 +232,7 @@ StemScribe is the only app doing ALL four risky things simultaneously.
 ## 7. Questions for the First Consultation
 
 ### Ask Every Attorney:
-1. "Given that Moises has 70M users and has never been sued, can we adopt their exact legal model? What would that look like for StemScribe?"
+1. "Given that Moises has 70M users and has never been sued, can we adopt their exact legal model? What would that look like for StemScriber?"
 2. "Does stem separation of user-provided audio constitute fair use under current case law?"
 3. "What's our exposure if we remove YouTube downloading, delete the UG library, and switch to ephemeral processing — does that reduce risk to an acceptable level?"
 4. "Do we need music publisher licenses to operate, or can we rely on user-provides-own-content model like Moises and Capo?"

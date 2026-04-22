@@ -1,4 +1,4 @@
-# StemScribe Session Notes - February 5, 2026
+# StemScriber Session Notes - February 5, 2026
 
 ## ✅ Completed Today
 

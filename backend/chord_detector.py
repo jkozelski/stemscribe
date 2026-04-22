@@ -1,5 +1,5 @@
 """
-Chord Detection for StemScribe
+Chord Detection for StemScriber
 ==============================
 Detects chord progressions from audio using librosa chroma features.
 Similar to Logic Pro's chord detection.

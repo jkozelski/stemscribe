@@ -2206,7 +2206,7 @@
             </button>
             <!-- Auth: Profile Dropdown -->
             <div class="auth-profile-dropdown">
-                <button class="auth-profile-btn" onclick="StemScribe.toggleProfileMenu(event)">
+                <button class="auth-profile-btn" onclick="StemScriber.toggleProfileMenu(event)">
                     <img class="auth-profile-avatar" src="" alt="">
                     <span class="auth-profile-name"></span>
                     <span class="auth-profile-chevron">&#9662;</span>
@@ -2942,7 +2942,7 @@
                 var self = this;
                 var lines = [];
                 var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                lines.push('=== StemScribe Audio Debug (Practice) ===');
+                lines.push('=== StemScriber Audio Debug (Practice) ===');
                 lines.push('Timestamp: ' + new Date().toISOString());
                 lines.push('');
                 lines.push('-- Platform --');
@@ -4811,7 +4811,7 @@
             // user uploaded. Now only runs as a fallback when we have no job
             // and no library match.
 
-            // --- Step 0.5: Check StemScribe chord library ---
+            // --- Step 0.5: Check StemScriber chord library ---
             {
                 var libTitle = '';
                 var libArtist = '';
@@ -4839,7 +4839,7 @@
                         if (libResp.ok) {
                             var libData = await libResp.json();
                             if (libData.sections && libData.sections.length > 0) {
-                                console.log('Using StemScribe chord library: ' + libData.title);
+                                console.log('Using StemScriber chord library: ' + libData.title);
                                 currentManualChart = libData;
                                 _chordLibraryLocked = true;
                                 renderManualChordChart(libData);
@@ -6309,7 +6309,7 @@
             html += '<button onclick="window.print()" style="padding:0.5rem 1rem; background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; color:var(--text); cursor:pointer; font-family:inherit; font-size:0.85rem; white-space:nowrap; display:flex; align-items:center; gap:0.4rem;">';
             html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
             html += 'Print / PDF</button>';
-            // ChordPro download button (only for StemScribe jobs)
+            // ChordPro download button (only for StemScriber jobs)
             if (currentJob && currentJob.job_id) {
                 html += '<button onclick="downloadChordPro()" style="padding:0.5rem 1rem; background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; color:var(--text); cursor:pointer; font-family:inherit; font-size:0.85rem; white-space:nowrap; display:flex; align-items:center; gap:0.4rem;" title="Download ChordPro for OnSong">';
                 html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
@@ -8207,6 +8207,6 @@
     </script>
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
-    <script>StemScribe.initAuth();</script>
+    <script>StemScriber.initAuth();</script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 # Modal Debug Team Prompt
 
 ```
-Fix the Modal cloud GPU integration for StemScribe. Modal is deployed, authenticated, and the code is wired in — but the processing thread never uses Modal. It always falls back to local GPU.
+Fix the Modal cloud GPU integration for StemScriber. Modal is deployed, authenticated, and the code is wired in — but the processing thread never uses Modal. It always falls back to local GPU.
 
 ## System
 - Backend: ~/stemscribe/backend/

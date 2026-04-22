@@ -1,4 +1,4 @@
-"""StemScribe route blueprints."""
+"""StemScriber route blueprints."""
 
 from flask import jsonify
 

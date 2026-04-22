@@ -1,5 +1,5 @@
 """
-Enhanced Audio Separator for StemScribe
+Enhanced Audio Separator for StemScriber
 Uses audio-separator with state-of-the-art models (BS-Roformer, MDX-Net, etc.)
 
 Features:

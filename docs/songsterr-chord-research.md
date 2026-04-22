@@ -5,13 +5,13 @@
 
 ## Summary
 
-Songsterr has **three distinct chord data sources**, two of which StemScribe is not currently using. The biggest win is the **ChordPro CDN endpoint** -- a dedicated service that returns full chord charts with lyrics in ChordPro format, complete with sections and chord-lyric alignment.
+Songsterr has **three distinct chord data sources**, two of which StemScriber is not currently using. The biggest win is the **ChordPro CDN endpoint** -- a dedicated service that returns full chord charts with lyrics in ChordPro format, complete with sections and chord-lyric alignment.
 
 ---
 
-## 1. Current StemScribe Approach
+## 1. Current StemScriber Approach
 
-StemScribe currently uses two methods (in `backend/routes/songsterr.py`):
+StemScriber currently uses two methods (in `backend/routes/songsterr.py`):
 
 ### Method A: Native `beat.chord` annotations (lines 290-318)
 - Looks for `beat.chord.text` in the per-track JSON from the CloudFront CDN
@@ -208,7 +208,7 @@ Track JSON includes a `newLyrics` array with syllable-split lyrics:
 }
 ```
 
-Currently used by StemScribe (line 472-479 in `routes/songsterr.py`), with lrclib.net as fallback for synced lyrics.
+Currently used by StemScriber (line 472-479 in `routes/songsterr.py`), with lrclib.net as fallback for synced lyrics.
 
 ---
 
@@ -234,7 +234,7 @@ The current code already handles `beat.chord.text` but could be improved:
 
 ### Priority 3: Use ChordPro Data for Chord Sheet Generation
 
-The ChordPro format from Songsterr maps directly to the chord sheet format StemScribe generates. Instead of building chord sheets from separate chord events + lyrics + word timestamps, parse the ChordPro directly -- it already has chords aligned to lyrics.
+The ChordPro format from Songsterr maps directly to the chord sheet format StemScriber generates. Instead of building chord sheets from separate chord events + lyrics + word timestamps, parse the ChordPro directly -- it already has chords aligned to lyrics.
 
 ### Priority 4: Cache Strategy
 

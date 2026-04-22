@@ -1,5 +1,5 @@
 {
-  "name": "StemScribe — Beta Tester Activity Monitor",
+  "name": "StemScriber — Beta Tester Activity Monitor",
   "nodes": [
     {
       "parameters": {
@@ -86,7 +86,7 @@
       "parameters": {
         "from": "+18447915323",
         "to": "+18034149454",
-        "message": "=📊 StemScribe Beta Activity\n{{ $json.newRedemptions > 0 ? '🆕 ' + $json.newRedemptions + ' new code redemption(s) (total: ' + $json.totalRedeemed + ')\\n' : '' }}{{ $json.newSongs > 0 ? '🎵 ' + $json.newSongs + ' new song(s) processed (total: ' + $json.totalSongs + ')\\n' : '' }}Checked: {{ $json.lastChecked }}"
+        "message": "=📊 StemScriber Beta Activity\n{{ $json.newRedemptions > 0 ? '🆕 ' + $json.newRedemptions + ' new code redemption(s) (total: ' + $json.totalRedeemed + ')\\n' : '' }}{{ $json.newSongs > 0 ? '🎵 ' + $json.newSongs + ' new song(s) processed (total: ' + $json.totalSongs + ')\\n' : '' }}Checked: {{ $json.lastChecked }}"
       },
       "id": "sms-activity",
       "name": "SMS Activity Summary",
@@ -94,7 +94,7 @@
       "typeVersion": 1,
       "position": [1440, 220],
       "credentials": {
-        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScribe" }
+        "twilioApi": { "id": "CREDENTIAL_ID", "name": "Twilio StemScriber" }
       }
     }
   ],
@@ -144,7 +144,7 @@
       "lastChecked": null
     }
   },
-  "tags": [{ "name": "StemScribe" }, { "name": "Beta" }],
+  "tags": [{ "name": "StemScriber" }, { "name": "Beta" }],
   "triggerCount": 1,
   "pinData": {},
   "versionId": "1"

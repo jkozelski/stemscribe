@@ -1,6 +1,6 @@
 ---
 name: stemscribe-task-queue
-description: Inter-agent task queue for the StemScribe team. Agents create, read, and complete tasks for each other.
+description: Inter-agent task queue for the StemScriber team. Agents create, read, and complete tasks for each other.
 requires:
   - filesystem
 ---

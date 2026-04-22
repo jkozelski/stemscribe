@@ -1,5 +1,5 @@
 """
-Song Structure Detection for StemScribe — Ensemble Detector
+Song Structure Detection for StemScriber — Ensemble Detector
 ============================================================
 Detects song sections (Intro, Verse, Chorus, Bridge, Outro, Solo/Instrumental)
 by combining three signal sources:

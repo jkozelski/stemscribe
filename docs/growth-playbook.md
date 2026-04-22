@@ -63,7 +63,7 @@ Position against workflow fragmentation: "Right now you use Lalal.ai for stems, 
 - Not price sensitive at $10/mo if it saves rehearsal time
 
 **Channel combo:**
-1. YouTube tutorials — "How to learn [song] in 10 minutes with StemScribe." Flanks UG's SEO with video.
+1. YouTube tutorials — "How to learn [song] in 10 minutes with StemScriber." Flanks UG's SEO with video.
 2. Facebook Groups — Cover band & worship musician groups. Authentic demos resonate. This audience lives on Facebook.
 3. Church music director outreach — Free Pro month to worship leaders. One leader = one band. Churches share tools across networks.
 

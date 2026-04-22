@@ -1,4 +1,4 @@
-# StemScribe VPS Hosting Recommendation
+# StemScriber VPS Hosting Recommendation
 
 **Date:** March 19, 2026
 **Status:** Final recommendation
@@ -42,7 +42,7 @@
 
 ### Why 8 GB RAM
 
-StemScribe's memory footprint under load:
+StemScriber's memory footprint under load:
 
 | Component | RAM Usage |
 |-----------|-----------|
@@ -236,4 +236,4 @@ Claude Code handles everything else.
 
 Hetzner CX32 at $12/mo is the clear winner. It has enough RAM for Whisper large-v3, enough CPU for concurrent processing, enough bandwidth for thousands of users, and full SSH access so Claude Code can manage everything. It comes in 40% under budget with room to scale up or down as needed.
 
-Jeff signs up. Claude Code deploys. StemScribe runs 24/7.
+Jeff signs up. Claude Code deploys. StemScriber runs 24/7.

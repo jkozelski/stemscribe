@@ -1,5 +1,5 @@
 """
-Chord Analysis Module for StemScribe
+Chord Analysis Module for StemScriber
 =====================================
 Analyzes MIDI/audio to detect chord progressions and generates chord charts.
 

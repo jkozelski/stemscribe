@@ -1,4 +1,4 @@
-# StemScribe Competitive Pricing Research
+# StemScriber Competitive Pricing Research
 **Last updated:** March 2026
 
 ## Competitor Pricing Comparison Table
@@ -104,13 +104,13 @@
 ### Who Combines Stem Separation + Transcription?
 Very few competitors offer both in one tool:
 1. **Music Demixer** — 6-stem separation + PDF/MIDI/MusicXML transcription ($9.99/mo)
-2. **StemScribe** (us) — stem separation + chord detection + Guitar Pro export
+2. **StemScriber** (us) — stem separation + chord detection + Guitar Pro export
 3. **Moises** — stem separation + practice tools (but NO tab/chord transcription from audio)
 4. **AudioShake** — stem separation + lyric transcription (B2B/enterprise, not consumer)
 
-**This is StemScribe's key differentiator.** The combination of high-quality stem separation, chord/tab transcription, AND Guitar Pro export is essentially unique in the consumer market.
+**This is StemScriber's key differentiator.** The combination of high-quality stem separation, chord/tab transcription, AND Guitar Pro export is essentially unique in the consumer market.
 
-## StemScribe Pricing Evaluation
+## StemScriber Pricing Evaluation
 
 ### Current Planned Pricing
 | Tier | Price | Limit | Features |
@@ -169,4 +169,4 @@ Very few competitors offer both in one tool:
 | Premium | $20/mo | $144/yr ($12/mo) | Unlimited | Everything + priority processing, batch, API |
 | Pay-per-song | $1.50/song | N/A | No subscription | Full processing, single song |
 
-This positions StemScribe competitively against Moises ($3.99-$9.99), Songsterr ($9.99), and Music Demixer ($9.99) while capturing more value from power users through the Premium tier at a price point ($20) that is still below the pain threshold for serious musicians.
+This positions StemScriber competitively against Moises ($3.99-$9.99), Songsterr ($9.99), and Music Demixer ($9.99) while capturing more value from power users through the Premium tier at a price point ($20) that is still below the pain threshold for serious musicians.

@@ -1,4 +1,4 @@
-# YouTube API & Music Licensing Research for StemScribe
+# YouTube API & Music Licensing Research for StemScriber
 
 **Date:** 2026-03-26
 **Purpose:** Research legal alternatives to yt-dlp for audio sourcing in a music practice app
@@ -43,7 +43,7 @@ The YouTube Data API v3 provides access to **metadata only**: video titles, desc
 - Each search costs 100 units, so ~100 searches/day free
 - Can request quota increases via audit form
 
-### Verdict for StemScribe
+### Verdict for StemScriber
 **NOT VIABLE for audio sourcing.** The API is metadata-only. Using yt-dlp alongside the API still violates ToS. There is no legitimate path to get raw audio through YouTube's official API.
 
 ### Sources
@@ -65,7 +65,7 @@ Content ID is YouTube's rights management system that allows copyright holders t
 - Individual creators generally need to go through a multi-channel network (MCN) or music distribution service
 - Strict eligibility criteria -- YouTube evaluates whether the copyright owner's content can be claimed through Content ID
 
-### Is It Relevant for StemScribe?
+### Is It Relevant for StemScriber?
 **NO.** Content ID is for rights holders to protect their content on YouTube, not for third-party apps to access or process audio. It is designed for content identification and monetization/blocking decisions, not for licensing audio to external services.
 
 ### Sources
@@ -88,7 +88,7 @@ Content ID is YouTube's rights management system that allows copyright holders t
 ### Legal Risk
 All unofficial YouTube Music APIs violate YouTube's ToS because they access YouTube data through means other than the official API or embeddable player. Using these for a commercial product carries significant legal risk.
 
-### Verdict for StemScribe
+### Verdict for StemScriber
 **NOT VIABLE.** No official API exists. Unofficial ones violate ToS just like yt-dlp does.
 
 ### Sources
@@ -116,13 +116,13 @@ All unofficial YouTube Music APIs violate YouTube's ToS because they access YouT
 3. **Revenue model:** Licensing voice AI technology to businesses (automotive, customer service), not music distribution
 4. **Key Detail:** SoundHound identifies music; it doesn't distribute it. The legal bar is much lower for recognition-only services.
 
-### Relevance to StemScribe
+### Relevance to StemScriber
 These companies do NOT process/distribute copyrighted audio. They only:
 - Create fingerprints (tiny mathematical representations)
 - Link users to licensed streaming services
 - Display metadata
 
-StemScribe's use case (downloading full audio, separating into stems, playing back) is fundamentally different and requires much more extensive licensing.
+StemScriber's use case (downloading full audio, separating into stems, playing back) is fundamentally different and requires much more extensive licensing.
 
 ### Sources
 - [How Shazam Works - Toptal](https://www.toptal.com/developers/algorithms/shazam-it-music-processing-fingerprinting-and-recognition)
@@ -137,14 +137,14 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 - **What:** Content identification for social networks, labels, publishers, streaming services, fitness/gaming apps
 - **Services:** Music identification, DMCA takedown reduction, catalog fulfillment APIs
 - **Pricing:** Not publicly listed; enterprise sales model. Contact helpdesk@audiblemagic.com
-- **Verdict:** Designed for platforms hosting user content, not for sourcing audio. Could be useful if StemScribe shifts to user-upload model for content identification.
+- **Verdict:** Designed for platforms hosting user content, not for sourcing audio. Could be useful if StemScriber shifts to user-upload model for content identification.
 - **Source:** [audiblemagic.com](https://www.audiblemagic.com/)
 
 ### Pex (acquired by Vobile, April 2025)
 - **What:** AI-powered content recognition (ACR) for identifying music in audio/video
 - **Services:** Discovery (copyright search engine), Attribution Engine (free for rightsholders)
 - **Pricing:** Starting at $1/file/month for tracking
-- **Verdict:** Content identification, not audio sourcing. Not directly useful for StemScribe's needs.
+- **Verdict:** Content identification, not audio sourcing. Not directly useful for StemScriber's needs.
 - **Source:** [pex.com](https://pex.com/)
 
 ### ACRCloud
@@ -195,7 +195,7 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 - Label deals: Revenue share (major labels typically want 50-70% of streaming revenue)
 - Legal fees to negotiate: $10K-50K+
 
-**Verdict:** Designed for Spotify-scale operations. The minimum costs ($60K+/year before label deals) make this impractical for a solo founder at StemScribe's current scale.
+**Verdict:** Designed for Spotify-scale operations. The minimum costs ($60K+/year before label deals) make this impractical for a solo founder at StemScriber's current scale.
 
 **Sources:**
 - [MLC - How It Works](https://www.themlc.com/how-it-works)
@@ -212,7 +212,7 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 - Covers physical copies and downloads, not interactive streaming
 - Affiliation fee: $125-$150
 
-**Verdict:** Designed for cover song CDs and downloads, not interactive streaming apps. Would not cover StemScribe's use case of on-demand stem playback.
+**Verdict:** Designed for cover song CDs and downloads, not interactive streaming apps. Would not cover StemScriber's use case of on-demand stem playback.
 
 **Sources:**
 - [harryfox.com](https://www.harryfox.com/)
@@ -231,7 +231,7 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 
 ### Fair Use Analysis for Stem Separation
 
-**Four-factor test applied to StemScribe:**
+**Four-factor test applied to StemScriber:**
 
 1. **Purpose and character of use:** Transformative? Arguable -- stems enable practice, not just redistribution. But the user is still listening to the copyrighted recording. Commercial use weighs against fair use.
 
@@ -245,7 +245,7 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 
 **Educational use exemption (Section 110):** Only applies to face-to-face instruction at nonprofit educational institutions, or distance learning under the TEACH Act. A commercial practice app does NOT qualify.
 
-**Bottom line:** Fair use is extremely unlikely to protect StemScribe's current model of downloading copyrighted audio from YouTube and separating it into stems. A lawyer would almost certainly advise against relying on fair use.
+**Bottom line:** Fair use is extremely unlikely to protect StemScriber's current model of downloading copyrighted audio from YouTube and separating it into stems. A lawyer would almost certainly advise against relying on fair use.
 
 **Sources:**
 - [Northwestern JTIP - AI Stem Extraction](https://jtip.law.northwestern.edu/2022/05/03/ai-stem-extraction-a-creative-tool-or-facilitator-of-mass-infringement/)
@@ -274,7 +274,7 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 - Still violates YouTube ToS (accessing content through unauthorized means)
 - No technical distinction that makes this legal vs. yt-dlp
 
-### Verdict for StemScribe
+### Verdict for StemScriber
 **Embedding is the only ToS-compliant option, but it doesn't give you audio data to process.** You can use the YouTube player for playback, but you cannot extract audio for stem separation through any YouTube-authorized method.
 
 ### Sources
@@ -298,7 +298,7 @@ StemScribe's use case (downloading full audio, separating into stems, playing ba
 - **Exception:** Approved DJ apps (djay, Serato, rekordbox) have special entitlements that appear to grant decoded PCM access
 - How to get this entitlement is not publicly documented; likely requires direct relationship with Apple
 
-### Verdict for StemScribe
+### Verdict for StemScriber
 **Not viable for stem separation.** Even if you could get the special DJ entitlement (unlikely for a solo founder), Apple's terms almost certainly prohibit modifying, separating, or redistributing the audio. The DJ apps use it for real-time mixing, not extraction.
 
 However, MusicKit could be useful for:
@@ -331,7 +331,7 @@ Spotify significantly restricted their Web API in November 2024. New apps lost a
 ### Raw Audio Access
 **No.** Spotify has never provided raw audio access through their API. All playback goes through their DRM-protected player. The recent restrictions made the API even more limited.
 
-### Verdict for StemScribe
+### Verdict for StemScriber
 **Not viable for audio sourcing.** Spotify's API is metadata/playback-control only. No audio extraction possible.
 
 ### Sources
@@ -349,14 +349,14 @@ Under Section 512(c), online service providers that host user-uploaded content a
 3. Designate a DMCA agent and respond expeditiously to takedown notices
 4. Have and enforce a repeat infringer policy
 
-### How This Applies to StemScribe
-If StemScribe shifts to a **user-upload model** (users provide their own audio files), the DMCA safe harbor could apply:
-- StemScribe processes files that users upload
-- StemScribe does not know whether the user has rights to the file
-- StemScribe responds to DMCA takedowns
-- StemScribe has a copyright policy and repeat infringer policy
+### How This Applies to StemScriber
+If StemScriber shifts to a **user-upload model** (users provide their own audio files), the DMCA safe harbor could apply:
+- StemScriber processes files that users upload
+- StemScriber does not know whether the user has rights to the file
+- StemScriber responds to DMCA takedowns
+- StemScriber has a copyright policy and repeat infringer policy
 
-**Critical distinction:** The safe harbor only applies when *someone other than the service provider* is the direct infringer. If StemScribe itself downloads from YouTube (via yt-dlp), StemScribe IS the direct infringer and safe harbor does not apply.
+**Critical distinction:** The safe harbor only applies when *someone other than the service provider* is the direct infringer. If StemScriber itself downloads from YouTube (via yt-dlp), StemScriber IS the direct infringer and safe harbor does not apply.
 
 ### Requirements to Qualify
 - Register a DMCA agent with the U.S. Copyright Office (~$6 filing fee)
@@ -374,7 +374,7 @@ If StemScribe shifts to a **user-upload model** (users provide their own audio f
 ## 11. How Moises Does It
 
 ### Business Model
-Moises is the closest competitor/analog to StemScribe. Here is how they handle licensing:
+Moises is the closest competitor/analog to StemScriber. Here is how they handle licensing:
 
 **User-upload model:**
 - Users upload their own audio files (MP3, WAV, FLAC, M4A, etc.)
@@ -416,7 +416,7 @@ Ranked by feasibility, cost, and legal safety:
 **Legal safety:** HIGH
 **How it works:**
 - Users upload their own audio files (from their personal music library, CDs they own, etc.)
-- StemScribe processes the files as a tool
+- StemScriber processes the files as a tool
 - Place legal responsibility on users via ToS
 - Implement DMCA takedown procedures
 - Register DMCA agent with Copyright Office
@@ -545,7 +545,7 @@ This is what Moises does. This is what every successful stem separation service 
 7. Remove yt-dlp from production code
 
 ### Questions for Lawyer
-1. Does the user-upload + DMCA safe harbor model adequately protect StemScribe?
+1. Does the user-upload + DMCA safe harbor model adequately protect StemScriber?
 2. Is stem separation itself a "derivative work" that creates additional liability for the tool provider?
 3. Does the Moises model (50M users, VC-backed, no label licenses) validate this approach?
 4. What ToS language is needed to properly disclaim liability?

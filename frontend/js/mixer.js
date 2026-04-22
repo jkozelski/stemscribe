@@ -1,5 +1,5 @@
-// StemScribe — Mixer / Web Audio / VU Meters / Playback
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Mixer / Web Audio / VU Meters / Playback
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -368,4 +368,4 @@ window.StemScribe = window.StemScribe || {};
     // Expose globally for onclick handlers in HTML
     window.toggleMiniMute = SS.toggleMiniMute;
 
-})(window.StemScribe);
+})(window.StemScriber);

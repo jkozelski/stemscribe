@@ -1,5 +1,5 @@
-// StemScribe — Results Display / Stem Card Rendering
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Results Display / Stem Card Rendering
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -179,8 +179,8 @@ window.StemScribe = window.StemScribe || {};
                         '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/stem/' + name + '" class="stem-btn" download>\u2B07 DL</a>'
                     ) +
                     '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/stem/' + name + '/mp3" class="stem-btn mp3-dl" download title="Download as MP3">\u2B07 MP3</a>' +
-                    ((job.musicxml_files?.[name] || job.gp_files?.[name]) ? '<button class="stem-btn notation" onclick="StemScribe.openNotationForStem(\'' + name + '\')" title="Open in Practice Mode">\u25B6 TAB</button>' : '') +
-                    (job.musicxml_files?.[name] ? '<button class="stem-btn notation" onclick="StemScribe.exportPDFForStem(\'' + name + '\')" title="Export sheet music as PDF">\u{1F4C4} PDF</button>' : '') +
+                    ((job.musicxml_files?.[name] || job.gp_files?.[name]) ? '<button class="stem-btn notation" onclick="StemScriber.openNotationForStem(\'' + name + '\')" title="Open in Practice Mode">\u25B6 TAB</button>' : '') +
+                    (job.musicxml_files?.[name] ? '<button class="stem-btn notation" onclick="StemScriber.exportPDFForStem(\'' + name + '\')" title="Export sheet music as PDF">\u{1F4C4} PDF</button>' : '') +
                     (hasMidi ? '<a href="' + SS.API_BASE + '/download/' + job.job_id + '/midi/' + name + '" class="stem-btn midi" download title="Download MIDI file">\u{1F3B9}</a>' : '') +
                 '</div>' +
                 '<audio id="audio-' + name + '" src="' + (job.enhanced_stems?.[name] ? SS.API_BASE + '/download/' + job.job_id + '/enhanced/' + name : SS.API_BASE + '/download/' + job.job_id + '/stem/' + name) + '" preload="auto"></audio>';
@@ -306,7 +306,7 @@ window.StemScribe = window.StemScribe || {};
                         '<div class="emoji">' + SS.escapeHtml(skill?.emoji || '\u{1F3AF}') + '</div>' +
                         '<div class="name">' + SS.escapeHtml(displayName) + '</div>' +
                         '<div class="mini-controls">' +
-                            '<button class="mini-btn" onclick="StemScribe.toggleMiniMute(\'' + SS.escapeJsString(subStemName) + '\', this)">M</button>' +
+                            '<button class="mini-btn" onclick="StemScriber.toggleMiniMute(\'' + SS.escapeJsString(subStemName) + '\', this)">M</button>' +
                             '<a href="' + SS.API_BASE + '/download/' + encodeURIComponent(job.job_id) + '/substem/' + encodeURIComponent(skillId) + '/' + encodeURIComponent(filename) + '" class="mini-btn" download>\u2B07</a>' +
                         '</div>' +
                         '<audio id="audio-' + SS.escapeHtml(subStemName) + '" src="' + SS.API_BASE + '/download/' + encodeURIComponent(job.job_id) + '/substem/' + encodeURIComponent(skillId) + '/' + encodeURIComponent(filename) + '" preload="auto"></audio>';
@@ -467,4 +467,4 @@ window.StemScribe = window.StemScribe || {};
     window.openNotationForStem = SS.openNotationForStem;
     window.exportPDFForStem = SS.exportPDFForStem;
 
-})(window.StemScribe);
+})(window.StemScriber);

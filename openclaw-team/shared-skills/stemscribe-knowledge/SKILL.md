@@ -1,13 +1,13 @@
 ---
 name: stemscribe-knowledge
-description: Core knowledge about StemScribe product, pricing, features, and positioning. Shared by all agents.
+description: Core knowledge about StemScriber product, pricing, features, and positioning. Shared by all agents.
 ---
 
-# StemScribe Product Knowledge
+# StemScriber Product Knowledge
 
-## What Is StemScribe?
+## What Is StemScriber?
 
-StemScribe is an AI-powered music tool that helps musicians learn songs by:
+StemScriber is an AI-powered music tool that helps musicians learn songs by:
 1. **Separating** any recording into individual instrument stems
 2. **Transcribing** those stems to MIDI and tablature
 3. **Recognizing** chord progressions with AI
@@ -74,7 +74,7 @@ Plus **stereo splitting** for dual-instrument bands:
 
 ## Competitor Quick Reference
 
-| Competitor | Price | Weakness StemScribe Exploits |
+| Competitor | Price | Weakness StemScriber Exploits |
 |-----------|-------|------------------------------|
 | Moises | $3.99-$18/mo | Expensive pro tier, weak on jazz chords |
 | Chordify | $3.49-$6.99/mo | No stem separation, chords only |

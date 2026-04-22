@@ -1,5 +1,5 @@
 """
-Chord Pattern Analyzer for StemScribe
+Chord Pattern Analyzer for StemScriber
 ======================================
 Detects song structure by analyzing repeating chord progressions.
 

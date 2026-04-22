@@ -1,4 +1,4 @@
-# Alternative Chord/Tab Sources for StemScribe
+# Alternative Chord/Tab Sources for StemScriber
 
 **Research Date:** 2026-03-18
 **Purpose:** Identify fallback chord sources when Songsterr lacks coverage (especially jam bands)
@@ -80,14 +80,14 @@ Phish.net API is great for setlist data but has zero chord content. Emil's Tabs 
   - Extended chords (7ths, 9ths, 13ths)
   - Fast chord changes
   - Jam band improvisation sections
-- Quality similar to what StemScribe already does with its own chord detection pipeline.
+- Quality similar to what StemScriber already does with its own chord detection pipeline.
 
 ### Pricing (Consumer)
 - Free tier with ads
 - Premium: ~$7/month (capo, transpose, MIDI export, etc.)
 
 ### Verdict
-No API access, and the auto-generated quality wouldn't be better than StemScribe's own pipeline. **Not useful as a fallback.**
+No API access, and the auto-generated quality wouldn't be better than StemScriber's own pipeline. **Not useful as a fallback.**
 
 ---
 
@@ -111,7 +111,7 @@ No API access, and the auto-generated quality wouldn't be better than StemScribe
 - ToS likely prohibits scraping (standard for these sites).
 
 ### Verdict
-**Not useful for StemScribe's needs.** Poor coverage of target genres (jam bands, American indie/classic rock). Would only add value for Brazilian music.
+**Not useful for StemScriber's needs.** Poor coverage of target genres (jam bands, American indie/classic rock). Would only add value for Brazilian music.
 
 ---
 
@@ -129,7 +129,7 @@ No API access, and the auto-generated quality wouldn't be better than StemScribe
 - Free API for chord diagrams/voicings
 - Endpoint: `https://api.uberchord.com/v1/chords/{chordName}`
 - **Chord shapes only** — not song-specific chord progressions.
-- Useful for rendering chord diagrams (which StemScribe already handles).
+- Useful for rendering chord diagrams (which StemScriber already handles).
 
 ### Scales-Chords API (scales-chords.com/api/)
 - Free, no activation required
@@ -148,7 +148,7 @@ No API access, and the auto-generated quality wouldn't be better than StemScribe
 ### autochord (PyPI)
 - Python library for automatic chord recognition from audio
 - Open source alternative to Chordify
-- StemScribe already has its own chord detection — redundant.
+- StemScriber already has its own chord detection — redundant.
 
 ---
 
@@ -156,25 +156,25 @@ No API access, and the auto-generated quality wouldn't be better than StemScribe
 
 ### Best Fallback #1: Emil's Tabs (for Phish specifically)
 - **Why:** Open source on GitHub, plain text format, easy to parse, covers the exact gap (Phish songs Songsterr doesn't have).
-- **How:** Fork/clone the GitHub repo, parse text files into StemScribe's chord format, serve as a fallback when Songsterr returns no results for Phish songs.
+- **How:** Fork/clone the GitHub repo, parse text files into StemScriber's chord format, serve as a fallback when Songsterr returns no results for Phish songs.
 - **Legal risk:** LOW — community-contributed, open source.
 - **Limitation:** Only covers Phish. No help for Widespread Panic, moe., Umphrey's, etc.
 
 ### Best Fallback #2: UG Data via Manual Curation (not scraping)
 - **Why:** UG has the best coverage for everything Songsterr misses, including all jam bands.
 - **How:** Instead of automated scraping (too legally risky), consider:
-  1. Manual entry of key jam band songs from UG into StemScribe's own chord database
+  1. Manual entry of key jam band songs from UG into StemScriber's own chord database
   2. Linking out to UG as a "can't find chords? try here" reference
   3. Building a community contribution feature where users can submit/correct chords (like UG's model)
 - **Legal risk:** LOW if manually curated or user-submitted. HIGH if automated scraping.
 
-### Long-term Strategy: StemScribe's Own Chord Pipeline
-- The best long-term play is improving StemScribe's own audio-to-chord detection.
+### Long-term Strategy: StemScriber's Own Chord Pipeline
+- The best long-term play is improving StemScriber's own audio-to-chord detection.
 - For songs with no external source, run the chord detection pipeline on the separated stems.
-- Combine multiple sources: Songsterr (primary) → Emil's Tabs (Phish) → StemScribe auto-detection (fallback).
+- Combine multiple sources: Songsterr (primary) → Emil's Tabs (Phish) → StemScriber auto-detection (fallback).
 
 ### Not Recommended
-- **Chordify** — No API, quality no better than StemScribe's own detection
+- **Chordify** — No API, quality no better than StemScriber's own detection
 - **Cifra Club** — Wrong genre focus (Brazilian music)
 - **Hooktheory** — Music theory tool, not a chord chart source
 - **Phish.net API** — Setlists only, no chords
@@ -186,6 +186,6 @@ No API access, and the auto-generated quality wouldn't be better than StemScribe
 ```
 1. Songsterr API (current primary — best quality, legal, has rhythm data)
 2. Emil's Tabs (Phish-only fallback — open source, free)
-3. StemScribe auto-detection (universal fallback — already built)
+3. StemScriber auto-detection (universal fallback — already built)
 4. UG manual link (show "Find chords on Ultimate Guitar" link as last resort)
 ```

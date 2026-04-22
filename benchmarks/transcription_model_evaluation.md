@@ -1,4 +1,4 @@
-# StemScribe Transcription Model Evaluation
+# StemScriber Transcription Model Evaluation
 
 ## Date: 2026-02-27
 ## Author: Pipeline Agent
@@ -7,7 +7,7 @@
 
 ## 1. Current Transcription Architecture
 
-StemScribe uses a tiered fallback system per instrument type:
+StemScriber uses a tiered fallback system per instrument type:
 
 ### Guitar
 1. **GuitarTabTranscriber** (Basic Pitch + post-processing) -- `guitar_tab_transcriber.py`
@@ -210,7 +210,7 @@ The task description mentions "guitar/bass CRNN training failed (F1 only 0.052 a
 - Not a transcription model -- requires MIDI input
 - Would complement, not replace, pitch detection
 
-**Verdict:** Could improve StemScribe's FretMapper (`_assign_string_fret`) algorithm, which already does a simpler version of this.
+**Verdict:** Could improve StemScriber's FretMapper (`_assign_string_fret`) algorithm, which already does a simpler version of this.
 
 ---
 
@@ -299,7 +299,7 @@ The core issue for guitar/bass CRNN training:
 
 **Possible solutions:**
 1. Synthesize training data from MIDI + guitar soundfonts (data augmentation)
-2. Use StemScribe's own separation to create guitar stems from MUSDB18/full songs
+2. Use StemScriber's own separation to create guitar stems from MUSDB18/full songs
 3. Fine-tune Basic Pitch on guitar-specific data (transfer learning)
 4. Train a Mel-Band-RoFormer model specifically for guitar transcription (the `train_guitar_model/` directory has the infrastructure for this)
 

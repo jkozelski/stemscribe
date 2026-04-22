@@ -1,7 +1,7 @@
 # iOS Safari Multi-Track Audio Playback Research
 
 **Date:** 2026-03-18
-**Problem:** StemScribe uses 6 separate `<audio>` elements (vocals, drums, bass, guitar, other, full mix). On iOS Safari, the play button shows pause state but audio stays at 0:00, no sound plays.
+**Problem:** StemScriber uses 6 separate `<audio>` elements (vocals, drums, bass, guitar, other, full mix). On iOS Safari, the play button shows pause state but audio stays at 0:00, no sound plays.
 
 **Root cause:** iOS Safari does not allow multiple `<audio>` elements to play simultaneously. Only one HTMLMediaElement can be active at a time. This is a longstanding WebKit restriction that has never been lifted.
 
@@ -254,7 +254,7 @@ For songs under 7 minutes (vast majority), this is safe on all modern iPhones.
 
 ```javascript
 /**
- * StemScribe iOS-Compatible Multi-Track Audio Engine
+ * StemScriber iOS-Compatible Multi-Track Audio Engine
  * Uses Web Audio API with AudioBufferSourceNode per stem
  */
 class StemAudioEngine {

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Full authentication, per-user library, and download system built and integrated into StemScribe. All changes are backward compatible with existing users and data. 318 tests passing with no regressions.
+Full authentication, per-user library, and download system built and integrated into StemScriber. All changes are backward compatible with existing users and data. 318 tests passing with no regressions.
 
 ---
 
@@ -98,7 +98,7 @@ Full authentication, per-user library, and download system built and integrated 
 
 ## What Jeff Needs To Do
 
-1. Go to **console.cloud.google.com** and create project "StemScribe"
+1. Go to **console.cloud.google.com** and create project "StemScriber"
 2. **APIs & Services > Credentials** > Create OAuth client ID (Web application)
 3. Authorized JS origins: `https://stemscribe.io`, `http://localhost:5555`
 4. Authorized redirect URIs: `https://stemscribe.io/auth/google/callback`, `http://localhost:5555/auth/google/callback`

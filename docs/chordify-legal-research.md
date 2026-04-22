@@ -1,7 +1,7 @@
 # Chordify Legal Research: How They Handle YouTube URLs Legally
 
 **Research Date:** 2026-03-26
-**Purpose:** Understand how Chordify (chordify.net) legally operates with YouTube URLs to inform StemScribe's legal strategy.
+**Purpose:** Understand how Chordify (chordify.net) legally operates with YouTube URLs to inform StemScriber's legal strategy.
 
 ---
 
@@ -210,15 +210,15 @@ Chordify's legal defense rests on **five pillars:**
 
 ---
 
-## 9. Key Takeaways for StemScribe
+## 9. Key Takeaways for StemScriber
 
-### What StemScribe Can Replicate from Chordify's Model
+### What StemScriber Can Replicate from Chordify's Model
 
 #### A. YouTube Audio Playback -- Use the YouTube IFrame Embed API
 - **DO:** Use YouTube's official embedded player for audio playback
 - **DO:** Sync your chord/lyric display with the embedded player's playback position
 - **DON'T:** Download YouTube audio for playback purposes
-- **RATIONALE:** This is the single most important legal distinction. Chordify doesn't serve YouTube audio -- YouTube does, through its own player. StemScribe should adopt this same approach for any YouTube-sourced content that users play back.
+- **RATIONALE:** This is the single most important legal distinction. Chordify doesn't serve YouTube audio -- YouTube does, through its own player. StemScriber should adopt this same approach for any YouTube-sourced content that users play back.
 
 #### B. Chord Display -- Lean on "Chords Aren't Copyrightable"
 - **DO:** Display chord progressions -- they are not copyrightable
@@ -226,9 +226,9 @@ Chordify's legal defense rests on **five pillars:**
 - **DON'T:** Display full melodies or tablature of copyrighted works without a license
 - **RATIONALE:** Chordify has operated for 13 years on this principle without legal challenge
 
-#### C. Stem Separation -- This Is Where StemScribe Differs (and Has More Risk)
+#### C. Stem Separation -- This Is Where StemScriber Differs (and Has More Risk)
 - Chordify does NOT separate stems -- they only analyze the full mix for chords
-- StemScribe separates audio into stems (vocals, drums, bass, etc.), which is a MORE transformative process
+- StemScriber separates audio into stems (vocals, drums, bass, etc.), which is a MORE transformative process
 - **The question:** Does stem separation create a derivative work of the original recording?
 - **Mitigation strategies:**
   - Process audio ephemerally (don't permanently store separated stems)
@@ -239,7 +239,7 @@ Chordify's legal defense rests on **five pillars:**
 #### D. Lyrics -- Use a Licensed Provider
 - **DO:** Use LyricFind or Musixmatch for lyrics (they handle publisher licensing)
 - **DON'T:** Scrape lyrics from unlicensed sources or generate them with Whisper and display them
-- **RATIONALE:** Chordify licenses lyrics through LyricFind specifically because lyrics ARE copyrightable. StemScribe should do the same.
+- **RATIONALE:** Chordify licenses lyrics through LyricFind specifically because lyrics ARE copyrightable. StemScriber should do the same.
 - **NOTE:** Whisper-generated lyrics for personal/internal use (not displayed to users) is a grayer area
 
 #### E. Takedown Process -- Implement a Notice-and-Takedown System
@@ -250,7 +250,7 @@ Chordify's legal defense rests on **five pillars:**
 
 #### F. Jurisdiction -- Consider Where You Incorporate
 - Chordify benefits from being a Dutch company under EU law
-- StemScribe (US-based) faces stricter US copyright enforcement
+- StemScriber (US-based) faces stricter US copyright enforcement
 - **Consider:** US DMCA safe harbor provisions (Section 512) if you register as a service provider
 - **Consider:** Emphasizing educational/transformative use for fair use arguments
 
@@ -262,14 +262,14 @@ Chordify's legal defense rests on **five pillars:**
 - Separate section for licensed content (lyrics) with usage restrictions
 - Clear notice-and-takedown procedure
 
-### What StemScribe Should NOT Do (Based on Chordify's Approach)
+### What StemScriber Should NOT Do (Based on Chordify's Approach)
 1. **Don't store YouTube audio permanently** -- Process ephemerally, discard after analysis
 2. **Don't allow users to download copyrighted audio** -- Only export derived data (chords, MIDI, etc.)
 3. **Don't display copyrighted content without a license** -- Lyrics need LyricFind/Musixmatch
 4. **Don't frame it as a "downloader"** -- Frame it as an educational/practice tool
 
-### The Biggest Risk Unique to StemScribe
-Chordify's output is **non-copyrightable data** (chord symbols). StemScribe's output includes **separated audio stems** which are derived from copyrighted recordings. This is the key difference and the key risk. Mitigations:
+### The Biggest Risk Unique to StemScriber
+Chordify's output is **non-copyrightable data** (chord symbols). StemScriber's output includes **separated audio stems** which are derived from copyrighted recordings. This is the key difference and the key risk. Mitigations:
 - Ephemeral processing (don't cache stems permanently)
 - Educational/practice framing
 - No stem download/export

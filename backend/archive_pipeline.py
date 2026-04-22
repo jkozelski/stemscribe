@@ -1,5 +1,5 @@
 """
-Internet Archive Live Music Pipeline for StemScribe
+Internet Archive Live Music Pipeline for StemScriber
 =====================================================
 Search, browse, and batch-process live recordings from archive.org.
 The Live Music Archive has 250,000+ free, legal concert recordings.
@@ -141,7 +141,7 @@ AUDIO_FORMATS = {
 class ArchivePipeline:
     """
     Search, browse, and prepare downloads from the Internet Archive
-    Live Music Archive for processing through StemScribe.
+    Live Music Archive for processing through StemScriber.
     """
 
     SEARCH_URL = "https://archive.org/advancedsearch.php"
@@ -159,7 +159,7 @@ class ArchivePipeline:
         self.session = requests.Session() if REQUESTS_AVAILABLE else None
         if self.session:
             self.session.headers.update({
-                'User-Agent': 'StemScribe/1.0 (music transcription tool; https://github.com/jkozelski/stemscribe)'
+                'User-Agent': 'StemScriber/1.0 (music transcription tool; https://github.com/jkozelski/stemscribe)'
             })
 
     def _rate_limit_wait(self):
@@ -457,7 +457,7 @@ class ArchivePipeline:
     def get_show_for_processing(self, identifier: str,
                                  prefer_format: str = "mp3") -> Dict:
         """
-        Get all info needed to process a show through StemScribe.
+        Get all info needed to process a show through StemScriber.
 
         Returns:
             Dict with:

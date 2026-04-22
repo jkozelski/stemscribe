@@ -1,14 +1,14 @@
-# StemScribe Comprehensive Audit Report
+# StemScriber Comprehensive Audit Report
 
 **Date:** 2026-03-04
-**Audited by:** Claude Opus 4.6 (StemScribe Audit Team)
+**Audited by:** Claude Opus 4.6 (StemScriber Audit Team)
 **Scope:** Full codebase — backend, frontend, tests, deployment, security
 
 ---
 
 ## Executive Summary
 
-StemScribe is an ambitious audio-to-tablature pipeline with a solid core architecture. The stem separation and mixer UI work well. However, the project has accumulated significant technical debt from rapid prototyping: ~54K lines of backend Python, of which roughly 30% is dead/unused code; major features (auth, billing, storage) are scaffolded but not integrated into the frontend; transcription accuracy is poor by the project owner's own assessment; and several security issues would need resolution before any production deployment.
+StemScriber is an ambitious audio-to-tablature pipeline with a solid core architecture. The stem separation and mixer UI work well. However, the project has accumulated significant technical debt from rapid prototyping: ~54K lines of backend Python, of which roughly 30% is dead/unused code; major features (auth, billing, storage) are scaffolded but not integrated into the frontend; transcription accuracy is poor by the project owner's own assessment; and several security issues would need resolution before any production deployment.
 
 **Overall assessment: Not production-ready.** Estimated effort to launch: 3-4 focused weeks of cleanup + testing + deployment hardening.
 

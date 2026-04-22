@@ -1,4 +1,4 @@
-# StemScribe VPS Migration Plan
+# StemScriber VPS Migration Plan
 
 **From:** M3 Mac (localhost) via Cloudflare Tunnel
 **To:** Hetzner Cloud VPS (US/Ashburn)
@@ -260,7 +260,7 @@ pip install gunicorn
 # Create service file
 cat > /etc/systemd/system/stemscribe.service << 'EOF'
 [Unit]
-Description=StemScribe Flask Backend
+Description=StemScriber Flask Backend
 After=network.target
 
 [Service]

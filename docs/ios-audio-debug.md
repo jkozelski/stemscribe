@@ -89,7 +89,7 @@ App backgrounded          -> may become "suspended" or "interrupted"
 3. **Creating a new context per play** -- wastes resources and each one starts suspended
 4. **Not handling `interrupted`** -- after a phone call, audio stays dead
 
-### StemScribe's Approach
+### StemScriber's Approach
 - Context is created lazily (in `_ensureContext()` for decoding, in `init()` for playback)
 - `init()` is called directly in the `togglePlayback()` function, which is in the user tap call stack
 - `play()` checks for suspended state and calls `resume().then(startAllSources)`

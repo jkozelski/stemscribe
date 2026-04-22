@@ -1,7 +1,7 @@
-# StemScribe Social Media Launch Strategy
+# StemScriber Social Media Launch Strategy
 
 **Created:** March 2026
-**Product:** StemScribe — Audio-to-Guitar-Pro transcription (upload song -> stems -> MIDI -> .gp5 tabs)
+**Product:** StemScriber — Audio-to-Guitar-Pro transcription (upload song -> stems -> MIDI -> .gp5 tabs)
 **Pricing:** Free (3 songs/mo) | Premium $4.99/mo | Pro $14.99/mo
 **Key differentiator:** ONLY product doing audio -> stems -> MIDI -> Guitar Pro tabs in one pipeline
 
@@ -38,11 +38,11 @@
 - r/livesound, r/audioengineering — stem separation use cases
 
 **Rules of engagement:**
-- Follow the 9:1 ratio religiously — 9 helpful comments/posts for every 1 that mentions StemScribe
+- Follow the 9:1 ratio religiously — 9 helpful comments/posts for every 1 that mentions StemScriber
 - Never post "check out my app" — frame it as solving a problem
 - Be active in communities for 2-3 weeks BEFORE any product mentions
 - If someone asks "how do I learn this song" or "is there a tab for X" — that's your opening
-- Always disclose you're the creator when mentioning StemScribe
+- Always disclose you're the creator when mentioning StemScriber
 
 ### YouTube
 **Goal:** SEO-driven discovery + tutorial content that ranks long-term
@@ -50,7 +50,7 @@
 **Frequency:** 1 video/week (long-form), 2-3 Shorts/week
 **Content pillars:**
 1. "Transcribe X with AI" — pick popular songs, show the full pipeline
-2. Comparisons — StemScribe vs Moises vs LALAL.AI vs Guitar2Tabs vs Klangio
+2. Comparisons — StemScriber vs Moises vs LALAL.AI vs Guitar2Tabs vs Klangio
 3. Tutorials — "How to use Guitar Pro tabs to learn songs faster"
 4. Behind the scenes — How the AI works (stem separation, CRNN models, MIDI conversion)
 5. Community requests — "You asked me to transcribe this, here's what happened"
@@ -75,7 +75,7 @@
 
 ### Discord
 **Goal:** Community hub for power users, beta testers, feature requests
-**Action:** Create StemScribe Discord server before launch
+**Action:** Create StemScriber Discord server before launch
 **Channels:** #show-your-tabs, #feature-requests, #bug-reports, #general, #stem-separation
 
 ### Product Hunt
@@ -111,16 +111,16 @@
 
 | Day | Platform | Content |
 |-----|----------|---------|
-| 1 (Tuesday) | **Product Hunt** | LAUNCH DAY. "StemScribe — Turn any song into Guitar Pro tabs with AI." Monitor and respond to every comment. |
+| 1 (Tuesday) | **Product Hunt** | LAUNCH DAY. "StemScriber — Turn any song into Guitar Pro tabs with AI." Monitor and respond to every comment. |
 | 1 | Twitter/X | Launch announcement thread with demo GIF |
 | 1 | Reddit | Post in r/WeAreTheMusicMakers Feedback Thread (if timing aligns) |
 | 1 | TikTok | "It's live. Upload any song, get Guitar Pro tabs for free." (30s demo) |
-| 2 | **Hacker News** | "Show HN: StemScribe — AI audio-to-Guitar-Pro pipeline (stem separation + MIDI + tab)" |
+| 2 | **Hacker News** | "Show HN: StemScriber — AI audio-to-Guitar-Pro pipeline (stem separation + MIDI + tab)" |
 | 2 | YouTube | Full launch demo video (5-8 min) |
 | 3 | Reddit | r/Guitar — Frame as discussion: "I built a free tool for getting Guitar Pro tabs from any song — looking for feedback from real guitarists" |
 | 4 | TikTok | "I separated the stems from [popular song] and this is what happened" |
 | 5 | Reddit | r/Bass — "Bass players: I built a free stem separator + tab generator. Would love your feedback" |
-| 6 | YouTube Short | "StemScribe vs Moises — which stem separation is better?" (60s) |
+| 6 | YouTube Short | "StemScriber vs Moises — which stem separation is better?" (60s) |
 | 7 | Twitter/X | "Week 1 recap: X signups, X songs processed, biggest surprise was..." |
 
 ### Growth Phase (Days 8-30)
@@ -136,7 +136,7 @@
 | 14 | YouTube Short | "Free vocal removal in seconds" (karaoke angle) |
 | 15 | Reddit | r/GuitarLessons — Comment on "how do I learn this song" with practical advice + soft mention |
 | 16 | TikTok | Before/after: messy full mix vs clean isolated guitar stem |
-| 17 | YouTube | "StemScribe vs LALAL.AI vs Moises vs Klangio — Full Comparison" (evergreen SEO play) |
+| 17 | YouTube | "StemScriber vs LALAL.AI vs Moises vs Klangio — Full Comparison" (evergreen SEO play) |
 | 18 | Twitter/X | User testimonial or case study |
 | 19 | TikTok | "What if you could hear JUST the bass in any song?" |
 | 20 | Reddit | r/musictheory — Share chord detection results on a complex song |
@@ -149,7 +149,7 @@
 | 27 | Reddit | r/Guitar — Share a genuinely helpful transcription of a song someone requested |
 | 28 | YouTube Short | "Guitar teacher reacts to AI-generated tabs" |
 | 29 | TikTok | "Name a song and I'll isolate any instrument" (engagement bait) |
-| 30 | YouTube | "30 Days of StemScribe: What Worked, What Didn't, What's Next" |
+| 30 | YouTube | "30 Days of StemScriber: What Worked, What Didn't, What's Next" |
 
 ---
 
@@ -162,7 +162,7 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 **Includes:** Screen recording demo, link to try free tier, invitation for feedback.
 
 ### 2. r/WeAreTheMusicMakers — "I compared 8 stem separation tools on the same 10 songs. Here are my honest results."
-**Angle:** Pure value post. Test Demucs, RoFormer, Moises, LALAL.AI, iZotope RX, etc. on the same tracks. Rank results for vocals, guitar, bass, drums. StemScribe appears naturally as one option.
+**Angle:** Pure value post. Test Demucs, RoFormer, Moises, LALAL.AI, iZotope RX, etc. on the same tracks. Rank results for vocals, guitar, bass, drums. StemScriber appears naturally as one option.
 **Includes:** Audio samples, quality ratings table, methodology.
 
 ### 3. r/Bass — "Bass players are underserved by every tab site. I built an AI that isolates bass stems and generates tab."
@@ -232,7 +232,7 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 
 ---
 
-### Video 2: "StemScribe vs Moises vs LALAL.AI vs Klangio — Which AI Music Tool Wins?"
+### Video 2: "StemScriber vs Moises vs LALAL.AI vs Klangio — Which AI Music Tool Wins?"
 **Length:** 12-15 minutes | **Type:** Comparison (evergreen SEO)
 
 **Hook (0-15s):**
@@ -251,7 +251,7 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 - Show generated tabs/notation side by side
 
 **Key differentiator to highlight:**
-"Moises and LALAL.AI do great stem separation, but they don't generate tabs. Klangio does tabs but doesn't separate stems first. StemScribe is the only one that does the full pipeline: separate, transcribe, and export as Guitar Pro."
+"Moises and LALAL.AI do great stem separation, but they don't generate tabs. Klangio does tabs but doesn't separate stems first. StemScriber is the only one that does the full pipeline: separate, transcribe, and export as Guitar Pro."
 
 **CTA:**
 "Links to all tools in the description. Let me know in the comments which one works best for your workflow."
@@ -267,14 +267,14 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 **Structure:**
 - Context: Why Dead jams are the ultimate AI transcription challenge (improvisation, multiple guitars, modal exploration)
 - Use actual Tidepool Artists connection: "I play in bands that cover Dead tunes, and learning jams by ear takes hours"
-- Process a specific live recording through StemScribe
+- Process a specific live recording through StemScriber
 - Show the isolated Garcia guitar stem — "just hearing Jerry's guitar by itself is worth it"
 - Show the generated tab — celebrate what it gets right, laugh at what it misses
 - Hand-correct the tab on camera to show the "AI as starting point" workflow
 - Compare to existing fan transcriptions on Jerry Garcia tabs sites
 
 **CTA:**
-"If you're a Deadhead, try feeding your favorite show into StemScribe. Free tier, no signup. What show are you transcribing first?"
+"If you're a Deadhead, try feeding your favorite show into StemScriber. Free tier, no signup. What show are you transcribing first?"
 
 ---
 
@@ -286,7 +286,7 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 
 **Structure:**
 - The old way: listen, pause, rewind, guess, repeat (slow)
-- Step 1: Upload song to StemScribe, separate stems
+- Step 1: Upload song to StemScriber, separate stems
 - Step 2: Isolate the instrument you want to learn
 - Step 3: Slow it down without pitch change (practice mode)
 - Step 4: Use the generated tab as a reference (not gospel)
@@ -299,7 +299,7 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 
 ---
 
-### Video 5: "The AI Behind StemScribe: How Neural Networks Hear Music"
+### Video 5: "The AI Behind StemScriber: How Neural Networks Hear Music"
 **Length:** 12-15 minutes | **Type:** Technical deep-dive (HN/developer audience)
 
 **Hook (0-15s):**
@@ -379,7 +379,7 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 
 ### Assets Needed
 1. **Tagline:** "Turn any song into Guitar Pro tabs with AI"
-2. **Description (short):** "Upload any song or paste a YouTube URL. StemScribe separates it into 6 stems, transcribes each instrument to MIDI, and exports a full Guitar Pro (.gp5) tab file. Free tier: 3 songs/month."
+2. **Description (short):** "Upload any song or paste a YouTube URL. StemScriber separates it into 6 stems, transcribes each instrument to MIDI, and exports a full Guitar Pro (.gp5) tab file. Free tier: 3 songs/month."
 3. **Gallery images (5):**
    - Hero shot: upload interface with a song being processed
    - Stem separation visual: 6 colored waveforms splitting out
@@ -404,13 +404,13 @@ All posts follow the value-first principle: lead with genuinely useful content, 
 ## Hacker News Show HN Strategy
 
 ### Post Title
-`Show HN: StemScribe – AI pipeline that converts audio to Guitar Pro tabs`
+`Show HN: StemScriber – AI pipeline that converts audio to Guitar Pro tabs`
 
 ### Post Text
 Keep it technical, modest, and honest. Example:
 
 ```
-I've been building StemScribe for the past 18 months. It's a web app that takes
+I've been building StemScriber for the past 18 months. It's a web app that takes
 an audio file (or YouTube URL), separates it into 6 stems (guitar, bass, drums,
 piano, vocals, other) using RoFormer/Demucs, transcribes each stem to MIDI using
 custom CRNN models (drums, piano) and Basic Pitch (guitar, bass), then converts
@@ -475,10 +475,10 @@ Jeff runs tidepoolartist.com with 5 working bands. This is a genuine, built-in d
 - Each band member posts to their own social media, expanding reach
 
 ### Cross-Promotion Strategy
-- Tidepool Artists social accounts share StemScribe demos using their music (no copyright issues — it's their own)
-- Open Claw poster pipeline generates gig posters — add "Powered by StemScribe" or "Tabs available on StemScribe" to select posts
-- Band email lists get early access to StemScribe (warm audience of music fans)
-- tidepoolartist.com gets a "Tabs" section powered by StemScribe for each band
+- Tidepool Artists social accounts share StemScriber demos using their music (no copyright issues — it's their own)
+- Open Claw poster pipeline generates gig posters — add "Powered by StemScriber" or "Tabs available on StemScriber" to select posts
+- Band email lists get early access to StemScriber (warm audience of music fans)
+- tidepoolartist.com gets a "Tabs" section powered by StemScriber for each band
 
 ### "Learn Our Songs" Initiative
 - Generate and publish Guitar Pro tabs for each band's repertoire
@@ -520,20 +520,20 @@ Highest response rate, most engaged audiences for this type of tool.
 |---------|---------|-------------|-----|-------------|
 | **David Bennett Piano** | David Bennett Piano | ~1.3M | Piano and music analysis | "Piano stem isolation + AI transcription" |
 | **Charles Berthoud** | Charles Berthoud | ~2M | Bass guitar | "Best bass isolation tool — demo on complex bass lines" |
-| **The Art of Guitar** | The Art of Guitar | ~200K | Guitar reviews, tab content | "Already tested AI tabs — show them StemScribe's pipeline" |
+| **The Art of Guitar** | The Art of Guitar | ~200K | Guitar reviews, tab content | "Already tested AI tabs — show them StemScriber's pipeline" |
 | **Let's Play Guitar** | Various bass channels | ~100K | Bass education | "Bass tab generation — underserved niche" |
 | **Drumeo** | Drumeo | ~3M | Drum education | "AI drum transcription + practice mode" |
 | **Stephen Clark** | Stephen Clark | ~200K | Drum covers, tutorials | "Drum isolation quality showcase" |
 
 ### Outreach Template
 
-Subject: **StemScribe — AI audio-to-Guitar-Pro tabs (free demo for your channel)**
+Subject: **StemScriber — AI audio-to-Guitar-Pro tabs (free demo for your channel)**
 
 ```
 Hey [Name],
 
 I've been watching your content for [specific reference to their video].
-I built StemScribe — it takes any song and generates a full Guitar Pro tab
+I built StemScriber — it takes any song and generates a full Guitar Pro tab
 file using AI (stem separation + transcription in one pipeline).
 
 I'd love to give you free Pro access to demo on your channel. It does
@@ -608,24 +608,24 @@ Jeff Kozelski
 
 ## Competitor Positioning
 
-### StemScribe vs Moises
+### StemScriber vs Moises
 - Moises: Best-in-class stem separation, practice tools, mobile app. No tab/notation output.
-- StemScribe: Full pipeline to Guitar Pro. Better for tab seekers. Moises is better for live practice.
-- Messaging: "Moises is great for practicing. StemScribe is great for getting tabs."
+- StemScriber: Full pipeline to Guitar Pro. Better for tab seekers. Moises is better for live practice.
+- Messaging: "Moises is great for practicing. StemScriber is great for getting tabs."
 
-### StemScribe vs LALAL.AI
+### StemScriber vs LALAL.AI
 - LALAL.AI: Excellent stem separation quality (Perseus neural network). No transcription.
-- StemScribe: Separation + transcription + Guitar Pro output.
-- Messaging: "LALAL.AI gives you stems. StemScribe gives you tabs."
+- StemScriber: Separation + transcription + Guitar Pro output.
+- Messaging: "LALAL.AI gives you stems. StemScriber gives you tabs."
 
-### StemScribe vs Klangio / Guitar2Tabs
+### StemScriber vs Klangio / Guitar2Tabs
 - Klangio: Good single-instrument transcription. Doesn't separate stems first.
-- StemScribe: Separates stems THEN transcribes — cleaner input means better tabs.
+- StemScriber: Separates stems THEN transcribes — cleaner input means better tabs.
 - Messaging: "Other tools transcribe from the full mix. We isolate each instrument first."
 
-### StemScribe vs Songscription
+### StemScriber vs Songscription
 - Songscription: Backed by $5M funding, celebrity endorsement. Single-instrument focus.
-- StemScribe: Full multi-instrument pipeline, Guitar Pro output specifically.
+- StemScriber: Full multi-instrument pipeline, Guitar Pro output specifically.
 - Messaging: "Full band tabs, not just single instruments."
 
 ---

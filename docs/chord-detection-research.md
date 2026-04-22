@@ -1,6 +1,6 @@
 # Automatic Chord Recognition & Guitar Transcription Research
 **Date:** 2026-03-16
-**Purpose:** Survey state-of-the-art for StemScribe chord detection improvement
+**Purpose:** Survey state-of-the-art for StemScriber chord detection improvement
 
 ---
 
@@ -84,7 +84,7 @@
 - **Install:** `pip install autochord`
 - **GPU:** Not required.
 - **Maintenance:** DEAD. Inactive project, no longer maintained.
-- **Verdict:** Too low accuracy, too limited vocabulary. Not suitable for StemScribe.
+- **Verdict:** Too low accuracy, too limited vocabulary. Not suitable for StemScriber.
 
 ### 6. chord-extractor
 - **Repo:** https://github.com/ohollo/chord-extractor
@@ -125,7 +125,7 @@
 ### 9. ChordNet (Voice Leading, not ACR)
 - **Paper:** Tsang & Aucouturier, JNMR 2004
 - **What it is:** NOT a chord recognition model. It's for voice leading and harmonization -- learns to produce chord sequences, not detect them from audio.
-- **Verdict:** Not relevant for StemScribe.
+- **Verdict:** Not relevant for StemScriber.
 
 ### 10. HarmonyNet
 - **Status:** No specific model by this name found in chord recognition literature.
@@ -140,7 +140,7 @@
 - **Approach:** 5-stage chain-of-thought framework using GPT-4o to coordinate multiple MIR tools (source separation, key detection, chord recognition, beat tracking).
 - **Results:** +1-2.77% improvement on MIREX metric across three datasets.
 - **Key insight:** LLMs as integrative bridges between specialized MIR tools. Converts audio-derived info to text for reasoning.
-- **Relevance to StemScribe:** This approach is directly applicable. StemScribe already does stem separation. Could pipe separated stems + key detection + multiple chord detectors through an LLM for consensus/correction.
+- **Relevance to StemScriber:** This approach is directly applicable. StemScriber already does stem separation. Could pipe separated stems + key detection + multiple chord detectors through an LLM for consensus/correction.
 
 ### Training on Artificially Generated Audio (2025)
 - **Paper:** arXiv:2508.05878
@@ -239,7 +239,7 @@
 
 For highest accuracy, the **Harmony Transformer v2** likely outperforms CREMA but requires manual setup and GPU.
 
-**Recommended approach for StemScribe:**
+**Recommended approach for StemScriber:**
 1. Use CREMA as primary detector (large vocabulary, pip installable, CPU-only)
 2. Cross-validate with madmom (for maj/min confidence)
 3. Consider the LLM-ensemble approach from the 2025 paper: run multiple detectors, use an LLM to reconcile disagreements using music theory reasoning
@@ -248,7 +248,7 @@ For highest accuracy, the **Harmony Transformer v2** likely outperforms CREMA bu
 
 **Mixed results.** Research from UW-Madison found that for deep neural network models, source separation may not significantly improve accuracy because the models are already deep enough to handle full mixes. However, for shallower models, separated stems can help by reducing spectral complexity.
 
-**For StemScribe specifically:** Since we already have separated stems, it's worth running chord detection on:
+**For StemScriber specifically:** Since we already have separated stems, it's worth running chord detection on:
 - The harmonic stem (guitar/piano) -- best signal for chords
 - The full mix as a secondary input
 - Compare results; the stem-based detection should have fewer false positives from drums/vocals
@@ -281,7 +281,7 @@ Yes, several exist but all have limitations:
 
 ---
 
-## Recommendations for StemScribe (Ranked)
+## Recommendations for StemScriber (Ranked)
 
 ### Tier 1: Implement Now (High Value, Low Effort)
 
@@ -302,7 +302,7 @@ Yes, several exist but all have limitations:
    - Run CREMA + madmom + Chordino on same audio
    - Use Claude/GPT to reconcile disagreements using music theory
    - The 2025 paper showed +2.77% improvement with this approach
-   - StemScribe already has key detection -- feed that context to the LLM
+   - StemScriber already has key detection -- feed that context to the LLM
 
 4. **Integrate Omnizart for chord + beat alignment**
    - Chord detection + beat tracking in one package

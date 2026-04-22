@@ -142,7 +142,7 @@ def archive_show_details(identifier):
 @archive_bp.route('/api/archive/process', methods=['POST'])
 def archive_process_track():
     """
-    Process an Archive.org track through StemScribe's full pipeline.
+    Process an Archive.org track through StemScriber's full pipeline.
 
     Body (JSON):
         url: Direct download URL or archive.org page URL

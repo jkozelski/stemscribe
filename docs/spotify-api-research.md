@@ -164,7 +164,7 @@ None of these give individual artists programmatic access to Spotify for Artists
 
 ### DO (Safe)
 1. **Use the official Spotify Web API** via the MCP tools for searching, discovering music, managing personal playlists, and playback control
-2. **Use Spotipy** if you need to build any catalog-data features into StemScribe (e.g., linking to Spotify tracks)
+2. **Use Spotipy** if you need to build any catalog-data features into StemScriber (e.g., linking to Spotify tracks)
 3. **Manually manage your Spotify for Artists dashboard** -- bio, Canvas, Discovery Mode, playlist pitches
 4. **Use DistroKid's built-in tools** for playlist pitching if available through your distributor
 5. **Pull public data** (follower counts, genres, album listings) through the official API for display purposes

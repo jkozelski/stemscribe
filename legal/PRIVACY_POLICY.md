@@ -1,11 +1,11 @@
-# StemScribe - Privacy Policy
+# StemScriber - Privacy Policy
 
 **Effective Date:** [INSERT DATE]
 **Last Updated:** February 2026
 
 ## 1. Introduction
 
-StemScribe ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and share information when you use our audio processing service.
+StemScriber ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and share information when you use our audio processing service.
 
 ## 2. Information We Collect
 
@@ -100,7 +100,7 @@ Depending on your jurisdiction, you may have the right to:
 - **Opt out** of marketing communications
 - **Object** to certain data processing
 
-To exercise these rights, contact us at [privacy@stemscribe.app].
+To exercise these rights, contact us at [privacy@stemscriber.com].
 
 ### California Residents (CCPA)
 California residents have additional rights under the CCPA, including the right to know what personal information is collected and to request deletion. We do not sell personal information.
@@ -113,7 +113,7 @@ If you are in the EU/EEA, our legal basis for processing is:
 
 ## 10. Children's Privacy
 
-StemScribe is not intended for children under 13. We do not knowingly collect information from children under 13. If we discover we have collected such information, we will delete it promptly.
+StemScriber is not intended for children under 13. We do not knowingly collect information from children under 13. If we discover we have collected such information, we will delete it promptly.
 
 ## 11. International Data Transfers
 
@@ -126,7 +126,7 @@ We may update this Privacy Policy from time to time. We will notify you of mater
 ## 13. Contact Us
 
 For privacy-related questions or concerns:
-- **Email:** [privacy@stemscribe.app]
+- **Email:** [privacy@stemscriber.com]
 - **Address:** [YOUR BUSINESS ADDRESS]
 
 ---

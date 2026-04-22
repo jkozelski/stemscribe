@@ -1,4 +1,4 @@
-# StemScribe v10 Chord Detection Threshold Experiment
+# StemScriber v10 Chord Detection Threshold Experiment
 
 **Date:** 2026-03-16
 **Investigator:** Agent 4 (Threshold Fixer)

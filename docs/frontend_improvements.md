@@ -1,4 +1,4 @@
-# StemScribe Frontend Improvements -- Research & Proposals
+# StemScriber Frontend Improvements -- Research & Proposals
 
 ## Research Date: 2026-02-27
 
@@ -113,7 +113,7 @@ Yousician proves engagement through:
 
 ---
 
-## Part 3: Proposed Improvements for StemScribe
+## Part 3: Proposed Improvements for StemScriber
 
 ### Priority 1: Critical / High Impact
 
@@ -125,7 +125,7 @@ Yousician proves engagement through:
 - Master playback transport: play/pause, seek bar, current time / total time
 - Loop selection: click-and-drag on waveform to create a loop region
 
-**Why:** This is the core UX of any stem separation tool. Moises, LALAL.AI, and every competitor does this. Without it, StemScribe feels incomplete.
+**Why:** This is the core UX of any stem separation tool. Moises, LALAL.AI, and every competitor does this. Without it, StemScriber feels incomplete.
 
 **Libraries:** Wavesurfer.js (waveform rendering), Web Audio API (stem mixing and routing)
 
@@ -137,7 +137,7 @@ Yousician proves engagement through:
 - Speed control slider (50% to 150%, pitch-preserved)
 - Instrument track selector (switch between guitar, bass, drums, piano views)
 
-**Why:** This is the "wow factor" that differentiates StemScribe from plain stem separators. Seeing your transcribed music as playable, interactive tabs is the core value proposition.
+**Why:** This is the "wow factor" that differentiates StemScriber from plain stem separators. Seeing your transcribed music as playable, interactive tabs is the core value proposition.
 
 **Libraries:** alphaTab.js (notation rendering + synthesis), alphaSynth (built-in MIDI playback)
 
@@ -247,13 +247,13 @@ Yousician proves engagement through:
 ### Priority 4: Future "Wow Factor" Features
 
 #### 4.1 Collaborative Session Sharing (Complexity: HIGH)
-**What:** Share a StemScribe session via URL with custom stem mix settings.
+**What:** Share a StemScriber session via URL with custom stem mix settings.
 - Encode stem volumes, loop points, speed, and active view in URL parameters
 - "Share mix" button generates a shareable link
 - Recipients see the same song with the sender's mix settings applied
 - Optional: real-time collaborative mixing (WebSocket-based)
 
-**Why:** BandLab proves that collaboration drives engagement. A band could share a StemScribe link and discuss parts.
+**Why:** BandLab proves that collaboration drives engagement. A band could share a StemScriber link and discuss parts.
 
 #### 4.2 Fretboard / Keyboard Visualization (Complexity: HIGH)
 **What:** Visual instrument display synced with tab playback.

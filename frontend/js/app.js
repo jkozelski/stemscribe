@@ -1,5 +1,5 @@
-// StemScribe — Application Entry Point / Initialization
-window.StemScribe = window.StemScribe || {};
+// StemScriber — Application Entry Point / Initialization
+window.StemScriber = window.StemScriber || {};
 
 (function(SS) {
     'use strict';
@@ -28,4 +28,4 @@ window.StemScribe = window.StemScribe || {};
     SS.initSpeedControl();
     SS.initTheme();
 
-})(window.StemScribe);
+})(window.StemScriber);

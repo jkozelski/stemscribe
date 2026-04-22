@@ -1,4 +1,4 @@
-# StemScribe Infrastructure Plan
+# StemScriber Infrastructure Plan
 ## Auth, Billing, Rate Limiting & Deployment
 
 **Author:** Dev agent
@@ -31,7 +31,7 @@
                          ┌──────────────────┐
                          │  Cloudflare Pages │
                          │  (frontend)       │
-                         │  stemscribe.app   │
+                         │  stemscriber.com   │
                          └────────┬─────────┘
                                   │ HTTPS
                                   ▼
@@ -143,10 +143,10 @@ These routes remain open (no JWT needed):
 | Pro | $14.99/mo | $119.99/yr (save 33%) | stemscribe_pro |
 
 ### Setup Steps (Stripe Dashboard)
-1. Create 2 Products: `StemScribe Premium`, `StemScribe Pro`
+1. Create 2 Products: `StemScriber Premium`, `StemScriber Pro`
 2. Each product gets 2 Prices: monthly recurring + annual recurring
 3. Store the 4 Price IDs as env vars
-4. Register webhook endpoint: `https://api.stemscribe.app/webhooks/stripe`
+4. Register webhook endpoint: `https://api.stemscriber.com/webhooks/stripe`
 
 ### Checkout Flow
 ```
@@ -526,7 +526,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:5555", "--workers", "2", "--timeout", "300",
 - `--timeout 300` — transcription can take up to 5 minutes
 
 ### Custom Domain
-- `api.stemscribe.app` → Railway custom domain
+- `api.stemscriber.com` → Railway custom domain
 - SSL handled automatically by Railway
 
 ### Health Check
@@ -544,7 +544,7 @@ web: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 backend.app:app
 ### Frontend Deployment
 - Cloudflare Pages (same as tidepool-artists setup)
 - Connect GitHub repo, build from `frontend/` directory
-- Custom domain: `stemscribe.app`
+- Custom domain: `stemscriber.com`
 
 ---
 
@@ -621,7 +621,7 @@ resend                    # Resend API (already used for tidepool)
 18. Update frontend: add login/register/upgrade UI
 19. Dockerfile + Railway setup
 20. Cloudflare Pages for frontend
-21. DNS: stemscribe.app → CF Pages, api.stemscribe.app → Railway
+21. DNS: stemscriber.com → CF Pages, api.stemscriber.com → Railway
 22. Stripe webhook registration
 23. End-to-end testing
 ```
@@ -664,13 +664,13 @@ RESEND_API_KEY=re_BFpDdj9b...
 
 # App
 FLASK_ENV=production
-APP_URL=https://stemscribe.app
-API_URL=https://api.stemscribe.app
+APP_URL=https://stemscriber.com
+API_URL=https://api.stemscriber.com
 ```
 
 ### Cloudflare Pages (Frontend)
 ```bash
-API_URL=https://api.stemscribe.app
+API_URL=https://api.stemscriber.com
 STRIPE_PUBLISHABLE_KEY=pk_live_...
 ```
 
@@ -687,7 +687,7 @@ STRIPE_PUBLISHABLE_KEY=pk_live_...
 | Cloudflare Pages | $0 |
 | Replicate (~500 songs) | $8.50 |
 | Stripe fees | ~$3 (on ~$50 MRR) |
-| Domain (stemscribe.app) | ~$1 |
+| Domain (stemscriber.com) | ~$1 |
 | **Total** | **~$18/mo** |
 
 ### At 500 Users (~100 paid)
@@ -725,7 +725,7 @@ GPU costs dominate. At ~2,000 users, consider:
 - [ ] Stripe webhook signature verification on every event
 - [ ] bcrypt password hashing (cost factor 12)
 - [ ] HTTPS only (Railway and Cloudflare handle this)
-- [ ] CORS: restrict to `stemscribe.app` and `localhost` (dev)
+- [ ] CORS: restrict to `stemscriber.com` and `localhost` (dev)
 - [ ] R2 presigned URLs: short expiry (5 min upload, 1 hour download)
 - [ ] SQL injection prevention: parameterized queries only
 - [ ] Rate limiting on auth endpoints (5/min per IP)
@@ -739,7 +739,7 @@ GPU costs dominate. At ~2,000 users, consider:
 
 ## 14. Open Questions
 
-1. **Domain:** Is `stemscribe.app` available and purchased? Need to register before deploy.
+1. **Domain:** Is `stemscriber.com` available and purchased? Need to register before deploy.
 
 2. **Supabase Auth vs. Custom JWT:** This plan uses custom JWT for full control. Supabase Auth could handle login/register/OAuth for free, but locks us into their token format. Recommendation: custom JWT is better for a product where we need fine-grained plan-based access control.
 
@@ -751,7 +751,7 @@ GPU costs dominate. At ~2,000 users, consider:
 
 6. **Redis:** Railway offers a Redis plugin ($5/mo). Useful for Flask-Limiter and job queuing. For MVP, in-memory rate limiting + threading is sufficient. Add Redis when we need Celery for job queues.
 
-7. **Email Provider:** Resend is already set up for Tidepool. Reuse it for StemScribe? Or set up a separate Resend domain for `stemscribe.app`? Recommend: separate domain, same Resend account.
+7. **Email Provider:** Resend is already set up for Tidepool. Reuse it for StemScriber? Or set up a separate Resend domain for `stemscriber.com`? Recommend: separate domain, same Resend account.
 
 8. **Monitoring:** Sentry (free tier) for error tracking, UptimeRobot for health checks. Add during Phase E deployment.
 

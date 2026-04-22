@@ -1,5 +1,5 @@
 """
-Neural Guitar Transcriber for StemScribe
+Neural Guitar Transcriber for StemScriber
 =========================================
 Uses a Kong-style CRNN model fine-tuned on GuitarSet via domain adaptation
 from the Kong et al. piano transcription checkpoint.

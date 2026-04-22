@@ -1,5 +1,5 @@
 """
-Tuning Detection & Chord Name Correction for StemScribe.
+Tuning Detection & Chord Name Correction for StemScriber.
 
 Songs recorded in non-standard guitar tunings (half-step down = Eb, full step
 down = D, etc.) produce chord names that are shifted from what guitarists expect.

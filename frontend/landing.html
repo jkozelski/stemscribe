@@ -53,7 +53,7 @@
             </button>
             <!-- Auth: Profile Dropdown (shown when logged in) -->
             <div class="auth-profile-dropdown">
-                <button class="auth-profile-btn" onclick="StemScribe.toggleProfileMenu(event)">
+                <button class="auth-profile-btn" onclick="StemScriber.toggleProfileMenu(event)">
                     <img class="auth-profile-avatar" src="" alt="">
                     <span class="auth-profile-name"></span>
                     <span class="auth-profile-chevron">&#9662;</span>
@@ -67,7 +67,7 @@
                     <a href="/app" class="auth-menu-item">My Library</a>
                     <div class="auth-beta-input-row">
                         <input type="text" class="auth-beta-input" placeholder="STEM-XXXX-XXXX" maxlength="14">
-                        <button class="auth-beta-submit" onclick="StemScribe.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
+                        <button class="auth-beta-submit" onclick="StemScriber.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
                     </div>
                     <div class="auth-menu-divider"></div>
                     <button class="auth-menu-item danger" onclick="logout()">Sign Out</button>
@@ -300,7 +300,7 @@
     <script src="js/auth.js"></script>
     <script>
         // Initialize auth
-        StemScribe.initAuth();
+        StemScriber.initAuth();
 
         // Mobile menu toggle
         document.getElementById('mobileMenuToggle').addEventListener('click', function() {

@@ -10,7 +10,7 @@ Environment variables:
   APP_URL             — Base URL for the practice link (default stemscriber.com).
   ENABLE_JOB_EMAILS   — "true" to send job-complete emails. Default "false" so
                         it can be toggled on at launch without code deploy.
-  EMAIL_FROM_JOB      — From header (default "StemScriber <noreply@stemscribe.app>").
+  EMAIL_FROM_JOB      — From header (default "StemScriber <noreply@stemscriber.com>").
 
 Templates live in backend/email_templates/job-complete.{html,txt}. Variables:
   {{song_title}}, {{practice_url}}, {{job_id}}, {{first_name_prefix}}
@@ -164,7 +164,7 @@ def send_job_complete_email(job) -> bool:
         html_body = _render(html_template, variables)
         txt_body = _render(txt_template, variables)
         subject = f'Your song "{song_title}" is ready on StemScriber'
-        from_addr = os.environ.get('EMAIL_FROM_JOB', 'StemScriber <noreply@stemscribe.app>')
+        from_addr = os.environ.get('EMAIL_FROM_JOB', 'StemScriber <noreply@stemscriber.com>')
 
         import resend  # local import so pytest's sys.modules mock works
         resend.api_key = api_key
