@@ -190,6 +190,19 @@ def format_chart(
     for section in raw_sections:
         _assign_chords_to_section(section, placement_chords)
 
+    # Step 4b: Re-anchor rendered chord strings to bar_grid order. Without this
+    # step, vocal sections that enter on a pickup bar render their chords in
+    # vocal-onset order (e.g. "Alright" verse starting on Am instead of Cm),
+    # because _assign_chords_to_section walks lyric lines and the lyric onset
+    # trails the bar downbeat. The bar_grid already reflects the true
+    # bass-anchored downbeat sequence, so we replay it over each section's
+    # existing lyric lines. Runs only when bar_grid is populated.
+    if bar_grid:
+        try:
+            _rebuild_section_chords_from_bar_grid(raw_sections, bar_grid)
+        except Exception as e:
+            logger.warning(f"bar-grid section rebuild failed, keeping vocal-aligned chords: {e}")
+
     # Step 5: Detect section types (Verse, Chorus, Bridge, etc.)
     _label_sections(raw_sections)
 
@@ -214,6 +227,13 @@ def format_chart(
         if ch not in seen:
             seen.add(ch)
             chords_used.append(ch)
+
+    # Step 7b: Strip internal keys now that all chord-placement passes are done.
+    for sec in raw_sections:
+        for line in sec.lines:
+            line.pop("_words", None)
+            line.pop("_start", None)
+            line.pop("_end", None)
 
     # Step 8: Build output
     sections_out = []
@@ -335,6 +355,93 @@ def _quantize_chords_to_bars(
             "end_time": round(end, 3),
         })
     return bars
+
+
+# ---------------------------------------------------------------------------
+# Render-layer bar-grid anchoring — rebuild section chord lines from bar_grid
+# so the chart follows the bass-anchored downbeat order instead of the
+# vocal-onset order. Fixes the "Alright by Jamiroquai" verse starting on the
+# pickup Am instead of the true Cm downbeat: the detector + bass pipeline
+# already produced bar_grid = [Cm, Gm, Dm, Am, ...], we just have to render
+# in that order rather than in word-timestamp order.
+# ---------------------------------------------------------------------------
+
+def _rebuild_section_chords_from_bar_grid(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+) -> None:
+    """
+    Rewrite each section's lines[].chords to reflect bar-grid chord order.
+
+    For vocal sections: keep each line's lyrics intact, but rebuild the
+    `chords` string from the bars whose midpoint falls inside the line's
+    time range. Consecutive duplicate chords are collapsed.
+
+    For instrumental sections: rebuild `lines` as 4-bar groups of bar-grid
+    chord labels (matching the existing `_assign_chords_to_section` format).
+
+    Mutates sections in place. No-op when bar_grid is empty.
+    """
+    if not bar_grid:
+        return
+
+    for sec in sections:
+        sec_bars = [
+            b for b in bar_grid
+            if b["end_time"] > sec.start_time - 0.5
+            and b["start_time"] < sec.end_time + 0.5
+        ]
+        if not sec_bars:
+            continue
+
+        if not sec.has_lyrics:
+            # Instrumental: collapse consecutive duplicates, then group by 4
+            chord_names: List[str] = []
+            for b in sec_bars:
+                if not chord_names or chord_names[-1] != b["chord"]:
+                    chord_names.append(b["chord"])
+            lines = []
+            for i in range(0, len(chord_names), 4):
+                batch = chord_names[i:i + 4]
+                lines.append({"chords": "  ".join(batch), "lyrics": None})
+            if lines:
+                sec.lines = lines
+            continue
+
+        # Vocal: pair bars to existing lyric lines by time overlap.
+        for line in sec.lines:
+            l_start = line.get("_start")
+            l_end = line.get("_end")
+            if l_start is None or l_end is None:
+                # Lyric-only line without timing (shouldn't normally happen
+                # post-_assign_chords_to_section which strips _start/_end);
+                # leave the line alone.
+                continue
+
+            # Bars whose midpoint falls inside this lyric line's window.
+            line_bars = []
+            for b in sec_bars:
+                mid = 0.5 * (b["start_time"] + b["end_time"])
+                if l_start - 0.3 <= mid <= l_end + 0.3:
+                    line_bars.append(b)
+
+            # If no bar midpoint lands inside the line, fall back to any bar
+            # that overlaps the line window at all.
+            if not line_bars:
+                for b in sec_bars:
+                    if b["end_time"] > l_start and b["start_time"] < l_end:
+                        line_bars.append(b)
+
+            if not line_bars:
+                continue
+
+            # Collapse consecutive duplicates.
+            chord_seq: List[str] = []
+            for b in line_bars:
+                if not chord_seq or chord_seq[-1] != b["chord"]:
+                    chord_seq.append(b["chord"])
+
+            line["chords"] = "  ".join(chord_seq)
 
 
 # ---------------------------------------------------------------------------
@@ -779,11 +886,10 @@ def _assign_chords_to_section(section: _Section, all_chords: List[Dict]):
     ]
     section.chord_pattern = _chord_fingerprint(sec_chords)
 
-    # Clean up internal keys
-    for line in section.lines:
-        line.pop("_words", None)
-        line.pop("_start", None)
-        line.pop("_end", None)
+    # NOTE: Internal keys (_words, _start, _end) are intentionally NOT stripped
+    # here — downstream steps (bar-grid section rebuild) still need _start/_end
+    # to pair bars to lyric lines. Stripping happens once at the end of
+    # format_chart, just before the JSON output is built.
 
 
 def _place_chords_on_words(
