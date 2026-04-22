@@ -1,0 +1,63 @@
+{
+  "title": "The Search",
+  "artist": "Kozelski",
+  "key": "C",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "C", "G/B", "D", "Em7", "Cadd9", "Eb", "Gmaj7", "Fmaj7"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": null, "notes": "repeat section"}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "I've been on a mission, finding your position"},
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "I know you have to be for real"},
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "Cause you are an addiction"},
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "And my intuitions will be fulfilled when you're revealed"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Em7  Cadd9  C  D", "lyrics": "All my life, searching for the answer", "notes": "x3"},
+        {"chords": "Em7  Cadd9  C  D", "lyrics": "Out of sight but not too far"},
+        {"chords": "Eb  D", "lyrics": "And I'm alright, waiting for your signals"},
+        {"chords": "Em7  Cadd9  C  D", "lyrics": "To tell me who you are"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "In my exploration, I've crossed many nations"},
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "And felt you in the rising moon"},
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "I see you in rain clouds, your voice is calling out loud"},
+        {"chords": "C  G/B  D  C  G/B  D", "lyrics": "Our souls will be colliding soon"}
+      ]
+    },
+    {
+      "name": "Chorus 2",
+      "lines": [
+        {"chords": "Em7  Cadd9  C  D", "lyrics": "All my life, you have been the answer"},
+        {"chords": "Em7  Cadd9  C  D", "lyrics": "We're bound by light and sounds so clear"},
+        {"chords": "Eb  D", "lyrics": "I can tell, it'll be forever"},
+        {"chords": "Em7  Cadd9  C  D", "lyrics": "When you finally reappear"}
+      ]
+    },
+    {
+      "name": "End Bridge",
+      "lines": [
+        {"chords": "Gmaj7  Fmaj7", "lyrics": "All right, all night, are you ready to be my destiny", "notes": "x4"},
+        {"chords": "Gmaj7  Fmaj7", "lyrics": "All right, don't fight it, are you ready baby, it's meant to be"},
+        {"chords": "Gmaj7  Fmaj7", "lyrics": "All right, all night, let me show the way and we'll be free"},
+        {"chords": "Gmaj7  Fmaj7", "lyrics": "All right, all night, are you ready baby, it's ecstasy"}
+      ]
+    }
+  ]
+}

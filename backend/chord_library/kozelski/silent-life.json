@@ -1,0 +1,69 @@
+{
+  "title": "Silent Life",
+  "artist": "Kozelski",
+  "key": "F#m",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "F#m", "A", "D", "D/C#", "Bm", "E", "G", "C#m7", "F#m"
+  ],
+  "sections": [
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "F#m  A  F#m  A", "lyrics": "The signs are fleeting, though I've never been for sure"},
+        {"chords": "D  D/C#  Bm", "lyrics": "It's coming down to dreaming, now I'll never pray for more"},
+        {"chords": "F#m  A  F#m  A", "lyrics": "It's fading away, I'll continue to search"},
+        {"chords": "D  D/C#  Bm", "lyrics": "If you wanna stay"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "F#m  A  F#m  A", "lyrics": "I hear a voice, \"Time won't wait for you\""},
+        {"chords": "D  D/C#  Bm", "lyrics": "You'll start to notice when you gotta make it through"},
+        {"chords": "F#m  A  F#m  A", "lyrics": "Live off the land and try to expand"},
+        {"chords": "D  D/C#  Bm", "lyrics": "Cause maybe they're wrong"}
+      ]
+    },
+    {
+      "name": "Pre-Chorus",
+      "lines": [
+        {"chords": "E  A  G  D", "lyrics": "Silent like it's gone"},
+        {"chords": "E  A  G  D", "lyrics": "Silent life is gone"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "F#m  A  F#m  A", "lyrics": "4 in the morning, where can you find the truth"},
+        {"chords": "D  D/C#  Bm", "lyrics": "They need to see me, the innocence has fallen through"},
+        {"chords": "F#m  A  F#m  A", "lyrics": "The devil he waits, the devil he knows"},
+        {"chords": "D  D/C#  Bm", "lyrics": "What you're gonna do"}
+      ]
+    },
+    {
+      "name": "Solo",
+      "lines": [
+        {"chords": "F#m  A  F#m  A", "lyrics": null, "notes": "Solo over verse chords"},
+        {"chords": "D  D/C#  Bm", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Bm  D  C#m7  E  F#m", "lyrics": "I need your love to save me"},
+        {"chords": "Bm  D  C#m7  E  F#m", "lyrics": "And pick me up through the fog"},
+        {"chords": "Bm  D  C#m7  E  F#m  E  D", "lyrics": "Stuck in the same daydream, you know I can't do it alone"},
+        {"chords": "D/C#  Bm", "lyrics": "I saw a blaze and I can keep it away if I see your face", "notes": "hit"}
+      ]
+    },
+    {
+      "name": "Pre-Chorus",
+      "lines": [
+        {"chords": "E  A  G  D", "lyrics": "Silent like it's gone"},
+        {"chords": "E  A  G  D", "lyrics": "Silent life is gone"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+{
+  "title": "Thunderhead",
+  "artist": "Kozelski",
+  "key": "Am",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Am7", "Bm7", "Cm7", "E9", "Bm6", "Dm7", "Gmaj7", "G#7", "Em7", "G#maj7"
+  ],
+  "sections": [
+    {
+      "name": "Intro Pickup",
+      "lines": [
+        {
+          "chords": "Cm7       Bm7",
+          "chord_beats": [
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2}
+          ],
+          "lyrics": null
+        }
+      ]
+    },
+    {
+      "name": "Intro",
+      "lines": [
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": null,
+          "notes": "x4"
+        }
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "Another night out, stirring with the boys in a cloud",
+          "notes": "x8"
+        },
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "If I give in it's cause the voice in my head is too loud"
+        },
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "Nowhere to hide the thunderhead is hitting me now"
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "She was right when she said boy you look like trouble"
+        },
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "I can't deny that I've been sitting here killing doubles"
+        },
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "So the one you're talking to turns out to be the real thing"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {
+          "chords": "Dm7                 Am7                 Gmaj7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4}
+          ],
+          "lyrics": "I see right through you, it's a madhouse"
+        },
+        {
+          "chords": "Dm7                 Am7                 Gmaj7               G#7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4},
+            {"name": "G#7", "beats": 4}
+          ],
+          "lyrics": "Oh my lord I've crossed that line again"
+        },
+        {
+          "chords": "Dm7                 Am7                 Gmaj7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4}
+          ],
+          "lyrics": "I really need it"
+        },
+        {
+          "chords": "Dm7                 Am7                 Gmaj7               G#7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4},
+            {"name": "G#7", "beats": 4}
+          ],
+          "lyrics": "So please believe me"
+        }
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "I can't give up my eyes are locked on to you now"
+        },
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "Let's have some fun, just a little more than the laws allow"
+        },
+        {
+          "chords": "Am7                                Bm7  Cm7       Bm7       E9        Bm6",
+          "chord_beats": [
+            {"name": "Am7", "beats": 7},
+            {"name": "Bm7", "beats": 1},
+            {"name": "Cm7", "beats": 2},
+            {"name": "Bm7", "beats": 2},
+            {"name": "E9", "beats": 2},
+            {"name": "Bm6", "beats": 2}
+          ],
+          "lyrics": "I'll come undone and you put me back together somehow"
+        }
+      ]
+    },
+    {
+      "name": "Chorus 2",
+      "lines": [
+        {
+          "chords": "Dm7                 Am7                 Gmaj7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4}
+          ],
+          "lyrics": "The Holy City brings out the demons"
+        },
+        {
+          "chords": "Dm7                 Am7                 Gmaj7               G#7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4},
+            {"name": "G#7", "beats": 4}
+          ],
+          "lyrics": "Oh my lord I've crossed that line again"
+        },
+        {
+          "chords": "Dm7                 Am7                 Gmaj7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4}
+          ],
+          "lyrics": "Why would you say that"
+        },
+        {
+          "chords": "Dm7                 Am7                 Gmaj7               G#7",
+          "chord_beats": [
+            {"name": "Dm7", "beats": 4},
+            {"name": "Am7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4},
+            {"name": "G#7", "beats": 4}
+          ],
+          "lyrics": "I didn't mean it"
+        }
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {
+          "chords": "Em7                 Bm7                 Am7",
+          "chord_beats": [
+            {"name": "Em7", "beats": 4},
+            {"name": "Bm7", "beats": 4},
+            {"name": "Am7", "beats": 4}
+          ],
+          "lyrics": "All my friends are lighting up the town",
+          "notes": "x3"
+        },
+        {
+          "chords": "Em7                 Bm7                 Am7",
+          "chord_beats": [
+            {"name": "Em7", "beats": 4},
+            {"name": "Bm7", "beats": 4},
+            {"name": "Am7", "beats": 4}
+          ],
+          "lyrics": "Acting like there's no one else around"
+        },
+        {
+          "chords": "Em7                 Bm7                 Am7",
+          "chord_beats": [
+            {"name": "Em7", "beats": 4},
+            {"name": "Bm7", "beats": 4},
+            {"name": "Am7", "beats": 4}
+          ],
+          "lyrics": "Standing in circles, I don't think I'll ever come down"
+        }
+      ]
+    },
+    {
+      "name": "End",
+      "lines": [
+        {
+          "chords": "G#maj7              Gmaj7",
+          "chord_beats": [
+            {"name": "G#maj7", "beats": 4},
+            {"name": "Gmaj7", "beats": 4}
+          ],
+          "lyrics": null,
+          "notes": "x4"
+        }
+      ]
+    }
+  ]
+}

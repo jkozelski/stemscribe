@@ -1,0 +1,79 @@
+{
+  "title": "Living Water",
+  "artist": "Kozelski",
+  "key": "B",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "C#m", "E", "F#", "B", "F#m", "G#m7", "G#maj7"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "C#m  E  F#", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "B  F#  F#m  E", "lyrics": "Life is much better when I am with you"},
+        {"chords": "B  G#m7  E  F#", "lyrics": "I was floating like a lost soul losing control again"},
+        {"chords": "B  F#  F#m  E", "lyrics": "The never-ending search for something better fell through"},
+        {"chords": "B  G#m7  E  F#", "lyrics": "I'll do everything demanded if you mend my soul till the end"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "B  G#maj7  E  F#", "lyrics": "You're my living water"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "A place that swallows my ugly past"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "Stopped me at the border"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "Now my mind can rest"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "B  F#  F#m  E", "lyrics": "Just a sweet daughter of a coal miner trying to save the world"},
+        {"chords": "B  G#m7  E  F#", "lyrics": "Even in an age where the internet glows red with overloaded garbage"},
+        {"chords": "B  F#  F#m  E", "lyrics": "She can see the big picture and it makes her feel good"},
+        {"chords": "B  G#m7  E  F#", "lyrics": "She'll do anything she can to make others feel better"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "B  G#maj7  E  F#", "lyrics": "You're my living water"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "A place that swallows my ugly past"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "Stopped me at the border"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "Now my mind can rest"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "C#m  E  F#  B", "lyrics": "You can have the world, there's nothing in the way"},
+        {"chords": "C#m  E  F#", "lyrics": "But I can't keep you furled when you could fly away"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "B  F#  F#m  E", "lyrics": "You'll always be the part of me that does the right thing"},
+        {"chords": "B  G#m7  E  F#", "lyrics": "Even with a devil on my shoulder in a mid 20's fantasy"},
+        {"chords": "B  F#  F#m  E", "lyrics": "With our hands together will turn another page"},
+        {"chords": "B  G#m7  E  F#", "lyrics": "Ride into the sun and we'll never look back again"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "B  G#maj7  E  F#", "lyrics": "You're my living water"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "A place that swallows my ugly past"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "Stopped me at the border"},
+        {"chords": "B  G#maj7  E  F#", "lyrics": "Now my mind can rest"}
+      ]
+    }
+  ]
+}

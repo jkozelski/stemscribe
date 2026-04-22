@@ -1,0 +1,75 @@
+{
+  "title": "Mystified",
+  "artist": "Kozelski",
+  "key": "Fm",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Bb7", "Fm7", "G#", "C", "Fm", "C#maj7", "Cm7", "C#dim", "Ebmaj7", "Bmaj7", "Cmaj7", "Bb7"
+  ],
+  "sections": [
+    {
+      "name": "Intro / Pre-Verse",
+      "lines": [
+        {"chords": "Bb7  Fm7", "lyrics": null, "notes": "x2"}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "Bb7  Fm7", "lyrics": "The heavens came open, you fell from the sky"},
+        {"chords": "Bb7  Fm7", "lyrics": "Can I come see you once in a while?"},
+        {"chords": "Bb7  Fm7", "lyrics": "Falling for the magic in your devilish eyes"},
+        {"chords": "Bb7  Fm7", "lyrics": "On the very first day you taught me to fly"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "G#  C  Fm  C#maj7", "lyrics": "When I'm around you it's easiest to see"},
+        {"chords": "Cm7  C#dim  Fm", "lyrics": "That you should be the one with me"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "Bb7  Fm7", "lyrics": "This is a spell that has never worn off"},
+        {"chords": "Bb7  Fm7", "lyrics": "I surrender my power and open the vault"},
+        {"chords": "Bb7  Fm7", "lyrics": "And you can take anything that you want"},
+        {"chords": "Bb7  Fm7", "lyrics": "There's an endless stream of you in my thoughts"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "G#  C  Fm  C#maj7", "lyrics": "When I'm around you it's easiest to see"},
+        {"chords": "Cm7  C#dim  Fm", "lyrics": "That you should be the one for me"}
+      ]
+    },
+    {
+      "name": "Pre-Bridge",
+      "lines": [
+        {"chords": "Bb7", "lyrics": "All the conclusions fall out of mind"},
+        {"chords": "Bb7", "lyrics": "A glance of the pendulum swinging out of time"},
+        {"chords": "Bb7", "lyrics": "It's a rhythmatic speed to love's endless flow"},
+        {"chords": "Bb7", "lyrics": "That's trapped me in space where my heart, my heart is aglow"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Ebmaj7  Bmaj7  Cmaj7", "lyrics": null, "notes": "bridge riff, repeat"},
+        {"chords": "Ebmaj7  Bmaj7  Cmaj7  Bb7", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "Bb7  Fm7", "lyrics": "Everyone says that I'm just mystified"},
+        {"chords": "Bb7  Fm7", "lyrics": "That happened the moment you stepped in my life"},
+        {"chords": "Bb7  Fm7", "lyrics": "Forever with you is all that I need"},
+        {"chords": "Bb7  Fm7", "lyrics": "Together the years will melt in the sea"}
+      ]
+    }
+  ]
+}

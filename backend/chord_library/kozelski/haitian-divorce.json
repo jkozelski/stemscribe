@@ -1,0 +1,63 @@
+{
+  "title": "Haitian Divorce",
+  "artist": "Kozelski",
+  "key": "Em",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Em7", "Em6", "E", "G#m", "A", "B", "F#m7", "C#m", "Amaj7", "G#m7", "B/C#", "C#m7",
+    "Bbm", "D", "Am", "G", "C", "Bm", "Cmaj7", "D7", "G7",
+    "F7", "A13", "C13", "F", "Bb", "Bb/A", "Fmaj7"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "Em7  Em6  Em7  Em6  Em7  Em6", "lyrics": null},
+        {"chords": "E  G#m  A", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        {"chords": "B  F#m7  E  C#m", "lyrics": null},
+        {"chords": "Amaj7  G#m7  B/C#  C#m7", "lyrics": null},
+        {"chords": "B  F#m7  E  C#m", "lyrics": null},
+        {"chords": "Amaj7  Bbm  E  A  G#m  F#m  B  F#m  B", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Em7  D  Am  G  C  Bm  C  Bm  Em7", "lyrics": null, "notes": "repeat section"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Cmaj7  Em7  D7  G  G7  Cmaj7", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Bridge Part 2",
+      "lines": [
+        {"chords": "F7  G7  F7  G7", "lyrics": null},
+        {"chords": "A13  C13", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Solo",
+      "lines": [
+        {"chords": "G  F  C  Bb  Bb/A", "lyrics": null, "notes": "x3"},
+        {"chords": "Cmaj7  Bm  C  Bm", "lyrics": null, "notes": "-> Intro"}
+      ]
+    },
+    {
+      "name": "Solo 2",
+      "lines": [
+        {"chords": "G  F  C  Bb  Bb/A", "lyrics": null, "notes": "x3"},
+        {"chords": "Fmaj7  Em7", "lyrics": null, "notes": "repeat to fade"}
+      ]
+    }
+  ]
+}

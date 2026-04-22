@@ -1,0 +1,34 @@
+{
+  "title": "Solar Connection",
+  "artist": "Kozelski",
+  "key": "Am",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Am", "Dm", "G", "G#o", "F", "C", "F#m7b5", "Fmaj7", "Em", "E", "A"
+  ],
+  "sections": [
+    {
+      "name": "Verse",
+      "lines": [
+        {"chords": "Am  Dm  G  G#o", "lyrics": null},
+        {"chords": "F  Am  G  G#o", "lyrics": null, "notes": "repeat section"},
+        {"chords": "Am  F  G", "lyrics": null, "notes": "2nd ending"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "C  F#m7b5  Fmaj7  G", "lyrics": null},
+        {"chords": "C  F#m7b5  Fmaj7  Em  E", "lyrics": null},
+        {"chords": "A", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        {"chords": "Dm  G  C  F", "lyrics": null, "notes": "x4"}
+      ]
+    }
+  ]
+}

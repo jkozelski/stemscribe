@@ -1,0 +1,58 @@
+{
+  "title": "Climbing The Bars",
+  "artist": "Kozelski",
+  "key": "G",
+  "tempo": 120,
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "G", "Bm", "Em", "Eb", "Am", "C", "D"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "G  Bm  Em  Eb", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        {"chords": "G  Bm  Em  Am", "lyrics": null},
+        {"chords": "C  Am  Em  D", "lyrics": null, "notes": "1st ending: repeat; 2nd ending: Eb"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "C  D  Bm  C", "lyrics": null},
+        {"chords": "C  D  Bm  C", "lyrics": null},
+        {"chords": "C  D  Bm  C", "lyrics": null},
+        {"chords": "Am  D  Em  Eb", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Guitar Solo",
+      "lines": [
+        {"chords": "C  D  Bm  C  Am  D  G  C", "lyrics": null},
+        {"chords": "C  D  Bm  C  Am  D  Em  Eb", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Em  C  G  Eb", "lyrics": null},
+        {"chords": "Em  C  G  Eb", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Chorus 3",
+      "lines": [
+        {"chords": "C  D  Bm  C", "lyrics": null},
+        {"chords": "C  D  Bm  C", "lyrics": null},
+        {"chords": "C  D  Bm  C", "lyrics": null},
+        {"chords": "Am  D  Em  Eb", "lyrics": null, "notes": "Eb -> End"}
+      ]
+    }
+  ]
+}

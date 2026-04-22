@@ -1,0 +1,211 @@
+{
+  "title": "Born In Zen",
+  "artist": "Kozelski",
+  "album": "Systematic Static",
+  "key": "G",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "G",
+    "Bm",
+    "D",
+    "Am7",
+    "C",
+    "Em",
+    "Am",
+    "C/B",
+    "E/D",
+    "F/D"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {
+          "chords": "G  Bm  D",
+          "lyrics": null,
+          "notes": "repeat section"
+        }
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "G  Bm  D",
+          "lyrics": "Sunlight hits the trees"
+        },
+        {
+          "chords": "G  Bm  D",
+          "lyrics": "Our true lovers wake and leave"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "In the morning glow"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "It is easy to believe"
+        }
+      ]
+    },
+    {
+      "name": "Pre-Chorus 1",
+      "lines": [
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "That you'll be always here"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "And I will never fear for love"
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "G  Bm  D",
+          "lyrics": "Up up and away"
+        },
+        {
+          "chords": "G  Bm  D",
+          "lyrics": "Oh it's me that's got it made"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "Maybe the world will fall"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "And they'll be shelter for us all"
+        }
+      ]
+    },
+    {
+      "name": "Pre-Chorus 2",
+      "lines": [
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "Then we can live again"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "Infinite never-ending love"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {
+          "chords": "G  Am7  Bm  C  D",
+          "lyrics": "We can live forever"
+        },
+        {
+          "chords": "G  Am7  D  C  C/B  Am",
+          "lyrics": "Hold on to the day that I met her"
+        },
+        {
+          "chords": "C  C/B  Am  G  Bm  D",
+          "lyrics": "Free from the binds that hold us down"
+        },
+        {
+          "chords": "G  Am7  Bm  C  D",
+          "lyrics": "You never been better to me"
+        },
+        {
+          "chords": "G  Am7  D  C  C/B  Am",
+          "lyrics": "I'll always continue to see"
+        }
+      ]
+    },
+    {
+      "name": "Solo",
+      "lines": [
+        {
+          "chords": "G  Bm  D",
+          "lyrics": null,
+          "notes": "Solo over verse chords"
+        }
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {
+          "chords": "D  E/D  F/D  D  E/D  F/D",
+          "lyrics": null,
+          "notes": "repeat section"
+        },
+        {
+          "chords": "D  C  G  D  C  G",
+          "lyrics": null,
+          "notes": "repeat section"
+        }
+      ]
+    },
+    {
+      "name": "Interlude",
+      "lines": [
+        {
+          "chords": "G  Bm  D",
+          "lyrics": null
+        }
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {
+          "chords": "G  Bm  D",
+          "lyrics": "Outside all the pain"
+        },
+        {
+          "chords": "G  Bm  D",
+          "lyrics": "There's a new life born in zen"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "I would walk through fire"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "To get that feeling once again"
+        }
+      ]
+    },
+    {
+      "name": "Pre-Chorus 3",
+      "lines": [
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "And there will be a light"
+        },
+        {
+          "chords": "Am7  C  Em  D",
+          "lyrics": "So we can see what right was done"
+        }
+      ]
+    },
+    {
+      "name": "Tag",
+      "lines": [
+        {
+          "chords": "G  Am7  Bm  C  D",
+          "lyrics": "All the love, all the love"
+        }
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        {
+          "chords": "C  Em  D",
+          "lyrics": null
+        }
+      ]
+    }
+  ]
+}

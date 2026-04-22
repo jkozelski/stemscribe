@@ -1,0 +1,211 @@
+{
+  "title": "Clandestine Sam",
+  "artist": "Kozelski",
+  "album": "Systematic Static",
+  "key": "Gm",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Gm",
+    "Cm",
+    "F",
+    "Eb",
+    "Eb/D",
+    "Bb",
+    "Bb/A",
+    "F#",
+    "D7",
+    "Cm/Gb"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": null,
+          "notes": "repeat section"
+        }
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "Clandestine Sam, he's shakin in the middle of the room"
+        },
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "Covert operations, covered up all the proof"
+        },
+        {
+          "chords": "Eb  Gm  Cm  F",
+          "lyrics": "Underhanded woman, insignificant love"
+        },
+        {
+          "chords": "Gm  Cm  Gm",
+          "lyrics": "Clandestine Sam, he's run out of luck"
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "He was always in to the cloak and dagger"
+        },
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "Illicit politicians, she loved money and swagger"
+        },
+        {
+          "chords": "Eb  Gm  Cm  F",
+          "lyrics": "Every Monday night she would loll him to sleep"
+        },
+        {
+          "chords": "Gm  Cm  Gm",
+          "lyrics": "Clandestine Sam, what does it all mean?"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {
+          "chords": "Cm  F  Bb  Eb  Eb/D",
+          "lyrics": "She's got your world under lock and key"
+        },
+        {
+          "chords": "Cm  F  Bb  Bb/A  Gm",
+          "lyrics": "Just like a movie, she's played off famously"
+        },
+        {
+          "chords": "Cm  F  F#",
+          "lyrics": "Sam's predilection for a dangerous game has got him bent out of shape"
+        }
+      ]
+    },
+    {
+      "name": "Solo",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": null
+        }
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {
+          "chords": "Eb  Eb/D  Cm  Cm/Gb  Bb  Bb/A  Gm",
+          "lyrics": "A weakness in my appetite",
+          "notes": "repeat section"
+        },
+        {
+          "chords": "Eb  Eb/D  Cm  Cm/Gb  Bb  Bb/A  Gm",
+          "lyrics": "Guilty of her delights but she won't just be mine"
+        },
+        {
+          "chords": "Eb  Eb/D  Cm  Cm/Gb  Bb  Bb/A  Gm",
+          "lyrics": "He went back to the mobile park, belligerently in the dark"
+        },
+        {
+          "chords": "Eb  Eb/D  Cm  Cm/Gb  Bb  Bb/A  Gm",
+          "lyrics": "And found Sally in the arms of another man"
+        }
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "That's when things turned red and he pulled out his gun"
+        },
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "The John he jumped for cover, Sally tried to run"
+        },
+        {
+          "chords": "Eb  Gm  Cm  F",
+          "lyrics": "With his double vision he unloaded his clip"
+        },
+        {
+          "chords": "Gm  Cm  Gm",
+          "lyrics": "And that's when Sam finally lost his grip"
+        }
+      ]
+    },
+    {
+      "name": "Verse 4",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "The law found out and surrounded the trailer"
+        },
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "The sheriff yelled son, you should do yourself a favor"
+        },
+        {
+          "chords": "Eb  Gm  Cm  F",
+          "lyrics": "Frazzled minded Sam knew he had lost"
+        },
+        {
+          "chords": "Gm  Cm  Gm",
+          "lyrics": "But jail would never be the cost"
+        }
+      ]
+    },
+    {
+      "name": "Verse 5",
+      "lines": [
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "He kicked the door open, pointed his finger and screamed"
+        },
+        {
+          "chords": "Gm  Cm  F  Gm",
+          "lyrics": "The night lit up like daylight, apocalyptic scene"
+        },
+        {
+          "chords": "Eb  Gm  Cm  F",
+          "lyrics": "He ate up all the ammo and fell down to his knees"
+        },
+        {
+          "chords": "Gm  Cm  Gm",
+          "lyrics": "Clandestine Sam was ready to leave"
+        }
+      ]
+    },
+    {
+      "name": "Chorus (Final)",
+      "lines": [
+        {
+          "chords": "Cm  F  Bb  Eb  Eb/D",
+          "lyrics": "She had his world spinning so fast"
+        },
+        {
+          "chords": "Cm  F  Bb  Bb/A  Gm",
+          "lyrics": "Like the oceans of Venus, it was never gonna last"
+        },
+        {
+          "chords": "Cm  F  F#",
+          "lyrics": "Clandestine Sam played a dangerous game, she got him bent out of shape"
+        }
+      ]
+    },
+    {
+      "name": "Coda",
+      "lines": [
+        {
+          "chords": "D7  Bb/A  Gm  Cm  F  F#  Gm",
+          "lyrics": "Things would never be the same, she loaded him down with shame"
+        }
+      ]
+    }
+  ]
+}

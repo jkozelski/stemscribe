@@ -1,0 +1,86 @@
+{
+  "title": "Simpler Understanding",
+  "artist": "Kozelski",
+  "key": "C#m",
+  "capo": 0,
+  "time_signature": "3/4",
+  "source": "StemScribe Library",
+  "chords_used": [
+    "C#m", "F#m", "A", "E", "G#", "G#7", "C#", "B"
+  ],
+  "sections": [
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "C#m  F#m", "lyrics": "Everyone's getting smarter, lead me to water"},
+        {"chords": "A  E", "lyrics": "Or carry me home"},
+        {"chords": "C#m  F#m", "lyrics": "Ask me whatever you wanna"},
+        {"chords": "A  E", "lyrics": "And I'm gonna tell you, you'll never be alone", "notes": "1st ending: repeat; 2nd ending: G# G#7"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "C#  E  A  G#", "lyrics": "When you're in my pocket, I feel lost", "notes": "x4"},
+        {"chords": "C#  E  A  G#", "lyrics": "Thought I just had you but now you're off"},
+        {"chords": "C#  E  A  G#", "lyrics": "I'll be with you always, you light my face"},
+        {"chords": "C#  E  A  G#", "lyrics": "You're the new god of the human race"}
+      ]
+    },
+    {
+      "name": "Pre-Verse 2",
+      "lines": [
+        {"chords": "C#m", "lyrics": null, "notes": "hit"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "C#m  F#m", "lyrics": "Turn on whenever I touch you"},
+        {"chords": "A  E", "lyrics": "You go to sleep in a dream"},
+        {"chords": "C#m  F#m", "lyrics": "The heavens float up above you"},
+        {"chords": "A  E", "lyrics": "And you're with me downstairs in my arms while you gleam"}
+      ]
+    },
+    {
+      "name": "Chorus 2",
+      "lines": [
+        {"chords": "C#  E  A  G#", "lyrics": "When you're in my pocket, I feel lost"},
+        {"chords": "C#  E  A  G#", "lyrics": "Thought I just had you but now you're off"},
+        {"chords": "C#  E  A  G#", "lyrics": "I'll be with you always, you light my face"},
+        {"chords": "C#  E  A  G#", "lyrics": "You're the new god of the human race"}
+      ]
+    },
+    {
+      "name": "Solo",
+      "lines": [
+        {"chords": "C#  E  A  G#", "lyrics": null, "notes": "solo over chorus"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "C#m  A  C#m  A", "lyrics": "You showed me the way, it gets easier every day"},
+        {"chords": "C#m  A  C#m  A  B", "lyrics": "But now it seems I will never think on my own"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "C#m  F#m", "lyrics": "It's a simpler understanding"},
+        {"chords": "A  E", "lyrics": "Not too much demanding of me but my time"},
+        {"chords": "C#m  F#m", "lyrics": "Now it seems there is no thunder"},
+        {"chords": "A  E", "lyrics": "Should I dare to wonder what they're doing outside"}
+      ]
+    },
+    {
+      "name": "Chorus 3",
+      "lines": [
+        {"chords": "C#  E  A  G#", "lyrics": "When you're in my pocket, I feel lost"},
+        {"chords": "C#  E  A  G#", "lyrics": "Thought I just had you but now you're off"},
+        {"chords": "C#  E  A  G#", "lyrics": "I'll be with you always, you light my face"},
+        {"chords": "C#  E  A  G#", "lyrics": "You're the new god of the human race"}
+      ]
+    }
+  ]
+}

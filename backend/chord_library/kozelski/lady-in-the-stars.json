@@ -1,0 +1,77 @@
+{
+  "title": "Lady In The Stars",
+  "artist": "Kozelski",
+  "key": "Gm",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Gm7", "Bbm7", "Eb9", "D9", "Dm7", "Cm7", "Eb", "F"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "Lady in the stars"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "Telling stories of eternal life and the flow of light"},
+        {"chords": "Eb9  D9", "lyrics": "An early message from the hidden birds that speak"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "Tiny hints and take their flight"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "But it's so far away, a needle in the hay"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "Buried deep inside the day"},
+        {"chords": "Eb9  D9", "lyrics": "A broken wishing well is where my money dwells"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "I think I need another way"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Dm7  Cm7  Dm7  Cm7", "lyrics": "The cards are down, no standing around"},
+        {"chords": "Dm7  Eb  Dm7  F", "lyrics": "Waiting for your time to set fire to the town"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "I'm back from yesterday"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "Little times we strained our eyes while looking in the sun"},
+        {"chords": "Eb9  D9", "lyrics": "You won't find what you want if you don't open up"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "And take it in once it's begun"}
+      ]
+    },
+    {
+      "name": "Verse 4",
+      "lines": [
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "I'm trying to give some back, I'm picking up my slack"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "It's buried deep inside facts"},
+        {"chords": "Eb9  D9", "lyrics": "The world spins endlessly, the birds are flying free"},
+        {"chords": "Gm7  Bbm7  Gm7", "lyrics": "The day is what it's supposed to be"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Dm7  Cm7  Dm7  Cm7", "lyrics": "The cards are down, no standing around"},
+        {"chords": "Dm7  Eb  Dm7  F", "lyrics": "Waiting for your time to set fire to the town"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Cm7  Gm7  Cm7  Gm7", "lyrics": "You can wake up early in the morning"},
+        {"chords": "Cm7  Gm7  F  Dm7", "lyrics": "Even give yourself a warning, get yourself together the day is dawning"},
+        {"chords": "Cm7  Gm7  Cm7  Gm7", "lyrics": "It's time for us to get together"},
+        {"chords": "Cm7  Gm7  F  Dm7", "lyrics": "And get the wheels rolling"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "title": "Cold Dice",
+  "artist": "Kozelski",
+  "key": "Bm",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Bm", "Em", "A", "Bm7", "Am", "Em7", "F#m7", "Gmaj7"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "Bm  Em  A  Bm7", "lyrics": null, "notes": "repeat section"}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "Bm  Em  A  Bm7", "lyrics": "Something's going wrong"},
+        {"chords": "Bm  Em  A  Bm7", "lyrics": "The dominoes are falling in my head"},
+        {"chords": "Bm  Em  Am  Em7", "lyrics": "And it won't take long till they get to the end"},
+        {"chords": "Em7  F#m7", "lyrics": "It's too hard to disarm"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "Bm  Em  A  Bm7", "lyrics": "And goes off in my mind"},
+        {"chords": "Bm  Em  A  Bm7", "lyrics": "People think I'm battling with something that isn't there"},
+        {"chords": "Bm  Em  Am  Em7", "lyrics": "The winds are wailing, I'm fueled by a storm"},
+        {"chords": "Em7  F#m7", "lyrics": "That's got me headed straight for the rocks"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Gmaj7  F#m7  Bm7  Em7", "lyrics": "I'm coming in hot, this is my spot"},
+        {"chords": "Gmaj7  F#m7  Bm7  Em7", "lyrics": "They bought me a ticket and sent me down south"},
+        {"chords": "F#m7", "lyrics": "To be a burden out in the street, I'm there but I'm not"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "Bm  Em  A  Bm7", "lyrics": "The sidewalk is my home, I've been sitting here all day"},
+        {"chords": "Bm  Em  A  Bm7", "lyrics": "The people rush by like the breeze from the bay"},
+        {"chords": "Bm  Em  Am  Em7", "lyrics": "It's cold in the summer and it freezes my soul"},
+        {"chords": "Em7  F#m7", "lyrics": "And I wander and wander but there's no wonder no more"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "Can you help me out, my good luck's on a drought", "notes": "x3"},
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "Can't somebody save me, I been feeling like hell"},
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "Cause I'm trapped in this shell on a corner in paradise", "notes": "half time"}
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "People try to ignore and I lay on the floor"},
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "Icy hands rolled the cold dice"},
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "As the die hit the ground, there's an absence of sound"},
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "And the wind starts to carry me, it whispers sweet things to me"},
+        {"chords": "A  Bm7  Gmaj7", "lyrics": "Finally I'm released"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "title": "Clever Devil",
+  "artist": "Kozelski",
+  "album": "Collector",
+  "key": "Am",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Am",
+    "G",
+    "C",
+    "F",
+    "Gm7",
+    "Dm",
+    "Bb",
+    "A",
+    "C7"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": null,
+          "notes": "repeat section"
+        }
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "I was on my way"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "Watched darkness turn to gray"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "Finally light made its way through"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "But you begged me to stay"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "Just give it one more day"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "I finally listened to you"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {
+          "chords": "Am  Gm7  F",
+          "lyrics": "Clever devil you got me now"
+        },
+        {
+          "chords": "Am  Gm7  F",
+          "lyrics": "Clever devil you got me now"
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "We were bad for ourselves"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "Every night the endless tales"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "Taking my mind from the mend"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "But they don't know or see"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "The way you speak to me"
+        },
+        {
+          "chords": "Am  G  C  F",
+          "lyrics": "And said you'd be there in the end"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {
+          "chords": "Am  Gm7  F",
+          "lyrics": "Clever devil you got me now"
+        },
+        {
+          "chords": "Am  Gm7  F",
+          "lyrics": "Clever devil you got me now"
+        }
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {
+          "chords": "Dm  G  C  Bb  A",
+          "lyrics": "You got me now, I can't see"
+        },
+        {
+          "chords": "Dm  G  C  C7",
+          "lyrics": "The life I was supposed to lead"
+        },
+        {
+          "chords": "Dm  G  C  Bb  A",
+          "lyrics": "Disappeared in the wink of your eye"
+        },
+        {
+          "chords": "Dm  G  C  C7",
+          "lyrics": "You've got your tricks and I lost my crucifix",
+          "notes": "1st ending: repeat; 2nd ending: back to Intro; 3rd ending: end on C"
+        },
+        {
+          "chords": "Dm  G  C  Bb  A",
+          "lyrics": "And you dragged me straight into hell"
+        }
+      ]
+    }
+  ]
+}

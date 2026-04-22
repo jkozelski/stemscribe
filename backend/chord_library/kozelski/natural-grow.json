@@ -1,0 +1,68 @@
+{
+  "title": "Natural Grow",
+  "artist": "Kozelski",
+  "key": "Am",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Am", "G", "Dm", "F", "C", "C/B", "Am/G", "G#", "Dm/C", "Bm7b5", "Bbmaj7", "Am7", "Bb", "Eb", "Eb/D"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "Am  G  Dm  F", "lyrics": null, "notes": "repeat section"}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "Am  G  Dm  F", "lyrics": "It's never-ending, the natural grow"},
+        {"chords": "Am  G  Dm  F", "lyrics": "It's up in the clouds and it's under the floor"},
+        {"chords": "Am  G  Dm  F", "lyrics": "And you believe what you want"},
+        {"chords": "Am  G  Dm  F", "lyrics": "And it seems that you've always known it before", "notes": "x4 total"}
+      ]
+    },
+    {
+      "name": "Verse 1 (cont.)",
+      "lines": [
+        {"chords": "C  C/B  Am  Am/G  F  G#", "lyrics": "It goes on forever but still they don't see"},
+        {"chords": "C", "lyrics": "The waves of the future hit a desolate beach"},
+        {"chords": "C  C/B  Am  Am/G  F  G#", "lyrics": "And the man with the money steps up to the mic"},
+        {"chords": "C", "lyrics": "With an elegant speech"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Dm  Dm/C  Bm7b5  Bbmaj7  Am7  F  G", "lyrics": "You're not on your own, this place is our home"},
+        {"chords": "Dm  Dm/C  Bm7b5  Bbmaj7  Am7  F  G", "lyrics": "To last till we don't"},
+        {"chords": "C  G  G  C  G  C  G  G  G  C", "lyrics": "Float through the breeze, it's all been released, follow the road"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Bb  G  C  C/B  Eb  Eb/D", "lyrics": null, "notes": "x2"},
+        {"chords": "Bb  Dm  Eb  F  G", "lyrics": null, "notes": "-> chorus"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "Am  G  Dm  F", "lyrics": "An open mind never closes the door"},
+        {"chords": "Am  G  Dm  F", "lyrics": "Now you're walking like you've been there before"},
+        {"chords": "Am  G  Dm  F", "lyrics": "And it seems that the dreams that you had"},
+        {"chords": "Am  G  Dm  F", "lyrics": "Lie silently locked in a drawer"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Dm  Dm/C  Bm7b5  Bbmaj7  Am7  F  G", "lyrics": "You're not on your own, this place is our home"},
+        {"chords": "Dm  Dm/C  Bm7b5  Bbmaj7  Am7  F  G", "lyrics": "To last till we don't"},
+        {"chords": "C  G  G  C  G  C  G  G  G  C", "lyrics": "Float through the breeze, it's all been released, follow the road"}
+      ]
+    }
+  ]
+}

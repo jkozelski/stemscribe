@@ -1,0 +1,183 @@
+{
+  "title": "The Time Comes",
+  "artist": "Kozelski",
+  "key": "F#m",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "F#m",
+    "A",
+    "Bm",
+    "E",
+    "B",
+    "D",
+    "C#m",
+    "G"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {
+          "chords": "F#m  A  Bm  E",
+          "lyrics": null
+        },
+        {
+          "chords": "F#m  A  Bm  E",
+          "lyrics": null
+        }
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "You say you wanted someone to take you away"
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "From out of the deep end where the devil's all play"
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "Is where I found you when you were going astray"
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "Pick up your head now, get up and get on your way"
+        }
+      ]
+    },
+    {
+      "name": "Pre-Chorus",
+      "lines": [
+        {
+          "chords": "D  C#m  Bm",
+          "lyrics": "The time comes to turn it around"
+        },
+        {
+          "chords": "D  C#m  G",
+          "lyrics": "All the lines must be put down"
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "Free your head now, you know the truth is inside"
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "And once you find you have what you desire"
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "It will free you and the memories will wake"
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": "To hover around you till the heavens will shake"
+        }
+      ]
+    },
+    {
+      "name": "Pre-Chorus",
+      "lines": [
+        {
+          "chords": "D  C#m  Bm",
+          "lyrics": "The time comes to turn it around"
+        },
+        {
+          "chords": "D  C#m  G",
+          "lyrics": "Can't deny when you've been found"
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "bars_per_chord": 2,
+      "lines": [
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "Come to life, feel easy when the wind blows"
+        },
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "Let go of that strife, throw your worries out the window"
+        },
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "It comes from the past to shine the light onto the future"
+        },
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "Forever to last, cause we don't ever need to leave here"
+        }
+      ]
+    },
+    {
+      "name": "Piano Solo",
+      "lines": [
+        {
+          "chords": "D  F#m  D  E  F",
+          "lyrics": null
+        },
+        {
+          "chords": "D  F#m  D  E  F",
+          "lyrics": null
+        }
+      ]
+    },
+    {
+      "name": "Guitar Solo",
+      "lines": [
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": null
+        },
+        {
+          "chords": "F#m  A  F#m  B",
+          "lyrics": null
+        }
+      ]
+    },
+    {
+      "name": "Chorus",
+      "bars_per_chord": 2,
+      "lines": [
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "Come to life, feel easy when the wind blows"
+        },
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "Let go of that strife, throw your worries out the window"
+        },
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "It comes from the past to shine the light onto the future"
+        },
+        {
+          "chords": "D  Bm  F#m  A",
+          "lyrics": "Forever to last, cause we don't ever need to leave here"
+        }
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        {
+          "chords": "F#m  A  Bm  E",
+          "lyrics": null
+        },
+        {
+          "chords": "F#m  A  Bm  E",
+          "lyrics": null
+        }
+      ]
+    }
+  ]
+}

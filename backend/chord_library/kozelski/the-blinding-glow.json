@@ -1,0 +1,71 @@
+{
+  "title": "The Blinding Glow",
+  "artist": "Kozelski",
+  "key": "Dm",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Dm7", "Bbmaj7", "Gm7", "Am7", "F", "Bbm7", "Eb", "Cm7", "Fm7", "Ebmaj7", "Abmaj7", "Abm7", "Gbmaj7"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": null, "notes": "x4"}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "Sandman told me something long ago", "notes": "x8"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "This dream is where the past stays buried below"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "It isn't what you seek, it's what you know"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "The inside can't see past the blinding glow"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "The smiles have turned around but you can't see"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "Once upon a time is now history"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "The things I see the things I wanna show"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "The inside can't see past the blinding glow"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "F  Bbm7  Eb", "lyrics": "Set it on down, take the weight up off your feet"},
+        {"chords": "F  Bbm7  Eb  Cm7", "lyrics": "Leave it behind where it can't be found"},
+        {"chords": "F  Bbm7  Eb", "lyrics": "Don't just shutter it defeat"},
+        {"chords": "F  Bbm7  Eb  Cm7", "lyrics": "It isn't the time, it isn't the place, it isn't the way"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "How I miss the things we were"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "Dodging cars and flying off the earth"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "We ended up in make believe"},
+        {"chords": "Dm7  Bbmaj7  Gm7  Am7", "lyrics": "With too many bridges to build and lives to reprieve"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "F  Bbm7  Eb", "lyrics": "Set it on down, take the weight up off your feet"},
+        {"chords": "F  Bbm7  Eb  Cm7", "lyrics": "Leave it behind where it can't be found"},
+        {"chords": "F  Bbm7  Eb", "lyrics": "Don't just shutter it defeat"},
+        {"chords": "F  Bbm7  Eb  Cm7", "lyrics": "It isn't the time, it isn't the place, it isn't the way"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Fm7  Ebmaj7  Bbm7  Fm7  Ebmaj7  Bbm7", "lyrics": null},
+        {"chords": "Fm7  Ebmaj7  Bbm7  Eb  Abmaj7  Abm7  Gbmaj7  Gm7", "lyrics": null},
+        {"chords": "Bbm7", "lyrics": null}
+      ]
+    }
+  ]
+}

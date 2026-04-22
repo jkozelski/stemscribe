@@ -1,0 +1,72 @@
+{
+  "title": "The City Gonna Teach You",
+  "artist": "Kozelski",
+  "key": "Em",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "Em", "Dmaj7sus4/C#", "Dsus4", "Gmaj7", "Gmaj6", "A7", "Gmaj7/B", "Csus2", "Dsus2", "Emadd9", "Bb6sus2"
+  ],
+  "sections": [
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "Waiting on the corner underneath the streetlight", "notes": "x3"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "Neon signs a buzzin in the shadows of the night"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "Come on now baby can you take my breath away"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "You give me what I want and we'll go our separate ways"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "She lays back and feels her life going by"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "I never came here to start living this lie"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "I ran out of bread and it's 40 degrees"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "I'll do anything I can to start making the green"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "Em  A7  Em  A7  Em  A7", "lyrics": "Oh the signs never told me my rights from wrongs"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "Now I belong to the streets and I'm wise to the heat"},
+        {"chords": "Em  A7  Em  A7  Em  A7", "lyrics": "Money's a game that I've cheated in all my life"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "You called it strife"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "The city is gonna teach you what the world never could"}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "You lost the balance and you started to sway"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "They never wanted you and you wanted it that way"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "You got on a vessel and you never looked back"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "Into the LA station with no plan of attack"}
+      ]
+    },
+    {
+      "name": "Verse 4",
+      "lines": [
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "Then you found out how many more were like you"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "They scheme and lie and forced you right into the blues"},
+        {"chords": "Gmaj7  Gmaj6", "lyrics": "A million sins in a city where the darkness hides in the light"},
+        {"chords": "Em  Dmaj7sus4/C#  Dsus4", "lyrics": "And the moonshine exposes creatures crawling through the night"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Gmaj7/B  Csus2  Dsus2  Emadd9", "lyrics": null, "notes": "x4"},
+        {"chords": "Emadd9", "lyrics": null, "notes": "extended -> to chorus"}
+      ]
+    },
+    {
+      "name": "Ending",
+      "lines": [
+        {"chords": "Em  Csus2  Em  Bb6sus2", "lyrics": null, "notes": "x4"},
+        {"chords": "Bb6sus2  Em", "lyrics": null}
+      ]
+    }
+  ]
+}

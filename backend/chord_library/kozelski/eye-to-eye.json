@@ -1,0 +1,84 @@
+{
+  "title": "Eye To Eye",
+  "artist": "Kozelski",
+  "key": "C",
+  "capo": 0,
+  "source": "StemScribe Library",
+  "chords_used": [
+    "C", "Bb", "Dm", "F", "C/Bb", "Db", "Bbm7", "Bm7", "B", "Abm7", "D"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {"chords": "C  Bb  Dm  F", "lyrics": null, "notes": "repeat section"}
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {"chords": "C  Bb  Dm  F", "lyrics": "There's no need for devastation"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "And let's give fate the upper hand"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "Let it spread across the nation"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "Run its fingers through the sand"}
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {"chords": "C  Bb  Dm  F", "lyrics": "While we've always been a wild one"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "I've turned into the thing I'm not"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "Take a deeper look at what we've done"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "You're starting to be just what you sought"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        {"chords": "C  C/Bb  F  Bb  Dm", "lyrics": "A love so deep it sees no end"},
+        {"chords": "C  C/Bb  F  Bb  Dm", "lyrics": "It breaks right through my dreams and thoughts"},
+        {"chords": "C  C/Bb  F  Bb  Dm  Db", "lyrics": "It must depend on what we've lost"},
+        {"chords": "C  C/Bb  F  Bb  Dm  Db", "lyrics": "But you will find it, right beside it, eye to eye"}
+      ]
+    },
+    {
+      "name": "Interlude",
+      "lines": [
+        {"chords": "C  Bb  Dm  F", "lyrics": null}
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {"chords": "C  Bb  Dm  F", "lyrics": "I'm not hiding from affection"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "It's just in a different place"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "And now that there's a loss of connection"},
+        {"chords": "C  Bb  Dm  F", "lyrics": "It's left it with a different taste"}
+      ]
+    },
+    {
+      "name": "Chorus 2",
+      "lines": [
+        {"chords": "C  C/Bb  F  Bb  Dm", "lyrics": "A hole so deep it sees no end"},
+        {"chords": "C  C/Bb  F  Bb  Dm", "lyrics": "It breaks right through my dreams and thoughts"},
+        {"chords": "C  C/Bb  F  Bb  Dm  Db", "lyrics": "It must depend on what you've lost"},
+        {"chords": "C  C/Bb  F  Bb  Dm  Db", "lyrics": "But you will find it, right beside it, eye to eye"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        {"chords": "Bbm7  Db  Bm7", "lyrics": "I found my way back to the section"},
+        {"chords": "Bbm7  Db  Bm7", "lyrics": "That had me holding on to you"},
+        {"chords": "Bbm7  Db  Bm7", "lyrics": "And you'll never lose my attention"},
+        {"chords": "Bbm7  Db  Bm7", "lyrics": "It's the least that I will do"}
+      ]
+    },
+    {
+      "name": "Outro / Coda",
+      "lines": [
+        {"chords": "B  Abm7  Bbm7  Db  D  C", "lyrics": null}
+      ]
+    }
+  ]
+}
