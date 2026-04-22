@@ -17,8 +17,6 @@ Drop any song in. The AI rips it apart — vocals, guitar, bass, drums, piano, e
 
 One upload. Every instrument. Full tabs.
 
-We also built a karaoke mode: mute the vocals, and the lyrics sync up in real time so you can sing along with the actual band. No more sketchy YouTube karaoke tracks.
-
 We're running a closed beta right now. DM us if you want an invite code — we're letting musicians in first.
 
 stemscriber.com | Tear The Sound Apart
@@ -39,11 +37,11 @@ Beta is open. DM us for an invite code.
 
 ---
 
-### FB Post 3 — The Feature Spotlight (Karaoke Mode)
+### FB Post 3 — The Feature Spotlight (Vocal Isolation)
 
-We didn't set out to build a karaoke machine. But once we had vocal separation working, we couldn't NOT do it.
+Once we had separation working clean, the vocal stem became one of the most requested outputs.
 
-StemScriber's karaoke mode: upload any song, mute the vocals with one click, and sing along with synced lyrics scrolling in real time. The band is still playing — just the singer stepped out.
+StemScriber pulls the vocals out of any song you own, so you can drop the vocal track into your DAW, practice your harmony part against the band, or hear exactly what the singer is doing on a track you're learning.
 
 Works on anything. Your favorite deep cut. That song you've been practicing for open mic night. The track your cover band is learning this week.
 
@@ -73,7 +71,7 @@ We need guinea pigs.
 
 StemScriber is in beta and we're looking for musicians who want to break it. Guitarists, bassists, drummers, pianists, singers — we want you to throw your weirdest, most complex songs at our AI and tell us where it falls apart.
 
-What you get: free beta access to AI stem separation, automatic Guitar Pro tab generation, karaoke mode with synced lyrics, chord detection, and a speed control practice mode.
+What you get: free beta access to AI stem separation, automatic Guitar Pro tab generation, chord detection, and a speed control practice mode.
 
 What we get: honest feedback from real players.
 
@@ -93,15 +91,13 @@ Tear The Sound Apart.
 
 StemScriber is live in beta. Upload any song — the AI separates every instrument into its own stem, then generates Guitar Pro tabs for the whole band. Guitar, bass, drums, piano, vocals. One upload, everything transcribed.
 
-Plus: karaoke mode. Mute the vocals, sing along with synced lyrics. The band keeps playing.
-
 We built this because we play in bands and got tired of bad tabs and no tabs. So we made a tool that generates them from the actual recording.
 
 Beta invites going out now. DM us for a code.
 
 Link in bio.
 
-#stemscriber #guitartabs #stemseparation #musictech #guitarpro #learnguitar #karaoke #bassguitar #drums #musicproduction #AI #indiedev #tearitapart
+#stemscriber #guitartabs #stemseparation #musictech #guitarpro #learnguitar #bassguitar #drums #musicproduction #AI #indiedev #tearitapart
 
 ---
 
@@ -127,19 +123,19 @@ Beta is open. DM for access.
 
 ---
 
-### IG Post 3 — Karaoke Mode Feature
+### IG Post 3 — Vocal Isolation Feature
 
 **Caption:**
 
-Your new karaoke machine doesn't need a TV or a mic stand.
+Need the vocal track by itself? Or the instrumental with vocals pulled out?
 
-StemScriber karaoke mode: upload any song, the AI strips the vocals out, and lyrics sync up on screen in real time. Sing along with the real band — not a MIDI backing track.
+StemScriber runs every upload through a full 6-stem split — vocals, guitar, bass, drums, piano, other. You get each one as its own clean WAV you can drop into a DAW or loop against for practice.
 
-Works on literally any song you have a file for. That deep cut nobody has a karaoke version of? Now they do.
+Works on literally any song you have a file for — no pre-made tracks required.
 
 DM us for beta access. Link in bio.
 
-#stemscriber #karaoke #karaokenight #vocalremoval #singalong #stemseparation #musictech #tearitapart
+#stemscriber #vocalremoval #stemseparation #musictech #tearitapart
 
 ---
 
@@ -171,7 +167,7 @@ We play in bands. We got tired of:
 - Paying for 3 different apps to separate stems and get notation
 - Spending hours transcribing by ear what AI should be able to figure out
 
-So we built StemScriber. One tool that takes any song and gives you stems, MIDI, Guitar Pro tabs, chord detection, and a karaoke mode with synced lyrics.
+So we built StemScriber. One tool that takes any song and gives you stems, MIDI, Guitar Pro tabs, and chord detection.
 
 It's in beta. It's free to try. We want feedback from real musicians, not just tech people.
 

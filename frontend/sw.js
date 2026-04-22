@@ -13,7 +13,6 @@ const SHELL_ASSETS = [
   '/css/settings.css',
   '/css/responsive.css',
   '/css/features.css',
-  '/css/karaoke.css',
   '/js/config.js',
   '/js/utils.js',
   '/js/mixer.js',
@@ -25,7 +24,6 @@ const SHELL_ASSETS = [
   '/js/panels.js',
   '/js/waveform.js',
   '/js/speed.js',
-  '/js/karaoke.js',
   '/js/theme.js',
   '/js/app.js',
 ];

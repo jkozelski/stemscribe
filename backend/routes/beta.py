@@ -202,7 +202,6 @@ def _beta_features():
         'songs_per_month': 50,
         'max_duration_sec': 600,
         'stems': 6,
-        'karaoke': True,
         'chord_detection': True,
         'gp_tabs': True,
         'stereo_split': True,

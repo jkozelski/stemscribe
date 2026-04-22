@@ -16,7 +16,6 @@
         songUploaded:       function()     { this.track('song_uploaded'); },
         songProcessed:      function()     { this.track('song_processed'); },
         practiceModeOpened:  function()     { this.track('practice_mode_opened'); },
-        karaokeModeOpened:   function()     { this.track('karaoke_mode_opened'); },
         stemMuted:           function(stem) { this.track('stem_muted',  { stem: stem }); },
         stemSoloed:          function(stem) { this.track('stem_soloed', { stem: stem }); }
     };

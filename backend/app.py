@@ -111,11 +111,6 @@ def create_app():
     def serve_app():
         return send_from_directory(FRONTEND_DIR, 'index.html')
 
-    @app.route('/karaoke')
-    @app.route('/karaoke.html')
-    def serve_karaoke():
-        return send_from_directory(FRONTEND_DIR, 'karaoke.html')
-
     @app.route('/practice.html')
     def serve_practice():
         resp = send_from_directory(FRONTEND_DIR, 'practice.html')

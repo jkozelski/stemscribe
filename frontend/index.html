@@ -37,7 +37,6 @@
     <link rel="stylesheet" href="css/settings.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/features.css">
-    <link rel="stylesheet" href="css/karaoke.css">
     <link rel="stylesheet" href="css/auth.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
@@ -717,10 +716,6 @@
                 <button class="practice-btn" id="practiceBtn" onclick="var jid = (window.StemScribe && (StemScribe.currentJobId || (StemScribe.currentJob && StemScribe.currentJob.job_id))); window.open('practice.html' + (jid ? '?job=' + jid : ''), '_blank');">
                     <img src="/images/icons/practice.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Open Practice Mode
                 </button>
-                <!-- Karaoke hidden until lyrics licensing is in place -->
-                <button class="practice-btn" id="karaokeBtn" onclick="window.location.href='/karaoke.html?job=' + (StemScribe.currentJobId || (StemScribe.currentJob && StemScribe.currentJob.job_id))" style="display:none; margin-left: 1rem; background: linear-gradient(135deg, #00ff88, #00ccff); color: #0d0d12;">
-                    <img src="icons/custom/32/vocals-vintage.png" width="18" height="18" style="vertical-align:middle; border-radius:3px;"> Karaoke Mode
-                </button>
                 <button class="practice-btn" id="downloadZipBtn" onclick="StemScribe.downloadStemsZip()" style="margin-left: 1rem; background: linear-gradient(135deg, #ff7b54, #ffcc47); color: #0d0d12;">
                     <span id="downloadZipIcon">&#x1F4E6;</span> <span id="downloadZipLabel">Download Stems (ZIP)</span>
                 </button>
@@ -728,9 +723,6 @@
                     <span>☁</span> <span>Export to Drive</span>
                 </button>
             </div>
-
-            <!-- Karaoke fullscreen overlay -->
-            <div class="karaoke-container" id="karaokeContainer"></div>
         </section>
     </div>
 
@@ -906,7 +898,6 @@
     <script src="js/panels.js"></script>
     <script src="js/waveform.js"></script>
     <script src="js/speed.js"></script>
-    <script src="js/karaoke.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/app.js"></script>
     <script>
