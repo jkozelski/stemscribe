@@ -22,7 +22,8 @@ class TestPlans:
     """Test plan definitions and price ID lookups."""
 
     def test_three_plans_defined(self):
-        assert set(PLANS.keys()) == {'free', 'premium', 'pro'}
+        # Four plans now: free, pro, premium, beta (beta added for launch promo)
+        assert set(PLANS.keys()) == {'free', 'premium', 'pro', 'beta'}
 
     def test_free_plan_is_free(self):
         assert PLANS['free']['monthly_price'] == 0
@@ -30,13 +31,14 @@ class TestPlans:
         assert PLANS['free']['max_duration_sec'] == 300
 
     def test_premium_plan_pricing(self):
-        assert PLANS['premium']['monthly_price'] == 4.99
-        assert PLANS['premium']['annual_price'] == 39.99
-        assert PLANS['premium']['songs_per_month'] == 50
+        assert PLANS['premium']['monthly_price'] == 20
+        assert PLANS['premium']['annual_price'] == 200
+        assert PLANS['premium']['songs_per_month'] == -1  # unlimited
 
     def test_pro_plan_unlimited(self):
-        assert PLANS['pro']['songs_per_month'] == -1  # unlimited
-        assert PLANS['pro']['max_duration_sec'] == 1800
+        # Pro is now metered at 25 songs/month; premium is the unlimited tier
+        assert PLANS['pro']['songs_per_month'] == 25
+        assert PLANS['pro']['max_duration_sec'] == 900
 
     def test_get_price_id_valid(self):
         assert get_price_id('premium', 'monthly') == 'price_test_pm'

@@ -202,22 +202,26 @@ class TestJobsEndpoint:
 
 
 class TestCleanupEndpoint:
-    """Test /api/cleanup input validation."""
+    """Test /api/cleanup input validation.
+
+    Endpoint now requires JWT auth (@auth_required). Without a valid token,
+    requests return 401. These tests verify the auth gate is enforced.
+    """
 
     def test_cleanup_bounds_max_age(self, client):
         with patch('dependencies.cleanup_old_stems', return_value={'deleted': 0, 'freed_mb': 0}), \
              patch('dependencies.DRIVE_AVAILABLE', True):
             resp = client.post('/api/cleanup', json={'max_age_days': -5})
-            assert resp.status_code == 200
+            assert resp.status_code == 401
 
             resp = client.post('/api/cleanup', json={'max_age_days': 99999})
-            assert resp.status_code == 200
+            assert resp.status_code == 401
 
     def test_cleanup_invalid_type(self, client):
         with patch('dependencies.cleanup_old_stems', return_value={'deleted': 0, 'freed_mb': 0}), \
              patch('dependencies.DRIVE_AVAILABLE', True):
             resp = client.post('/api/cleanup', json={'max_age_days': 'not_a_number'})
-            assert resp.status_code == 200  # Falls back to default 7
+            assert resp.status_code == 401  # Requires auth; unauthenticated rejected
 
 
 class TestValidationHelpers:
