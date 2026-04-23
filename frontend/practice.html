@@ -6749,9 +6749,43 @@
 
             currentManualChart = data;
 
-            // Route to the lead-sheet renderer when preferred
+            // Route to the lead-sheet renderer when preferred.
+            // Prepend chord diagrams — same extraction + rendering as the
+            // gig-chart path below so diagrams don't disappear when the
+            // musician switches to leadsheet view.
             if (chartViewMode === 'leadsheet') {
-                chordChart.innerHTML = renderLeadSheet(data);
+                var _lsChordCounts = {};
+                (data.sections || []).forEach(function(s) {
+                    (s.lines || []).forEach(function(l) {
+                        if (l.chords) {
+                            var m = l.chords.match(/[A-G][#b]?(?:m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?/g);
+                            if (m) m.forEach(function(c) {
+                                c = c.trim();
+                                if (c && c !== 'N.C.' && c !== 'N.C') {
+                                    _lsChordCounts[c] = (_lsChordCounts[c] || 0) + 1;
+                                }
+                            });
+                        }
+                    });
+                });
+                var _lsTop = Object.keys(_lsChordCounts)
+                    .sort(function(a, b) { return _lsChordCounts[b] - _lsChordCounts[a]; })
+                    .slice(0, 10);
+                var _lsDiagramHtml = '';
+                _lsTop.forEach(function(name) {
+                    var shape = getChordShape(name);
+                    if (shape) {
+                        _lsDiagramHtml += renderChordDiagram(name, shape.frets, shape.barres);
+                    }
+                });
+                var _lsBody = renderLeadSheet(data);
+                if (_lsDiagramHtml) {
+                    chordChart.innerHTML =
+                        '<div class="chord-diagrams-row" style="display:flex; flex-wrap:wrap; gap:0; margin-bottom:0; padding:0.75rem; background:#eee; border-radius:8px; border:1px solid #ddd;">'
+                        + _lsDiagramHtml + '</div>' + _lsBody;
+                } else {
+                    chordChart.innerHTML = _lsBody;
+                }
                 return;
             }
 
