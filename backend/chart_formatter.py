@@ -249,6 +249,11 @@ def format_chart(
         # "Verse" entries back-to-back; this pass collapses them into
         # "Verse 1", "Verse 2", etc.
         _number_repeated_sections(raw_sections)
+        # Step 6f: Merge adjacent sections that now share the same name.
+        # Post-rename, a trailing "[Outro] [Outro]" pair (vocal outro followed
+        # by a 1-bar instrumental tail) should render as a single Outro whose
+        # final chunk is just the tail chord.
+        raw_sections = _merge_adjacent_sections_with_same_name(raw_sections)
 
     # Step 7: Collect unique chords used
     chords_used = []
@@ -743,6 +748,32 @@ def _rename_solo_sections_with_lyrics(sections: List[_Section]) -> None:
             sec.name = "Outro"
         else:
             sec.name = _nearest_vocal_label(i)
+
+
+def _merge_adjacent_sections_with_same_name(
+    sections: List[_Section],
+) -> List[_Section]:
+    """Merge consecutive sections that share the same display name.
+
+    After solo-rename + re-numbering, it's common to see a trailing vocal
+    section and a 1-bar instrumental tail both labeled "Outro". The chart
+    reads cleaner when they render as a single Outro section whose last
+    chunk is the instrumental tail, so we concatenate line lists whenever two
+    adjacent sections carry identical names. Returns a new list; the
+    original sections are not mutated.
+    """
+    if not sections:
+        return sections
+    merged: List[_Section] = [sections[0]]
+    for sec in sections[1:]:
+        prev = merged[-1]
+        if prev.name == sec.name:
+            prev.lines = list(prev.lines) + list(sec.lines)
+            prev.end_time = sec.end_time
+            prev.has_lyrics = prev.has_lyrics or sec.has_lyrics
+        else:
+            merged.append(sec)
+    return merged
 
 
 # ---------------------------------------------------------------------------
