@@ -6017,7 +6017,12 @@
             var dx = sw / 5, dy = sh / 4;
             var minFret = 100, maxFret = 0;
             frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
-            var offset = (minFret > 3 && maxFret > 4) ? minFret - 1 : 0;
+            // Use a fret-position indicator ("3fr" label + shifted grid) for
+            // barre chords that would otherwise render as a full 5-fret grid
+            // with a barre across. Any chord whose lowest fretted note is at
+            // fret 2 or higher gets the shift. Open chords (minFret=1 or 0)
+            // stay in standard open-position view.
+            var offset = (minFret >= 2) ? minFret - 1 : 0;
 
             var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">';
             if (offset === 0) {
@@ -6062,7 +6067,12 @@
             var dx = sw / 5, dy = sh / 4;
             var minFret = 100, maxFret = 0;
             frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
-            var offset = (minFret > 3 && maxFret > 4) ? minFret - 1 : 0;
+            // Use a fret-position indicator ("3fr" label + shifted grid) for
+            // barre chords that would otherwise render as a full 5-fret grid
+            // with a barre across. Any chord whose lowest fretted note is at
+            // fret 2 or higher gets the shift. Open chords (minFret=1 or 0)
+            // stay in standard open-position view.
+            var offset = (minFret >= 2) ? minFret - 1 : 0;
 
             var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">';
             // Nut or fret position indicator
