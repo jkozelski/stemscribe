@@ -237,6 +237,18 @@ def format_chart(
     # final chunk of a section may be shorter than 4 bars (partial chunks OK
     # at boundaries — we emit only the bars present, no rest-padding).
     if bar_grid:
+        # Step 6c.5: Snap non-first section starts FORWARD to the nearest
+        # phrase downbeat so sections line up to the 4-bar vamp rather than
+        # to the vocal pickup bar. Without this, a verse that enters on a
+        # pickup bar (bar 3 = Dm of a Cm-Gm-Dm-Am vamp) would read as if the
+        # verse progression starts on Dm, which is musically wrong. Bars
+        # absorbed into the previous section preserve their pickup lyrics
+        # under the previous section's final chunk.
+        try:
+            _snap_sections_to_phrase_boundaries(raw_sections, bar_grid)
+        except Exception as e:
+            logger.warning(f"Phrase-boundary snap failed, keeping prior boundaries: {e}")
+
         try:
             _rebuild_sections_as_4bar_chunks(raw_sections, bar_grid, words)
         except Exception as e:
@@ -591,6 +603,73 @@ def _build_slash_chord_line(chord_names: List[str]) -> str:
     if not chord_names:
         return ""
     return _SLOT_SEPARATOR.join(_format_slash_bar(c) for c in chord_names)
+
+
+def _snap_sections_to_phrase_boundaries(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+    phrase_bars: int = _CHORDS_PER_LINE,
+) -> None:
+    """Snap non-first section starts forward to the nearest phrase downbeat.
+
+    Pop songs with a 4-bar vamp (Cm-Gm-Dm-Am repeating every 4 bars) can have
+    their vocal sections enter on a pickup bar mid-phrase. The stem-RMS
+    section labeler uses vocal onset as the section boundary, which produces
+    "Verse 1 starts on Dm" when musically the verse progression is still
+    Cm-Gm-Dm-Am. This pass re-aligns each non-first section's start time
+    to the bar_grid phrase grid so the chunker emits full 4-bar phrases
+    starting on the vamp's downbeat chord.
+
+    Algorithm:
+      1. Treat bar_grid[0] as phrase beat 1. Phrase downbeats are at bar
+         indices 0, phrase_bars, 2*phrase_bars, ...
+      2. For each section after the first, find the bar index whose midpoint
+         is closest to the section's start_time.
+      3. If that index is NOT on a phrase downbeat (index % phrase_bars != 0),
+         snap forward to the next phrase downbeat.
+      4. Update the section's start_time to that bar's start_time; push the
+         preceding section's end_time to match. Bars absorbed into the
+         preceding section keep their chords AND any pickup lyrics that fell
+         in those bars (chunker reads those via word timestamps).
+
+    Runs in-place. No-op when bar_grid is empty or there are fewer than 2
+    sections. Safe: if a snapped index would exceed len(bar_grid), leave the
+    section boundary alone rather than push it off the end.
+    """
+    if not bar_grid or len(sections) < 2 or phrase_bars <= 1:
+        return
+
+    def _bar_index_for_time(t: float) -> int:
+        """Index in bar_grid of the bar whose midpoint is closest to t."""
+        best_i = 0
+        best_d = float("inf")
+        for i, b in enumerate(bar_grid):
+            mid = 0.5 * (b["start_time"] + b["end_time"])
+            d = abs(mid - t)
+            if d < best_d:
+                best_d = d
+                best_i = i
+        return best_i
+
+    for i in range(1, len(sections)):
+        sec = sections[i]
+        first_idx = _bar_index_for_time(sec.start_time)
+        offset = first_idx % phrase_bars
+        if offset == 0:
+            continue  # already on a phrase downbeat
+        snap_forward_by = phrase_bars - offset
+        new_idx = first_idx + snap_forward_by
+        if new_idx >= len(bar_grid):
+            # Would push off the end; leave this boundary alone. The
+            # remaining short tail stays with the preceding section.
+            continue
+        new_start = bar_grid[new_idx]["start_time"]
+        if new_start >= sec.end_time:
+            # Whole section would vanish — skip the snap.
+            continue
+        # Extend previous section to absorb the pickup bars.
+        sections[i - 1].end_time = new_start
+        sec.start_time = new_start
 
 
 def _rebuild_sections_as_4bar_chunks(
