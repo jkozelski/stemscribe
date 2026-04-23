@@ -5920,6 +5920,9 @@
             }
 
             return {
+                parseChord: parseChord,
+                simplifyQuality: simplifyQuality,
+                NOTE_TO_SEMI: NOTE_TO_SEMI,
                 generate: function(chordName) {
                     var parsed = parseChord(chordName);
                     if (!parsed) return null;
