@@ -249,6 +249,27 @@ def format_chart(
         except Exception as e:
             logger.warning(f"Phrase-boundary snap failed, keeping prior boundaries: {e}")
 
+        # Step 6c.6: Split sections dominated by a repeated lyric hook into
+        # "Pre-Verse" (hook portion) + the unique-content portion. The
+        # stem-RMS labeler groups a song's opening 30 bars of "I need your
+        # love" hook with the subsequent story verse into a single Verse
+        # section, which makes the chart misrepresent the actual song
+        # structure. Detect phrases that repeat enough to dominate a section
+        # and split them out.
+        try:
+            raw_sections = _split_sections_by_lyric_hook(
+                raw_sections, bar_grid, words,
+            )
+        except Exception as e:
+            logger.warning(f"Hook-based section split failed, keeping prior sections: {e}")
+
+        # Step 6c.7: Re-snap any newly-created section boundaries to phrase
+        # downbeats so the split point aligns to the vamp.
+        try:
+            _snap_sections_to_phrase_boundaries(raw_sections, bar_grid)
+        except Exception as e:
+            logger.warning(f"Second phrase-boundary snap failed: {e}")
+
         try:
             _rebuild_sections_as_4bar_chunks(raw_sections, bar_grid, words)
         except Exception as e:
@@ -670,6 +691,141 @@ def _snap_sections_to_phrase_boundaries(
         # Extend previous section to absorb the pickup bars.
         sections[i - 1].end_time = new_start
         sec.start_time = new_start
+
+
+def _split_sections_by_lyric_hook(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+    words: List[Dict],
+    hook_min_len: int = 3,
+    hook_max_len: int = 5,
+    hook_dominance: float = 0.45,
+    min_hook_repeats: int = 3,
+) -> List[_Section]:
+    """Split sections whose opening is dominated by a repeated lyric hook.
+
+    Typical pattern (Jamiroquai "Alright"): the song opens with "I need your
+    love" sung ~30 times over a Cm-Gm-Dm-Am vamp, then transitions into
+    unique verse content ("We don't touch for the rest..."). The section
+    labeler sees one continuous Cm-Gm-Dm-Am block with vocals, labels it
+    all "Verse 1", and splits at an arbitrary midpoint.
+
+    This pass detects when a section's first portion is dominated by a
+    single repeated short phrase (the "hook") and splits that portion off
+    into a separate "Pre-Verse" section, leaving the unique-content remainder
+    under the original label.
+
+    Detection:
+      1. For each section, collect the Whisper words whose start falls in
+         the section's time window.
+      2. Build n-grams of lengths [hook_min_len .. hook_max_len]. Find the
+         most-frequent n-gram. Let f = its count and L = its length.
+      3. Coverage = (f * L) / total_words. If coverage >= hook_dominance
+         AND f >= min_hook_repeats, the section has a hook.
+      4. Find the LAST occurrence of the hook in the word stream — that's
+         where the hook stops dominating. Split the section at the word
+         immediately after that last occurrence.
+
+    Returns a NEW list of sections. Sections without a dominant hook pass
+    through unchanged.
+    """
+    if not sections or not words:
+        return sections
+
+    words_sorted = sorted(words, key=lambda w: w.get("start", 0.0))
+
+    def _normalize(w: str) -> str:
+        return (w or "").strip().strip(",.!?;:\"'()").lower()
+
+    out: List[_Section] = []
+    for sec in sections:
+        sec_words = [
+            w for w in words_sorted
+            if sec.start_time - 0.1 <= w.get("start", 0.0) < sec.end_time + 0.1
+        ]
+        if len(sec_words) < hook_min_len * (min_hook_repeats + 1):
+            out.append(sec)
+            continue
+
+        norm = [_normalize(w.get("word", "")) for w in sec_words]
+
+        # Find most-frequent n-gram across the range of lengths. Pick the one
+        # with the highest coverage (freq * length).
+        best = None  # (coverage, freq, length, phrase_tuple)
+        for L in range(hook_min_len, hook_max_len + 1):
+            if len(norm) < L:
+                continue
+            counts: Dict[tuple, int] = {}
+            for i in range(len(norm) - L + 1):
+                if all(norm[i + k] for k in range(L)):
+                    ngram = tuple(norm[i + k] for k in range(L))
+                    counts[ngram] = counts.get(ngram, 0) + 1
+            if not counts:
+                continue
+            phrase, freq = max(counts.items(), key=lambda kv: kv[1])
+            coverage = (freq * L) / max(1, len(norm))
+            if best is None or coverage > best[0]:
+                best = (coverage, freq, L, phrase)
+
+        if best is None:
+            out.append(sec)
+            continue
+
+        coverage, freq, L, phrase = best
+        if coverage < hook_dominance or freq < min_hook_repeats:
+            out.append(sec)
+            continue
+
+        # Find the LAST occurrence of the phrase in the word stream.
+        last_occ_end = -1  # index AFTER the last word of the last occurrence
+        for i in range(len(norm) - L, -1, -1):
+            if all(norm[i + k] == phrase[k] for k in range(L)):
+                last_occ_end = i + L
+                break
+        if last_occ_end <= 0 or last_occ_end >= len(sec_words):
+            # Hook runs to the end of the section — no unique content to split off.
+            out.append(sec)
+            continue
+
+        # Split time: start of the first word AFTER the last hook occurrence.
+        split_word = sec_words[last_occ_end]
+        split_time = float(split_word.get("start", sec.end_time))
+
+        # Snap split_time to the nearest bar_grid bar boundary so the split
+        # falls cleanly on a chord change.
+        if bar_grid:
+            best_bar_t = split_time
+            best_d = float("inf")
+            for b in bar_grid:
+                d = abs(b["start_time"] - split_time)
+                if d < best_d:
+                    best_d = d
+                    best_bar_t = b["start_time"]
+            split_time = best_bar_t
+
+        if split_time <= sec.start_time + 0.5 or split_time >= sec.end_time - 0.5:
+            out.append(sec)
+            continue
+
+        # Create Pre-Verse (hook portion) + continuation (original label).
+        pre = _Section(
+            name="Pre-Verse",
+            start_time=sec.start_time,
+            end_time=split_time,
+            has_lyrics=True,
+            lines=[],
+        )
+        post = _Section(
+            name=sec.name,
+            start_time=split_time,
+            end_time=sec.end_time,
+            has_lyrics=True,
+            lines=[],
+        )
+        out.append(pre)
+        out.append(post)
+
+    return out
 
 
 def _rebuild_sections_as_4bar_chunks(
