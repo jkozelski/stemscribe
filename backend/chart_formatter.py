@@ -225,21 +225,22 @@ def format_chart(
     # reads as a "solo" to the musician.
     _rename_solo_sections_with_lyrics(raw_sections)
 
-    # Step 6d: Collapse each section into the fixed-width 8-bar chord/lyric
+    # Step 6d: Collapse each section into the 4-bar slash-notation chord/lyric
     # chunk layout. Each section becomes one or more lines of:
-    #   - chords: up to 8 chord names, each in its own `_CHORD_SLOT_WIDTH`-wide
-    #     column, producing the even-column pattern
-    #     "Cm        Gm        Dm        Am        Cm        Gm        Dm        Am".
+    #   - chords: up to 4 chord slots where each slot is "<chord> ////"
+    #     (chord name + four beat slashes for a 4/4 bar), producing the
+    #     Nashville / lead-sheet idiom
+    #     "Cm  ////  Gm  ////  Dm  ////  Am  ////".
     #   - lyrics: concatenation of all Whisper words whose start timestamp
-    #     falls inside the chunk's 8-bar time window.
+    #     falls inside the chunk's 4-bar time window.
     # Section boundaries are honored: a chunk never spans two sections, so the
-    # final chunk of a section may be shorter than 8 bars (partial chunks OK
+    # final chunk of a section may be shorter than 4 bars (partial chunks OK
     # at boundaries — we emit only the bars present, no rest-padding).
     if bar_grid:
         try:
-            _rebuild_sections_as_8bar_chunks(raw_sections, bar_grid, words)
+            _rebuild_sections_as_4bar_chunks(raw_sections, bar_grid, words)
         except Exception as e:
-            logger.warning(f"8-bar chunk rebuild failed, keeping prior layout: {e}")
+            logger.warning(f"4-bar chunk rebuild failed, keeping prior layout: {e}")
         # Rebuild may have changed has_lyrics (e.g. Whisper phantom words land
         # inside a previously-instrumental window); re-run the relabel so a
         # section that just gained real lyrics drops its Solo/Drum-Break name.
@@ -526,79 +527,101 @@ def _rebuild_section_chords_from_bar_grid(
 
 
 # ---------------------------------------------------------------------------
-# 8-bar fixed-width chunk layout
+# 4-bar slash-notation chunk layout
 #
-# Collapses each section's lines into one or more fixed-width "chord page"
-# chunks: 8 bars across the top with chord labels evenly spaced, and all the
-# Whisper words whose start_time falls in that 8-bar time window flowing as
-# lyrics underneath. Matches what a musician reads off a chord sheet — one
-# glance sees the 4-chord vamp twice (8 bars) with the lyrics that land under
-# them.
+# Collapses each section's lines into one or more 4-bar chord-sheet lines.
+# Each bar renders as the chord name followed by four slashes (one slash per
+# beat of a 4/4 measure). All Whisper words whose start_time falls in that
+# 4-bar time window flow underneath as the lyric line. This is the standard
+# Nashville / lead-sheet idiom that reading musicians already know.
 #
-# Example for Alright's verse (Cm Gm Dm Am repeating):
+# Example for Alright's verse (Cm Gm Dm Am):
 #
-#     Cm        Gm        Dm        Am        Cm        Gm        Dm        Am
-#     I've been seeing angels turn into devils in my mind I need your love…
+#     Cm  ////  Gm  ////  Dm  ////  Am  ////
+#     I've been seeing angels turn into devils in my mind
 #
 # Section boundaries are honored: a chunk never spans two sections, so the
-# final chunk of a section may be shorter than 8 bars.
+# final chunk of a section may be shorter than 4 bars (partial chunks at
+# boundaries emit only the bars that are present — no rest-padding).
 # ---------------------------------------------------------------------------
 
-# Width reserved for each chord slot in the chord line. Eight slots at 10
-# chars each yields an 80-character line — wide enough for typical lyric
-# phrases without wrapping, and matches the UG-style chord sheet density.
-_CHORDS_PER_LINE = 8
-_CHORD_SLOT_WIDTH = 10
+# Bars per rendered chord line.
+_CHORDS_PER_LINE = 4
+
+# Chord-name field width inside a slot. Fits "Cm", "F#m", "Am" cleanly;
+# longer names like "Cm7b5" overflow but still render legibly (we always
+# keep at least one space before the slashes).
+_CHORD_NAME_WIDTH = 4
+
+# Separator between bar-slots ("////" of one bar + "  " + next chord name).
+_SLOT_SEPARATOR = "  "
 
 
-def _chunk_chords_line(chord_names: List[str]) -> str:
-    """Render a list of chord names as a fixed-width, space-padded line.
+def _format_slash_bar(chord: str) -> str:
+    """Render one bar as '<chord-name-padded> ////' (chord + 4 beat slashes).
 
-    Each chord sits in a `_CHORD_SLOT_WIDTH`-wide slot so the 8 chord labels
-    line up in even columns regardless of their individual name widths
-    ("Cm" vs "F#m7"). If a chord name is longer than the slot it overflows
-    into the following slot — acceptable because we still preserve left-
-    alignment of each chord on its bar downbeat.
+    Chord name is left-justified to `_CHORD_NAME_WIDTH` so typical 2-3 char
+    chord names line up in even columns. Longer chord names overflow into
+    their padding but always keep at least one space before the slashes so
+    the bar stays unambiguous.
+
+    Example:
+        "Cm"    -> "Cm  ////"
+        "F#m"   -> "F#m ////"
+        "Cm7b5" -> "Cm7b5 ////"   (overflow, keeps one space)
+    """
+    name = (chord or "").strip()
+    if len(name) < _CHORD_NAME_WIDTH:
+        name = name.ljust(_CHORD_NAME_WIDTH)
+    else:
+        # Overflow: keep one space before the slashes
+        name = name + " "
+    return f"{name}////"
+
+
+def _build_slash_chord_line(chord_names: List[str]) -> str:
+    """Render up to `_CHORDS_PER_LINE` chord names as a 4-bar slash line.
+
+    Example:
+        ["Cm", "Gm", "Dm", "Am"] -> "Cm  ////  Gm  ////  Dm  ////  Am  ////"
+
+    Empty input -> empty string. Partial chunks (1-3 chords at a section
+    boundary) render with only the bars that are present; no padding to 4.
     """
     if not chord_names:
         return ""
-    out: List[str] = []
-    for name in chord_names:
-        slot = name
-        if len(slot) < _CHORD_SLOT_WIDTH:
-            slot = slot + (" " * (_CHORD_SLOT_WIDTH - len(slot)))
-        else:
-            slot = slot + " "  # at least one space before the next chord
-        out.append(slot)
-    return "".join(out).rstrip()
+    return _SLOT_SEPARATOR.join(_format_slash_bar(c) for c in chord_names)
 
 
-def _rebuild_sections_as_8bar_chunks(
+def _rebuild_sections_as_4bar_chunks(
     sections: List[_Section],
     bar_grid: List[Dict],
     words: List[Dict],
 ) -> None:
-    """Rewrite `sections[].lines` in-place as 8-bar chord/lyric chunks.
+    """Rewrite `sections[].lines` in-place as 4-bar slash-notation chunks.
 
     For each section, finds the bars from `bar_grid` whose midpoint falls
-    inside the section's time window, chunks them in groups of up to 8, and
+    inside the section's time window, chunks them in groups of up to 4, and
     for each chunk emits ONE `{chords, lyrics, segments}` line where:
-      - chords: up to 8 chord names, space-padded to fixed columns via
-        `_chunk_chords_line` — each chord sits in its own `_CHORD_SLOT_WIDTH`-
-        wide slot (10 chars), producing the even column layout
-        "Cm        Gm        Dm        Am        Cm        Gm        Dm        Am".
-        ONE chord per bar — no consecutive-duplicate collapsing, because the
-        musician needs to see each bar's label on its own slot.
+      - chords: "<Chord1>  ////  <Chord2>  ////  <Chord3>  ////  <Chord4>  ////"
+        (partial chunks at section boundaries emit fewer slots). ONE chord
+        per bar — no consecutive-duplicate collapsing, so the musician sees
+        each bar's label even when a chord is held for multiple bars.
       - lyrics: concatenation of all `words` whose `start` falls inside the
-        chunk's time window (chunk_start .. chunk_end), joined by single
-        spaces. `None` when the chunk is fully instrumental.
+        chunk's time window, joined by single spaces. `None` when the chunk
+        is fully instrumental.
       - segments: per-bar word groups for the lead-sheet renderer
         (practice.html's preferred path), one segment per bar in the chunk.
 
     Section boundaries are honored: a chunk never spans two sections, so the
-    final chunk of a section may be shorter than 8 bars (e.g., a 3-bar Intro
+    final chunk of a section may be shorter than 4 bars (e.g. a 3-bar Intro
     emits one 3-bar chunk). No-op when `bar_grid` is empty. Sections with no
     bars overlapping their time window are left unchanged (rare).
+
+    The prior UG-style per-syllable chord-over-word alignment (via
+    `_place_chords_on_words` + `_build_chord_line`) is bypassed here: the
+    slash-notation idiom communicates bar and beat position without needing
+    character-column alignment with the lyric text below.
     """
     if not bar_grid:
         return
@@ -628,9 +651,9 @@ def _rebuild_sections_as_8bar_chunks(
             chunk_start = chunk[0]["start_time"]
             chunk_end = chunk[-1]["end_time"]
 
-            # One chord slot per bar — even-columned.
+            # Slash notation: one chord per bar, four slashes per bar.
             chord_names = [b["chord"] for b in chunk]
-            chords_line = _chunk_chords_line(chord_names)
+            chords_line = _build_slash_chord_line(chord_names)
 
             # Words whose onset lies inside the chunk's time window. A small
             # leading tolerance (0.1s) catches words that begin on the bar
@@ -777,7 +800,7 @@ def _merge_adjacent_sections_with_same_name(
 
 
 # ---------------------------------------------------------------------------
-# Post-rebuild consolidation (unused — 8-bar-chunk rebuild handles
+# Post-rebuild consolidation (unused — 4-bar-chunk rebuild handles
 # fragmentation and held-chord rendering directly). Kept here as reference
 # if a future layout needs to pre-process sections before chunking.
 # ---------------------------------------------------------------------------
@@ -861,17 +884,19 @@ def _consolidate_short_lyric_lines(
 
 
 def _compact_held_chord_lines(sections: List[_Section]) -> None:
-    """Collapse "Gm  Gm  Gm  Gm  Gm  Gm  Gm  Gm" into "Gm (x8)".
+    """Collapse "Gm  Gm  Gm  Gm" style repetition into "Gm (x4)".
 
-    The 8-bar chunk rebuild emits one chord slot per bar. When a section
-    holds a single chord across many bars (typical tail / vamp), that
-    renders as a wall of identical chord labels — Jeff reported this as
-    "bar-after-bar of Gm" at the end of Alright.
+    Legacy helper from earlier layouts that emitted bare chord names per
+    bar. Under the current 4-bar slash-notation layout each bar renders as
+    "<chord> ////" (tokens are [chord, "////", chord, "////", ...]), so this
+    pass is effectively a no-op because `////` always interrupts the run of
+    identical chord tokens. Retained in case a future layout reverts to a
+    bare-chord chord line that would benefit from held-chord compaction.
 
     For each chord line, collapse runs of 3+ identical consecutive chord
     tokens into "{name} (x{count})". Shorter runs (1-2 repeats) are left
-    alone so a straight Cm-Gm-Dm-Am-Cm-Gm-Dm-Am 8-bar verse vamp still
-    reads as the full progression.
+    alone so a straight Cm-Gm-Dm-Am verse vamp still reads as the full
+    progression.
     """
     for sec in sections:
         for line in sec.lines or []:
