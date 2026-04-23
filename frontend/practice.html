@@ -6062,11 +6062,17 @@
         }
 
         function renderChordDiagram(name, frets, barres) {
-            var w = 60, h = 80, top = 16, pad = 8;
-            var sx = pad, sw = w - pad * 2, sh = h - top - 4;
-            var dx = sw / 5, dy = sh / 4;
+            var h = 80, top = 16, pad = 8;
             var minFret = 100, maxFret = 0;
             frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
+            // When we'll render a "3fr"-style fret indicator we need extra
+            // horizontal room on the left so the label doesn't clip into
+            // the grid or get cut off by the SVG viewBox.
+            var _willOffset = (minFret >= 2);
+            var leftLabelWidth = _willOffset ? 18 : 0;
+            var w = 60 + leftLabelWidth;
+            var sx = pad + leftLabelWidth, sw = w - sx - pad, sh = h - top - 4;
+            var dx = sw / 5, dy = sh / 4;
             // Use a fret-position indicator ("3fr" label + shifted grid) for
             // barre chords that would otherwise render as a full 5-fret grid
             // with a barre across. Any chord whose lowest fretted note is at
