@@ -6009,6 +6009,372 @@
             return CHORD_GENERATOR.getShape(name);
         }
 
+        // ── CAGED multi-voicing system ──
+        // For any root+quality, produce the 5 CAGED positions (C, A, G, E, D shapes).
+        // Each template encodes a base pattern at its natural open/low position plus
+        // the root's semitone at that base. To move to a target root R we shift every
+        // non-muted fret by (R - baseRootSemi) mod 12. Duplicate shapes (same resulting
+        // fret pattern) are deduped; the list is sorted by lowest played fret.
+        var CAGED_TEMPLATES = {
+            // Major: 5 classic CAGED shapes
+            'maj': [
+                { shape: 'E', pattern: [0,2,2,1,0,0],   rootSemi: 4 },  // E
+                { shape: 'D', pattern: [-1,-1,0,2,3,2], rootSemi: 2 },  // D
+                { shape: 'C', pattern: [-1,3,2,0,1,0],  rootSemi: 0 },  // C
+                { shape: 'A', pattern: [-1,0,2,2,2,0],  rootSemi: 9 },  // A
+                { shape: 'G', pattern: [3,2,0,0,0,3],   rootSemi: 7 }   // G
+            ],
+            'min': [
+                { shape: 'E', pattern: [0,2,2,0,0,0],   rootSemi: 4 },  // Em
+                { shape: 'D', pattern: [-1,-1,0,2,3,1], rootSemi: 2 },  // Dm
+                // C-shape minor is awkward open; use a moveable 5-string voicing
+                { shape: 'C', pattern: [-1,3,1,0,1,-1], rootSemi: 0 },
+                { shape: 'A', pattern: [-1,0,2,2,1,0],  rootSemi: 9 },  // Am
+                // G-shape minor isn't an open chord; use moveable E-m barre rooted on G
+                { shape: 'G', pattern: [3,5,5,3,3,3],   rootSemi: 7 }
+            ],
+            '7': [
+                { shape: 'E', pattern: [0,2,0,1,0,0],   rootSemi: 4 },  // E7
+                { shape: 'D', pattern: [-1,-1,0,2,1,2], rootSemi: 2 },  // D7
+                { shape: 'C', pattern: [-1,3,2,3,1,0],  rootSemi: 0 },  // C7
+                { shape: 'A', pattern: [-1,0,2,0,2,0],  rootSemi: 9 },  // A7
+                { shape: 'G', pattern: [3,2,0,0,0,1],   rootSemi: 7 }   // G7
+            ],
+            // m7: E-shape template uses Jeff's 4-string voicing (mute A + highE);
+            // when shifted to root A (shift=5) it yields 5 X 5 5 5 X at 5fr.
+            'm7': [
+                { shape: 'E', pattern: [0,-1,0,0,0,-1], rootSemi: 4 },
+                { shape: 'D', pattern: [-1,-1,0,2,1,1], rootSemi: 2 },  // Dm7
+                { shape: 'C', pattern: [-1,3,1,3,1,-1], rootSemi: 0 },  // C-shape m7 moveable
+                { shape: 'A', pattern: [-1,0,2,0,1,0],  rootSemi: 9 },  // Am7 open
+                { shape: 'G', pattern: [3,5,3,3,3,3],   rootSemi: 7 }
+            ],
+            'maj7': [
+                { shape: 'E', pattern: [0,2,1,1,0,0],   rootSemi: 4 },  // Emaj7
+                { shape: 'D', pattern: [-1,-1,0,2,2,2], rootSemi: 2 },  // Dmaj7
+                { shape: 'C', pattern: [-1,3,2,0,0,0],  rootSemi: 0 },  // Cmaj7
+                { shape: 'A', pattern: [-1,0,2,1,2,0],  rootSemi: 9 },  // Amaj7
+                { shape: 'G', pattern: [3,2,0,0,0,2],   rootSemi: 7 }   // Gmaj7
+            ],
+            'sus4': [
+                { shape: 'E', pattern: [0,2,2,2,0,0],   rootSemi: 4 },  // Esus4
+                { shape: 'D', pattern: [-1,-1,0,2,3,3], rootSemi: 2 },  // Dsus4
+                { shape: 'C', pattern: [-1,3,3,0,1,1],  rootSemi: 0 },  // Csus4
+                { shape: 'A', pattern: [-1,0,2,2,3,0],  rootSemi: 9 },  // Asus4
+                { shape: 'G', pattern: [3,5,5,5,3,3],   rootSemi: 7 }   // Gsus4 moveable
+            ],
+            'sus2': [
+                { shape: 'E', pattern: [0,2,4,4,0,0],   rootSemi: 4 },  // Esus2
+                { shape: 'D', pattern: [-1,-1,0,2,3,0], rootSemi: 2 },  // Dsus2
+                { shape: 'A', pattern: [-1,0,2,2,0,0],  rootSemi: 9 },  // Asus2
+                { shape: 'G', pattern: [3,0,0,0,3,3],   rootSemi: 7 }   // Gsus2
+            ],
+            'dim': [
+                // Three-note dim shapes rooted on low E, A, D
+                { shape: 'E', pattern: [0,1,2,0,-1,-1], rootSemi: 4 },
+                { shape: 'A', pattern: [-1,0,1,2,1,-1], rootSemi: 9 },
+                { shape: 'D', pattern: [-1,-1,0,1,2,1], rootSemi: 2 }
+            ],
+            'm7b5': [
+                { shape: 'E', pattern: [0,-1,0,0,-1,1],  rootSemi: 4 },
+                { shape: 'A', pattern: [-1,0,1,0,1,0],   rootSemi: 9 },
+                { shape: 'D', pattern: [-1,-1,0,3,1,1],  rootSemi: 2 }
+            ],
+            'dim7': [
+                { shape: 'E', pattern: [-1,-1,1,2,1,2], rootSemi: 2 },
+                { shape: 'A', pattern: [-1,0,1,2,1,2],  rootSemi: 9 }
+            ],
+            '6': [
+                { shape: 'E', pattern: [0,2,2,1,2,0],   rootSemi: 4 },
+                { shape: 'C', pattern: [-1,3,2,2,1,0],  rootSemi: 0 },
+                { shape: 'A', pattern: [-1,0,2,2,2,2],  rootSemi: 9 },
+                { shape: 'G', pattern: [3,2,0,0,0,0],   rootSemi: 7 }
+            ],
+            'm6': [
+                { shape: 'E', pattern: [0,2,2,0,2,0],   rootSemi: 4 },
+                { shape: 'A', pattern: [-1,0,2,2,1,2],  rootSemi: 9 },
+                { shape: 'D', pattern: [-1,-1,0,2,0,1], rootSemi: 2 }
+            ]
+        };
+
+        // Quality simplification chain used when a quality has no direct CAGED templates
+        // (e.g. m9 → m7, maj9 → maj7, 13 → 9 → 7).
+        var CAGED_QUALITY_FALLBACK = {
+            '':     'maj',
+            'maj':  'maj',
+            'm':    'min',
+            'min':  'min',
+            'm7':   'm7',
+            'min7': 'm7',
+            'maj7': 'maj7',
+            'M7':   'maj7',
+            '7':    '7',
+            'sus4': 'sus4',
+            'sus2': 'sus2',
+            'sus':  'sus4',
+            'dim':  'dim',
+            'o':    'dim',
+            'dim7': 'dim7',
+            'o7':   'dim7',
+            'm7b5': 'm7b5',
+            'hdim7':'m7b5',
+            '6':    '6',
+            'm6':   'm6',
+            // Extended chords fall back to their 7th-family voicings
+            '9':       '7',
+            'maj9':    'maj7',
+            'M9':      'maj7',
+            'm9':      'm7',
+            'min9':    'm7',
+            '11':      '7',
+            'm11':     'm7',
+            '13':      '7',
+            'm13':     'm7',
+            'maj13':   'maj7',
+            'add9':    'maj',
+            'madd9':   'min',
+            '7sus4':   'sus4',
+            '7sus2':   'sus2',
+            '9sus4':   'sus4',
+            '7b9':     '7',
+            '7#9':     '7',
+            '7+9':     '7',
+            '7b5':     '7',
+            '7#5':     '7',
+            'aug7':    '7',
+            'aug':     'maj',
+            '+':       'maj',
+            '6/9':     '6',
+            'm6/9':    'm6',
+            '5':       'maj'
+        };
+
+        function _cagedFallbackQuality(q) {
+            if (CAGED_QUALITY_FALLBACK[q] !== undefined) return CAGED_QUALITY_FALLBACK[q];
+            // Walk CHORD_GENERATOR.simplifyQuality chain until we find a match
+            var cur = q;
+            var guard = 0;
+            while (cur !== null && guard++ < 10) {
+                cur = CHORD_GENERATOR.simplifyQuality(cur);
+                if (cur === null) break;
+                if (CAGED_QUALITY_FALLBACK[cur] !== undefined) return CAGED_QUALITY_FALLBACK[cur];
+                if (CAGED_TEMPLATES[cur]) return cur;
+            }
+            return null;
+        }
+
+        // Compute barres from a fret array: any fret value >=1 that appears on 2+
+        // adjacent strings starting at the lowest-played fret gets marked as a barre.
+        function _detectBarres(frets) {
+            var played = frets.filter(function(f) { return f > 0; });
+            if (played.length < 2) return [];
+            var minF = Math.min.apply(null, played);
+            var count = 0;
+            frets.forEach(function(f) { if (f === minF) count++; });
+            return count >= 2 ? [minF] : [];
+        }
+
+        // Generate CAGED voicings for a given root+quality.
+        // Returns array of { frets, barres, shape, minFret } sorted by minFret ascending.
+        function generateCagedVoicings(rootSemi, quality) {
+            if (typeof rootSemi !== 'number') return [];
+            var qKey = CAGED_TEMPLATES[quality] ? quality : _cagedFallbackQuality(quality);
+            if (!qKey || !CAGED_TEMPLATES[qKey]) return [];
+            var templates = CAGED_TEMPLATES[qKey];
+            var results = [];
+            templates.forEach(function(t) {
+                var shift = ((rootSemi - t.rootSemi) % 12 + 12) % 12;
+                var frets = t.pattern.map(function(f) {
+                    return f < 0 ? -1 : f + shift;
+                });
+                var played = frets.filter(function(f) { return f > 0; });
+                var maxFret = played.length ? Math.max.apply(null, played) : 0;
+                var minFret = played.length ? Math.min.apply(null, played) : 0;
+                // Skip voicings that run past the 15th fret — unplayable for most guitars
+                if (maxFret > 15) return;
+                // Skip voicings with too wide a stretch
+                var span = played.length ? (maxFret - minFret) : 0;
+                if (span > 5) return;
+                results.push({
+                    frets: frets,
+                    barres: _detectBarres(frets),
+                    shape: t.shape,
+                    minFret: minFret
+                });
+            });
+            return results;
+        }
+
+        // Merge/dedupe voicings from multiple sources into a single sorted list.
+        // Order: preferredShape (if any, always first) → hardcoded CHORD_SHAPES[name] →
+        // CAGED voicings → algorithmic fallback. Duplicates collapse by fret signature.
+        function getChordVoicings(name, preferredShape) {
+            var out = [];
+            var seen = {};
+            function add(v) {
+                if (!v || !v.frets) return;
+                var key = v.frets.join(',');
+                if (seen[key]) return;
+                seen[key] = true;
+                var played = v.frets.filter(function(f) { return f > 0; });
+                v.minFret = played.length ? Math.min.apply(null, played) : 0;
+                v.barres = v.barres || _detectBarres(v.frets);
+                out.push(v);
+            }
+
+            // 1. Preferred (e.g. UG/Songsterr-supplied) shape — merged into the list
+            //    and sorted alongside everything else by minFret so the lowest-fret
+            //    voicing always wins the default slot (spec: beginner-friendly default).
+            if (preferredShape && Array.isArray(preferredShape.frets)) {
+                add({ frets: preferredShape.frets.slice(), barres: (preferredShape.barres || []).slice() });
+            }
+
+            // 2. Hardcoded CHORD_SHAPES[name] (single shape)
+            if (CHORD_SHAPES[name]) {
+                add({ frets: CHORD_SHAPES[name].frets.slice(), barres: (CHORD_SHAPES[name].barres || []).slice() });
+            }
+
+            // 3. CAGED voicings
+            var parsed = CHORD_GENERATOR.parseChord(name);
+            if (parsed) {
+                var caged = generateCagedVoicings(parsed.rootSemi, parsed.quality);
+                caged.forEach(add);
+            }
+
+            // 4. Algorithmic fallback if nothing else produced a voicing
+            if (out.length === 0) {
+                var gen = CHORD_GENERATOR.generate(name);
+                if (gen) add(gen);
+            }
+
+            // Sort purely by minFret (lowest position first = default).
+            out.sort(function(a, b) { return a.minFret - b.minFret; });
+            return out;
+        }
+
+        // Per-chord-name voicing index map. Persisted to localStorage keyed by job id
+        // so a musician's chosen voicings survive page reloads within the same song.
+        var chordVoicingIndex = {};
+        var _chordVoicingLoaded = false;
+
+        function _loadChordVoicingIndex() {
+            if (_chordVoicingLoaded) return;
+            _chordVoicingLoaded = true;
+            try {
+                var jobId = (typeof currentJob !== 'undefined' && currentJob && currentJob.job_id) ? currentJob.job_id : null;
+                if (!jobId) return;
+                var raw = localStorage.getItem('chordVoicings:' + jobId);
+                if (raw) {
+                    var parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        Object.keys(parsed).forEach(function(k) {
+                            if (typeof parsed[k] === 'number') chordVoicingIndex[k] = parsed[k];
+                        });
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        function _saveChordVoicingIndex() {
+            try {
+                var jobId = (typeof currentJob !== 'undefined' && currentJob && currentJob.job_id) ? currentJob.job_id : null;
+                if (!jobId) return;
+                localStorage.setItem('chordVoicings:' + jobId, JSON.stringify(chordVoicingIndex));
+            } catch (e) { /* ignore */ }
+        }
+
+        // Cycle the voicing for a chord name; re-renders every wrapper showing that name.
+        window.cycleChordVoicing = function(name, delta) {
+            _loadChordVoicingIndex();
+            var voicings = getChordVoicings(name);
+            if (!voicings || voicings.length <= 1) return;
+            var cur = chordVoicingIndex[name] || 0;
+            var next = ((cur + delta) % voicings.length + voicings.length) % voicings.length;
+            chordVoicingIndex[name] = next;
+            _saveChordVoicingIndex();
+            var wrappers = document.querySelectorAll('[data-chord-voicing-wrapper]');
+            for (var i = 0; i < wrappers.length; i++) {
+                if (wrappers[i].getAttribute('data-chord-voicing-wrapper') === name) {
+                    wrappers[i].innerHTML = _renderChordWrapperInner(name);
+                }
+            }
+        };
+
+        // Pure SVG output for a single voicing (frets + barres). Extracted from
+        // the original renderChordDiagram so the wrapper can replace its inner
+        // HTML when the voicing is cycled without touching the outer container.
+        function _renderChordDiagramSvg(frets, barres) {
+            var h = 80, top = 16, pad = 8;
+            var minFret = 100, maxFret = 0;
+            frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
+            var _willOffset = (minFret >= 2);
+            var leftLabelWidth = _willOffset ? 18 : 0;
+            var w = 60 + leftLabelWidth;
+            var sx = pad + leftLabelWidth, sw = w - sx - pad, sh = h - top - 4;
+            var dx = sw / 5, dy = sh / 4;
+            var offset = (minFret >= 2) ? minFret - 1 : 0;
+
+            var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">';
+            if (offset === 0) {
+                svg += '<rect x="' + (sx - 1) + '" y="' + (top - 2) + '" width="' + (sw + 2) + '" height="3" fill="#fff"/>';
+            } else {
+                svg += '<text x="' + (sx - 3) + '" y="' + (top + dy / 2 + 4) + '" fill="#333" font-size="11" font-weight="700" text-anchor="end">' + (offset + 1) + 'fr</text>';
+            }
+            for (var i = 0; i <= 4; i++) {
+                svg += '<line x1="' + sx + '" y1="' + (top + i * dy) + '" x2="' + (sx + sw) + '" y2="' + (top + i * dy) + '" stroke="#555" stroke-width="1"/>';
+            }
+            for (var s = 0; s < 6; s++) {
+                svg += '<line x1="' + (sx + s * dx) + '" y1="' + top + '" x2="' + (sx + s * dx) + '" y2="' + (top + 4 * dy) + '" stroke="#555" stroke-width="1"/>';
+            }
+            (barres || []).forEach(function(b) {
+                var bf = b - offset;
+                if (bf >= 1 && bf <= 4) {
+                    var firstStr = 0, lastStr = 5;
+                    frets.forEach(function(f, si) { if (f === b) { firstStr = Math.min(firstStr, si); lastStr = Math.max(lastStr, si); }});
+                    svg += '<rect x="' + (sx + firstStr * dx - 2) + '" y="' + (top + (bf - 1) * dy + dy / 2 - 3) + '" width="' + ((lastStr - firstStr) * dx + 4) + '" height="6" rx="3" fill="var(--orange)"/>';
+                }
+            });
+            for (var s2 = 0; s2 < 6; s2++) {
+                var f = frets[s2];
+                if (f < 0) {
+                    svg += '<text x="' + (sx + s2 * dx) + '" y="' + (top - 4) + '" fill="#888" font-size="9" text-anchor="middle">x</text>';
+                } else if (f === 0) {
+                    svg += '<circle cx="' + (sx + s2 * dx) + '" cy="' + (top - 6) + '" r="3" fill="none" stroke="#fff" stroke-width="1.5"/>';
+                } else {
+                    var fy = f - offset;
+                    if (fy >= 1 && fy <= 4) {
+                        svg += '<circle cx="' + (sx + s2 * dx) + '" cy="' + (top + (fy - 1) * dy + dy / 2) + '" r="4" fill="var(--orange)"/>';
+                    }
+                }
+            }
+            svg += '</svg>';
+            return svg;
+        }
+
+        // Builds the inner HTML (name label + svg + optional cycle controls) for a
+        // wrapper div. Called both on first render and when a cycle arrow is clicked.
+        function _renderChordWrapperInner(name) {
+            _loadChordVoicingIndex();
+            var voicings = getChordVoicings(name);
+            if (!voicings || voicings.length === 0) return '';
+            var idx = chordVoicingIndex[name] || 0;
+            if (idx >= voicings.length) { idx = 0; chordVoicingIndex[name] = 0; }
+            var cur = voicings[idx];
+            var multi = voicings.length > 1;
+            var jsName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+            var counter = multi ? ' <span style="color:#888; font-size:0.6rem; font-weight:400;">' + (idx + 1) + '/' + voicings.length + '</span>' : '';
+            var html = '<div style="font-family:\'Fira Code\',monospace; font-size:0.8rem; font-weight:600; color:var(--yellow); margin-bottom:2px;">' + name + counter + '</div>';
+            html += _renderChordDiagramSvg(cur.frets, cur.barres);
+            if (multi) {
+                html += '<div class="cv-controls no-print" style="display:flex; gap:6px; margin-top:3px; line-height:1;">'
+                     +   '<button type="button" onclick="cycleChordVoicing(\'' + jsName + '\', -1); event.stopPropagation();" style="padding:0 6px; background:#333; color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.7rem; line-height:1.4;" aria-label="Previous voicing" title="Previous voicing">&#9664;</button>'
+                     +   '<button type="button" onclick="cycleChordVoicing(\'' + jsName + '\', 1); event.stopPropagation();" style="padding:0 6px; background:#333; color:#fff; border:none; border-radius:3px; cursor:pointer; font-size:0.7rem; line-height:1.4;" aria-label="Next voicing" title="Next voicing">&#9654;</button>'
+                     + '</div>';
+            }
+            return html;
+        }
+
         // Mini chord diagram for inline placement in lead-sheet bar cells.
         // Renders just the SVG (no name label, that's already in the bar).
         function renderMiniChordDiagram(name) {
@@ -6064,66 +6430,28 @@
             return svg;
         }
 
+        // Renders a chord diagram with CAGED multi-voicing cycle controls.
+        // The legacy (name, frets, barres) signature still works — the passed shape
+        // is pinned as the first voicing so callers sourcing custom shapes (UG,
+        // Songsterr fallback) still see their shape render by default. All CAGED
+        // positions for the chord are appended; ◀ ▶ buttons cycle between them.
         function renderChordDiagram(name, frets, barres) {
-            var h = 80, top = 16, pad = 8;
-            var minFret = 100, maxFret = 0;
-            frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
-            // When we'll render a "3fr"-style fret indicator we need extra
-            // horizontal room on the left so the label doesn't clip into
-            // the grid or get cut off by the SVG viewBox.
-            var _willOffset = (minFret >= 2);
-            var leftLabelWidth = _willOffset ? 18 : 0;
-            var w = 60 + leftLabelWidth;
-            var sx = pad + leftLabelWidth, sw = w - sx - pad, sh = h - top - 4;
-            var dx = sw / 5, dy = sh / 4;
-            // Use a fret-position indicator ("3fr" label + shifted grid) for
-            // barre chords that would otherwise render as a full 5-fret grid
-            // with a barre across. Any chord whose lowest fretted note is at
-            // fret 2 or higher gets the shift. Open chords (minFret=1 or 0)
-            // stay in standard open-position view.
-            var offset = (minFret >= 2) ? minFret - 1 : 0;
-
-            var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">';
-            // Nut or fret position indicator
-            if (offset === 0) {
-                svg += '<rect x="' + (sx - 1) + '" y="' + (top - 2) + '" width="' + (sw + 2) + '" height="3" fill="#fff"/>';
-            } else {
-                svg += '<text x="' + (sx - 3) + '" y="' + (top + dy / 2 + 4) + '" fill="#333" font-size="11" font-weight="700" text-anchor="end">' + (offset + 1) + 'fr</text>';
+            var preferred = null;
+            if (Array.isArray(frets)) {
+                preferred = { frets: frets, barres: barres || [] };
             }
-            // Grid lines
-            for (var i = 0; i <= 4; i++) {
-                svg += '<line x1="' + sx + '" y1="' + (top + i * dy) + '" x2="' + (sx + sw) + '" y2="' + (top + i * dy) + '" stroke="#555" stroke-width="1"/>';
+            var voicings = getChordVoicings(name, preferred);
+            if (!voicings || voicings.length === 0) return '';
+            // Seed any preferred shape into the hardcoded map so the cycle's
+            // re-render (which doesn't receive the original frets/barres) can
+            // still find it on subsequent calls.
+            if (preferred && !CHORD_SHAPES[name]) {
+                CHORD_SHAPES[name] = preferred;
             }
-            for (var s = 0; s < 6; s++) {
-                svg += '<line x1="' + (sx + s * dx) + '" y1="' + top + '" x2="' + (sx + s * dx) + '" y2="' + (top + 4 * dy) + '" stroke="#555" stroke-width="1"/>';
-            }
-            // Barres
-            barres.forEach(function(b) {
-                var bf = b - offset;
-                if (bf >= 1 && bf <= 4) {
-                    var firstStr = 0, lastStr = 5;
-                    frets.forEach(function(f, si) { if (f === b) { firstStr = Math.min(firstStr, si); lastStr = Math.max(lastStr, si); }});
-                    svg += '<rect x="' + (sx + firstStr * dx - 2) + '" y="' + (top + (bf - 1) * dy + dy / 2 - 3) + '" width="' + ((lastStr - firstStr) * dx + 4) + '" height="6" rx="3" fill="var(--orange)"/>';
-                }
-            });
-            // Dots and X/O markers
-            for (var s = 0; s < 6; s++) {
-                var f = frets[s];
-                if (f < 0) {
-                    svg += '<text x="' + (sx + s * dx) + '" y="' + (top - 4) + '" fill="#888" font-size="9" text-anchor="middle">x</text>';
-                } else if (f === 0) {
-                    svg += '<circle cx="' + (sx + s * dx) + '" cy="' + (top - 6) + '" r="3" fill="none" stroke="#fff" stroke-width="1.5"/>';
-                } else {
-                    var fy = f - offset;
-                    if (fy >= 1 && fy <= 4) {
-                        svg += '<circle cx="' + (sx + s * dx) + '" cy="' + (top + (fy - 1) * dy + dy / 2) + '" r="4" fill="var(--orange)"/>';
-                    }
-                }
-            }
-            svg += '</svg>';
-            return '<div style="display:inline-flex; flex-direction:column; align-items:center; margin:0.3rem 0.5rem;">' +
-                '<div style="font-family:\'Fira Code\',monospace; font-size:0.8rem; font-weight:600; color:var(--yellow); margin-bottom:2px;">' + name + '</div>' +
-                svg + '</div>';
+            var safeAttr = String(name).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+            return '<div class="chord-voicing-wrapper" data-chord-voicing-wrapper="' + safeAttr + '" style="display:inline-flex; flex-direction:column; align-items:center; margin:0.3rem 0.5rem;">' +
+                _renderChordWrapperInner(name) +
+                '</div>';
         }
 
         function getUniqueChordsFromData(data) {
