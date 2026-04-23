@@ -893,12 +893,14 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
     # Count how many chords have extensions vs triads
     extended_count = 0
     triad_count = 0
+    ext_qualities: list = []
     for ce in chord_events:
         q = ce.quality
         if q in ('maj', 'min', 'dim', 'aug', 'sus2', 'sus4', '5'):
             triad_count += 1
         elif q in _SIMPLIFY_MAP:
             extended_count += 1
+            ext_qualities.append(q)
 
     total = extended_count + triad_count
     if total == 0:
@@ -906,9 +908,34 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
 
     extension_rate = extended_count / total
 
-    # If >60% of chords have extensions, it's likely systematic bleed
-    # (real jazz songs would have varied extensions, not all min7/maj7)
-    systematic_bleed = extension_rate > 0.60
+    # Consistency of the extensions: fraction that share the single most
+    # common quality. High consistency (e.g. all min7) = deliberate song
+    # style (pop/soul). Low consistency with moderate rate = stem bleed
+    # producing random extensions on triads.
+    from collections import Counter as _Counter
+    if ext_qualities:
+        _, top_count = _Counter(ext_qualities).most_common(1)[0]
+        ext_consistency = top_count / len(ext_qualities)
+    else:
+        ext_consistency = 0.0
+
+    # Systematic-bleed heuristic (revised 2026-04-23 to preserve genuine 7ths):
+    #   - extension rate in 0.60-0.90: MAYBE bleed
+    #     - if extensions are varied (consistency < 0.75), it's bleed → simplify
+    #     - if extensions are consistent (all the same min7 / maj7 / 7), keep
+    #   - extension rate > 0.90: real music (Cm7-Gm7-Dm7-Am7 style songs, jazz)
+    #     regardless of consistency — bleed wouldn't produce THIS many extensions
+    #   - extension rate < 0.60: per-chord confidence filter handles it
+    #
+    # Ground-truth test case: Jamiroquai "Alright" = Cm7 Gm7 Dm7 Am7 throughout.
+    # Old logic saw 92% extension rate → systematic_bleed=True → stripped all 7ths.
+    # New logic: 92% > 0.90 ceiling → systematic_bleed=False → keeps 7ths.
+    if extension_rate > 0.90:
+        systematic_bleed = False
+    elif extension_rate > 0.60:
+        systematic_bleed = ext_consistency < 0.75
+    else:
+        systematic_bleed = False
 
     simplified = []
     for ce in chord_events:
