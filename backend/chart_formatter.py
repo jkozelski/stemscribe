@@ -273,6 +273,19 @@ def format_chart(
         except Exception as e:
             logger.warning(f"Hook-dominated relabel failed: {e}")
 
+        # Step 6c.6c: After Pre-Verse relabeling, the section immediately
+        # after the final Pre-Verse (or the final Pre-Verse 2 if chained) is
+        # almost certainly the real first Verse of the song — its lyrics
+        # are unique storytelling content, not the hook. The stem-RMS
+        # labeler often names it "Chorus" because it's a different lyric
+        # block on the same chord progression as the Pre-Verse. Rename it
+        # to "Verse 1" so the sequence reads Pre-Verse → Verse 1 the way a
+        # musician would understand the song.
+        try:
+            _rename_post_preverse_to_verse(raw_sections)
+        except Exception as e:
+            logger.warning(f"Post-preverse Verse rename failed: {e}")
+
         # Step 6c.7: Re-snap any newly-created section boundaries to phrase
         # downbeats so the split point aligns to the vamp.
         try:
@@ -771,6 +784,54 @@ def _relabel_hook_dominated_sections(
         coverage, freq, _L = best
         if coverage >= dominance_threshold and freq >= min_repeats:
             sec.name = "Pre-Verse"
+
+
+def _rename_post_preverse_to_verse(sections: List[_Section]) -> None:
+    """Rename the section that immediately follows the final Pre-Verse → Verse.
+
+    Musical structure: after a pre-verse/hook (repeated phrase) the song
+    typically enters its FIRST VERSE — the storytelling content. The
+    stem-RMS labeler often calls that section "Chorus" because it's a
+    distinct lyric block on the same chord progression, but that's wrong:
+    a chorus is usually the refrain that returns after each verse. The
+    first unique content after the Pre-Verse is the Verse.
+
+    This pass finds the last consecutive run of Pre-Verse sections and,
+    if the next section is currently labeled Chorus/Verse/Bridge with real
+    lyrics, renames it to "Verse". _number_repeated_sections downstream
+    adds "Verse 1", "Verse 2", etc. to any duplicate names.
+    """
+    if not sections:
+        return
+
+    # Find the last Pre-Verse section index.
+    last_preverse_idx = -1
+    for i, sec in enumerate(sections):
+        if (sec.name or "").split(" ")[0] == "Pre-Verse":
+            last_preverse_idx = i
+    if last_preverse_idx < 0:
+        return  # no Pre-Verse anywhere
+
+    target_idx = last_preverse_idx + 1
+    if target_idx >= len(sections):
+        return  # Pre-Verse is the last section
+
+    target = sections[target_idx]
+    name_base = (target.name or "").split(" ")[0]
+    if name_base not in ("Chorus", "Verse", "Bridge"):
+        return  # don't rename Intro / Outro / Solo / etc.
+
+    # Only rename if the target has real lyric content (not an instrumental
+    # passage that got a vocal label by mistake).
+    has_lyrics = any(
+        (ln.get("lyrics") or "").strip()
+        for ln in (target.lines or [])
+        if isinstance(ln, dict)
+    )
+    if not has_lyrics:
+        return
+
+    target.name = "Verse"
 
 
 def _split_sections_by_lyric_hook(
