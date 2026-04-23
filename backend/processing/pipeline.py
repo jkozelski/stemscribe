@@ -365,7 +365,13 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         # Step 2a: Extract tempo + beat/downbeat grid. Everything downstream
         # (chord-to-bar quantization, rendering, pickup detection) reads from
         # this grid so we stop guessing at bar boundaries.
+        # Progress is advanced through sub-steps here — without these increments
+        # the whole chord-chart phase would sit at a single progress value for
+        # many minutes and the watchdog would false-positive a stall (2026-04-22).
         if job.chord_progression:
+            job.stage = 'Analyzing tempo and beats'
+            job.progress = 60
+            save_job_checkpoint(job)
             try:
                 from processing.tempo_beats import extract_grid
                 drums_stem = job.stems.get('drums')
@@ -388,6 +394,9 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         # root-confusion where the detector labels Am as Cm on keyboard-heavy
         # mixes.
         if job.chord_progression and job.metadata.get('grid'):
+            job.stage = 'Extracting bass roots'
+            job.progress = 62
+            save_job_checkpoint(job)
             try:
                 from processing.bass_root_extraction import extract_bass_roots
                 bass_stem = job.stems.get('bass')
@@ -403,9 +412,6 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         # Step 2b: Generate formatted chord chart (chords above lyrics, UG-style)
         _pipeline_word_ts = []  # Shared with RAG step below
         if job.chord_progression:
-            job.stage = 'Generating chord chart'
-            job.progress = 59
-            save_job_checkpoint(job)
             try:
                 import json as _json
                 from chart_formatter import format_chart
@@ -416,7 +422,14 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 artist = job.metadata.get('artist', '') if job.metadata else ''
                 key = job.detected_key or 'Unknown'
 
-                # Get word-level timestamps from vocal stem via Whisper
+                # Get word-level timestamps from vocal stem via Whisper.
+                # This is the longest sub-step of chord-chart generation
+                # (faster-whisper medium @ int8, CPU on the VPS, ~2-5 min
+                # per 4-5 min song). Its own progress value keeps the watchdog
+                # happy and gives the UI something to report.
+                job.stage = 'Transcribing lyrics'
+                job.progress = 64
+                save_job_checkpoint(job)
                 word_ts = []
                 if vocals_stem and os.path.isfile(vocals_stem):
                     try:
@@ -427,6 +440,13 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                         logger.warning(f"Word timestamp extraction failed (non-fatal): {wte}")
                 else:
                     logger.info("No vocal stem available — chart will be instrumental-only")
+
+                # Now the actual chart assembly (consolidate, section split,
+                # bar-grid build, chord placement). This runs in ~5-10 s even
+                # on the VPS CPU, so a single progress tick is fine.
+                job.stage = 'Generating chord chart'
+                job.progress = 68
+                save_job_checkpoint(job)
 
                 # Generate the formatted chart
                 # Phi-3 LLM formatter is wired but disabled until retraining completes
@@ -499,7 +519,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 from lead_sheet_generator import generate_lead_sheet_for_job, MUSIC21_AVAILABLE
                 if MUSIC21_AVAILABLE:
                     job.stage = 'Generating lead sheet'
-                    job.progress = 59
+                    job.progress = 70
                     save_job_checkpoint(job)
                     lead_sheet_path = generate_lead_sheet_for_job(job, str(audio_path))
                     if lead_sheet_path:

@@ -19,7 +19,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-STALL_THRESHOLD_SECONDS = 600  # 10 minutes — Modal GPU can take 5+ min for long tracks
+STALL_THRESHOLD_SECONDS = 600  # 10 min without progress-number OR stage-text change. The chord-chart phase was previously one monolithic stage at 59% that ran Whisper (~2-5 min on CPU) + grid + bass-root extraction; pipeline.py now advances progress and stage through those sub-steps so this threshold works again. See commit history 2026-04-22.
 MAX_RETRIES = 3
 CHECK_INTERVAL_SECONDS = 30   # Check every 30 seconds for faster detection
 WATCHDOG_LOG_FILE = Path(__file__).parent.parent / 'watchdog_log.json'
@@ -94,6 +94,7 @@ def _retry_job(job):
     # Update retry count
     _job_snapshots[job_id] = {
         'last_progress': 0,
+        'last_stage': job.stage,
         'last_check': time.time(),
         'retries': retry_count,
     }
@@ -208,22 +209,30 @@ def _check_jobs():
             # First time seeing this job — record baseline
             _job_snapshots[job_id] = {
                 'last_progress': job.progress,
+                'last_stage': job.stage,
                 'last_check': now,
                 'retries': job.metadata.get('watchdog_retry', 0),
             }
             continue
 
-        # Check if progress has changed since last check
-        if job.progress != snapshot['last_progress']:
-            # Job is making progress — update snapshot
+        # Treat EITHER a progress-number bump OR a stage-text change as forward
+        # motion. Some pipeline sub-steps advance the stage label but not the
+        # progress number (e.g. a cosmetic "Finalizing" step) — without this
+        # belt-and-suspenders check, those would false-positive as stalls.
+        # Conversely, some sub-steps advance progress without changing stage,
+        # which is also fine.
+        progress_changed = job.progress != snapshot['last_progress']
+        stage_changed = job.stage != snapshot.get('last_stage')
+        if progress_changed or stage_changed:
             _job_snapshots[job_id] = {
                 'last_progress': job.progress,
+                'last_stage': job.stage,
                 'last_check': now,
                 'retries': snapshot['retries'],
             }
             continue
 
-        # Progress hasn't changed — check if stall threshold exceeded
+        # Neither progress nor stage changed — check if stall threshold exceeded
         time_since_progress = now - snapshot['last_check']
         if time_since_progress >= STALL_THRESHOLD_SECONDS:
             _log_event('stall_detected', job_id, {

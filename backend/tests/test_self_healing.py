@@ -208,6 +208,37 @@ class TestWatchdog:
         assert _job_snapshots['active-1']['last_progress'] == 60
         _job_snapshots.clear()
 
+    def test_stage_change_resets_stall_timer(self):
+        """Stage-text change alone (progress-number unchanged) must reset the
+        stall timer. Regression test for the 2026-04-22 chord-chart false-retry
+        where pipeline stage advanced through sub-steps without bumping progress.
+        """
+        from processing.watchdog import _check_jobs, _job_snapshots, STALL_THRESHOLD_SECONDS
+
+        job = ProcessingJob('stage-change-1', 'test.mp3')
+        job.status = 'processing'
+        job.progress = 59
+        job.stage = 'Generating chord chart'
+        jobs['stage-change-1'] = job
+
+        _job_snapshots.clear()
+        _check_jobs()  # Baseline snapshot
+
+        # Pretend a lot of time has passed with no progress-number change
+        _job_snapshots['stage-change-1']['last_check'] = time.time() - STALL_THRESHOLD_SECONDS - 10
+
+        # But the stage text DID change — pipeline is advancing
+        job.stage = 'Transcribing lyrics'
+
+        with patch('processing.watchdog._retry_job') as mock_retry:
+            with patch('processing.watchdog._log_event'):
+                _check_jobs()
+                mock_retry.assert_not_called()
+
+        # Timer should have been reset and stage updated
+        assert _job_snapshots['stage-change-1']['last_stage'] == 'Transcribing lyrics'
+        _job_snapshots.clear()
+
     def test_completed_jobs_ignored(self):
         from processing.watchdog import _check_jobs, _job_snapshots
 
