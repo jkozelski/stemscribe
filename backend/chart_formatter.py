@@ -263,6 +263,16 @@ def format_chart(
         except Exception as e:
             logger.warning(f"Hook-based section split failed, keeping prior sections: {e}")
 
+        # Step 6c.6b: For sections that are nearly entirely a single repeated
+        # hook phrase (e.g. "I need your love" sung 20+ times) — too uniform
+        # to split — relabel them as "Pre-Verse" so a musician's mental model
+        # is right. Two adjacent Verse-labeled sections that are both the
+        # same repeating hook shouldn't read as "Verse 1" and "Verse 2".
+        try:
+            _relabel_hook_dominated_sections(raw_sections, words)
+        except Exception as e:
+            logger.warning(f"Hook-dominated relabel failed: {e}")
+
         # Step 6c.7: Re-snap any newly-created section boundaries to phrase
         # downbeats so the split point aligns to the vamp.
         try:
@@ -691,6 +701,76 @@ def _snap_sections_to_phrase_boundaries(
         # Extend previous section to absorb the pickup bars.
         sections[i - 1].end_time = new_start
         sec.start_time = new_start
+
+
+def _relabel_hook_dominated_sections(
+    sections: List[_Section],
+    words: List[Dict],
+    hook_min_len: int = 3,
+    hook_max_len: int = 5,
+    dominance_threshold: float = 0.70,
+    min_repeats: int = 4,
+) -> None:
+    """Relabel sections that are >=70% a single repeated hook phrase.
+
+    When a section's lyrics are overwhelmingly one repeated short phrase
+    (e.g. the "I need your love" 20+-times opening of Alright) but the split
+    function couldn't find a transition to split on (because the hook runs
+    the whole section), the labeler leaves it as "Verse 1" / "Verse 2" —
+    which reads as if the song has two verses that happen to repeat the
+    same line, instead of what it actually is: a long pre-chorus / hook.
+
+    This pass scans each Verse/Chorus-labeled section. If its dominant
+    n-gram covers >= dominance_threshold of the section's words AND repeats
+    at least min_repeats times, rename the section to "Pre-Verse". In-place.
+    Numbering (Pre-Verse 1, Pre-Verse 2) is handled downstream by
+    _number_repeated_sections.
+    """
+    if not sections or not words:
+        return
+
+    words_sorted = sorted(words, key=lambda w: w.get("start", 0.0))
+
+    def _normalize(w: str) -> str:
+        return (w or "").strip().strip(",.!?;:\"'()").lower()
+
+    relabel_targets = ("Verse", "Chorus", "Bridge")
+
+    for sec in sections:
+        name_base = (sec.name or "").split(" ")[0]
+        if name_base not in relabel_targets:
+            continue
+
+        sec_words = [
+            w for w in words_sorted
+            if sec.start_time - 0.1 <= w.get("start", 0.0) < sec.end_time + 0.1
+        ]
+        if len(sec_words) < hook_min_len * min_repeats:
+            continue
+
+        norm = [_normalize(w.get("word", "")) for w in sec_words]
+
+        best = None  # (coverage, freq, length)
+        for L in range(hook_min_len, hook_max_len + 1):
+            if len(norm) < L:
+                continue
+            counts: Dict[tuple, int] = {}
+            for i in range(len(norm) - L + 1):
+                if all(norm[i + k] for k in range(L)):
+                    ngram = tuple(norm[i + k] for k in range(L))
+                    counts[ngram] = counts.get(ngram, 0) + 1
+            if not counts:
+                continue
+            _phrase, freq = max(counts.items(), key=lambda kv: kv[1])
+            coverage = (freq * L) / max(1, len(norm))
+            if best is None or coverage > best[0]:
+                best = (coverage, freq, L)
+
+        if best is None:
+            continue
+        coverage, freq, _L = best
+        if coverage >= dominance_threshold and freq >= min_repeats:
+            sec.name = "Pre-Verse"
 
 
 def _split_sections_by_lyric_hook(
