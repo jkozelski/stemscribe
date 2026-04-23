@@ -6307,12 +6307,20 @@
             var h = 80, top = 16, pad = 8;
             var minFret = 100, maxFret = 0;
             frets.forEach(function(f) { if (f > 0) { minFret = Math.min(minFret, f); maxFret = Math.max(maxFret, f); }});
-            var _willOffset = (minFret >= 2);
+            // Only shift the grid up (show "3fr" style) when ALL fretted
+            // notes are at fret 2+ AND there are no open strings. If even
+            // one string is open (fret 0), we need the nut visible — the
+            // A chord [-1,0,2,2,2,0] is a classic example: minFret=2 but
+            // two open strings. Shifting to "2fr" in that case hides the
+            // opens, which was the "2fr label with finger dots on fret 1"
+            // visual bug.
+            var hasOpenString = frets.some(function(f) { return f === 0; });
+            var _willOffset = (minFret >= 2) && !hasOpenString;
             var leftLabelWidth = _willOffset ? 18 : 0;
             var w = 60 + leftLabelWidth;
             var sx = pad + leftLabelWidth, sw = w - sx - pad, sh = h - top - 4;
             var dx = sw / 5, dy = sh / 4;
-            var offset = (minFret >= 2) ? minFret - 1 : 0;
+            var offset = _willOffset ? minFret - 1 : 0;
 
             var svg = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;">';
             if (offset === 0) {
