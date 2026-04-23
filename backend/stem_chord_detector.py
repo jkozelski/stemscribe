@@ -445,9 +445,15 @@ def _match_intervals_to_quality(intervals: frozenset) -> Tuple[str, float]:
 
         score = coverage - noise_penalty - priority_penalty
 
-        # Big bonus for exact match
+        # Exact match DOMINATES — no subset can beat a perfect interval match.
+        # Without this, a minor-triad subset match (which gets superset +0.15
+        # and core-triad +0.08 bonuses) scored ~1.17, beating a true min7
+        # exact match at ~0.99, causing the detector to drop 7ths on every
+        # song that genuinely uses them (e.g. Alright: Cm7/Gm7/Dm7/Am7 was
+        # being classified as Cm/Gm/Dm/Am). Bump exact-match well above
+        # any bonus-boosted subset score.
         if intervals == template:
-            score = 1.0 - priority_penalty
+            score = 2.0 - priority_penalty
 
         # Bonus for matching all template tones (superset of template)
         if template <= intervals:
