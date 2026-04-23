@@ -3433,7 +3433,11 @@
                 if (_nc) { _nc.classList.remove('visible'); _nc.innerHTML = ''; }
                 document.querySelectorAll('.notation-toggle-btn').forEach(b => b.classList.remove('active'));
 
-                // Try Songsterr first (real tabs), fall back to AI notation
+                // Tab view is CUT for May 12 launch — do NOT auto-search Songsterr on job load.
+                // The "Loading Songsterr tabs..." spinner was fired on every practice-page
+                // load even though the tab button is hidden and users only see chords. Keep
+                // the songsterrQuery input value populated in case the manual tab-search UI
+                // is ever re-enabled post-launch, but skip the auto-search entirely.
                 const songTitle = job.metadata?.title || '';
                 const songArtist = job.metadata?.artist || '';
                 const songsterrQuery = songArtist ? (songArtist + ' - ' + songTitle) : songTitle;
@@ -3441,20 +3445,9 @@
                 if (queryEl) queryEl.value = songsterrQuery;
 
                 let songsterrLoaded = false;
-                var hideTabs = job.metadata?.hide_tabs;
-                if (songTitle && !hideTabs) {
-                    try {
-                        // Wrap Songsterr search in a 10s timeout race
-                        songsterrLoaded = await Promise.race([
-                            searchSongsterr(true),
-                            new Promise(function(_, reject) {
-                                setTimeout(function() { reject(new Error('timeout')); }, 10000);
-                            })
-                        ]);
-                    } catch (e) {
-                        console.log('Songsterr auto-search failed or timed out, using AI notation');
-                    }
-                }
+                var hideTabs = true;  // always hide tabs for launch — was: job.metadata?.hide_tabs;
+                // Auto-search disabled. Was:
+                //   if (songTitle && !hideTabs) { await Promise.race([searchSongsterr(true), ...]); }
                 if (hideTabs) {
                     console.log('Tabs hidden for this job (hide_tabs flag)');
                     var atEl = document.getElementById('alphaTab');
