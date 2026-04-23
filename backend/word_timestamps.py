@@ -30,6 +30,64 @@ def _get_model():
     return _model
 
 
+def _strip_whisper_repetition_loops(
+    words: List[Dict],
+    bucket_width_sec: float = 0.1,
+    max_per_bucket: int = 2,
+) -> List[Dict]:
+    """Drop Whisper repetition-loop phantom words.
+
+    faster-whisper's medium model (CPU int8) occasionally enters a
+    repetition loop where the same phrase gets stamped dozens of times
+    at essentially the same timestamp. Real-world example from
+    Jamiroquai "Alright" (2026-04-23 audit): 72 words all stamped at
+    t≈69.08s in a 0.05s span — obvious model hallucination that then
+    poisons every downstream lyric layout pass.
+
+    Strategy: bucket words by floor(start / bucket_width_sec). Within
+    each bucket, normalize each word's text and keep at most
+    max_per_bucket copies of any given (bucket, text) pair. A normal
+    singer's syllable rate is far below 20/sec per bucket; phantom
+    loops easily hit 50-100/sec. max_per_bucket=2 keeps legitimate
+    fast passages while dropping the runaway repetitions.
+
+    Returns a filtered list in the original chronological order.
+    """
+    if not words:
+        return words
+
+    def _norm(w: Dict) -> str:
+        return (w.get("word") or "").strip().strip(",.!?;:\"'()").lower()
+
+    seen: Dict[tuple, int] = {}
+    kept: List[Dict] = []
+    dropped = 0
+    for w in words:
+        try:
+            start = float(w.get("start", 0.0))
+        except (TypeError, ValueError):
+            kept.append(w)
+            continue
+        text = _norm(w)
+        if not text:
+            kept.append(w)
+            continue
+        key = (int(start / bucket_width_sec), text)
+        n = seen.get(key, 0)
+        if n < max_per_bucket:
+            kept.append(w)
+            seen[key] = n + 1
+        else:
+            dropped += 1
+
+    if dropped:
+        logger.info(
+            f"  Dropped {dropped}/{len(words)} Whisper phantom-loop words "
+            f"(bucket={bucket_width_sec}s max_per_bucket={max_per_bucket})"
+        )
+    return kept
+
+
 def get_word_timestamps(audio_path: str) -> List[Dict]:
     """
     Extract word-level timestamps from an audio file (ideally a vocal stem).
@@ -54,6 +112,12 @@ def get_word_timestamps(audio_path: str) -> List[Dict]:
                     "start": round(w.start, 3),
                     "end": round(w.end, 3),
                 })
+
+    # Strip Whisper repetition-loop phantom words before they reach any
+    # downstream layout code. Without this, a single hallucinated loop
+    # (e.g. 72 words stamped at t≈69.08s on Alright) poisons every
+    # section/line builder.
+    words = _strip_whisper_repetition_loops(words)
 
     logger.info(f"Extracted {len(words)} word timestamps from {os.path.basename(audio_path)}")
     return words
