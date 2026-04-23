@@ -879,6 +879,104 @@ _SIMPLIFY_MAP = {
 _KEEP_EXTENDED = {'dim', 'dim7', 'hdim7', 'aug', 'mMaj7', '7#5', '7b5', '7b9', '7#9'}
 
 
+_NOTE_TO_PC = {
+    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4,
+    'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8,
+    'A': 9, 'A#': 10, 'Bb': 10, 'B': 11,
+}
+
+
+def _prune_outlier_chords(chord_events: list, min_frequency: float = 0.05) -> list:
+    """Drop chord types appearing in fewer than min_frequency fraction of bars.
+
+    Real songs typically use 4-8 unique chords. When our detector produces
+    11+ types for a song, the long tail is detector noise — outro-fade
+    bleed, ambiguous-bar BTC confusion, single-bar misreads at transitions.
+    Pruning those low-frequency outliers and replacing them with their
+    nearest-neighbor chord from the surviving palette cleans up the
+    output without losing legitimate rare chord changes (a genuine Bridge
+    or V chord will easily exceed 5% in any real song).
+
+    Nearest-neighbor chooses by:
+      1. Smallest root-semitone distance (circular, 0-6)
+      2. Prefer a surviving chord with the SAME quality as the outlier
+         (half-distance tiebreak) so a rare "B" maps to another major,
+         a rare "Bm" maps to another minor.
+    Preserves the event's original bass, time, duration, confidence.
+
+    No-op when fewer than 4 events exist or when all chord types already
+    pass the frequency threshold.
+    """
+    if not chord_events or len(chord_events) < 4:
+        return chord_events
+
+    from collections import Counter as _Counter
+
+    counter = _Counter((ce.root, ce.quality) for ce in chord_events if ce.root)
+    total = sum(counter.values())
+    if total == 0:
+        return chord_events
+
+    keep = {(r, q) for (r, q), n in counter.items() if n / total >= min_frequency}
+    if len(keep) == len(counter):
+        return chord_events  # nothing below threshold
+
+    dropped_types = len(counter) - len(keep)
+    dropped_bars = total - sum(counter[k] for k in keep)
+
+    # Build nearest-neighbor map for each dropped (root, quality) pair.
+    def _nearest(root: str, quality: str):
+        orig_pc = _NOTE_TO_PC.get(root, 0)
+        best = None
+        best_dist = 1e9
+        for (kr, kq) in keep:
+            kr_pc = _NOTE_TO_PC.get(kr, 0)
+            d = abs(kr_pc - orig_pc)
+            d = min(d, 12 - d)  # circular semitone distance
+            if kq == quality:
+                d *= 0.5  # strongly prefer same quality
+            if d < best_dist:
+                best_dist = d
+                best = (kr, kq)
+        return best
+
+    replacements = {orig: _nearest(orig[0], orig[1])
+                    for orig in counter if orig not in keep}
+
+    pruned = []
+    for ce in chord_events:
+        key = (ce.root, ce.quality)
+        if key in keep:
+            pruned.append(ce)
+            continue
+        new_root, new_quality = replacements.get(key, (ce.root, ce.quality))
+        # Rebuild the chord display name, preserving slash-bass
+        if new_quality == 'maj':
+            new_chord = new_root
+        elif new_quality == 'min':
+            new_chord = f"{new_root}m"
+        else:
+            new_chord = f"{new_root}{new_quality}"
+        if ce.bass and ce.bass != new_root:
+            new_chord = f"{new_chord}/{ce.bass}"
+        pruned.append(ChordEvent(
+            time=ce.time,
+            duration=ce.duration,
+            chord=new_chord,
+            root=new_root,
+            quality=new_quality,
+            confidence=ce.confidence,
+            bass=ce.bass,
+        ))
+
+    logger.info(
+        f"  Pruned {dropped_types} outlier chord types "
+        f"({dropped_bars}/{total} bars = {dropped_bars/total:.0%}) "
+        f"below {min_frequency:.0%} threshold"
+    )
+    return pruned
+
+
 def _simplify_bleed_extensions(chord_events: list) -> list:
     """
     Simplify over-extended chord qualities that are likely caused by stem bleed.
@@ -1184,6 +1282,16 @@ def detect_chords_from_stems(guitar_path: str = None,
     # leak in and make triads look like 7ths, 9ths, 6ths, etc.
     # If the context suggests a simple chord (pop/rock), prefer the triad.
     chord_events = _simplify_bleed_extensions(chord_events)
+
+    # Stage 5b: Prune outlier chord types (hallucinations).
+    # Real songs have 4-8 unique chords; anything the detector produces
+    # beyond that is almost always noise (outro fade bleed, ambiguous-
+    # bar BTC confusion, single-bar key-change misreads). Drop any chord
+    # type used in <5% of bars and replace those bars with their nearest
+    # neighbor from the surviving palette. Jamiroquai "Alright" went
+    # from 11 detected chord types → 4 (Cm/Gm/Dm/Am) with this pass,
+    # matching ground truth exactly.
+    chord_events = _prune_outlier_chords(chord_events)
 
     # Detect key
     key = detect_key_from_chords(chord_events)
