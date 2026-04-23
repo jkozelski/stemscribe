@@ -830,11 +830,29 @@ def _shift_pickup_words_across_lines(
         except (TypeError, ValueError):
             continue
 
-        # Word must be sung near the end of its segment (pickup position).
-        if last_t < seg_end - tail_window_sec:
-            continue
         # Gap to first word of next line must be short (tight phrase cluster).
-        if first_t_next - last_t > gap_window_sec:
+        tight_cluster = (first_t_next - last_t) <= gap_window_sec
+
+        # Heuristic A (time-based): word sung near the end of its segment AND
+        # tight cluster with next line. Catches straight pickup anacrusis.
+        near_segment_end = last_t >= seg_end - tail_window_sec
+
+        # Heuristic B (phrase-based): the word BEFORE the last word ends in a
+        # sentence-terminating punctuation (. ! ? ;), meaning the last word
+        # starts a new lyric phrase. Lyric-phrase starts belong on the next
+        # chord line's downbeat regardless of how the Whisper timestamps
+        # happened to land. This is the "oh that sounds like the start of
+        # the next verse — put it there" rule.
+        starts_new_phrase = False
+        if len(cur_last_words) >= 2:
+            prev_w_text = (cur_last_words[-2].get("w") or "").strip()
+            if prev_w_text.endswith((".", "!", "?", ";")):
+                starts_new_phrase = True
+
+        # Only shift when at least one trigger fires AND the cluster is tight.
+        if not tight_cluster:
+            continue
+        if not (near_segment_end or starts_new_phrase):
             continue
         # Shift.
         cur_last_words.pop()
