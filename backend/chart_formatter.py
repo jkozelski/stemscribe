@@ -772,9 +772,84 @@ def _rebuild_sections_as_4bar_chunks(
                 "segments": segments,
             })
 
+        # Shift pickup words across chunk boundaries: a word sung near the
+        # end of line N that begins a phrase completed on line N+1 should
+        # start line N+1, not end line N. Musically this is the intra-section
+        # analogue of the phrase-boundary snap (which handles Section→Section
+        # pickups). Without it, verses read "... love. You," | "give me light"
+        # when the phrase is actually "You give me light" starting on the Cm
+        # downbeat of the next line.
+        _shift_pickup_words_across_lines(new_lines)
+
         sec.lines = new_lines
         # Reflect whether the section actually carries lyric text post-chunk.
         sec.has_lyrics = any(ln.get("lyrics") for ln in new_lines)
+
+
+def _shift_pickup_words_across_lines(
+    lines: List[dict],
+    tail_window_sec: float = 0.5,
+    gap_window_sec: float = 1.0,
+) -> None:
+    """Move last word of line N to line N+1 when it's a musical pickup.
+
+    Heuristic: if line N's final segment ends with a word sung near the bar
+    end (start within ``tail_window_sec`` of the segment's end) AND line N+1's
+    first segment begins with a word sung close in time (gap within
+    ``gap_window_sec``), treat the word as a pickup anacrusis for line N+1's
+    phrase and shift it forward. Runs in-place, updates both the per-segment
+    ``words`` arrays and each line's ``lyrics`` string.
+
+    Only shifts ONE word per boundary per pass — avoids cascading shifts that
+    could re-order entire phrases. If the heuristic's thresholds don't fire,
+    the line boundary stays where it was (safe default).
+    """
+    if not lines or len(lines) < 2:
+        return
+
+    for i in range(len(lines) - 1):
+        cur = lines[i]
+        nxt = lines[i + 1]
+        cur_segs = cur.get("segments") or []
+        nxt_segs = nxt.get("segments") or []
+        if not cur_segs or not nxt_segs:
+            continue
+        cur_last_seg = cur_segs[-1]
+        nxt_first_seg = nxt_segs[0]
+        cur_last_words = cur_last_seg.get("words") or []
+        nxt_first_words = nxt_first_seg.get("words") or []
+        if not cur_last_words or not nxt_first_words:
+            continue
+
+        last_w = cur_last_words[-1]
+        first_w_next = nxt_first_words[0]
+        try:
+            last_t = float(last_w.get("t", 0.0))
+            first_t_next = float(first_w_next.get("t", 0.0))
+            seg_end = float(cur_last_seg.get("end", 0.0))
+        except (TypeError, ValueError):
+            continue
+
+        # Word must be sung near the end of its segment (pickup position).
+        if last_t < seg_end - tail_window_sec:
+            continue
+        # Gap to first word of next line must be short (tight phrase cluster).
+        if first_t_next - last_t > gap_window_sec:
+            continue
+        # Shift.
+        cur_last_words.pop()
+        nxt_first_words.insert(0, last_w)
+
+    # Rebuild each line's lyrics string from the updated per-segment words.
+    for ln in lines:
+        all_words = []
+        for seg in ln.get("segments") or []:
+            for w in seg.get("words") or []:
+                txt = (w.get("w") or "").strip()
+                if txt:
+                    all_words.append(txt)
+        joined = " ".join(all_words).strip()
+        ln["lyrics"] = joined if joined else None
 
 
 def _rename_solo_sections_with_lyrics(sections: List[_Section]) -> None:
