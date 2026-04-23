@@ -351,26 +351,20 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
             except Exception as e:
                 logger.warning(f"Vocal onset detection failed (non-fatal): {e}")
 
-        # Step 2: Detect chord progression (optional - before transcription)
-        if chord_detection and CHORD_DETECTOR_AVAILABLE:
-            job.stage = 'Detecting chords and key'
-            job.progress = 58
-            try:
-                detect_chords_for_job(job, audio_path)
-            except Exception as e:
-                logger.warning(f"Chord detection failed (non-fatal): {e}")
-        elif not chord_detection:
-            logger.info("⏭️ Skipping chord detection (disabled)")
-
-        # Step 2a: Extract tempo + beat/downbeat grid. Everything downstream
-        # (chord-to-bar quantization, rendering, pickup detection) reads from
+        # Step 2: Extract tempo + beat/downbeat grid. Everything downstream
+        # (chord-to-bar quantization, rendering, pickup detection, and — when
+        # ENABLE_MIDI_DETECTOR=true — the chord detector itself) reads from
         # this grid so we stop guessing at bar boundaries.
-        # Progress is advanced through sub-steps here — without these increments
-        # the whole chord-chart phase would sit at a single progress value for
-        # many minutes and the watchdog would false-positive a stall (2026-04-22).
-        if job.chord_progression:
+        #
+        # 2026-04-23: moved UP from post-detection (was step 2a) so the MIDI
+        # detector can consume it. Grid extraction depends only on the drums
+        # stem + mix, not on chord detection, so this reorder is safe. The
+        # guard `if job.chord_progression` was also dropped — we want the grid
+        # even if detection later fails, so the render layer still has bar
+        # boundaries to work from.
+        if chord_detection:
             job.stage = 'Analyzing tempo and beats'
-            job.progress = 60
+            job.progress = 58
             save_job_checkpoint(job)
             try:
                 from processing.tempo_beats import extract_grid
@@ -388,14 +382,17 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
             except Exception as e:
                 logger.warning(f"Grid extraction failed (non-fatal, formatter will fall back): {e}")
 
-        # Step 2a2: Extract bass ROOT per bar from the bass stem. This anchors
+        # Step 2a: Extract bass ROOT per bar from the bass stem. This anchors
         # each chord's root to an actual pitch (reliable) and the polyphonic
         # detector only contributes quality (m/maj7/7/etc.). Fixes the
         # root-confusion where the detector labels Am as Cm on keyboard-heavy
         # mixes.
-        if job.chord_progression and job.metadata.get('grid'):
+        #
+        # 2026-04-23: also moved UP. Same rationale as the grid: bass root
+        # extraction needs only the bass stem + grid, not chord detection.
+        if chord_detection and job.metadata.get('grid'):
             job.stage = 'Extracting bass roots'
-            job.progress = 62
+            job.progress = 60
             save_job_checkpoint(job)
             try:
                 from processing.bass_root_extraction import extract_bass_roots
@@ -408,6 +405,20 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                     logger.info("No bass stem available — bass-root extraction skipped")
             except Exception as e:
                 logger.warning(f"Bass-root extraction failed (non-fatal): {e}")
+
+        # Step 2b: Detect chord progression. Runs AFTER grid + bass_roots now
+        # so the MIDI-intermediate detector (if ENABLE_MIDI_DETECTOR=true)
+        # can consume them. Legacy detectors simply don't read job.metadata
+        # entries they don't know about — unchanged behavior with flag off.
+        if chord_detection and CHORD_DETECTOR_AVAILABLE:
+            job.stage = 'Detecting chords and key'
+            job.progress = 62
+            try:
+                detect_chords_for_job(job, audio_path)
+            except Exception as e:
+                logger.warning(f"Chord detection failed (non-fatal): {e}")
+        elif not chord_detection:
+            logger.info("⏭️ Skipping chord detection (disabled)")
 
         # Step 2b: Generate formatted chord chart (chords above lyrics, UG-style)
         _pipeline_word_ts = []  # Shared with RAG step below

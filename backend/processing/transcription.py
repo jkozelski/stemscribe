@@ -832,6 +832,52 @@ def detect_chords_for_job(job: ProcessingJob, audio_path: Path):
     has_bass = 'bass' in job.stems and Path(job.stems['bass']).exists()
     has_piano = 'piano' in job.stems and Path(job.stems['piano']).exists()
 
+    # ---- EXPERIMENTAL: MIDI-intermediate detector (Phase 2 rebuild, 2026-04-23) ----
+    # Gated behind ENABLE_MIDI_DETECTOR. Requires grid + bass_roots to already
+    # be attached to job.metadata by the pipeline (pipeline.py now runs
+    # tempo_beats + bass_root_extraction before chord detection). If those
+    # inputs are missing, or Basic Pitch fails, we silently fall through to
+    # the existing stem-aware path — no behavior change when flag is off.
+    if os.environ.get("ENABLE_MIDI_DETECTOR", "false").lower() == "true":
+        grid = (job.metadata or {}).get('grid')
+        bass_roots = (job.metadata or {}).get('bass_roots')
+        if grid and bass_roots and (has_guitar or has_piano):
+            try:
+                from midi_chord_detector import detect_chords_from_midi
+                job.stage = 'Detecting chords (MIDI-intermediate)'
+                logger.info("🎹 MIDI-intermediate chord detector: Basic Pitch → template match")
+                midi_result = detect_chords_from_midi(
+                    guitar_path=job.stems.get('guitar') if has_guitar else None,
+                    piano_path=job.stems.get('piano') if has_piano else None,
+                    bass_path=job.stems.get('bass') if has_bass else None,
+                    grid=grid,
+                    bass_roots=bass_roots,
+                )
+                if (midi_result.basic_pitch_ok
+                        and len(midi_result.chord_progression.chords) >= 3):
+                    _store_progression_on_job(
+                        job, midi_result.chord_progression, 'midi_intermediate')
+                    logger.info(
+                        f"✅ MIDI detector: {len(job.chord_progression)} chords "
+                        f"(notes: {midi_result.notes_by_stem})"
+                    )
+                    return
+                logger.info(
+                    "MIDI detector produced insufficient output "
+                    f"(basic_pitch_ok={midi_result.basic_pitch_ok}, "
+                    f"chords={len(midi_result.chord_progression.chords)}) "
+                    "— falling back to stem-aware"
+                )
+            except Exception as e:
+                logger.warning(
+                    f"MIDI-intermediate detector crashed, falling back: {e}"
+                )
+        else:
+            logger.info(
+                "ENABLE_MIDI_DETECTOR=true but grid/bass_roots/stems "
+                "not ready — falling back to stem-aware"
+            )
+
     if has_guitar or has_piano:
         try:
             from stem_chord_detector import StemAwareChordDetector
