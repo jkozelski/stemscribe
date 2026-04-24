@@ -1041,6 +1041,15 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
     else:
         systematic_bleed = False
 
+    # When the song is dominantly extended AND consistent (e.g. all min7), the
+    # per-chord confidence gate below would still strip 7ths whose individual
+    # confidence dips below 0.93 — which is normal for stem-derived detection.
+    # Skip the per-chord gate in that regime; the song-level signal already
+    # told us these extensions are real.
+    high_consistency_extended = (
+        extension_rate > 0.75 and ext_consistency >= 0.75
+    )
+
     simplified = []
     for ce in chord_events:
         if ce.quality in _KEEP_EXTENDED:
@@ -1053,8 +1062,9 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
             if systematic_bleed:
                 # High bleed rate → simplify everything
                 should_simplify = True
-            elif ce.confidence < 0.93:
-                # Low confidence on this specific chord → simplify
+            elif not high_consistency_extended and ce.confidence < 0.93:
+                # Low confidence on this specific chord → simplify,
+                # unless the whole song is deliberately extended.
                 should_simplify = True
 
         if should_simplify:
