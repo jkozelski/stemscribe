@@ -1,5 +1,6 @@
+# Pre-launch: blocking search engine indexing while product quality is locked in.
+# Remove the blanket Disallow when ready to go public.
 User-agent: *
-Allow: /
-Disallow: /api/
+Disallow: /
 
 Sitemap: https://stemscriber.com/sitemap.xml
