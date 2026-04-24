@@ -33,8 +33,13 @@ jobs:
       - name: Run tests
         # PYTHONPATH=. so test files that do `from backend.xxx import ...`
         # can resolve the package root.
+        # DATABASE_URL=dummy triggers the auth-required path in
+        # backend/auth/middleware.py (_DB_AVAILABLE flag). Tests assert
+        # 401 responses from auth-gated endpoints; without a DATABASE_URL
+        # the middleware silently passes through and returns 200.
         env:
           PYTHONPATH: .
+          DATABASE_URL: postgresql://ci:ci@localhost/ci
         run: pytest backend/tests/ -v --tb=short
 
   lint:
