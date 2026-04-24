@@ -13,7 +13,7 @@ flask-cors==6.0.2
 demucs==4.0.1                   # Stem separation (htdemucs_6s model)
 librosa==0.11.0                 # Audio analysis, chroma features, beat detection
 soundfile==0.13.1               # Audio I/O
-numpy==2.4.2
+numpy>=1.26,<2.0             # <2.0 for ABI compat with tensorflow 2.14 (pulled via basic-pitch). Upgrade both together when bumping.
 scipy==1.17.1
 # pydub                         # Audio format conversion (not currently installed)
 
