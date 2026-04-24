@@ -173,6 +173,7 @@ def create_app():
     from routes.jazz_chords import jazz_bp
     from chord_lookup import chord_library_bp
     from routes.waitlist import waitlist_bp
+    from routes.admin import admin_bp
     # SEO chord pages DISABLED — served lyrics publicly (NMPA/Genius lawsuit risk)
     # from routes.seo_chords import seo_chords_bp
 
@@ -197,6 +198,7 @@ def create_app():
     app.register_blueprint(jazz_bp)
     app.register_blueprint(chord_library_bp)
     app.register_blueprint(waitlist_bp)
+    app.register_blueprint(admin_bp)
     # app.register_blueprint(seo_chords_bp)  # DISABLED — lyric copyright exposure
 
     # Auth blueprint (JWT-protected endpoints)

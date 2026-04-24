@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin · StemScriber</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1c232c;
+    --border: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
+  }
+  header h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  header .meta { font-size: 12px; color: var(--muted); }
+  main { padding: 20px; max-width: 1400px; margin: 0 auto; }
+  .cards {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .card .label { font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+    color: var(--muted); margin-bottom: 6px; }
+  .card .value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .card .sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 14px;
+  }
+  .chart-panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px;
+  }
+  .chart-panel h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600;
+    color: var(--text); letter-spacing: .2px; }
+  .chart-wrap { position: relative; height: 260px; }
+  .state {
+    padding: 40px; text-align: center; color: var(--muted); font-size: 14px;
+  }
+  .state.error { color: var(--bad); }
+  .state a { color: var(--accent); text-decoration: none; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    background: var(--panel-2); color: var(--muted); font-size: 11px;
+    border: 1px solid var(--border);
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .chart-wrap { height: 240px; }
+    header h1 { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>StemScriber · Admin</h1>
+  <div class="meta">
+    <span class="pill" id="last-updated">loading…</span>
+  </div>
+</header>
+
+<main>
+  <div id="state" class="state">Loading metrics…</div>
+
+  <section id="dashboard" style="display:none;">
+    <div class="cards">
+      <div class="card"><div class="label">Queue depth</div>
+        <div class="value" id="card-queue">—</div>
+        <div class="sub">Jobs in flight</div></div>
+      <div class="card"><div class="label">Total users</div>
+        <div class="value" id="card-users">—</div>
+        <div class="sub">All-time signups</div></div>
+      <div class="card"><div class="label">Jobs complete</div>
+        <div class="value" id="card-jobs">—</div>
+        <div class="sub">All-time successful</div></div>
+      <div class="card" id="card-spend-wrap"><div class="label">Modal spend (month)</div>
+        <div class="value" id="card-spend">—</div>
+        <div class="sub" id="card-spend-sub">Not tracked</div></div>
+    </div>
+
+    <div class="grid">
+      <div class="chart-panel">
+        <h3>Signups per day · last 30 days</h3>
+        <div class="chart-wrap"><canvas id="chart-signups"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <h3>Cumulative users · all time</h3>
+        <div class="chart-wrap"><canvas id="chart-cumulative"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <h3>Songs processed per day · last 30 days</h3>
+        <div class="chart-wrap"><canvas id="chart-songs"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <h3>Daily active users · last 30 days</h3>
+        <div class="chart-wrap"><canvas id="chart-dau"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <h3>Peak usage by hour · last 30 days (UTC)</h3>
+        <div class="chart-wrap"><canvas id="chart-hours"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <h3>Free vs paid users</h3>
+        <div class="chart-wrap"><canvas id="chart-plans"></canvas></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const REFRESH_MS = 5 * 60 * 1000;
+  const charts = {};
+
+  function token() {
+    return localStorage.getItem('access_token');
+  }
+
+  function setState(msg, isError) {
+    const el = document.getElementById('state');
+    el.className = 'state' + (isError ? ' error' : '');
+    el.innerHTML = msg;
+    el.style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+  }
+
+  function show() {
+    document.getElementById('state').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+  }
+
+  function fmt(n) {
+    if (n == null) return '—';
+    return Number(n).toLocaleString();
+  }
+
+  function fillDateRange(points, days) {
+    // Ensure every day in [today - (days-1), today] is represented.
+    const map = {};
+    for (const p of points) map[p.day] = p;
+    const out = [];
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      out.push({ day: key, row: map[key] || null });
+    }
+    return out;
+  }
+
+  function makeBar(canvasId, labels, values, label) {
+    if (charts[canvasId]) charts[canvasId].destroy();
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    charts[canvasId] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{ label: label, data: values, backgroundColor: '#58a6ff' }]
+      },
+      options: commonOpts()
+    });
+  }
+
+  function makeLine(canvasId, labels, values, label) {
+    if (charts[canvasId]) charts[canvasId].destroy();
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: label, data: values,
+          borderColor: '#3fb950', backgroundColor: 'rgba(63,185,80,0.15)',
+          fill: true, tension: 0.25, pointRadius: 2
+        }]
+      },
+      options: commonOpts()
+    });
+  }
+
+  function makeDoughnut(canvasId, labels, values) {
+    if (charts[canvasId]) charts[canvasId].destroy();
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    charts[canvasId] = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: ['#8b949e', '#3fb950', '#58a6ff', '#d29922', '#f85149']
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { color: '#e6edf3' } } }
+      }
+    });
+  }
+
+  function commonOpts() {
+    const grid = { color: 'rgba(139,148,158,0.15)' };
+    const ticks = { color: '#8b949e', font: { size: 11 } };
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: grid, ticks: ticks },
+        y: { grid: grid, ticks: ticks, beginAtZero: true }
+      }
+    };
+  }
+
+  function render(data) {
+    // Cards
+    document.getElementById('card-queue').textContent = fmt(data.summary.queue_depth);
+    document.getElementById('card-users').textContent = fmt(data.summary.total_users);
+    document.getElementById('card-jobs').textContent = fmt(data.summary.total_jobs_complete);
+    if (data.summary.modal_spend_this_month == null) {
+      document.getElementById('card-spend').textContent = '—';
+      document.getElementById('card-spend-sub').textContent = 'Not tracked';
+    } else {
+      document.getElementById('card-spend').textContent =
+        '$' + Number(data.summary.modal_spend_this_month).toFixed(2);
+      document.getElementById('card-spend-sub').textContent = 'This calendar month';
+    }
+
+    // Signups per day
+    const signupsRange = fillDateRange(data.signups_per_day, 30);
+    makeBar('chart-signups',
+      signupsRange.map(p => p.day.slice(5)),
+      signupsRange.map(p => p.row ? p.row.count : 0),
+      'Signups');
+
+    // Cumulative users
+    makeLine('chart-cumulative',
+      data.cumulative_users.map(p => p.day),
+      data.cumulative_users.map(p => p.total),
+      'Total users');
+
+    // Songs per day
+    const songsRange = fillDateRange(data.songs_per_day, 30);
+    makeBar('chart-songs',
+      songsRange.map(p => p.day.slice(5)),
+      songsRange.map(p => p.row ? p.row.count : 0),
+      'Songs');
+
+    // DAU
+    const dauRange = fillDateRange(data.daily_active_users, 30);
+    makeLine('chart-dau',
+      dauRange.map(p => p.day.slice(5)),
+      dauRange.map(p => p.row ? p.row.count : 0),
+      'DAU');
+
+    // Peak hours
+    makeBar('chart-hours',
+      data.peak_hours.map(p => String(p.hour).padStart(2, '0')),
+      data.peak_hours.map(p => p.count),
+      'Jobs');
+
+    // Plan breakdown
+    const byPlan = data.plans.by_plan || {};
+    const planLabels = Object.keys(byPlan);
+    const planValues = planLabels.map(k => byPlan[k]);
+    if (planLabels.length) {
+      makeDoughnut('chart-plans', planLabels, planValues);
+    } else {
+      makeDoughnut('chart-plans',
+        ['free', 'paid'],
+        [data.plans.free_vs_paid.free, data.plans.free_vs_paid.paid]);
+    }
+
+    document.getElementById('last-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString();
+  }
+
+  async function load() {
+    const t = token();
+    if (!t) {
+      setState('Not signed in. <a href="/">Go to home</a> and sign in first.', true);
+      return;
+    }
+    try {
+      const res = await fetch('/api/admin/metrics', {
+        headers: { 'Authorization': 'Bearer ' + t },
+        credentials: 'same-origin'
+      });
+      if (res.status === 401) {
+        setState('Session expired. <a href="/">Sign in again.</a>', true);
+        return;
+      }
+      if (res.status === 403) {
+        setState('This dashboard is restricted.', true);
+        return;
+      }
+      if (!res.ok) {
+        setState('Failed to load metrics (HTTP ' + res.status + ').', true);
+        return;
+      }
+      const data = await res.json();
+      show();
+      render(data);
+    } catch (e) {
+      setState('Failed to load metrics: ' + e.message, true);
+    }
+  }
+
+  load();
+  setInterval(load, REFRESH_MS);
+})();
+</script>
+</body>
+</html>
