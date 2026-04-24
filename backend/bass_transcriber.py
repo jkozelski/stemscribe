@@ -64,8 +64,19 @@ TUNING = [28, 33, 38, 43]  # E1, A1, D2, G2
 
 # Bass range limits
 BASS_MIN_MIDI = 28   # E1 (low E open)
-BASS_MAX_MIDI = 67   # G4 (fret 24 on G string)
+BASS_MAX_MIDI = 55   # G3 — hard ceiling for standard 4-string electric/upright bass.
+                     # Basic Pitch routinely emits fundamental + octave-harmonic as two
+                     # simultaneous notes; the harmonic lands above G3 and is a pure
+                     # artifact. Gating here eliminates most of the octave-doubling
+                     # without clipping legitimate high bass playing (which tops out
+                     # at G3 on a 20-fret 4-string and is rarely sustained there).
 MAX_POLYPHONY = 4    # 4-string bass, rarely plays chords
+
+# Simultaneous-note deduplication window. Basic Pitch's octave-doubling
+# artifact emits the fundamental and its first harmonic within a handful of
+# frames of each other; any two notes starting within this window are treated
+# as the same event and only the lower pitch is kept.
+SIMULTANEOUS_WINDOW_SEC = 0.05
 
 # Octave correction thresholds
 BASS_OCTAVE_BOUNDARY = 55  # G3 -- most bass playing is below this
@@ -261,8 +272,54 @@ def _assign_bass_string_fret(midi_note: int, prev_fret: int = None,
 # ============================================================================
 
 def _filter_bass_range(notes: List) -> List:
-    """Remove notes outside bass range."""
+    """Remove notes outside bass range (E1 to G3 for standard 4-string bass)."""
     return [n for n in notes if BASS_MIN_MIDI <= n.pitch <= BASS_MAX_MIDI]
+
+
+def _dedupe_simultaneous(notes: List, window: float = SIMULTANEOUS_WINDOW_SEC) -> List:
+    """
+    Collapse notes that start within `window` seconds of each other, keeping
+    only the lowest-pitched note per cluster.
+
+    This kills Basic Pitch's fundamental+octave-harmonic artifact (and any
+    other harmonic-double spurious voicing) without needing pitch-interval
+    heuristics — legitimate bass is monophonic, so any simultaneous cluster
+    is an artifact.
+    """
+    if not notes:
+        return notes
+
+    sorted_notes = sorted(notes, key=lambda n: n.start)
+    kept: List = []
+    removed = 0
+
+    cluster: List = [sorted_notes[0]]
+    cluster_start = sorted_notes[0].start
+
+    def _flush(cluster_notes):
+        # Keep the lowest-pitched note in the cluster (fundamental, not harmonic).
+        # Ties broken by velocity (louder = more likely the real onset).
+        return min(cluster_notes, key=lambda n: (n.pitch, -n.velocity))
+
+    for note in sorted_notes[1:]:
+        if note.start - cluster_start < window:
+            cluster.append(note)
+        else:
+            winner = _flush(cluster)
+            removed += len(cluster) - 1
+            kept.append(winner)
+            cluster = [note]
+            cluster_start = note.start
+
+    winner = _flush(cluster)
+    removed += len(cluster) - 1
+    kept.append(winner)
+
+    if removed > 0:
+        logger.info(f"Simultaneous-note dedup: removed {removed} overlapping notes "
+                    f"(kept lowest pitch per {int(window * 1000)}ms cluster)")
+
+    return kept
 
 
 def _octave_correct(notes: List) -> List:
@@ -453,10 +510,21 @@ class BassTranscriber:
         raw_notes = midi_data.instruments[0].notes
         logger.info(f"Basic Pitch raw: {len(raw_notes)} notes")
 
-        # --- Step 2: Bass-specific post-processing ---
-        notes = _octave_correct(raw_notes)
-        notes = _filter_bass_range(notes)
-        logger.info(f"After range filter + octave correction: {len(notes)} notes")
+        # --- Step 2: Artifact filters (cheap, kill most of the octave-doubling) ---
+        # 1. Hard range gate: E1–G3. Anything above G3 is a harmonic ghost on
+        #    real bass parts. Must run before dedup so the remaining notes are
+        #    all plausible fundamentals.
+        notes = _filter_bass_range(raw_notes)
+        # 2. Simultaneous-note dedup: collapse any cluster of notes starting
+        #    within 50ms to the lowest pitch. Kills fundamental+octave doubles
+        #    and any other harmonic artifact Basic Pitch emits.
+        notes = _dedupe_simultaneous(notes)
+        logger.info(f"After range gate + simultaneous dedup: {len(notes)} notes")
+
+        # --- Step 2b: Bass-specific post-processing ---
+        notes = _octave_correct(notes)
+        notes = _filter_bass_range(notes)  # Re-gate in case octave-correct pulled anything up
+        logger.info(f"After octave correction: {len(notes)} notes")
 
         notes = _remove_short_notes(notes, min_duration=0.04)
         notes = _fix_overlapping_same_pitch(notes)

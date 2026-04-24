@@ -511,46 +511,66 @@
             min-height: 100%;
         }
 
-        /* Notation toggle (piano/drums sheet music) */
-        .notation-toggles {
-            display: none;
-            gap: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            align-items: center;
-        }
-        .notation-toggles.visible { display: flex; }
-        .notation-toggles .toggle-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-right: 0.25rem;
-        }
-        .notation-toggle-btn {
-            padding: 0.3rem 0.7rem;
-            background: var(--bg-dark);
+        /* Bass sheet music panel — sits below the chord chart */
+        .bass-notation-panel {
+            margin-top: 1rem;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text-dim);
+            border-radius: 10px;
+            background: var(--bg-card);
+            overflow: hidden;
+        }
+        .bass-notation-header {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-dark);
+        }
+        .bass-notation-panel.collapsed .bass-notation-header {
+            border-bottom: none;
+        }
+        .bass-notation-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text);
             cursor: pointer;
             font-family: inherit;
-            font-size: 0.8rem;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
-        .notation-toggle-btn:hover { border-color: var(--orange); color: var(--text); }
-        .notation-toggle-btn.active {
-            background: linear-gradient(135deg, var(--orange), var(--pink));
-            color: #fff;
-            border-color: transparent;
+        .bass-notation-toggle-btn:hover { color: var(--orange); }
+        .bass-notation-chevron {
+            display: inline-block;
+            transition: transform 0.2s;
+            font-size: 0.85rem;
+            color: var(--text-dim);
         }
-        #notationOSMDContainer {
+        .bass-notation-panel.expanded .bass-notation-chevron {
+            transform: rotate(90deg);
+            color: var(--orange);
+        }
+        #bassNotationContainer {
             display: none;
             background: #fff;
-            border-radius: 8px;
-            margin-top: 0.5rem;
             padding: 1rem;
             overflow-y: auto;
-            max-height: 500px;
+            overflow-x: auto;
+            max-height: 600px;
         }
-        #notationOSMDContainer.visible { display: block; }
+        .bass-notation-panel.expanded #bassNotationContainer {
+            display: block;
+        }
+        #bassNotationContainer svg {
+            background: #ffffff !important;
+        }
+        .bass-notation-empty {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #666;
+            font-style: italic;
+        }
 
         #osmd-container svg {
             background: #ffffff !important;
@@ -2319,13 +2339,20 @@
                 <!-- Chord Chart (hidden by default) -->
                 <div id="chordChart"></div>
 
-                <!-- Piano/Drums sheet-music toggles disabled for May-5 launch
-                     (CRNN transcription output unreliable — see transcription-failure-inventory.md). -->
-                <div class="notation-toggles" id="notationToggles" style="display:none !important;">
-                    <button class="notation-toggle-btn" id="notationPianoBtn" onclick="toggleNotation('piano')">Piano</button>
-                    <button class="notation-toggle-btn" id="notationDrumsBtn" onclick="toggleNotation('drums')">Drums</button>
+                <!-- Bass sheet music panel. Only rendered when the job has a bass
+                     MusicXML file (Basic Pitch transcription of the bass stem).
+                     Piano/Drums/Guitar/Vocals sheet music is intentionally not
+                     shipped — transcription produces too many acoustic artifacts
+                     to be readable. -->
+                <div class="bass-notation-panel" id="bassNotationPanel" style="display:none;">
+                    <div class="bass-notation-header">
+                        <button class="bass-notation-toggle-btn" id="bassNotationToggleBtn" type="button" onclick="toggleBassNotation()">
+                            <span class="bass-notation-chevron" id="bassNotationChevron">▸</span>
+                            <span>Bass Sheet Music</span>
+                        </button>
+                    </div>
+                    <div id="bassNotationContainer"></div>
                 </div>
-                <div id="notationOSMDContainer" style="display:none;"></div>
 
                 <!-- Piano Keyboard Visualizer -->
                 <div id="pianoPanel">
@@ -2454,8 +2481,10 @@
         let currentUGData = null; // UG chord sheet data (takes priority over Songsterr)
         let songsterrTracks = []; // [{index, instrument, name}] from Songsterr meta
         let currentView = 'chords'; // 'tab' or 'chords'
-        let activeNotation = null; // null, 'piano', or 'drums' — which notation sheet is showing
-        let notationOSMDInstance = null; // separate OSMD instance for the notation toggle
+        // Bass sheet music state (OSMD instance rendered in the bass notation panel)
+        let bassNotationOSMD = null;
+        let bassNotationLoadedFor = null; // job_id the bass notation is currently loaded for
+        let bassNotationExpanded = false;
         let transposeAmount = 0;
         let useFlats = false;
         const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -3424,14 +3453,10 @@
 
                 loadStemAudio(job);
                 buildStemTabs(job, requestedStem);
-                updateNotationToggles();
 
-                // Reset notation toggle state on job change
-                activeNotation = null;
-                notationOSMDInstance = null;
-                var _nc = document.getElementById('notationOSMDContainer');
-                if (_nc) { _nc.classList.remove('visible'); _nc.innerHTML = ''; }
-                document.querySelectorAll('.notation-toggle-btn').forEach(b => b.classList.remove('active'));
+                // Reset bass notation panel on job change
+                resetBassNotation();
+                updateBassNotationVisibility();
 
                 // Tab view is CUT for May 12 launch — do NOT auto-search Songsterr on job load.
                 // The "Loading Songsterr tabs..." spinner was fired on every practice-page
@@ -4345,18 +4370,15 @@
             var chordsBtn = document.getElementById('viewChordsBtn');
             var alphaTabEl = document.getElementById('alphaTab');
             var chordChart = document.getElementById('chordChart');
-
-            var notationToggles = document.getElementById('notationToggles');
-            var notationContainer = document.getElementById('notationOSMDContainer');
+            var bassPanel = document.getElementById('bassNotationPanel');
 
             if (view === 'chords') {
                 if (tabBtn) tabBtn.classList.remove('active');
                 if (chordsBtn) chordsBtn.classList.add('active');
                 if (alphaTabEl) alphaTabEl.style.display = 'none';
                 if (chordChart) chordChart.classList.add('visible');
-                // Show notation toggles in chords view
-                if (notationToggles) updateNotationToggles();
-                if (notationContainer && activeNotation) notationContainer.classList.add('visible');
+                // Bass sheet music panel is tied to the chord-chart view
+                updateBassNotationVisibility();
 
                 // Load chords if we haven't yet — use unified chain
                 if (!currentChordData && !currentUGData && !currentManualChart) {
@@ -4373,9 +4395,8 @@
                 if (tabBtn) tabBtn.classList.add('active');
                 if (alphaTabEl) alphaTabEl.style.display = '';
                 if (chordChart) chordChart.classList.remove('visible');
-                // Hide notation toggles in tab view
-                if (notationToggles) notationToggles.classList.remove('visible');
-                if (notationContainer) notationContainer.classList.remove('visible');
+                // Hide bass notation panel in tab view (it belongs to chord view)
+                if (bassPanel) bassPanel.style.display = 'none';
                 // AlphaTab needs a resize after being hidden
                 if (alphaTabApi && alphaTabApi.render) {
                     setTimeout(function() { alphaTabApi.render(); }, 50);
@@ -4383,66 +4404,77 @@
             }
         }
 
-        // ── Notation Toggle (Piano/Drums Sheet Music) ──
-        function updateNotationToggles() {
-            const toggles = document.getElementById('notationToggles');
-            const pianoBtn = document.getElementById('notationPianoBtn');
-            const drumsBtn = document.getElementById('notationDrumsBtn');
-            if (!toggles || !currentJob) { if (toggles) toggles.classList.remove('visible'); return; }
-
-            const xmlFiles = currentJob.musicxml_files || {};
-            const hasPiano = Object.keys(xmlFiles).some(k => k.startsWith('piano'));
-            const hasDrums = Object.keys(xmlFiles).some(k => k.startsWith('drums'));
-
-            if (pianoBtn) pianoBtn.style.display = hasPiano ? '' : 'none';
-            if (drumsBtn) drumsBtn.style.display = hasDrums ? '' : 'none';
-
-            if (hasPiano || hasDrums) {
-                toggles.classList.add('visible');
-            } else {
-                toggles.classList.remove('visible');
-            }
+        // ── Bass Sheet Music (collapsible panel under chord chart) ──
+        // Bass is the only stem we ship sheet music for — Basic Pitch
+        // transcription of piano/drums/guitar/vocals produces too many
+        // acoustic artifacts to be readable. See
+        // backend/processing/transcription.py::convert_midi_to_musicxml.
+        function findBassMusicXMLKey(job) {
+            if (!job || !job.musicxml_files) return null;
+            const keys = Object.keys(job.musicxml_files);
+            // Prefer enhanced > plain bass > any key starting with 'bass'
+            const enhanced = keys.find(k => /^bass.*enhanced/i.test(k));
+            if (enhanced) return enhanced;
+            const plain = keys.find(k => k.toLowerCase() === 'bass');
+            if (plain) return plain;
+            return keys.find(k => k.toLowerCase().startsWith('bass')) || null;
         }
 
-        async function toggleNotation(stem) {
-            const pianoBtn = document.getElementById('notationPianoBtn');
-            const drumsBtn = document.getElementById('notationDrumsBtn');
-            const container = document.getElementById('notationOSMDContainer');
-            if (!container || !currentJob) return;
+        function resetBassNotation() {
+            bassNotationOSMD = null;
+            bassNotationLoadedFor = null;
+            bassNotationExpanded = false;
+            const panel = document.getElementById('bassNotationPanel');
+            const container = document.getElementById('bassNotationContainer');
+            if (panel) {
+                panel.classList.remove('expanded');
+                panel.classList.add('collapsed');
+            }
+            if (container) container.innerHTML = '';
+            const chev = document.getElementById('bassNotationChevron');
+            if (chev) chev.textContent = '▸';
+        }
 
-            // Toggle off if already active
-            if (activeNotation === stem) {
-                activeNotation = null;
-                container.classList.remove('visible');
-                container.innerHTML = '';
-                if (pianoBtn) pianoBtn.classList.remove('active');
-                if (drumsBtn) drumsBtn.classList.remove('active');
-                notationOSMDInstance = null;
+        function updateBassNotationVisibility() {
+            const panel = document.getElementById('bassNotationPanel');
+            if (!panel) return;
+            // Only show the panel when in chords view AND the job has a bass MusicXML.
+            const inChordsView = (currentView === 'chords');
+            const hasBass = currentJob && !!findBassMusicXMLKey(currentJob);
+            panel.style.display = (inChordsView && hasBass) ? '' : 'none';
+        }
+
+        async function toggleBassNotation() {
+            const panel = document.getElementById('bassNotationPanel');
+            const container = document.getElementById('bassNotationContainer');
+            const chev = document.getElementById('bassNotationChevron');
+            if (!panel || !container || !currentJob) return;
+
+            if (bassNotationExpanded) {
+                bassNotationExpanded = false;
+                panel.classList.remove('expanded');
+                panel.classList.add('collapsed');
+                if (chev) chev.textContent = '▸';
                 return;
             }
 
-            // Update button states
-            activeNotation = stem;
-            if (pianoBtn) pianoBtn.classList.toggle('active', stem === 'piano');
-            if (drumsBtn) drumsBtn.classList.toggle('active', stem === 'drums');
+            bassNotationExpanded = true;
+            panel.classList.add('expanded');
+            panel.classList.remove('collapsed');
+            if (chev) chev.textContent = '▸';
 
-            // Find the MusicXML file for this stem
-            const xmlFiles = currentJob.musicxml_files || {};
-            let targetKey = null;
-            for (const k of Object.keys(xmlFiles)) {
-                if (k.startsWith(stem)) {
-                    if (k.includes('enhanced') || !targetKey) targetKey = k;
-                }
+            // Already loaded for this job — nothing else to do
+            if (bassNotationLoadedFor === currentJob.job_id && bassNotationOSMD) {
+                return;
             }
+
+            const targetKey = findBassMusicXMLKey(currentJob);
             if (!targetKey) {
-                container.innerHTML = '<div style="text-align:center; padding:1rem; color:#666;">No notation available</div>';
-                container.classList.add('visible');
+                container.innerHTML = '<div class="bass-notation-empty">No bass sheet music available for this track.</div>';
                 return;
             }
 
-            // Show loading
-            container.innerHTML = '<div style="text-align:center; padding:2rem; color:#666;">Loading notation...</div>';
-            container.classList.add('visible');
+            container.innerHTML = '<div class="bass-notation-empty">Loading bass notation...</div>';
 
             try {
                 const url = `${API_BASE}/download/${currentJob.job_id}/musicxml/${targetKey}`;
@@ -4453,10 +4485,14 @@
 
                 const xmlString = new TextDecoder().decode(new Uint8Array(data));
 
-                container.innerHTML = '<div id="notationOSMDRender"></div>';
-                const renderEl = document.getElementById('notationOSMDRender');
+                container.innerHTML = '<div id="bassNotationRender"></div>';
+                const renderEl = document.getElementById('bassNotationRender');
 
-                notationOSMDInstance = new opensheetmusicdisplay.OpenSheetMusicDisplay(renderEl, {
+                if (typeof opensheetmusicdisplay === 'undefined') {
+                    throw new Error('OpenSheetMusicDisplay library not loaded');
+                }
+
+                bassNotationOSMD = new opensheetmusicdisplay.OpenSheetMusicDisplay(renderEl, {
                     autoResize: true,
                     backend: 'svg',
                     drawTitle: true,
@@ -4466,14 +4502,17 @@
                     followCursor: false
                 });
 
-                await notationOSMDInstance.load(xmlString);
-                notationOSMDInstance.render();
+                await bassNotationOSMD.load(xmlString);
+                bassNotationOSMD.render();
+                bassNotationLoadedFor = currentJob.job_id;
 
-                const measures = notationOSMDInstance.sheet?.sourceMeasures?.length || 0;
-                console.log(`[Notation Toggle] ${stem} rendered — ${measures} measures`);
+                const measures = bassNotationOSMD.sheet?.sourceMeasures?.length || 0;
+                console.log(`[Bass Notation] rendered — ${measures} measures`);
             } catch (error) {
-                console.error('[Notation Toggle] Error:', error);
-                container.innerHTML = `<div style="text-align:center; padding:1rem; color:#f77;">Failed to load ${stem} notation: ${error.message}</div>`;
+                console.error('[Bass Notation] Error:', error);
+                container.innerHTML = `<div class="bass-notation-empty">Failed to load bass notation: ${error.message}</div>`;
+                bassNotationOSMD = null;
+                bassNotationLoadedFor = null;
             }
         }
 

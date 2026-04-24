@@ -973,6 +973,15 @@ def convert_midi_to_musicxml(job: ProcessingJob):
     - Dynamic markings from velocity
     - Artifact removal
     - Librosa beat-tracking fallback for tempo detection
+
+    SCOPE: Bass stems only. Phase 0 testing showed that Basic Pitch / CRNN
+    transcription of piano, drums, guitar, vocals and "other" stems produces
+    too many acoustic artifacts (~15 notes/measure for piano — overtones and
+    pick noise, not what was played) to be useful sheet music. Bass is
+    monophonic with a dominant fundamental, so Basic Pitch output is readable.
+    The chord chart + lyrics view is the primary practice output for all
+    other instruments. Do not re-enable non-bass MusicXML without first
+    addressing the artifact-noise problem in the transcription models.
     """
     if not NOTATION_CONVERTER_AVAILABLE:
         logger.warning("Notation converter not available - skipping MusicXML conversion")
@@ -980,7 +989,7 @@ def convert_midi_to_musicxml(job: ProcessingJob):
 
     job.stage = 'Converting to notation'
     job.progress = 95
-    logger.info("Converting MIDI to MusicXML via notation module")
+    logger.info("Converting MIDI to MusicXML via notation module (bass only)")
 
     xml_output_dir = OUTPUT_DIR / job.job_id / 'musicxml'
     xml_output_dir.mkdir(parents=True, exist_ok=True)
@@ -1001,6 +1010,14 @@ def convert_midi_to_musicxml(job: ProcessingJob):
     for stem_name, midi_path in job.midi_files.items():
         try:
             stem_type = stem_name.lower().split('_')[0]
+
+            # Gate: bass is the only stem we ship as sheet music. Skip
+            # piano/drums/guitar/vocals/other to save CPU and avoid serving
+            # artifact-ridden notation that users can't read.
+            if stem_type != 'bass':
+                logger.info(f"  ⏭️  Skipping MusicXML for {stem_name} (bass-only policy)")
+                continue
+
             xml_path = xml_output_dir / f"{stem_name}.musicxml"
 
             # Determine melody_mode from transcription_mode tracking
