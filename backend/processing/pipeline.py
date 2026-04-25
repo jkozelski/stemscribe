@@ -188,7 +188,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         print(f"[MODAL DEBUG] MODAL_AVAILABLE={MODAL_AVAILABLE}, ensemble={ensemble_mode}, mdx={mdx_model}", flush=True)
         if MODAL_AVAILABLE and not ensemble_mode and not mdx_model:
             # Modal cloud GPU — default when enabled, skips local GPU entirely
-            logger.info("☁️ Using Modal cloud GPU (T4) for separation")
+            logger.info("☁️ Using Modal cloud GPU (A10G) for separation")
             separation_success = separate_stems_modal(job, audio_path)
         elif ensemble_mode and ENSEMBLE_SEPARATOR_AVAILABLE:
             logger.info("🎯 Using ENSEMBLE mode (multi-model voting)")

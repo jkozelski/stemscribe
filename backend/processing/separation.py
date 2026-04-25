@@ -692,7 +692,7 @@ def separate_stems_ensemble(job: ProcessingJob, audio_path: Path):
 
 def separate_stems_modal(job: ProcessingJob, audio_path: Path):
     """
-    Stem separation via Modal cloud GPU (T4).
+    Stem separation via Modal cloud GPU (A10G).
 
     Sends audio bytes to a Modal serverless function running htdemucs_6s,
     receives MP3 stems back, and saves them locally. Falls back to local
@@ -715,7 +715,7 @@ def separate_stems_modal(job: ProcessingJob, audio_path: Path):
         size_mb = len(audio_bytes) / (1024 * 1024)
         logger.info(f"Uploading {size_mb:.1f} MB to Modal cloud GPU")
 
-        job.stage = 'Separating stems on cloud GPU (T4)'
+        job.stage = 'Separating stems on cloud GPU (A10G)'
         job.progress = 20
         save_job_checkpoint(job)
 
