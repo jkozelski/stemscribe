@@ -1012,42 +1012,65 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
 
     extension_rate = extended_count / total
 
-    # Consistency of the extensions: fraction that share the single most
-    # common quality. High consistency (e.g. all min7) = deliberate song
-    # style (pop/soul). Low consistency with moderate rate = stem bleed
-    # producing random extensions on triads.
+    # Family-aware consistency. The detector emits multiple flavors of the
+    # same musical idea — min7/min9/min11/min13/madd9 are all "minor with a
+    # b7" from a player's perspective; maj7/maj9/maj13/6/add9 are all
+    # "major with extensions." Counting consistency at the literal-quality
+    # level penalizes songs whose detector output VARIES within a family
+    # (Alright: 45 min9 + 15 min7 + 9 maj7 = 53% literal consistency, but
+    # 65% of extensions are minor-family). Family-level consistency tells
+    # us whether the extensions are coherent music or random bleed.
+    _MIN_FAMILY = {'min7', 'min9', 'min11', 'min13', 'min6', 'madd9'}
+    _MAJ_FAMILY = {'maj7', 'maj9', 'maj13', '6', 'add9'}
+    _DOM_FAMILY = {'7', '9', '11', '13'}
+    _SUS_FAMILY = {'7sus4', '9sus4', '7sus2'}
+
+    def _family(q: str) -> str:
+        if q in _MIN_FAMILY:
+            return 'min'
+        if q in _MAJ_FAMILY:
+            return 'maj'
+        if q in _DOM_FAMILY:
+            return 'dom'
+        if q in _SUS_FAMILY:
+            return 'sus'
+        return 'other'
+
     from collections import Counter as _Counter
     if ext_qualities:
-        _, top_count = _Counter(ext_qualities).most_common(1)[0]
-        ext_consistency = top_count / len(ext_qualities)
+        _, top_literal = _Counter(ext_qualities).most_common(1)[0]
+        ext_literal_consistency = top_literal / len(ext_qualities)
+        family_counter = _Counter(_family(q) for q in ext_qualities)
+        _, top_family = family_counter.most_common(1)[0]
+        ext_family_consistency = top_family / len(ext_qualities)
     else:
-        ext_consistency = 0.0
+        ext_literal_consistency = 0.0
+        ext_family_consistency = 0.0
 
-    # Systematic-bleed heuristic (revised 2026-04-23 to preserve genuine 7ths):
-    #   - extension rate in 0.60-0.90: MAYBE bleed
-    #     - if extensions are varied (consistency < 0.75), it's bleed → simplify
-    #     - if extensions are consistent (all the same min7 / maj7 / 7), keep
-    #   - extension rate > 0.90: real music (Cm7-Gm7-Dm7-Am7 style songs, jazz)
-    #     regardless of consistency — bleed wouldn't produce THIS many extensions
-    #   - extension rate < 0.60: per-chord confidence filter handles it
-    #
-    # Ground-truth test case: Jamiroquai "Alright" = Cm7 Gm7 Dm7 Am7 throughout.
-    # Old logic saw 92% extension rate → systematic_bleed=True → stripped all 7ths.
-    # New logic: 92% > 0.90 ceiling → systematic_bleed=False → keeps 7ths.
-    if extension_rate > 0.90:
+    # Systematic-bleed heuristic (2026-04-25):
+    #   - extension rate > 0.85 AND family consistency >= 0.65: real music in
+    #     a coherent extended style (jazz, soul, fusion). Don't simplify.
+    #     This is the Jamiroquai/Steely Dan case — the detector hears m7/m9/m11
+    #     interchangeably but they're all the same musical chord.
+    #   - extension rate 0.60-0.85 AND family consistency < 0.65: random
+    #     extensions on triads → bleed → simplify
+    #   - extension rate < 0.60: handled per-chord by confidence filter
+    if extension_rate > 0.85 and ext_family_consistency >= 0.65:
+        systematic_bleed = False
+    elif extension_rate > 0.90:
+        # Catch-all for VERY extended songs even with low family consistency
         systematic_bleed = False
     elif extension_rate > 0.60:
-        systematic_bleed = ext_consistency < 0.75
+        systematic_bleed = ext_family_consistency < 0.65
     else:
         systematic_bleed = False
 
-    # When the song is dominantly extended AND consistent (e.g. all min7), the
-    # per-chord confidence gate below would still strip 7ths whose individual
-    # confidence dips below 0.93 — which is normal for stem-derived detection.
-    # Skip the per-chord gate in that regime; the song-level signal already
-    # told us these extensions are real.
+    # When the song is dominantly extended AND family-consistent, skip the
+    # per-chord confidence gate below — song-level signal already told us
+    # these extensions are real. Stem-derived chord confidence routinely
+    # sits in 0.80-0.90, below the 0.93 per-chord threshold.
     high_consistency_extended = (
-        extension_rate > 0.75 and ext_consistency >= 0.75
+        extension_rate > 0.75 and ext_family_consistency >= 0.65
     )
 
     simplified = []
