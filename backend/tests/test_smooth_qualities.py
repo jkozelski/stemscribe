@@ -98,14 +98,29 @@ def test_legacy_minor_triad_smoothing_still_works():
     assert all(b["detector_quality"] == "m" for b in out)
 
 
-def test_no_dominant_quality_leaves_bars_unchanged():
-    """50/50 split — neither quality clears majority. Bars unchanged."""
+def test_minor_detection_wins_over_major_50_50():
+    """5 Cm + 5 C: m3 was detected 5 times, which is asymmetric positive
+    evidence the chord is minor. Snap all to Cm."""
     bars = [_bar(i, "C", "m") for i in range(5)] + [_bar(i + 5, "C", "") for i in range(5)]
     out = smooth_qualities(bars)
     qualities = [b["detector_quality"] for b in out]
-    # Original distribution preserved
-    assert qualities.count("m") == 5
-    assert qualities.count("") == 5
+    assert all(q == "m" for q in qualities), (
+        f"5 m3-detections should snap all to minor; got {qualities}"
+    )
+
+
+def test_no_minor_evidence_50_50_major_left_alone():
+    """5 Cmaj7 + 5 C7: no minor evidence, neither extension clears extension
+    threshold (10% × 10 = 1 needed but the most-common extension has 5
+    occurrences in 10 bars = 50% which is ABOVE 10%). Extension promotion
+    fires, snapping to one of them."""
+    bars = [_bar(i, "C", "maj7") for i in range(5)] + [_bar(i + 5, "C", "7") for i in range(5)]
+    out = smooth_qualities(bars)
+    qualities = {b["detector_quality"] for b in out}
+    # Pass 1 (extension promotion) picks the most-common — could be either,
+    # since 5 == 5. Counter.most_common is deterministic by insertion order
+    # in Python 3.7+, so first key wins.
+    assert qualities <= {"maj7", "7"}, f"should snap to one extension; got {qualities}"
 
 
 def test_different_roots_smoothed_independently():

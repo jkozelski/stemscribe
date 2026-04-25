@@ -320,9 +320,40 @@ def smooth_qualities(
             continue
         qualities_by_root.setdefault(root, Counter())[b.get("detector_quality", "")] += 1
 
+    def _is_minor_family(q: str) -> bool:
+        # Minor-family qualities all contain m3 (interval 3) in their template.
+        # Distinct from 'maj*' (major 3rd) and from plain '' (major triad).
+        if not q:
+            return False
+        if q.startswith('maj'):
+            return False
+        return q.startswith('m') or q.startswith('min')
+
     dominant_quality: Dict[str, str] = {}
     for root, counter in qualities_by_root.items():
         total = sum(counter.values())
+
+        # Pass 0: m3-detection priority. Detecting the minor 3rd (interval 3)
+        # is asymmetrically reliable evidence: when the detector outputs a
+        # minor-family quality on a root, the m3 was actually heard. When the
+        # detector outputs a major/dominant quality, the m3 may simply not
+        # have made it into pitch_classes — so absence of m3 is weak signal.
+        # If ≥3 minor-family events appear for this root, the chord IS minor
+        # even if non-minor detections outnumber. (Alright bug: 8 Gm9 + 25 G9
+        # → old logic picked G9 as majority; new logic picks Gm9 because
+        # m3 was detected ≥3 times.)
+        minor_counts = Counter({q: n for q, n in counter.items() if _is_minor_family(q)})
+        if sum(minor_counts.values()) >= 3:
+            # Prefer a minor-family EXTENSION (m7/m9/...) over plain m triad —
+            # it carries more information.
+            minor_ext_counts = Counter({q: n for q, n in minor_counts.items()
+                                        if q in _EXTENSION_QUALITIES})
+            if minor_ext_counts:
+                top_q, _ = minor_ext_counts.most_common(1)[0]
+            else:
+                top_q, _ = minor_counts.most_common(1)[0]
+            dominant_quality[root] = top_q
+            continue
 
         # Pass 1: prefer the most-common informative extension if it clears
         # both the absolute and relative thresholds.
