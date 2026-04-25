@@ -257,21 +257,54 @@ def combine_with_detector_quality(
 # Quality smoother — majority-vote snap per bass root
 # ---------------------------------------------------------------------------
 
+# Quality suffixes we treat as "informative extensions" — when the detector
+# surfaces these on a root, it's positive evidence the chord IS extended.
+# Triad-like qualities ('', 'm', 'sus2', 'sus4', etc.) carry no extension
+# information either way — a bar showing 'Cm' may genuinely be Cm or may be
+# a Cm7 where the detector failed to see the b7.
+_EXTENSION_QUALITIES = {
+    'm7', 'maj7', '7',
+    'm9', 'maj9', '9',
+    'm11', 'maj11', '11',
+    '13', 'maj13', 'm13',
+    'm6', '6',
+    'add9', 'madd9',
+    '7sus4', '9sus4',
+    'dim7', 'hdim7',
+}
+
+
 def smooth_qualities(
     bar_grid: List[Dict],
     min_occurrences: int = 2,
     majority_ratio: float = 0.5,
+    extension_min_occurrences: int = 3,
+    extension_min_ratio: float = 0.10,
 ) -> List[Dict]:
     """
-    Snap ambiguous quality labels to the dominant quality for each bass root.
+    Snap ambiguous quality labels to the most informative quality for each
+    bass root.
 
-    The polyphonic chord detector sometimes drops the minor 3rd on a subset
-    of bars (e.g. A instead of Am). If the same bass root pairs with quality
-    "m" in the majority of bars, snap the minority to "m" too.
+    Two passes:
 
-    A root's dominant quality is applied when:
-      - it appears at least `min_occurrences` times for that root
-      - it accounts for more than `majority_ratio` of that root's total bars
+    1. **Extension promotion.** Extensions (m7/maj7/7/etc.) carry strictly
+       more information than triads. When the detector surfaces an extension
+       on a root at least `extension_min_occurrences` times AND in at least
+       `extension_min_ratio` of that root's bars, snap ALL bars of that root
+       to the extension. Reason: when a song is genuinely Cm7 throughout, the
+       detector inconsistently catches the b7 — bars where the b7 wasn't
+       loud enough get labeled plain Cm. Without promotion, the legacy
+       majority-ratio rule would snap the minority Cm7 evidence to the
+       majority Cm — destroying the signal that proves the chord is m7.
+       This is the bug Apr 24's _simplify_bleed_extensions fix tried to
+       address but couldn't reach (it operates upstream on chord_events,
+       not on bar_grid).
+
+    2. **Triad smoothing (legacy).** If no extension promoted for a root,
+       fall back to the original majority-ratio rule: snap minority quality
+       to the dominant quality when it accounts for >majority_ratio of bars.
+       This still handles cases like '' (major triad) being inconsistently
+       paired with 'm' (minor triad) on the same root.
 
     Returns a new list (does not mutate the input). Source field is updated
     to track which bars were smoothed.
@@ -290,6 +323,18 @@ def smooth_qualities(
     dominant_quality: Dict[str, str] = {}
     for root, counter in qualities_by_root.items():
         total = sum(counter.values())
+
+        # Pass 1: prefer the most-common informative extension if it clears
+        # both the absolute and relative thresholds.
+        ext_counts = Counter({q: n for q, n in counter.items() if q in _EXTENSION_QUALITIES})
+        if ext_counts:
+            top_ext_q, top_ext_n = ext_counts.most_common(1)[0]
+            if (top_ext_n >= extension_min_occurrences
+                    and top_ext_n / total >= extension_min_ratio):
+                dominant_quality[root] = top_ext_q
+                continue
+
+        # Pass 2: legacy triad-majority smoothing.
         top_q, top_n = counter.most_common(1)[0]
         if top_n >= min_occurrences and top_n / total > majority_ratio:
             dominant_quality[root] = top_q
