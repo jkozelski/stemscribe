@@ -1073,6 +1073,29 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
         extension_rate > 0.75 and ext_family_consistency >= 0.65
     )
 
+    # Per-root family analysis (added 2026-04-25 PM). Songs with diverse
+    # chord palettes (Peg: Cmaj9-Bmin7-E7-Am7) have low GLOBAL family
+    # consistency but high PER-ROOT family consistency — each root's
+    # extensions are coherent in isolation, even though the song as a
+    # whole spans multiple families. Trust extensions on any root whose
+    # own extension events are family-consistent (≥3 events, ≥50% in one
+    # family).
+    from collections import defaultdict as _dd
+    extensions_by_root: dict = _dd(list)
+    for ce in chord_events:
+        if ce.root and ce.quality in _SIMPLIFY_MAP:
+            extensions_by_root[ce.root].append(ce.quality)
+
+    per_root_trusted: set = set()
+    for root, qualities in extensions_by_root.items():
+        if len(qualities) < 3:
+            continue
+        fam_counter = _Counter(_family(q) for q in qualities)
+        _, top_fam_count = fam_counter.most_common(1)[0]
+        # Strict majority — exactly 50/50 is ambiguous, not trusted.
+        if top_fam_count / len(qualities) > 0.5:
+            per_root_trusted.add(root)
+
     simplified = []
     for ce in chord_events:
         if ce.quality in _KEEP_EXTENDED:
@@ -1081,7 +1104,7 @@ def _simplify_bleed_extensions(chord_events: list) -> list:
 
         should_simplify = False
 
-        if ce.quality in _SIMPLIFY_MAP:
+        if ce.quality in _SIMPLIFY_MAP and ce.root not in per_root_trusted:
             if systematic_bleed:
                 # High bleed rate → simplify everything
                 should_simplify = True
