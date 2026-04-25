@@ -27,6 +27,19 @@ from services.downloader import download_from_url
 
 logger = logging.getLogger(__name__)
 
+# Post-separation concurrency cap. Stem separation is already serialized to 1
+# (GPU memory). The downstream pipeline (chord detection, MIDI, MusicXML, lead
+# sheet, vocal transcription) is CPU-bound and ran with no concurrency limit
+# until 2026-04-25, when 6 simultaneous jobs on CPX41 (8 vCPU / 16 GB) hit the
+# watchdog stall pattern: every job's chord-detection thread fights for CPU,
+# none completes inside the 600s threshold, watchdog retries, retries fail.
+#
+# Cap of 4 leaves CPX41 with ~2 vCPU per active job — enough headroom that
+# basic_pitch and music21 finish inside watchdog timeouts. Slot 5+ shows
+# "Queued for processing" and waits without burning compute or stalling.
+_POST_SEPARATION_MAX_CONCURRENT = 4
+_post_separation_semaphore = threading.Semaphore(_POST_SEPARATION_MAX_CONCURRENT)
+
 # ============ CONDITIONAL IMPORTS (single source of truth: dependencies.py) ============
 
 from dependencies import (
@@ -145,6 +158,7 @@ def apply_skills_to_job(job: ProcessingJob):
 
 def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = False, stereo_split: bool = False, gp_tabs: bool = True, chord_detection: bool = True, mdx_model: bool = False, ensemble_mode: bool = False):
     """Main processing pipeline - simplified: separate → (optional stereo split) → transcribe → done"""
+    post_sep_acquired = False
     try:
         job.status = 'processing'
         save_job_checkpoint(job)
@@ -202,6 +216,17 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
             except Exception:
                 pass
             return
+
+        # Acquire post-separation slot. See _post_separation_semaphore comment
+        # at top of file for rationale. If all 4 slots are busy, the user sees
+        # "Queued for processing" until a slot opens — much better UX than the
+        # watchdog-stall failure pattern we hit at 6 concurrent on 2026-04-25.
+        if not _post_separation_semaphore.acquire(blocking=False):
+            job.stage = 'Queued for processing'
+            save_job_checkpoint(job)
+            logger.info(f"Job {job.job_id} queued — waiting for post-separation slot")
+            _post_separation_semaphore.acquire()  # block until available
+        post_sep_acquired = True
 
         # Optional: Enhance stems (off by default)
         if enhance_stems and ENHANCER_AVAILABLE:
@@ -673,6 +698,12 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
             )
         except Exception:
             pass  # Error tracking itself must never break the pipeline
+
+    finally:
+        # Release post-separation slot for next queued job, regardless of
+        # whether processing succeeded, failed, or threw.
+        if post_sep_acquired:
+            _post_separation_semaphore.release()
 
 
 def process_url(job: ProcessingJob, url: str, enhance_stems: bool = False, stereo_split: bool = False, gp_tabs: bool = True, chord_detection: bool = True, mdx_model: bool = False, ensemble_mode: bool = False):
