@@ -219,6 +219,25 @@ def _detect_tempo(score: 'stream.Score', audio_path: Optional[str] = None) -> Op
             y, sr = librosa.load(str(audio_path), duration=60)
             tempo_detected, _ = librosa.beat.beat_track(y=y, sr=sr)
             tempo_val = float(tempo_detected) if hasattr(tempo_detected, '__float__') else float(tempo_detected[0])
+
+            # Half-time correction: librosa occasionally locks onto half the
+            # real tempo on tracks with sparse onsets (isolated bass stems,
+            # quiet intros). Symptom on a6755573 (Aja bass): detected 46 BPM,
+            # actual ~92 BPM, which squeezed bass MusicXML into half the
+            # measures. Re-run with a higher start_bpm prior; if the result
+            # agrees with doubling, prefer the doubled value.
+            if 40 < tempo_val < 70:
+                try:
+                    tempo_alt, _ = librosa.beat.beat_track(y=y, sr=sr, start_bpm=140)
+                    tempo_alt = float(tempo_alt) if hasattr(tempo_alt, '__float__') else float(tempo_alt[0])
+                    # Accept the higher estimate if it's roughly 2× the original
+                    # (within 5 BPM) and lands in a normal pop/rock range.
+                    if abs(tempo_val * 2 - tempo_alt) < 5 and 80 < tempo_alt < 200:
+                        logger.info(f"  Half-time corrected: {tempo_val:.0f} → {tempo_alt:.0f} BPM")
+                        tempo_val = tempo_alt
+                except Exception:
+                    pass
+
             if 40 < tempo_val < 240:
                 logger.info(f"  Detected tempo from audio: {tempo_val:.0f} BPM")
                 return tempo_val
