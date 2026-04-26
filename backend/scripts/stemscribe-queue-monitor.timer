@@ -1,0 +1,12 @@
+[Unit]
+Description=Run StemScriber queue-depth monitor every 5 minutes
+Requires=stemscribe-queue-monitor.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Unit=stemscribe-queue-monitor.service
+
+[Install]
+WantedBy=timers.target

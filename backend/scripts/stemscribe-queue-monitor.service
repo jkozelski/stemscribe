@@ -1,0 +1,11 @@
+[Unit]
+Description=StemScriber queue-depth alerting (one-shot)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/stemscribe
+EnvironmentFile=/opt/stemscribe/backend/.env
+ExecStart=/opt/stemscribe/venv311/bin/python /opt/stemscribe/backend/scripts/monitor_queue.py
+StandardOutput=journal
+StandardError=journal
