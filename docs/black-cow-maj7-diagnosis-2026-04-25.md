@@ -73,6 +73,53 @@ maj7 fix only addresses bug 2.
 
 Estimated work: 3-4 hours including bass-root investigation.
 
+---
+
+## UPDATE 2026-04-26: bass-root WAS NOT broken — it's slash-chord detection
+
+Re-ran pyin diagnostic over the full 308s of Black Cow's bass stem.
+Pitch-class distribution: A 22.3%, D 16.2%, E 16.2%, C 11.6%, ... that's
+EXACTLY what you'd expect for a song in A major where the bassist plays
+the famous descending chromatic intro line (A-G-F#-E-D-C-B-A). The "wrong"
+C in early segments was correct — the bassist really does play C as a
+passing tone.
+
+**The real bug is slash-chord detection.** When the bassist walks down
+through the scale beneath a sustained chord (Amaj7 with bass A→G→F#→E
+→D→C→B→A), the harmony stays Amaj7 but the bass note changes per beat.
+The detector currently treats bass=C as "chord root is C" → outputs C9.
+The musically correct output is `Amaj7/C` (slash chord: Amaj7 chord with
+C in bass).
+
+### Slash-chord detection approach
+
+Compare bars over a moving window:
+- If `bass_root` changes from one bar to the next BUT `pitch_classes`
+  (the harmony notes detected from guitar/piano stems) are mostly the
+  same, then the harmony is stable and only the bass moved → slash chord
+- Hold the previous chord's quality, change only the slash-bass label
+- Output: `Amaj7/C` instead of `C9`
+
+This requires multi-bar analysis in `combine_with_detector_quality` (or a
+new pass after it). It's a meaningfully larger architectural change than
+yesterday's per-root family override — touches the bar_grid construction
+loop, not just smoothing.
+
+### Revised priority
+
+Slash-chord detection is the bigger fix and probably the right one. But
+it's harder than the maj7 promotion. Realistic order:
+1. Try the key-aware maj7 promotion FIRST (smaller, may improve the
+   non-walk-bass bars on Black Cow). Test against Cosmic Girl/Alright/Aja.
+2. Slash-chord detection separately, larger scope.
+3. Regression suite covers both.
+
+### What didn't I deploy today
+
+Stopped after the diagnostic — the slash-chord finding changes the fix
+shape, and the right move is to think it through, not ship blind.
+Marketing draft + sections-empty bug investigation are next instead.
+
 ## Files
 
 - Diagnostic script: `/tmp/diag_blackcow_maj7.py` on local + VPS
