@@ -120,6 +120,43 @@ Stopped after the diagnostic — the slash-chord finding changes the fix
 shape, and the right move is to think it through, not ship blind.
 Marketing draft + sections-empty bug investigation are next instead.
 
+---
+
+## UPDATE 2026-04-26 (afternoon): maj7 promotion shipped, didn't fire
+
+Shipped commit `bb64448` — `promote_diatonic_maj7()` in
+`bass_root_extraction.py`. Promotes I/IV dom-7 chords to maj-7 when key
+is major and song doesn't look like a 12-bar blues. 17 tests cover
+positive cases + 4 categories of regression protection.
+
+**Verification result:**
+- Black Cow: 0 promotions fired. Detected key was "D" (wrong — Black
+  Cow is in A major). With key=D, A9 is the V chord, and my safety
+  check correctly skips V.
+- Alright (regression): 92/97 extensions, 0 maj-family bars, 0
+  promoted. Pattern unchanged. Fix is safe in production.
+
+**Real bottleneck for Black Cow:** Krumhansl-Kessler key detection in
+`detect_key_from_chords()` is fooled by the slash-chord moments. Black
+Cow's chord weights: A=42, D=25, E=15, C=16. C is high because slash-
+chord bars output as "C9" (when really Amaj7/C). C as bIII isn't part
+of A major, so the K-K correlation drifts toward D major.
+
+**Either fix unblocks Black Cow:**
+1. **Slash-chord detection** (planned) — fixes the C9 → Amaj7/C
+   relabeling. As a side effect, fixes key detection too because the
+   noise C-root chords disappear.
+2. **Key detection over pitch-classes** — instead of weighting only
+   chord roots, also weight the implied notes of each chord (M3, 5,
+   etc.). A song with A I, D IV, E V chords should add A/C#/E (from A
+   major), D/F#/A (from D), E/G#/B (from E) to the histogram. The
+   resulting profile would clearly fit A major even with passing C
+   chords.
+
+Either fix is ~2-4 hours of careful work. Slash-chord detection is the
+cleaner architectural fix; key-detection-over-pitch-classes is faster
+to ship.
+
 ## Files
 
 - Diagnostic script: `/tmp/diag_blackcow_maj7.py` on local + VPS

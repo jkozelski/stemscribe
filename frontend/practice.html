@@ -2219,6 +2219,7 @@
             <button class="header-btn" id="downloadGP" style="display:none;" title="Download Guitar Pro"><img src="icons/custom/32/guitar-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;"> GP</button>
             <a href="tuner.html" class="header-btn">🎸 Tuner</a>
             <a href="fretboard.html" class="header-btn">🎹 Scales</a>
+            <button class="header-btn" id="reportIssueBtn" title="Report a chord-chart issue with this song">⚠ Report</button>
             <a href="index.html" class="header-btn">← Back</a>
             <!-- Auth: Sign-In Button -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
@@ -8307,6 +8308,41 @@
 
         // Print
         document.getElementById('printNotation')?.addEventListener('click', () => window.print());
+
+        // ══════════════════════════════════════════════════════════════
+        // ── Report Issue ──
+        // ══════════════════════════════════════════════════════════════
+        // User-reported chord-chart problems on a specific job. Captures
+        // the job_id + a short description, sends to /api/report-issue.
+        // No backend yet — for now this opens a mailto: with prefilled
+        // subject/body so reports flow to support@. Trivially upgradable
+        // to an API endpoint when we want structured ticket tracking.
+        document.getElementById('reportIssueBtn')?.addEventListener('click', () => {
+            var jobId = (typeof window.currentJobId === 'string') ? window.currentJobId : '';
+            if (!jobId) {
+                var url = window.location.href;
+                var match = url.match(/[?&]job=([^&#]+)/);
+                jobId = match ? match[1] : '(unknown job)';
+            }
+            var description = prompt(
+                'What\'s wrong with the chord chart?\n\n' +
+                'Examples:\n' +
+                '  • Chord X should be Y\n' +
+                '  • Section labels are wrong\n' +
+                '  • Key is detected wrong\n\n' +
+                'Your message:'
+            );
+            if (!description) return;
+            var subject = encodeURIComponent('StemScriber chord-chart issue — job ' + jobId);
+            var body = encodeURIComponent(
+                description + '\n\n' +
+                '— — — — — — — — — —\n' +
+                'Job ID: ' + jobId + '\n' +
+                'URL: ' + window.location.href + '\n' +
+                'User agent: ' + navigator.userAgent
+            );
+            window.location.href = 'mailto:support@stemscriber.com?subject=' + subject + '&body=' + body;
+        });
 
         // ══════════════════════════════════════════════════════════════
         // ── Piano Keyboard Chord Visualizer ──
