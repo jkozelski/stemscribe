@@ -170,13 +170,23 @@ def format_chart(
     #   2. detector-only quantized to bars (when no bass stem / grid)
     #   3. raw detector events (when no grid at all)
     if grid and bass_roots:
-        from processing.bass_root_extraction import combine_with_detector_quality, smooth_qualities
+        from processing.bass_root_extraction import (
+            combine_with_detector_quality, smooth_qualities, promote_diatonic_maj7,
+        )
         bar_grid = combine_with_detector_quality(bass_roots, chords, grid)
         bar_grid = smooth_qualities(bar_grid)
+        # Key-aware maj7 promotion: when a song is in a major key, the
+        # detector tends to label I and IV chords as A9/D9 (dom7) when
+        # the song actually uses Amaj7/Dmaj7. Fix only fires for major
+        # keys, only on I/IV degrees, and only if the song doesn't look
+        # like a 12-bar blues (V also dom-7).
+        bar_grid = promote_diatonic_maj7(bar_grid, key)
         smoothed_count = sum(1 for b in bar_grid if "smoothed" in (b.get("source") or ""))
+        promoted_count = sum(1 for b in bar_grid if "maj7promoted" in (b.get("source") or ""))
         logger.info(
             f"chart_formatter: bar grid built from bass+detector "
-            f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed)"
+            f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
+            f"{promoted_count} maj7-promoted)"
         )
     elif grid:
         bar_grid = _quantize_chords_to_bars(chords, grid)

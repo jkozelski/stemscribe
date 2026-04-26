@@ -387,6 +387,128 @@ def smooth_qualities(
 
 
 # ---------------------------------------------------------------------------
+# Diatonic maj7 promotion — key-aware fix for "A9 instead of Amaj7" pattern
+# ---------------------------------------------------------------------------
+
+# Map dom-family quality → its maj-family counterpart.
+# Promotion is one-directional: 7→maj7, 9→maj9, 13→maj13.
+# 11 stays as-is (maj11 is unusual; safer to leave).
+_DOM_TO_MAJ_PROMOTION = {
+    '7':  'maj7',
+    '9':  'maj9',
+    '13': 'maj13',
+}
+
+# Note → pitch class. Mirrors _NOTE_TO_PC at module top but redefined here
+# to keep this section self-contained.
+_PC_FROM_NOTE = {
+    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4,
+    'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8,
+    'A': 9, 'A#': 10, 'Bb': 10, 'B': 11,
+}
+
+
+def promote_diatonic_maj7(bar_grid: List[Dict], key: Optional[str]) -> List[Dict]:
+    """
+    Promote dom-7 chords on the I and IV degrees of a major key to maj-7.
+
+    Why: when a song is in a major key, the I and IV chords are typically
+    maj7 (not dom7). The detector inconsistently catches the major-7 note
+    (interval 11) — when it doesn't, the chord falls through to dom-7 (b7
+    only). On Black Cow this manifests as A9 instead of Amaj7 on the I
+    chord throughout.
+
+    Safety conditions:
+      - Only fires when key is detected as major.
+      - Only promotes I and IV degrees (the chords most likely to be maj7
+        in tonal music). V is left alone.
+      - Skipped entirely when V is ALSO dom-7 in this song (blues
+        signature: I7 IV7 V7 are all dominants by design — promoting I
+        and IV would wreck a 12-bar blues).
+
+    Args:
+        bar_grid: bar-level chord grid as produced by combine_with_detector_quality.
+        key: detected key string. Examples: "A", "G", "F#" (major), "Am",
+             "F#m", "A#m" (minor — function is no-op).
+
+    Returns:
+        New list (does not mutate input). Bars whose quality is changed
+        get '+maj7promoted' appended to their source field.
+    """
+    if not bar_grid or not key:
+        return bar_grid
+
+    # Normalize key. Anything ending in 'm' or 'min' is minor — skip.
+    key_str = key.strip()
+    if not key_str:
+        return bar_grid
+    is_minor = (
+        key_str.endswith('m')
+        or key_str.endswith('min')
+        or key_str.lower().endswith('minor')
+    )
+    if is_minor:
+        return bar_grid
+
+    # Extract the tonic note from the key string (e.g., "A major" → "A",
+    # "F#" → "F#", "Bb major" → "Bb").
+    tonic = key_str.split()[0] if ' ' in key_str else key_str
+    tonic_pc = _PC_FROM_NOTE.get(tonic)
+    if tonic_pc is None:
+        return bar_grid
+
+    iv_pc = (tonic_pc + 5) % 12   # IV is a perfect 4th up from I
+    v_pc = (tonic_pc + 7) % 12    # V is a perfect 5th up from I
+
+    # Blues detection: if any bar shows V with a dom-quality (7/9/11/13),
+    # treat the whole song as blues-flavored and skip promotion.
+    v_is_dom = any(
+        _PC_FROM_NOTE.get(b.get('bass_root') or '') == v_pc
+        and b.get('detector_quality', '') in _DOM_TO_MAJ_PROMOTION
+        for b in bar_grid
+    )
+    if v_is_dom:
+        logger.info(
+            f"  maj7 promotion skipped: V chord is dom-quality "
+            f"(blues pattern in key {tonic})"
+        )
+        return bar_grid
+
+    # Eligible bars: dom-quality on I or IV.
+    promoted_count = 0
+    out: List[Dict] = []
+    for b in bar_grid:
+        bass = b.get('bass_root') or ''
+        bass_pc = _PC_FROM_NOTE.get(bass)
+        quality = b.get('detector_quality', '')
+
+        is_i_or_iv = bass_pc is not None and bass_pc in (tonic_pc, iv_pc)
+        is_promotable = quality in _DOM_TO_MAJ_PROMOTION
+
+        if is_i_or_iv and is_promotable:
+            new_quality = _DOM_TO_MAJ_PROMOTION[quality]
+            new_b = dict(b)
+            new_b['detector_quality'] = new_quality
+            new_b['chord'] = bass + new_quality
+            new_b['source'] = (b.get('source', '') or '') + '+maj7promoted'
+            # Preserve slash bass if present
+            existing_chord = b.get('chord', '')
+            if '/' in existing_chord:
+                slash = existing_chord.split('/', 1)[1]
+                new_b['chord'] = bass + new_quality + '/' + slash
+            out.append(new_b)
+            promoted_count += 1
+        else:
+            out.append(b)
+
+    if promoted_count:
+        logger.info(
+            f"  Promoted {promoted_count} dom→maj7 chords on I/IV in key {tonic}"
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
 # CLI for sanity check
 # ---------------------------------------------------------------------------
 
