@@ -208,17 +208,18 @@ A gate is **launch-blocking** if its status is 🔴 AND it's marked
 - Personal outreach drafted but **not sent**. Per memory, you find
   artist relationships fragile — you said you'd handle this when home.
 
-### 6.5 Social handles 🔴
-- @stemscriber on Twitter / Bluesky / Instagram — exist? Not verified.
-  **Action:** confirm handles you control before any link goes out.
+### 6.5 Social handles 🟢
+- Jeff confirmed 2026-04-26: he owns @stemscriber on Facebook,
+  Instagram, Twitter, and TikTok. (Bluesky not yet — optional.)
 
 ---
 
 ## 7. Summary: launch decision framework
 
-### Hard blockers (red gates)
-- 4.2: Queue alerting cron — ~30 min to ship
-- 6.5: Social handles claimed — ~15 min if available
+### Hard blockers (red gates) — ALL CLEARED 🟢
+- ~~4.2: Queue alerting cron~~ — shipped 2026-04-26 (commit `faf25ba`)
+- ~~6.5: Social handles claimed~~ — confirmed 2026-04-26: @stemscriber
+  on FB / IG / Twitter / TikTok
 
 ### Yellow gates (ship-ready, polish later)
 - 3.4: Flip `RETENTION_DRY_RUN=false`
