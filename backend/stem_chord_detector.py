@@ -788,21 +788,55 @@ def cross_validate_segments(guitar_pcs: set, bass_root: Optional[int],
 # ============ KEY DETECTION ============
 
 def detect_key_from_chords(chord_events: List[ChordEvent]) -> str:
-    """Detect musical key from a chord progression using Krumhansl-Kessler profiles."""
+    """Detect musical key from a chord progression using Krumhansl-Kessler profiles.
+
+    Weights pitch-classes implied by each chord's quality (root + 3rd + 5th +
+    7th when applicable), not just chord roots. This is more robust to
+    slash-chord moments where a passing bass note temporarily replaces the
+    chord root — the harmony notes still vote for the real key.
+
+    Example: Black Cow's descending bass walk (A-G-F#-E-D-C-B-A) over a
+    sustained Amaj7 gets labeled bar-by-bar as A9 / G9 / F# / E / D / C9 / B
+    by the detector. Counting only roots → C, G, F# noise pulls the key
+    away from A. Counting CHORD NOTES → every bar contributes A, C#, E,
+    G# (Amaj7's notes), so A major dominates the histogram.
+    """
     if not chord_events:
         return 'C'
 
-    # Count weighted root occurrences
-    root_weights = np.zeros(12)
+    # Build a weighted histogram of pitch-classes implied by each chord.
+    # The root carries full weight (it IS the tonic). The 3rd and 5th carry
+    # half weight (they're scale degree info). Extensions (7ths, 9ths, etc.)
+    # are SKIPPED — they add noise that pulls away from the real key. For
+    # example, Bm7 includes A (the b7), and counting A would falsely vote
+    # for the key of A on a song that's actually in B minor.
+    pc_weights = np.zeros(12)
     for c in chord_events:
-        if c.root in NOTE_NAMES:
-            idx = NOTE_NAMES.index(c.root)
-            root_weights[idx] += c.duration * c.confidence
+        if c.root not in NOTE_NAMES:
+            continue
+        root_pc = NOTE_NAMES.index(c.root)
+        weight = c.duration * c.confidence
 
-    if np.sum(root_weights) == 0:
+        # Root always counts at full weight.
+        pc_weights[root_pc] += weight
+
+        # Add the parent-triad 3rd and 5th at half weight, IF the chord's
+        # quality template tells us which 3rd is in play. Extensions (>5)
+        # are ignored — they're noise for key detection.
+        intervals = CHORD_INTERVALS.get(c.quality)
+        if intervals is None:
+            continue
+        for iv in intervals:
+            if iv == 0:
+                continue  # already counted as root
+            if iv > 7:
+                continue  # skip 7ths and above
+            pc_weights[(root_pc + iv) % 12] += weight * 0.5
+
+    if np.sum(pc_weights) == 0:
         return 'C'
 
-    root_weights /= np.sum(root_weights)
+    pc_weights /= np.sum(pc_weights)
 
     # Krumhansl-Kessler key profiles
     major_profile = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88])
@@ -811,18 +845,38 @@ def detect_key_from_chords(chord_events: List[ChordEvent]) -> str:
     major_profile /= np.sum(major_profile)
     minor_profile /= np.sum(minor_profile)
 
+    # Chord-quality polarity: how minor is this song?
+    # K-K profiles look at raw pitch-class distributions, which can be
+    # ambiguous between e.g. G major and G minor when the roots are the
+    # same. Chord QUALITY tells us which way the song is leaning. If 60%+
+    # of chords are minor-family, this is a minor-key song — restrict
+    # K-K to minor candidates. If <30%, restrict to major.
+    _minor_family_qs = {'min', 'min7', 'min9', 'min11', 'min13', 'min6', 'madd9'}
+    valid_events = [c for c in chord_events if c.root in NOTE_NAMES]
+    total_evs = len(valid_events)
+    minor_count = sum(1 for c in valid_events if c.quality in _minor_family_qs)
+    minor_polarity = (minor_count / total_evs) if total_evs else 0.0
+
+    if minor_polarity >= 0.6:
+        consider_major, consider_minor = False, True
+    elif minor_polarity <= 0.3:
+        consider_major, consider_minor = True, False
+    else:
+        consider_major, consider_minor = True, True
+
     best_corr, best_key = -1, 'C'
     for i in range(12):
-        rotated = np.roll(root_weights, -i)
-        major_corr = np.corrcoef(rotated, major_profile)[0, 1]
-        minor_corr = np.corrcoef(rotated, minor_profile)[0, 1]
-
-        if major_corr > best_corr:
-            best_corr = major_corr
-            best_key = NOTE_NAMES[i]
-        if minor_corr > best_corr:
-            best_corr = minor_corr
-            best_key = f"{NOTE_NAMES[i]}m"
+        rotated = np.roll(pc_weights, -i)
+        if consider_major:
+            major_corr = np.corrcoef(rotated, major_profile)[0, 1]
+            if major_corr > best_corr:
+                best_corr = major_corr
+                best_key = NOTE_NAMES[i]
+        if consider_minor:
+            minor_corr = np.corrcoef(rotated, minor_profile)[0, 1]
+            if minor_corr > best_corr:
+                best_corr = minor_corr
+                best_key = f"{NOTE_NAMES[i]}m"
 
     return best_key
 
