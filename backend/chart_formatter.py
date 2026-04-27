@@ -175,6 +175,13 @@ def format_chart(
         )
         bar_grid = combine_with_detector_quality(bass_roots, chords, grid)
         bar_grid = smooth_qualities(bar_grid)
+        # Re-detect key from the smoothed bar_grid before maj7 promotion.
+        # The raw chord_events feed detect_key_from_chords with mostly plain
+        # 'maj' qualities (the detector emits triads; family-aware promotion
+        # to dom7/9 happens INSIDE smooth_qualities). The static-dominant
+        # heuristic in detect_key_from_chords needs the dom-quality labels
+        # to fire — so we re-detect here, after smoothing.
+        key = _redetect_key_from_bargrid(bar_grid, fallback=key)
         # Key-aware maj7 promotion: when a song is in a major key, the
         # detector tends to label I and IV chords as A9/D9 (dom7) when
         # the song actually uses Amaj7/Dmaj7. Fix only fires for major
@@ -186,7 +193,7 @@ def format_chart(
         logger.info(
             f"chart_formatter: bar grid built from bass+detector "
             f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
-            f"{promoted_count} maj7-promoted)"
+            f"{promoted_count} maj7-promoted, key={key})"
         )
     elif grid:
         bar_grid = _quantize_chords_to_bars(chords, grid)
@@ -368,6 +375,43 @@ def format_chart(
 # ---------------------------------------------------------------------------
 # Bar quantization — assign one chord per bar based on the tempo grid
 # ---------------------------------------------------------------------------
+
+def _redetect_key_from_bargrid(bar_grid: List[Dict], fallback: Optional[str]) -> str:
+    """Re-run key detection over the post-smoothing bar_grid.
+
+    The bar_grid carries the family-aware quality labels (e.g. 'A9' instead
+    of plain 'maj') that smooth_qualities promotes. Running detect_key_from_chords
+    here lets the static-dominant heuristic see those labels — without this
+    pass, the heuristic only sees raw 'maj' from the detector and never fires
+    on songs like Black Cow (A9 vamp gets called D major).
+    """
+    if not bar_grid:
+        return fallback or 'C'
+    try:
+        from stem_chord_detector import detect_key_from_chords, ChordEvent
+    except Exception:
+        return fallback or 'C'
+    events = []
+    for b in bar_grid:
+        root = b.get('root') or b.get('detector_root')
+        chord = b.get('chord') or ''
+        quality = b.get('detector_quality')
+        # Pull quality from the chord label if not explicitly stored
+        if not quality and root and chord.startswith(root):
+            quality = chord[len(root):] or 'maj'
+        if not root or not quality:
+            continue
+        st = b.get('start_time', 0.0)
+        en = b.get('end_time', st + 1.0)
+        dur = max(0.1, en - st)
+        events.append(ChordEvent(
+            time=st, duration=dur, chord=chord, root=root,
+            quality=quality, confidence=b.get('bass_confidence', 0.7) or 0.7,
+        ))
+    if not events:
+        return fallback or 'C'
+    return detect_key_from_chords(events)
+
 
 def _bar_grid_to_chord_events(bar_grid: List[Dict]) -> List[Dict]:
     """

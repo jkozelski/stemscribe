@@ -804,6 +804,27 @@ def detect_key_from_chords(chord_events: List[ChordEvent]) -> str:
     if not chord_events:
         return 'C'
 
+    # Static-dominant heuristic: catches Black Cow / blues / funk where a
+    # single dom7/9 chord is held as the tonic. K-K reads the b7+3rd voicing
+    # as V→I motion and picks the implied IV as the key (Black Cow's A9 vamp
+    # gets called D major). If one dom-quality root covers ≥30% of the song's
+    # weighted duration, treat it as a static tonic instead.
+    # Why: V chords are normally short (1-2 bars per phrase). If a dominant
+    # chord dominates ≥30% of total time, it's overwhelmingly more likely
+    # functioning as a tonic colored with a b7 than as a true V.
+    _dom_quality_set = {'7', '9', '11', '13', '7sus4', '9sus4'}
+    _valid_for_dom = [c for c in chord_events if c.root in NOTE_NAMES]
+    _total_w = sum(c.duration * c.confidence for c in _valid_for_dom)
+    if _total_w > 0:
+        _dom_by_root: dict = {}
+        for c in _valid_for_dom:
+            if c.quality in _dom_quality_set:
+                _dom_by_root[c.root] = _dom_by_root.get(c.root, 0.0) + c.duration * c.confidence
+        if _dom_by_root:
+            _top_root, _top_w = max(_dom_by_root.items(), key=lambda kv: kv[1])
+            if _top_w / _total_w >= 0.30:
+                return _top_root
+
     # Build a weighted histogram of pitch-classes implied by each chord.
     # The root carries full weight (it IS the tonic). The 3rd and 5th carry
     # half weight (they're scale degree info). Extensions (7ths, 9ths, etc.)

@@ -73,22 +73,32 @@ def test_aja_pattern_detects_b_minor():
 
 def test_black_cow_pattern_detects_a_major():
     """Black Cow chord events: A9 (37) D (25) C9 (16) E (15) — as
-    observed in the v4 audit. Real key is A major. Old root-weighted
-    K-K detected D. New pc-weighted should detect A or A's relative.
+    observed in the v4 audit. Real key is A major. A9 dominates ≥30% of
+    weighted duration → static-dominant heuristic returns 'A' directly.
     """
     events = (
         [_ev("A9", "A", "9") for _ in range(37)]
         + [_ev("D", "D", "maj") for _ in range(25)]
-        + [_ev("C9", "C", "9") for _ in range(16)]  # the slash-chord noise
+        + [_ev("C9", "C", "9") for _ in range(16)]
         + [_ev("E", "E", "maj") for _ in range(15)]
     )
     key = detect_key_from_chords(events)
-    # We accept A major OR F# minor (relative minor of A) — both indicate
-    # the song's real tonality. Old detector returned 'D' which is wrong.
-    assert key in ('A', 'F#m'), (
-        f"Black Cow's chord-note distribution should detect A major "
-        f"(or F# minor relative); got {key}"
+    assert key == 'A', f"static-dominant heuristic should pick A; got {key}"
+
+
+def test_static_dominant_below_threshold_falls_through_to_kk():
+    """If no single dom chord covers ≥30%, the guard shouldn't fire — fall
+    through to K-K. G (40) + C (30) + D7 (5) → D7 is 6.7%, way below
+    threshold. Key should resolve via K-K to G major, NOT D (D is the
+    chord-root that would only be picked if the dom guard misfired)."""
+    events = (
+        [_ev("G", "G", "maj") for _ in range(40)]
+        + [_ev("C", "C", "maj") for _ in range(30)]
+        + [_ev("D7", "D", "7") for _ in range(5)]
     )
+    key = detect_key_from_chords(events)
+    assert key != 'D', f"dom guard misfired below 30%; got {key}"
+    assert key in ('G', 'Em'), f"expected G major (or relative Em); got {key}"
 
 
 def test_black_cow_without_slash_chord_noise_detects_a_major():
