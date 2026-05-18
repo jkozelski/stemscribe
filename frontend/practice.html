@@ -1419,6 +1419,72 @@
 
         #chordChart.visible { display: block; }
 
+        /* === Collapsible chord-diagram panel === */
+        .chord-diagrams-wrap {
+            margin-bottom: 1rem;
+        }
+        .chord-diagrams-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.35rem 0.5rem;
+            margin-bottom: 0.25rem;
+            user-select: none;
+        }
+        .chord-diagrams-header .cd-title {
+            font-family: 'Righteous', cursive;
+            font-size: 0.85rem;
+            color: var(--text-dim, #888);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .chord-diagrams-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: transparent;
+            border: 1px solid var(--border, #2a2a35);
+            color: var(--orange);
+            font: inherit;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+            cursor: pointer;
+            line-height: 1;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .chord-diagrams-toggle:hover {
+            background: rgba(255, 123, 84, 0.1);
+            border-color: var(--orange);
+        }
+        .chord-diagrams-toggle .cd-chevron {
+            display: inline-block;
+            font-size: 0.85rem;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+        .chord-diagrams-wrap.collapsed .chord-diagrams-row {
+            max-height: 0 !important;
+            opacity: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            border-top-width: 0 !important;
+            border-bottom-width: 0 !important;
+            overflow: hidden !important;
+            pointer-events: none;
+        }
+        .chord-diagrams-row {
+            /* Animate collapse/expand. Cap at a generous height for the
+               diagrams row when expanded; horizontal overflow still works. */
+            max-height: 600px;
+            opacity: 1;
+            transition: max-height 0.2s ease, opacity 0.2s ease,
+                        padding 0.2s ease, margin 0.2s ease, border-width 0.2s ease;
+            will-change: max-height, opacity;
+        }
         .chord-section {
             margin-bottom: 1.5rem;
         }
@@ -1491,6 +1557,21 @@
             color: #111;
             line-height: 1.5;
             letter-spacing: 0.01em;
+            /* Mobile: faster tap response + visible feedback when edit mode is on */
+            -webkit-tap-highlight-color: rgba(255, 123, 84, 0.25);
+            touch-action: manipulation;
+        }
+        /* In edit mode, give rows a larger tap target + clear hover/active state */
+        .gig-chord-row[onclick],
+        .gig-lyric-row[onclick] {
+            padding: 0.4rem 0.25rem;
+            margin: 0.1rem 0;
+            border-radius: 4px;
+            min-height: 44px;
+        }
+        .gig-chord-row[onclick]:active,
+        .gig-lyric-row[onclick]:active {
+            background: rgba(255, 123, 84, 0.15);
         }
         .gig-slash-row {
             white-space: pre;
@@ -1506,9 +1587,33 @@
             font-style: normal;
             line-height: 1.5;
             min-height: 1.2em;
+            -webkit-tap-highlight-color: rgba(255, 123, 84, 0.25);
+            touch-action: manipulation;
         }
         .gig-bar-line {
             color: #999;
+        }
+        /* Repeat-count badge on collapsed identical bars/lines (#70) */
+        .gig-repeat-badge {
+            display: inline-block;
+            margin-left: 0.6rem;
+            padding: 0.05rem 0.4rem;
+            background: var(--orange);
+            color: #111;
+            border-radius: 3px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            vertical-align: middle;
+        }
+        /* Edit button — on mobile, override inline-style padding so the tap target
+           hits Apple's 44x44 minimum. Without !important the inline style wins. */
+        @media (max-width: 768px) {
+            #manualEditBtn {
+                padding: 0.7rem 1.1rem !important;
+                font-size: 0.95rem !important;
+                min-height: 44px;
+            }
         }
         /* Print overrides for gig chart */
         @media print {
@@ -2217,10 +2322,11 @@
             <button class="header-btn" id="printNotation" style="display:none;" title="Print">🖨 Print</button>
             <button class="header-btn" id="downloadMusicXML" style="display:none;" title="Download MusicXML">📜 XML</button>
             <button class="header-btn" id="downloadGP" style="display:none;" title="Download Guitar Pro"><img src="icons/custom/32/guitar-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;"> GP</button>
-            <a href="tuner.html" class="header-btn">🎸 Tuner</a>
-            <a href="fretboard.html" class="header-btn">🎹 Scales</a>
-            <button class="header-btn" id="reportIssueBtn" title="Report a chord-chart issue with this song">⚠ Report</button>
-            <a href="index.html" class="header-btn">← Back</a>
+            <a href="tuner.html" class="header-btn"><img src="icons/custom/32/guitar-vintage.png" width="18" height="18" style="vertical-align:middle; margin-right:0.35rem; border-radius:3px;"> Tuner</a>
+            <a href="fretboard.html" class="header-btn"><img src="icons/custom/32/piano-vintage.png" width="18" height="18" style="vertical-align:middle; margin-right:0.35rem; border-radius:3px;"> Scales</a>
+            <button class="header-btn" id="useMyChartBtn" title="Paste your own chord chart from Ultimate Guitar, Songsterr, or anywhere else">📋 My Chart</button>
+            <button class="header-btn" id="reportIssueBtn" title="Report a chord-chart issue with this song"><img src="icons/custom/features/48/feature-chords.png" width="18" height="18" style="vertical-align:middle; margin-right:0.35rem; border-radius:3px; filter: hue-rotate(180deg) saturate(0.4);"> Report</button>
+            <a href="index.html" class="header-btn"><span style="display:inline-block; width:18px; text-align:center; vertical-align:middle; margin-right:0.35rem;">←</span> Back</a>
             <!-- Auth: Sign-In Button -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
                 <svg class="auth-google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -2240,6 +2346,7 @@
                     </div>
                     <div class="auth-menu-divider"></div>
                     <a href="/app" class="auth-menu-item">My Library</a>
+                    <a href="/landing.html#pricing" class="auth-menu-item">Upgrade to Pro</a>
                     <div class="auth-menu-divider"></div>
                     <button class="auth-menu-item danger" onclick="logout()">Sign Out</button>
                 </div>
@@ -2281,6 +2388,9 @@
                     <button class="tempo-preset active" data-tempo="100">100%</button>
                     <button class="tempo-preset" data-tempo="150">150%</button>
                     <button class="tempo-preset" data-tempo="200">200%</button>
+                </div>
+                <div class="tempo-note" style="font-size:11px;opacity:.6;margin-top:6px;line-height:1.3;">
+                    Heads up: changing speed also changes pitch. True pitch-lock is coming soon.
                 </div>
             </div>
 
@@ -2579,18 +2689,39 @@
             document.addEventListener('click', initIOSAudioSession, { capture: true });
         })();
 
+        // ── Pitch-locked time-stretch (Signalsmith Stretch, MIT, WASM AudioWorklet) ──
+        // Single-file ESM, no build system — dynamic import() (UMD .js has no global).
+        // Cached: one factory promise for the whole page.
+        var _stretchFactoryP = null;
+        function loadStretchFactory() {
+            return _stretchFactoryP || (_stretchFactoryP =
+                import('./js/lib/signalsmith-stretch/SignalsmithStretch.mjs')
+                    .then(function(m) { return m.default; }));
+        }
+        var SCHED_LEAD = 0.15; // seconds: lead so all stems' schedule msgs land on a common quantum
+
         // ── Web Audio API Engine (replaces <audio> elements for iOS Safari multi-track) ──
+        // PUSH MODEL: each stem owns a SignalsmithStretch AudioWorkletNode that IS the
+        // source (no BufferSource). Graph: stretchNode -> stemData.gain -> destination.
+        // The gain layer (volume/mute/solo) is UNTOUCHED by this rewrite.
         class StemAudioEngine {
             constructor() {
                 this.ctx = null;           // AudioContext
-                this.stems = {};           // { name: { buffer, source, gain, loaded, url } }
+                this.stems = {};           // { name: { buffer, node, gain, loaded, url, volume, muted } }
                 this.isPlaying = false;
-                this._startTime = 0;       // ctx.currentTime when playback started
+                this._startTime = 0;       // ctx.currentTime the scheduled playback output begins
                 this._offset = 0;          // position in track (seconds) when play was last called
                 this._playbackRate = 1.0;
                 this._duration = 0;
                 this._rafId = null;
                 this._unlocked = false;    // iOS silent-buffer unlock flag
+                this._scheduleAt = 0;      // common ctx-time all stems are scheduled to start (sample-lock)
+                this._latencyComp = 0;     // constant subtracted in getCurrentTime (Phase-1 proved ~constant)
+                // Phase 3: native worklet loop (gapless, sample-accurate — replaces
+                // the old RAF seek(loopStart) hack which had a SCHED_LEAD-sized gap).
+                this._loopStart = 0;
+                this._loopEnd = 0;
+                this._loopEnabled = false;
             }
 
             // Create AudioContext if needed, resume if suspended.
@@ -2654,13 +2785,23 @@
                     var stemData = self.stems[name];
                     // Disconnect old gain node
                     if (stemData.gain) try { stemData.gain.disconnect(); } catch(e) {}
+                    // The old worklet node is bound to the dead context — tear it down.
+                    if (stemData.node) {
+                        try { stemData.node.disconnect(); } catch(e) {}
+                        try { if (stemData.node.port) stemData.node.port.close(); } catch(e) {}
+                        stemData.node = null;
+                    }
+                    stemData._nodePending = false;
                     // Create new gain node on the new context
                     stemData.gain = self.ctx.createGain();
                     stemData.gain.connect(self.ctx.destination);
                     stemData.gain.gain.value = stemData.volume !== undefined ? stemData.volume : 0.8;
-                    stemData.source = null; // old source is dead
+                    // Rebuild the stretch node on the new context (async; self-schedules
+                    // if playing). NOTE: robust iOS resume/interruption timing for this
+                    // path is Phase 4 — this keeps desktop context-swap from going silent.
+                    if (stemData.buffer) self._createNode(name);
                 });
-                console.log('[StemAudio:Practice] Rebuilt', Object.keys(this.stems).length, 'gain nodes');
+                console.log('[StemAudio:Practice] Rebuilt', Object.keys(this.stems).length, 'gain+stretch nodes');
             }
 
             // Ensure context exists for fetch+decode. Does NOT call resume()
@@ -2686,7 +2827,7 @@
                 var self = this;
                 // Create context for decoding (may be suspended on iOS - that's OK for decode)
                 this._ensureContext();
-                var stemData = { buffer: null, source: null, gain: null, loaded: false, url: url, volume: 0.8, muted: false };
+                var stemData = { buffer: null, node: null, _nodePending: false, gain: null, loaded: false, url: url, volume: 0.8, muted: false };
                 // Create gain node
                 stemData.gain = this.ctx.createGain();
                 stemData.gain.connect(this.ctx.destination);
@@ -2733,10 +2874,10 @@
                     if (audioBuffer.duration > self._duration) {
                         self._duration = audioBuffer.duration;
                     }
-                    // If we're currently playing, start this stem too (synced)
-                    if (self.isPlaying) {
-                        self._startSource(name);
-                    }
+                    // Create the per-stem pitch-locked stretch node. _createNode is
+                    // async (WASM/worklet); when it resolves it self-schedules if the
+                    // engine is already playing (mirrors the old loaded-late behaviour).
+                    self._createNode(name);
                     if (onReady) onReady(audioBuffer);
                 }).catch(function(err) {
                     console.error('[StemAudio:Practice] FAILED stem "' + name + '":', err.message || err);
@@ -2774,27 +2915,76 @@
                 });
             }
 
-            // Create and start a BufferSourceNode for one stem
-            _startSource(name) {
+            // Create the per-stem SignalsmithStretch worklet node (pitch-locked),
+            // load its PCM, wire node -> gain. Async (WASM/worklet bootstrap).
+            // If the engine is already playing when it resolves, it self-schedules.
+            _createNode(name) {
+                var self = this;
                 var stemData = this.stems[name];
-                if (!stemData || !stemData.buffer) return;
-                // Stop existing source if any
-                if (stemData.source) {
-                    try { stemData.source.stop(); } catch (e) {}
-                    stemData.source.disconnect();
-                }
-                var src = this.ctx.createBufferSource();
-                src.buffer = stemData.buffer;
-                src.playbackRate.value = this._playbackRate;
-                src.connect(stemData.gain);
-                stemData.source = src;
+                if (!stemData || !stemData.buffer || !this.ctx) return;
+                if (stemData.node || stemData._nodePending) return; // already built/building
+                stemData._nodePending = true;
+                loadStretchFactory().then(function(SignalsmithStretch) {
+                    return SignalsmithStretch(self.ctx);
+                }).then(function(node) {
+                    stemData._nodePending = false;
+                    // Context may have been swapped (rebuild) while we awaited.
+                    if (!self.ctx || !self.stems[name] || self.stems[name] !== stemData) {
+                        try { node.disconnect(); } catch (e) {}
+                        return;
+                    }
+                    var buf = stemData.buffer;
+                    // slice() copies — passing getChannelData views would detach the AudioBuffer.
+                    var chans = [];
+                    for (var c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c).slice());
+                    node.connect(stemData.gain);
+                    stemData.node = node;
+                    // Latency comp: lib reports its own latency; Phase-1 proved the
+                    // position formula needs only a constant subtract (~const across rates).
+                    try {
+                        Promise.resolve(node.latency()).then(function(L) {
+                            if (typeof L === 'number' && L > self._latencyComp) self._latencyComp = L;
+                        });
+                    } catch (e) {}
+                    Promise.resolve(node.addBuffers(chans)).then(function() {
+                        // If playback started while this node was loading, join in sync.
+                        if (self.isPlaying) self._scheduleStem(name);
+                    }).catch(function(e) {
+                        console.error('[StemAudio:Practice] addBuffers failed "' + name + '":', e);
+                    });
+                }).catch(function(e) {
+                    stemData._nodePending = false;
+                    console.error('[StemAudio:Practice] stretch node create failed "' + name + '":', e);
+                });
+            }
 
+            // Schedule one stem's playback at the shared output time (sample-lock).
+            // Replaces the old createBufferSource()/src.start(). Pitch is preserved
+            // by the worklet at any rate.
+            _scheduleStem(name) {
+                var stemData = this.stems[name];
+                if (!stemData || !stemData.node) return; // not ready — will self-schedule on ready
                 var offset = this._offset;
-                // Clamp offset to valid range
-                if (offset >= stemData.buffer.duration) offset = 0;
+                if (stemData.buffer && offset >= stemData.buffer.duration) offset = 0;
                 if (offset < 0) offset = 0;
-
-                src.start(0, offset);
+                // Phase 3: native loop. Input==track seconds (whole stem added 1:1).
+                // Equal loopStart/loopEnd disables looping (per lib README).
+                var lpS = 0, lpE = 0;
+                if (this._loopEnabled && this._loopEnd > this._loopStart) {
+                    lpS = this._loopStart; lpE = this._loopEnd;
+                }
+                try {
+                    stemData.node.schedule({
+                        output: this._scheduleAt,   // common ctx-time => 6 stems start locked
+                        active: true,
+                        input: offset,              // seconds into the input buffer
+                        rate: this._playbackRate,   // lib rate IS playback rate (0.5 == half); NO 1/rate
+                        loopStart: lpS,             // gapless worklet loop (0,0 == off)
+                        loopEnd: lpE
+                    });
+                } catch (e) {
+                    console.error('[StemAudio:Practice] schedule failed "' + name + '":', e);
+                }
             }
 
             // Play all loaded stems from current offset.
@@ -2814,16 +3004,20 @@
                         self._rebuildGainNodes();
                     }
 
-                    self._startTime = self.ctx.currentTime;
+                    // One common output time for ALL stems => they begin on the same
+                    // render quantum (sample-locked). _startTime tracks that same
+                    // instant so the Phase-1-proven position formula stays exact.
+                    self._scheduleAt = self.ctx.currentTime + SCHED_LEAD;
+                    self._startTime = self._scheduleAt;
+                    self.isPlaying = true; // set first so late-ready nodes self-schedule
                     var started = 0;
                     Object.keys(self.stems).forEach(function(name) {
                         if (self.stems[name].loaded) {
-                            self._startSource(name);
+                            self._scheduleStem(name); // no-ops if node not ready yet
                             started++;
                         }
                     });
-                    self.isPlaying = true;
-                    console.log('[StemAudio:Practice] Started', started, 'sources at offset', self._offset.toFixed(2), 'ctx.state:', self.ctx.state);
+                    console.log('[StemAudio:Practice] Scheduled', started, 'stems at offset', self._offset.toFixed(2), 'startAt', self._scheduleAt.toFixed(3), 'ctx.state:', self.ctx.state);
                 }
 
                 // iOS Safari: context may be suspended — must resume before starting sources
@@ -2843,57 +3037,60 @@
                 return Promise.resolve();
             }
 
-            // Pause — stop all sources, save current offset
+            // Pause — stop the worklet processing, save current position.
+            // Keep the node + its loaded PCM (re-init is expensive WASM work).
             pause() {
                 if (!this.isPlaying) return;
                 this._offset = this.getCurrentTime();
                 var self = this;
                 Object.keys(this.stems).forEach(function(name) {
                     var s = self.stems[name];
-                    if (s.source) {
-                        try { s.source.stop(); } catch (e) {}
-                        s.source.disconnect();
-                        s.source = null;
+                    if (s.node) {
+                        try { s.node.stop(); } catch (e) {}
                     }
                 });
                 this.isPlaying = false;
             }
 
-            // Seek to a specific time
+            // Seek to a specific time. Push model: re-anchor the position formula
+            // and re-schedule every node's input pointer at a fresh common output
+            // time (keeps the 6 stems sample-locked across the seek).
             seek(t) {
                 if (t < 0) t = 0;
                 if (t > this._duration) t = this._duration;
-                var wasPlaying = this.isPlaying;
-                if (wasPlaying) {
-                    // Stop all sources
+                this._offset = t;
+                if (this.isPlaying && this.ctx) {
+                    this._scheduleAt = this.ctx.currentTime + SCHED_LEAD;
+                    this._startTime = this._scheduleAt;
                     var self = this;
                     Object.keys(this.stems).forEach(function(name) {
-                        var s = self.stems[name];
-                        if (s.source) {
-                            try { s.source.stop(); } catch (e) {}
-                            s.source.disconnect();
-                            s.source = null;
-                        }
-                    });
-                }
-                this._offset = t;
-                if (wasPlaying) {
-                    this._startTime = this.ctx.currentTime;
-                    var self2 = this;
-                    Object.keys(this.stems).forEach(function(name) {
-                        if (self2.stems[name].loaded) {
-                            self2._startSource(name);
-                        }
+                        if (self.stems[name].loaded) self._scheduleStem(name);
                     });
                 }
             }
 
-            // Get current playback position (seconds)
+            // Get current playback position (seconds).
+            // Formula UNCHANGED from the BufferSource era — Phase-1 spike proved it
+            // survives a stretcher (slope = rate, only a constant offset). The
+            // _latencyComp subtract aligns the visual cursor with the heard audio.
             getCurrentTime() {
                 if (!this.ctx) return this._offset;
                 if (!this.isPlaying) return this._offset;
                 var elapsed = (this.ctx.currentTime - this._startTime) * this._playbackRate;
-                return this._offset + elapsed;
+                // During SCHED_LEAD (before _startTime) audio hasn't begun — park at offset.
+                if (elapsed < 0) return this._offset;
+                var pos = this._offset + elapsed - this._latencyComp;
+                // Phase 3: mirror the worklet's native input loop so the cursor
+                // wraps in lock-step with the (gapless) audio.
+                if (this._loopEnabled && this._loopEnd > this._loopStart) {
+                    var span = this._loopEnd - this._loopStart;
+                    if (pos >= this._loopEnd) {
+                        var rel = (pos - this._loopStart) % span;
+                        if (rel < 0) rel += span;
+                        pos = this._loopStart + rel;
+                    }
+                }
+                return Math.max(0, pos);
             }
 
             getDuration() {
@@ -2942,11 +3139,43 @@
                 }
                 this._playbackRate = rate;
                 var self = this;
+                // Re-pass loop bounds with the rate change: a partial schedule()
+                // must not drop the active loop (defensive — keeps loop + rate atomic).
+                var lpS = 0, lpE = 0;
+                if (this._loopEnabled && this._loopEnd > this._loopStart) {
+                    lpS = this._loopStart; lpE = this._loopEnd;
+                }
+                // One synchronous pass => all stems get the rate change in the same
+                // JS task, staying sample-locked. Pitch is preserved by the worklet.
+                // Lib `rate` IS playback rate (0.5 == half speed) — NO 1/rate inversion.
                 Object.keys(this.stems).forEach(function(name) {
                     var s = self.stems[name];
-                    if (s.source) {
-                        s.source.playbackRate.value = rate;
+                    if (s.node) {
+                        try { s.node.schedule({ rate: rate, loopStart: lpS, loopEnd: lpE }); } catch (e) {}
                     }
+                });
+            }
+
+            // Phase 3: enable/disable the native worklet loop. start/end in track
+            // seconds (== input seconds, whole stem added 1:1). Gapless + sample-
+            // accurate — no RAF seek, no SCHED_LEAD gap, no click at the loop point.
+            setLoop(start, end, enabled) {
+                var on = !!enabled && end > start;
+                this._loopStart = on ? start : 0;
+                this._loopEnd = on ? end : 0;
+                this._loopEnabled = on;
+                if (!this.isPlaying || !this.ctx) return;
+                // Re-anchor the position formula. If turning the loop on while the
+                // playhead is outside the region, jump input to loopStart so audio
+                // and the wrapped cursor agree from the first frame.
+                var pos = this.getCurrentTime();
+                if (on && (pos < start || pos >= end)) pos = start;
+                this._offset = pos;
+                this._scheduleAt = this.ctx.currentTime + SCHED_LEAD;
+                this._startTime = this._scheduleAt;
+                var self = this;
+                Object.keys(this.stems).forEach(function(name) {
+                    if (self.stems[name].loaded) self._scheduleStem(name);
                 });
             }
 
@@ -2960,6 +3189,15 @@
 
             dispose() {
                 this.pause();
+                var self = this;
+                Object.keys(this.stems).forEach(function(name) {
+                    var s = self.stems[name];
+                    if (s.node) {
+                        try { s.node.disconnect(); } catch (e) {}
+                        try { if (s.node.port) s.node.port.close(); } catch (e) {}
+                        s.node = null;
+                    }
+                });
                 if (this.ctx) {
                     this.ctx.close().catch(function() {});
                     this.ctx = null;
@@ -3019,11 +3257,13 @@
                     } else {
                         lines.push('    gain: NULL');
                     }
-                    if (s.source) {
-                        lines.push('    source: active');
-                        lines.push('    source.playbackRate.value: ' + s.source.playbackRate.value);
+                    if (s.node) {
+                        lines.push('    stretchNode: ready (inputTime=' +
+                            (typeof s.node.inputTime === 'number' ? s.node.inputTime.toFixed(3) : 'n/a') + ')');
+                    } else if (s._nodePending) {
+                        lines.push('    stretchNode: building…');
                     } else {
-                        lines.push('    source: null (not playing)');
+                        lines.push('    stretchNode: null');
                     }
                     if (s.buffer) {
                         lines.push('    buffer.duration: ' + s.buffer.duration.toFixed(2) + 's');
@@ -3062,7 +3302,7 @@
                     Object.keys(this.stems).forEach(function(name) {
                         var s = self.stems[name];
                         var chain = name + ': ';
-                        chain += s.source ? 'BufferSource -> ' : '(no source) -> ';
+                        chain += s.node ? 'StretchNode -> ' : (s._nodePending ? '(stretch building) -> ' : '(no node) -> ');
                         chain += s.gain ? 'GainNode(gain=' + s.gain.gain.value.toFixed(3) + ') -> ' : '(no gain) -> ';
                         chain += 'destination';
                         lines.push('  ' + chain);
@@ -3161,18 +3401,19 @@
             }
         })();
 
-        const stemIconBase = 'icons/custom/32/';
+        const stemIconBase = '/images/';
+        const stemIconStyle = 'height:26px;width:auto;max-width:40px;object-fit:contain;vertical-align:middle;';
         const stemConfig = {
-            vocals:   { icon: '<img src="' + stemIconBase + 'vocals-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#ff6b9d' },
-            vocals_lead: { icon: '<img src="' + stemIconBase + 'vocals-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#ff6b9d' },
-            vocals_backing: { icon: '<img src="' + stemIconBase + 'vocals-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#c678dd' },
-            drums:    { icon: '<img src="' + stemIconBase + 'drums-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#e5c07b' },
-            bass:     { icon: '<img src="' + stemIconBase + 'bass-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#ff7b54' },
-            guitar:   { icon: '<img src="' + stemIconBase + 'guitar-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#61afef' },
-            guitar_lead: { icon: '<img src="' + stemIconBase + 'guitar-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#61afef' },
-            guitar_rhythm: { icon: '<img src="' + stemIconBase + 'guitar-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#5a9bd4' },
-            piano:    { icon: '<img src="' + stemIconBase + 'piano-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#98c379' },
-            other:    { icon: '<img src="' + stemIconBase + 'other-vintage.png" width="24" height="24" style="border-radius:4px;">', color: '#c678dd' }
+            vocals:         { icon: '<img src="' + stemIconBase + 'icon-mic.png" style="' + stemIconStyle + '">',         color: '#ff6b9d' },
+            vocals_lead:    { icon: '<img src="' + stemIconBase + 'icon-mic.png" style="' + stemIconStyle + '">',         color: '#ff6b9d' },
+            vocals_backing: { icon: '<img src="' + stemIconBase + 'icon-mic.png" style="' + stemIconStyle + '">',         color: '#c678dd' },
+            drums:          { icon: '<img src="' + stemIconBase + 'icon-drums.png" style="' + stemIconStyle + '">',       color: '#e5c07b' },
+            bass:           { icon: '<img src="' + stemIconBase + 'icon-bass.png" style="' + stemIconStyle + '">',        color: '#ff7b54' },
+            guitar:         { icon: '<img src="' + stemIconBase + 'icon-guitar.png" style="' + stemIconStyle + '">',      color: '#61afef' },
+            guitar_lead:    { icon: '<img src="' + stemIconBase + 'icon-guitar.png" style="' + stemIconStyle + '">',      color: '#61afef' },
+            guitar_rhythm:  { icon: '<img src="' + stemIconBase + 'icon-guitar-tele.png" style="' + stemIconStyle + '">', color: '#5a9bd4' },
+            piano:          { icon: '<img src="' + stemIconBase + 'icon-piano.png" style="' + stemIconStyle + '">',       color: '#98c379' },
+            other:          { icon: '<img src="' + stemIconBase + 'icon-vinyl.png" style="' + stemIconStyle + '">',       color: '#c678dd' }
         };
 
         // Helper: get total ticks from AlphaTab score
@@ -3197,7 +3438,24 @@
                 const resp = await fetch(API_BASE + '/library');
                 const data = await resp.json();
                 if (!data.library || data.library.length === 0) {
-                    section.style.display = 'none';
+                    // Empty library + no ?job= param → show a real CTA instead of the
+                    // dead "Practice Mode / Load a track to begin" header. (#74)
+                    section.innerHTML =
+                        '<div style="text-align:center; padding:2.5rem 1.5rem; max-width:540px; margin:2rem auto; ' +
+                        'background:var(--bg-card); border:1px solid var(--border); border-radius:12px;">' +
+                        '<div style="font-size:2rem; margin-bottom:0.5rem;">&#127925;</div>' +
+                        '<div style="font-family:Righteous,cursive; font-size:1.4rem; margin-bottom:0.5rem;">No song loaded yet</div>' +
+                        '<div style="color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">' +
+                        'Practice mode opens songs you\'ve already uploaded. Head to the upload page to get started.' +
+                        '</div>' +
+                        '<a href="/" style="display:inline-block; background:var(--orange); color:#111; ' +
+                        'padding:0.7rem 1.4rem; border-radius:6px; font-weight:600; text-decoration:none; font-family:Righteous,cursive; letter-spacing:0.5px;">' +
+                        '&larr; Upload a song</a>' +
+                        '<div style="font-size:0.78rem; color:var(--text-dim); margin-top:1rem;">' +
+                        'Already uploaded somewhere else? <a href="/?signin=1" style="color:var(--orange);">Sign in</a> to access your library on any device.' +
+                        '</div>' +
+                        '</div>';
+                    section.style.display = 'block';
                     return;
                 }
                 const heading = '<div style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;"><img src="/images/icons/library.png" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;border-radius:3px;"> Your Library</div>';
@@ -3279,34 +3537,76 @@
                 console.error('Transport controls setup failed:', e);
             }
 
-            // Timeline scrubbing
+            // Timeline = true drag-to-seek scrubber (click OR drag anywhere).
+            // During a drag the cursor follows the pointer instantly; the actual
+            // engine.seek() is throttled (~70ms) so we don't hammer 6 worklet
+            // reschedules per mousemove, with a guaranteed final seek on release.
+            // engine.seek lands correctly while slowed/pitch-locked (Phase-2 proven).
             try {
                 var timeline = document.getElementById('timeline');
                 if (timeline) {
-                    timeline.addEventListener('click', seekTo);
+                    var SCRUB_MS = 70;
+                    var scrubClientX = function(clientX) {
+                        var rect = timeline.getBoundingClientRect();
+                        var pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                        var t = pct * duration;
+                        // Instant visual feedback (owns the bar while _scrubbing).
+                        var tlFill = document.getElementById('timelineFill');
+                        if (tlFill) tlFill.style.width = (pct * 100) + '%';
+                        var ctEl = document.getElementById('currentTime');
+                        if (ctEl) ctEl.textContent = formatTime(t);
+                        syncNotationCursor(t);
+                        var nowMs = (performance && performance.now) ? performance.now() : Date.now();
+                        if (nowMs - _scrubLastSeek >= SCRUB_MS) {
+                            _scrubLastSeek = nowMs;
+                            seekToTime(t);
+                        }
+                        _scrubPendingT = t;
+                    };
+                    var scrubEnd = function() {
+                        if (!window._scrubbing) return;
+                        window._scrubbing = false;
+                        if (_scrubPendingT != null) seekToTime(_scrubPendingT); // final precise commit
+                        _scrubPendingT = null;
+                    };
 
-                    // Mouse drag support for timeline
+                    // ---- mouse ----
                     timeline.addEventListener('mousedown', function(e) {
                         e.preventDefault();
-                        seekTo(e);
-                        var onMove = function(ev) { seekTo(ev); };
+                        window._scrubbing = true;
+                        _scrubLastSeek = 0;
+                        scrubClientX(e.clientX);
+                        var onMove = function(ev) { scrubClientX(ev.clientX); };
                         var onUp = function() {
                             document.removeEventListener('mousemove', onMove);
                             document.removeEventListener('mouseup', onUp);
+                            scrubEnd();
                         };
                         document.addEventListener('mousemove', onMove);
                         document.addEventListener('mouseup', onUp);
                     });
+                    // Bare click (keyboard / no-drag) still jumps.
+                    timeline.addEventListener('click', function(e) {
+                        if (window._scrubbing) return; // mousedown path already handled it
+                        seekTo(e);
+                    });
 
-                    // Touch support for timeline scrubbing
-                    timeline.addEventListener('touchstart', (e) => {
+                    // ---- touch ----
+                    timeline.addEventListener('touchstart', function(e) {
                         e.preventDefault();
-                        seekToTouch(e);
+                        window._scrubbing = true;
+                        _scrubLastSeek = 0;
+                        if (e.touches[0]) scrubClientX(e.touches[0].clientX);
                     }, { passive: false });
-                    timeline.addEventListener('touchmove', (e) => {
+                    timeline.addEventListener('touchmove', function(e) {
                         e.preventDefault();
-                        seekToTouch(e);
+                        if (e.touches[0]) scrubClientX(e.touches[0].clientX);
                     }, { passive: false });
+                    timeline.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        scrubEnd();
+                    }, { passive: false });
+                    timeline.addEventListener('touchcancel', scrubEnd);
                 }
             } catch (e) {
                 console.error('Timeline setup failed:', e);
@@ -3579,6 +3879,12 @@
             // Dispose previous engine and create fresh
             audioEngine.dispose();
             audioEngine = new StemAudioEngine();
+            // Keep speed.js bound to the live engine (StemScriber namespace reference)
+            if (window.StemScriber) window.StemScriber.audioEngine = audioEngine;
+            // Re-apply current playback rate if user has set one
+            if (window.StemScriber && typeof window.StemScriber.playbackRate === 'number' && window.StemScriber.playbackRate !== 1.0) {
+                audioEngine.setPlaybackRate(window.StemScriber.playbackRate);
+            }
             // NOTE: Do NOT call audioEngine.init() here — on iOS Safari, AudioContext
             // can only be resumed inside a user gesture. _ensureContext() in loadStem()
             // creates the context for decoding, and init() is called in togglePlayback().
@@ -3755,7 +4061,8 @@
             var tl = document.getElementById('timeline');
             if (!tl) return;
             const rect = tl.getBoundingClientRect();
-            const pct = (e.clientX - rect.left) / rect.width;
+            // Clamp: drags can travel past the bar edges (mousemove is on document).
+            const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             const t = pct * duration;
             seekToTime(t);
         }
@@ -3834,6 +4141,12 @@
         }
 
         function updateLoopRegion() {
+            // Phase 3: push loop bounds into the engine's native worklet loop
+            // (gapless). Single chokepoint — toggleLoop/clearLoop/setLoopPoint
+            // all route through here.
+            if (audioEngine && audioEngine.setLoop) {
+                audioEngine.setLoop(loopStart, loopEnd, loopEnabled && loopStart < loopEnd);
+            }
             const region = document.getElementById('loopRegion');
             if (!region || !duration) return;
 
@@ -3878,9 +4191,11 @@
             }
         }
 
+        var _scrubLastSeek = 0, _scrubPendingT = null;
         function updateTimeline() {
             if (!Object.keys(stemAudios).length) return;
             if (!audioEngine.hasLoadedStems()) return;
+            if (window._scrubbing) return; // drag owns the bar this frame
             var ct = audioEngine.getCurrentTime();
             var pct = (ct / duration) * 100 || 0;
             var tlFill = document.getElementById('timelineFill');
@@ -3890,13 +4205,17 @@
             syncNotationCursor(ct);
             syncLeadSheetCursor(ct);
 
-            if (loopEnabled && loopStart < loopEnd && ct >= loopEnd && isPlaying) {
-                audioEngine.seek(loopStart);
-                lastCursorIndex = -1;
+            // Phase 3: the loop is now native in the worklet (gapless). getCurrentTime()
+            // already wraps inside [loopStart,loopEnd]; we only detect the backward
+            // jump here to reset the notation cursor cleanly. No RAF seek.
+            if (loopEnabled && loopStart < loopEnd && isPlaying) {
+                if (ct + 0.25 < _lastTlCt) lastCursorIndex = -1; // wrapped this frame
             } else if (ct >= duration - 0.1 && isPlaying) {
                 audioEngine.seek(0);
             }
+            _lastTlCt = ct;
         }
+        var _lastTlCt = 0;
 
         function formatTime(s) {
             const m = Math.floor(s / 60);
@@ -3906,8 +4225,35 @@
 
         // ── Lead Sheet cursor: highlight the chord segment + currently-sung word,
         //    and auto-scroll the active segment into view.
+        // Manual scroll / touch suppresses autoscroll for SCROLL_SUPPRESS_MS so
+        // mobile users can scroll ahead/back without the page yanking them around.
         var _lastActiveSeg = null;
         var _lastActiveWord = null;
+        var _userScrollSuppressUntil = 0;
+        var SCROLL_SUPPRESS_MS = 5000;
+        // Distinguish programmatic scrolls (from scrollIntoView) from real user scrolls.
+        // We set this flag right before each programmatic scroll so the scroll listener
+        // can ignore the resulting event.
+        var _suppressNextScrollEvent = false;
+        (function attachScrollSuppressors() {
+            function userInteracted() { _userScrollSuppressUntil = Date.now() + SCROLL_SUPPRESS_MS; }
+            // Touch: only count as user interaction if it actually moved (taps shouldn't suppress)
+            window.addEventListener('touchmove', userInteracted, { passive: true });
+            // Mousewheel / trackpad
+            window.addEventListener('wheel', userInteracted, { passive: true });
+            // Keyboard scroll keys
+            window.addEventListener('keydown', function(e) {
+                if (['PageUp','PageDown','Home','End','ArrowUp','ArrowDown'].indexOf(e.key) >= 0) {
+                    userInteracted();
+                }
+            });
+            // Catch-all: any scroll that wasn't triggered by us
+            window.addEventListener('scroll', function() {
+                if (_suppressNextScrollEvent) { _suppressNextScrollEvent = false; return; }
+                userInteracted();
+            }, { passive: true });
+        })();
+
         function syncLeadSheetCursor(ct) {
             var chordChart = document.getElementById('chordChart');
             if (!chordChart || !chordChart.classList.contains('visible')) return;
@@ -3929,7 +4275,9 @@
                     hit.classList.add(hit.classList.contains('cs-seg') ? 'cs-seg-active' : 'ls-bar-active');
                     var rect = hit.getBoundingClientRect();
                     var vh = window.innerHeight || document.documentElement.clientHeight;
-                    if (rect.top < 80 || rect.bottom > vh - 80) {
+                    var autoscrollPaused = Date.now() < _userScrollSuppressUntil;
+                    if (!autoscrollPaused && (rect.top < 80 || rect.bottom > vh - 80)) {
+                        _suppressNextScrollEvent = true;
                         hit.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 }
@@ -4874,6 +5222,12 @@
                             var libData = await libResp.json();
                             if (libData.sections && libData.sections.length > 0) {
                                 console.log('Using StemScriber chord library: ' + libData.title);
+                                // Layer personal edits over the library chart if any exist for this job.
+                                var personal = currentJob && currentJob.job_id ? loadPersonalEdits(currentJob.job_id) : null;
+                                if (personal && personal.sections && personal.sections.length > 0) {
+                                    console.log('Layering personal edits from localStorage over library chart');
+                                    libData = personal;
+                                }
                                 currentManualChart = libData;
                                 _chordLibraryLocked = true;
                                 renderManualChordChart(libData);
@@ -4901,6 +5255,12 @@
                         var chartData = await chartResp.json();
                         if (chartData.sections && chartData.sections.length > 0) {
                             console.log('Loaded AI chord chart for job: ' + currentJob.job_id);
+                            // Layer personal edits over the AI chart if any exist for this job.
+                            var personal = loadPersonalEdits(currentJob.job_id);
+                            if (personal && personal.sections && personal.sections.length > 0) {
+                                console.log('Layering personal edits from localStorage over AI chart');
+                                chartData = personal;
+                            }
                             currentManualChart = chartData;
                             renderManualChordChart(chartData);
                             return;
@@ -6760,35 +7120,260 @@
             manualChordEditMode = !manualChordEditMode;
             if (currentManualChart) renderManualChordChart(currentManualChart);
         }
+        // Expose on window for inline onclick handlers — without this, mobile browsers
+        // running stricter scoping (or browsers where the script is wrapped) silently
+        // fail when the user taps the Edit button.
+        window.toggleManualChordEdit = toggleManualChordEdit;
+
+        // Personal edits — saved to localStorage per job_id, never sent to the
+        // server. Each user has their own copy; nobody can mutate the master
+        // chart that other users see. Edits persist across page reloads on
+        // the same browser/device. Use _resetManualChartEdits() to revert.
+        function _personalEditsKey(jobId) {
+            return 'stemscriber-edits-' + (jobId || 'no-job');
+        }
+        function _savePersonalEdits() {
+            if (!currentJob || !currentJob.job_id || !currentManualChart) return;
+            try {
+                localStorage.setItem(_personalEditsKey(currentJob.job_id), JSON.stringify(currentManualChart));
+            } catch (e) {
+                console.warn('Could not save personal edits to localStorage:', e);
+            }
+        }
+        function loadPersonalEdits(jobId) {
+            try {
+                var raw = localStorage.getItem(_personalEditsKey(jobId));
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return null;
+        }
+        function resetPersonalEdits() {
+            if (!currentJob || !currentJob.job_id) return;
+            if (!confirm('Discard your personal edits and reload the original chart?')) return;
+            try { localStorage.removeItem(_personalEditsKey(currentJob.job_id)); } catch (e) {}
+            // Re-fetch the original
+            loadChordChart(currentSongsterrId || null);
+        }
+        // Expose for the Reset button onclick
+        window.resetPersonalEdits = resetPersonalEdits;
+
+        // ===========================================================
+        // "My Chart" — paste your own chord chart from UG/Songsterr/etc.
+        // Saved to localStorage scoped by job_id (same key as personal
+        // edits, so the existing render path picks it up automatically).
+        // The user warrants they have the right to use whatever they paste —
+        // same posture as audio uploads. Nothing leaves their device.
+        // ===========================================================
+
+        // Chord token regex: A-G with optional b/#, optional quality, optional digits, optional /bass
+        var _CHORD_RE = /^[A-G][b#]?(maj|min|m(?!aj)|sus|aug|dim|add)?\d{0,2}(\/[A-G][b#]?)?$/i;
+        var _SECTION_HINTS = /^\s*(\[[^\]]+\]|(intro|verse|chorus|bridge|outro|solo|pre[- ]?chorus|hook|interlude|coda|tag|refrain|breakdown|instrumental)(\s*\d+)?\s*:?\s*)\s*$/i;
+
+        function _looksLikeChordLine(line) {
+            var tokens = line.trim().split(/\s+/).filter(Boolean);
+            if (tokens.length === 0) return false;
+            var chordCount = tokens.filter(function(t) { return _CHORD_RE.test(t); }).length;
+            // Treat as chord line if at least 60% of tokens are chord-like
+            // (gives us tolerance for "/" filler or "x4" repeat markers)
+            return chordCount / tokens.length >= 0.6;
+        }
+
+        function _looksLikeSectionHeader(line) {
+            return _SECTION_HINTS.test(line.trim());
+        }
+
+        function _cleanSectionName(line) {
+            return line.replace(/^\s*\[?/, '').replace(/\]?\s*:?\s*$/, '').trim();
+        }
+
+        function parseImportedChart(text, jobMetadata) {
+            // Returns a chart structure compatible with renderManualChordChart.
+            text = (text || '').replace(/\r\n/g, '\n');
+
+            // Pre-process common paste formats:
+            // 1. Ultimate Guitar: [ch]Am[/ch] → Am  (UG wraps every chord in [ch]...[/ch] tags)
+            text = text.replace(/\[ch\]([^\[\]]+)\[\/ch\]/gi, '$1');
+            // 2. UG also embeds tab-style braces around tabs we want to ignore: [tab]...[/tab]
+            //    Strip them but keep the inner content (chord lines often live inside [tab] blocks).
+            text = text.replace(/\[\/?tab\]/gi, '');
+            // 3. ChordPro-style metadata directives we don't render: {title:...}, {key:...}, {comment:...}
+            text = text.replace(/^\s*\{[^}]*\}\s*$/gm, '');
+            // 4. Common UG section markers: [Verse 1] is already handled by _SECTION_HINTS regex;
+            //    "[Verse]" without spaces is also caught. No-op but documenting.
+
+            var lines = text.split('\n');
+            var sections = [];
+            var current = null;
+            var pendingChordLine = null;
+
+            function pushLine(chords, lyrics) {
+                if (!current) {
+                    current = { name: 'Verse', lines: [] };
+                    sections.push(current);
+                }
+                current.lines.push({
+                    chords: chords || '',
+                    lyrics: lyrics || '',
+                    segments: []
+                });
+            }
+
+            for (var i = 0; i < lines.length; i++) {
+                var raw = lines[i];
+                var trimmed = raw.trim();
+
+                if (!trimmed) {
+                    // Blank line → flush any pending chord-only line, soft section break
+                    if (pendingChordLine !== null) {
+                        pushLine(pendingChordLine, '');
+                        pendingChordLine = null;
+                    }
+                    continue;
+                }
+
+                if (_looksLikeSectionHeader(trimmed)) {
+                    if (pendingChordLine !== null) {
+                        pushLine(pendingChordLine, '');
+                        pendingChordLine = null;
+                    }
+                    current = { name: _cleanSectionName(trimmed) || 'Section', lines: [] };
+                    sections.push(current);
+                    continue;
+                }
+
+                if (_looksLikeChordLine(trimmed)) {
+                    // If we already have a pending chord line, flush it as chords-only
+                    if (pendingChordLine !== null) {
+                        pushLine(pendingChordLine, '');
+                    }
+                    pendingChordLine = trimmed;
+                    continue;
+                }
+
+                // Otherwise: lyric line. Pair with pending chord line if present.
+                if (pendingChordLine !== null) {
+                    pushLine(pendingChordLine, trimmed);
+                    pendingChordLine = null;
+                } else {
+                    // Lyric line with no chords above — store as lyric-only line
+                    pushLine('', trimmed);
+                }
+            }
+
+            // Flush trailing pending chord line
+            if (pendingChordLine !== null) {
+                pushLine(pendingChordLine, '');
+            }
+
+            // If parser found no sections at all, give it a default
+            if (sections.length === 0) {
+                return null;
+            }
+
+            return {
+                title: (jobMetadata && jobMetadata.title) || 'My Chart',
+                artist: (jobMetadata && jobMetadata.artist) || '',
+                key: '?',
+                sections: sections,
+                _imported: true
+            };
+        }
+
+        function showImportChartModal() {
+            if (!currentJob || !currentJob.job_id) {
+                alert('Open a song first, then paste your chart.');
+                return;
+            }
+            var overlay = document.createElement('div');
+            overlay.className = 'chord-modal-overlay';
+            overlay.innerHTML =
+                '<div class="chord-modal" style="max-width:640px; width:90vw;">' +
+                '<label style="font-weight:600; font-size:1rem; margin-bottom:0.25rem;">Import a chord chart</label>' +
+                '<div style="font-size:0.8rem; color:var(--text-dim); margin-bottom:0.8rem; line-height:1.4;">' +
+                '  Upload a chart file or paste text from Ultimate Guitar, Songsterr, etc. ' +
+                '  Section headers (Verse, Chorus) auto-detect. Chord lines go above their lyric lines.' +
+                '</div>' +
+                '<div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.8rem;">' +
+                '<button class="chord-pick-file" type="button" style="padding:0.5rem 0.9rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.85rem;">📁 Choose a file…</button>' +
+                '<span style="font-size:0.75rem; color:var(--text-dim);">.txt, .chordpro, .pro, .crd</span>' +
+                '<input type="file" class="chord-file-input" accept=".txt,.text,.chordpro,.pro,.crd,text/plain" style="display:none;">' +
+                '</div>' +
+                '<div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">…or paste below</div>' +
+                '<textarea id="importChartText" rows="14" style="width:100%; font-family:Fira Code,monospace; font-size:0.85rem; line-height:1.5; padding:0.6rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px; resize:vertical;" placeholder="Example format:&#10;&#10;[Verse]&#10;C       G       Am      F&#10;Lyric line one goes here&#10;C       G       F&#10;Lyric line two goes here"></textarea>' +
+                '<div style="font-size:0.72rem; color:var(--text-dim); margin-top:0.4rem; line-height:1.4;">' +
+                '  Saved to your device only. By using this you confirm you have the right to use this chart.' +
+                '</div>' +
+                '<div class="chord-modal-btns" style="margin-top:0.8rem;">' +
+                '<button class="chord-cancel">Cancel</button>' +
+                '<button class="chord-ok">Use My Chart</button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+            var ta = overlay.querySelector('textarea');
+            ta.focus();
+
+            function close() { overlay.remove(); }
+
+            overlay.querySelector('.chord-cancel').onclick = close;
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+
+            // File picker → read text → into textarea
+            var fileInput = overlay.querySelector('.chord-file-input');
+            overlay.querySelector('.chord-pick-file').onclick = function() { fileInput.click(); };
+            fileInput.addEventListener('change', function(e) {
+                var f = e.target.files && e.target.files[0];
+                if (!f) return;
+                if (f.size > 500 * 1024) {
+                    alert('That file is over 500KB — chord charts are usually under 50KB. If this is a PDF or image, paste the text directly for now.');
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    ta.value = (ev.target.result || '').toString();
+                };
+                reader.onerror = function() {
+                    alert('Could not read that file.');
+                };
+                reader.readAsText(f);
+            });
+            overlay.querySelector('.chord-ok').onclick = function() {
+                var text = ta.value.trim();
+                if (!text) { close(); return; }
+                var meta = (currentJob && currentJob.metadata) ? currentJob.metadata : {};
+                var chart = parseImportedChart(text, meta);
+                if (!chart || !chart.sections || chart.sections.length === 0) {
+                    alert('Could not parse a chart from that text. Make sure chord lines look like "Am C D F" or "[Am]when the [C]sun".');
+                    return;
+                }
+                currentManualChart = chart;
+                _savePersonalEdits();
+                renderManualChordChart(chart);
+                close();
+            };
+            ta.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') close();
+            });
+        }
+        window.showImportChartModal = showImportChartModal;
 
         function editManualChord(sectionIdx, lineIdx, chordText) {
-            showChordInput('Edit chord line', chordText, function(val) {
+            showChordInput('Edit chord line (saved to your device only)', chordText, function(val) {
                 currentManualChart.sections[sectionIdx].lines[lineIdx].chords = val;
-                // Save back to server
-                if (currentJob) {
-                    fetch(API_BASE + '/chord-sheet/job/' + currentJob.job_id, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(currentManualChart)
-                    }).catch(function(e) { console.log('Save failed:', e); });
-                }
+                _savePersonalEdits();
                 renderManualChordChart(currentManualChart);
             });
         }
 
         function editManualLyric(sectionIdx, lineIdx, lyricText) {
-            showChordInput('Edit lyrics', lyricText, function(val) {
+            showChordInput('Edit lyrics (saved to your device only)', lyricText, function(val) {
                 currentManualChart.sections[sectionIdx].lines[lineIdx].lyrics = val;
-                if (currentJob) {
-                    fetch(API_BASE + '/chord-sheet/job/' + currentJob.job_id, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(currentManualChart)
-                    }).catch(function(e) { console.log('Save failed:', e); });
-                }
+                _savePersonalEdits();
                 renderManualChordChart(currentManualChart);
             });
         }
+        // Expose on window — same reason as toggleManualChordEdit above. Inline onclick
+        // handlers can't reach functions inside script-block scope on some mobile browsers.
+        window.editManualChord = editManualChord;
+        window.editManualLyric = editManualLyric;
 
 
         function renderChordSheetContent(data) {
@@ -7029,8 +7614,73 @@
             if (currentManualChart) renderManualChordChart(currentManualChart);
         }
 
+        // Apply capo-shape substitution to a chord chart for display.
+        // The underlying chord_chart.json keeps concert-pitch chord names so
+        // bar timing, transpose ±, and audio sync stay correct. Only the
+        // rendered text gets swapped to capo shapes when capo > 0.
+        // Walks chords_used + bar_grid + sections.lines.chords. The slash
+        // notation strings ("Bm  ////  F#  ////  A   ////") get a token-by-
+        // token rewrite that preserves whitespace + slashes.
+        function applyCapoShapesForDisplay(data) {
+            if (!data || !data.capo || !data.capo_shape_map) return data;
+            var map = data.capo_shape_map;
+            // Sort keys longest-first so "A#m" gets matched before "A"
+            var keys = Object.keys(map).filter(function (k) {
+                return k && map[k] && k !== map[k];
+            }).sort(function (a, b) { return b.length - a.length; });
+            if (keys.length === 0) return data;
+            // Build a regex that matches any of the original chord names as
+            // a "chord token" (root + optional accidental + quality, bounded
+            // by whitespace/slash/string boundary)
+            var escaped = keys.map(function (k) {
+                return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            });
+            var re = new RegExp('(^|[\\s/|])(' + escaped.join('|') + ')(?=[\\s/|]|$)', 'g');
+            function rewrite(s) {
+                if (typeof s !== 'string' || !s) return s;
+                return s.replace(re, function (_, lead, chord) {
+                    return lead + (map[chord] || chord);
+                });
+            }
+            // Deep-clone so we don't mutate the source data (other code paths
+            // may need concert pitch — e.g. transpose, audio anchor, reverts)
+            var clone = JSON.parse(JSON.stringify(data));
+            if (Array.isArray(clone.chords_used)) {
+                clone.chords_used = clone.chords_used.map(function (c) {
+                    return map[c] || c;
+                });
+            }
+            if (Array.isArray(clone.bar_grid)) {
+                clone.bar_grid.forEach(function (b) {
+                    if (b && b.chord && map[b.chord]) b.chord = map[b.chord];
+                });
+            }
+            if (Array.isArray(clone.sections)) {
+                clone.sections.forEach(function (s) {
+                    (s.lines || []).forEach(function (ln) {
+                        if (ln && typeof ln.chords === 'string') {
+                            ln.chords = rewrite(ln.chords);
+                        }
+                        if (Array.isArray(ln && ln.segments)) {
+                            ln.segments.forEach(function (seg) {
+                                if (seg && seg.chord && map[seg.chord]) {
+                                    seg.chord = map[seg.chord];
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+            // Also flip key for display (Bm capo 2 → Am capo 2)
+            if (clone.key && map[clone.key]) {
+                clone.key = map[clone.key];
+            }
+            return clone;
+        }
+
         // ─── Lead Sheet renderer (classic music-publishing style) ───
-        function renderLeadSheet(data) {
+        function renderLeadSheet(rawData) {
+            var data = applyCapoShapesForDisplay(rawData);
             var html = '<div class="lead-sheet">';
 
             // Header — 3-column layout like classical sheet music (credits | title | metadata)
@@ -7042,7 +7692,9 @@
             html += '</div>';
             html += '<div class="lead-sheet-meta">';
             if (data.key) html += 'Key of ' + data.key + '<br>';
-            if (data.capo) html += 'Capo ' + data.capo + '<br>';
+            if (data.capo) {
+                html += '<span style="display:inline-block; padding:2px 10px; margin:2px 0; background:linear-gradient(135deg,#ff7b54,#ff6b9d); color:#0d0d12; font-weight:700; border-radius:6px; font-size:0.85rem; letter-spacing:0.04em;">Capo ' + data.capo + '</span><br>';
+            }
             html += '<div class="no-print" style="margin-top:0.7rem; display:flex; gap:0.4rem; justify-content:flex-end; font-style:normal;">';
             html += '<button onclick="toggleManualChordEdit()" style="padding:0.35rem 0.8rem; background:#2a2a35; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;" id="manualEditBtn">' + (manualChordEditMode ? 'Done' : 'Edit') + '</button>';
             html += '<button onclick="window.print()" style="padding:0.35rem 0.8rem; background:#2a2a35; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;">Print</button>';
@@ -7158,7 +7810,8 @@
                             if (m) m.forEach(function(c) {
                                 c = c.trim();
                                 if (c && c !== 'N.C.' && c !== 'N.C') {
-                                    _lsChordCounts[c] = (_lsChordCounts[c] || 0) + 1;
+                                    var keyName = transposeAmount !== 0 ? transposeChordName(c, transposeAmount) : c;
+                                    _lsChordCounts[keyName] = (_lsChordCounts[keyName] || 0) + 1;
                                 }
                             });
                         }
@@ -7201,6 +7854,11 @@
             // View toggle + Edit + Print buttons
             html += '<div class="no-print" style="margin-top:0.5rem; display:flex; gap:0.4rem; justify-content:flex-end; align-items:center;">';
             html += '<button onclick="toggleManualChordEdit()" style="padding:0.3rem 0.7rem; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;" id="manualEditBtn">' + (manualChordEditMode ? 'Done Editing' : 'Edit Chords') + '</button>';
+            // Show "Reset" button only if this job has personal edits saved
+            var _hasPersonalEdits = currentJob && currentJob.job_id && loadPersonalEdits(currentJob.job_id);
+            if (_hasPersonalEdits) {
+                html += '<button onclick="resetPersonalEdits()" title="Discard your personal edits and reload the original chart" style="padding:0.3rem 0.7rem; background:transparent; color:#f0ece7; border:1px solid rgba(255,255,255,.2); border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;">Reset</button>';
+            }
             html += '<button onclick="window.print()" style="padding:0.3rem 0.7rem; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer; font-family:inherit; font-size:0.8rem;">Print / PDF</button>';
             html += '</div>';
             html += '</div>';
@@ -7211,10 +7869,48 @@
                 html += '<div class="gig-section">';
                 html += '<div class="gig-section-label">[' + section.name + ']</div>';
 
-                section.lines.forEach(function(line, li) {
+                // (#70) Collapse consecutive identical lines (same chords + same lyrics)
+                // into a single rendered line with "×N" badge. Skipped in edit mode so
+                // every line is individually targetable. A line with .notes is always
+                // shown standalone — notes mean the line is annotated/special.
+                var renderLines = [];
+                if (manualChordEditMode) {
+                    section.lines.forEach(function(line, li) {
+                        renderLines.push({line: line, li: li, repeats: 1});
+                    });
+                } else {
+                    var prev = null;
+                    section.lines.forEach(function(line, li) {
+                        var key = (line.chords || '') + '||' + (line.lyrics || '');
+                        var canMerge = prev && prev._key === key && !line.notes && !prev.line.notes;
+                        if (canMerge) {
+                            prev.repeats++;
+                        } else {
+                            prev = {line: line, li: li, repeats: 1, _key: key};
+                            renderLines.push(prev);
+                        }
+                    });
+                }
+
+                renderLines.forEach(function(rl) {
+                    var line = rl.line;
+                    var li = rl.li;
+                    var repeats = rl.repeats;
                     var parsedChords = _parseChordsFromString(line.chords);
+                    // Apply transpose to each parsed chord name so the slash-notation
+                    // chord row reflects the current transpose setting.
+                    if (transposeAmount !== 0 && parsedChords.length > 0) {
+                        parsedChords = parsedChords.map(function(c) {
+                            return { name: transposeChordName(c.name, transposeAmount), charPos: c.charPos };
+                        });
+                    }
                     var lineWidth = Math.max((line.chords || '').length, (line.lyrics || '').length, 40);
                     var chordBeatsData = line.chord_beats || null;
+                    if (chordBeatsData && transposeAmount !== 0) {
+                        chordBeatsData = chordBeatsData.map(function(cb) {
+                            return { name: transposeChordName(cb.name, transposeAmount), beats: cb.beats };
+                        });
+                    }
 
                     if (parsedChords.length > 0 || (chordBeatsData && chordBeatsData.length > 0)) {
                         var notation = _buildSlashNotation(chordBeatsData, parsedChords, lineWidth, beatsPerBar, line.lyrics || '');
@@ -7229,7 +7925,10 @@
                         }
 
                         // Layer 2: Slash notation with bar lines
-                        html += '<div class="gig-slash-row">' + notation.slashRow + '</div>';
+                        var repeatBadge = repeats > 1
+                            ? '<span class="gig-repeat-badge">&times;' + repeats + '</span>'
+                            : '';
+                        html += '<div class="gig-slash-row">' + notation.slashRow + repeatBadge + '</div>';
 
                         // Layer 3: Lyrics (beat-aligned from notation, or raw fallback)
                         if (line.lyrics) {
@@ -7253,7 +7952,10 @@
                         if (manualChordEditMode) {
                             html += '<div class="gig-lyric-row" style="cursor:pointer; text-decoration:underline dotted #aaa;" onclick="editManualLyric(' + si + ',' + li + ',' + JSON.stringify(line.lyrics).replace(/"/g, '&quot;') + ')" title="Click to edit">' + line.lyrics + '</div>';
                         } else {
-                            html += '<div class="gig-lyric-row">' + line.lyrics + '</div>';
+                            var repeatBadgeLyric = repeats > 1
+                                ? '<span class="gig-repeat-badge">&times;' + repeats + '</span>'
+                                : '';
+                            html += '<div class="gig-lyric-row">' + line.lyrics + repeatBadgeLyric + '</div>';
                         }
                         html += '</div>';
                     }
@@ -7266,6 +7968,8 @@
             chordChart.innerHTML = html;
 
             // Show chord diagrams — extract full chord names including 7#9, sus4, maj7, etc.
+            // Apply transpose so the fretboard diagrams at the top match the
+            // transposed chord row in the slash notation below.
             var chordCounts = {};
             data.sections.forEach(function(s) {
                 s.lines.forEach(function(l) {
@@ -7275,7 +7979,8 @@
                             matches.forEach(function(c) {
                                 c = c.trim();
                                 if (c && c !== 'N.C.' && c !== 'N.C') {
-                                    chordCounts[c] = (chordCounts[c] || 0) + 1;
+                                    var keyName = transposeAmount !== 0 ? transposeChordName(c, transposeAmount) : c;
+                                    chordCounts[keyName] = (chordCounts[keyName] || 0) + 1;
                                 }
                             });
                         }
@@ -8317,6 +9022,10 @@
         // No backend yet — for now this opens a mailto: with prefilled
         // subject/body so reports flow to support@. Trivially upgradable
         // to an API endpoint when we want structured ticket tracking.
+        document.getElementById('useMyChartBtn')?.addEventListener('click', () => {
+            showImportChartModal();
+        });
+
         document.getElementById('reportIssueBtn')?.addEventListener('click', () => {
             var jobId = (typeof window.currentJobId === 'string') ? window.currentJobId : '';
             if (!jobId) {
@@ -8662,9 +9371,165 @@
             updatePianoFromPlayback();
         };
 
+        // === Collapsible chord-diagram panel ===
+        // Wraps every .chord-diagrams-row that appears inside #chordChart with
+        // a header + toggle button. State persists in localStorage under
+        // `stemscribe-chord-diagrams-collapsed`. UI-only — does not touch any
+        // chord-detection logic. The wrap+enhance is delegated through a
+        // MutationObserver so it works no matter which renderer
+        // (renderAIChordView / renderManualChordChart / renderChordChart /
+        // UG renderer) produced the markup.
+        (function() {
+            var STORAGE_KEY = 'stemscribe-chord-diagrams-collapsed';
+
+            function isCollapsed() {
+                try { return localStorage.getItem(STORAGE_KEY) === '1'; }
+                catch (e) { return false; }
+            }
+            function saveCollapsed(v) {
+                try { localStorage.setItem(STORAGE_KEY, v ? '1' : '0'); }
+                catch (e) {}
+            }
+
+            function makeChevron(collapsed) {
+                return collapsed ? '▸' : '▾'; // ▸ collapsed, ▾ expanded
+            }
+
+            function syncWrap(wrap, collapsed) {
+                if (collapsed) wrap.classList.add('collapsed');
+                else wrap.classList.remove('collapsed');
+                var btn = wrap.querySelector('.chord-diagrams-toggle');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                    var chev = btn.querySelector('.cd-chevron');
+                    if (chev) chev.textContent = makeChevron(collapsed);
+                    var label = btn.querySelector('.cd-label');
+                    if (label) label.textContent = collapsed ? 'Show' : 'Hide';
+                }
+            }
+
+            function syncAllWraps() {
+                var collapsed = isCollapsed();
+                var wraps = document.querySelectorAll('.chord-diagrams-wrap');
+                for (var i = 0; i < wraps.length; i++) {
+                    syncWrap(wraps[i], collapsed);
+                }
+            }
+
+            function enhance(row) {
+                if (!row || !row.parentNode) return;
+                // Don't double-wrap.
+                if (row.parentNode.classList && row.parentNode.classList.contains('chord-diagrams-wrap')) return;
+
+                var collapsed = isCollapsed();
+
+                var wrap = document.createElement('div');
+                wrap.className = 'chord-diagrams-wrap';
+
+                var header = document.createElement('div');
+                header.className = 'chord-diagrams-header';
+                header.innerHTML =
+                    '<span class="cd-title">Chord Diagrams</span>' +
+                    '<button type="button" class="chord-diagrams-toggle" aria-label="Toggle chord diagrams" aria-expanded="' + (collapsed ? 'false' : 'true') + '">' +
+                        '<span class="cd-chevron">' + makeChevron(collapsed) + '</span>' +
+                        '<span class="cd-label">' + (collapsed ? 'Show' : 'Hide') + '</span>' +
+                    '</button>';
+
+                row.parentNode.insertBefore(wrap, row);
+                wrap.appendChild(header);
+                wrap.appendChild(row);
+
+                if (collapsed) wrap.classList.add('collapsed');
+
+                var btn = header.querySelector('.chord-diagrams-toggle');
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var willCollapse = !wrap.classList.contains('collapsed');
+                    saveCollapsed(willCollapse);
+                    // Sync every wrap on the page so all panels move together.
+                    syncAllWraps();
+                });
+            }
+
+            function scan(root) {
+                var rows = (root || document).querySelectorAll('.chord-diagrams-row');
+                for (var i = 0; i < rows.length; i++) {
+                    enhance(rows[i]);
+                }
+            }
+
+            function init() {
+                var chordChart = document.getElementById('chordChart');
+                if (!chordChart) return;
+
+                // Initial sweep in case content is already in the DOM.
+                scan(chordChart);
+
+                // Re-scan whenever any renderer rewrites #chordChart's innerHTML.
+                var mo = new MutationObserver(function(mutations) {
+                    var needsScan = false;
+                    for (var i = 0; i < mutations.length; i++) {
+                        var added = mutations[i].addedNodes;
+                        for (var j = 0; j < added.length; j++) {
+                            var n = added[j];
+                            if (n.nodeType !== 1) continue;
+                            if ((n.classList && n.classList.contains('chord-diagrams-row')) ||
+                                (n.querySelector && n.querySelector('.chord-diagrams-row'))) {
+                                needsScan = true;
+                                break;
+                            }
+                        }
+                        if (needsScan) break;
+                    }
+                    if (needsScan) scan(chordChart);
+                });
+                mo.observe(chordChart, { childList: true, subtree: true });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+
     </script>
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
-    <script>StemScriber.initAuth();</script>
+    <script>
+        StemScriber.initAuth();
+        // Wire the existing tempo UI (slider + 5 preset buttons) to the audio engine.
+        // NOTE: this changes playbackRate only — pitch shifts with speed. There is
+        // no pitch-lock (preservesPitch is HTMLMediaElement-only, not available on
+        // the AudioBufferSourceNode used here). Pitch-preserving time-stretch is a
+        // planned v1.1 feature (Signalsmith Stretch in an AudioWorklet).
+        document.addEventListener('DOMContentLoaded', function() {
+            window.StemScriber = window.StemScriber || {};
+            window.StemScriber.playbackRate = 1.0;
+
+            function applyRate(rate) {
+                rate = Math.max(0.25, Math.min(2.0, rate));
+                window.StemScriber.playbackRate = rate;
+                if (typeof audioEngine !== 'undefined' && audioEngine && audioEngine.setPlaybackRate) {
+                    audioEngine.setPlaybackRate(rate);
+                }
+                var valEl = document.getElementById('tempoValue');
+                if (valEl) valEl.textContent = Math.round(rate * 100) + '%';
+                var slider = document.getElementById('tempoSlider');
+                if (slider && Math.abs(slider.value/100 - rate) > 0.001) slider.value = Math.round(rate * 100);
+                document.querySelectorAll('.tempo-preset').forEach(function(b) {
+                    b.classList.toggle('active', parseInt(b.dataset.tempo, 10) === Math.round(rate * 100));
+                });
+            }
+            window.StemScriber.setPlaybackRate = applyRate;
+
+            var slider = document.getElementById('tempoSlider');
+            if (slider) slider.addEventListener('input', function() { applyRate(parseInt(slider.value, 10) / 100); });
+            document.querySelectorAll('.tempo-preset').forEach(function(b) {
+                b.addEventListener('click', function() { applyRate(parseInt(b.dataset.tempo, 10) / 100); });
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<!--
+  PHASE 1 SPIKE — Signalsmith Stretch go/no-go harness.
+  NOT linked anywhere. NOT prod. Does not touch StemAudioEngine.
+  Proves: (1) pitch constant at 1.0x / 0.5x / 0.25x (objective FFT peak),
+          (2) engine formula offset+(now-start)*rate tracks lib inputTime.
+  Delete after Phase 1 sign-off (or keep as a regression bench).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signalsmith Stretch — Phase 1 Spike</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font: 15px/1.5 system-ui, sans-serif; background:#10131a; color:#e7ecf3; margin:0; padding:24px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:#8a93a3; margin:0 0 20px; font-size:13px; }
+  .panel { background:#1a1f2b; border:1px solid #2a3142; border-radius:10px; padding:18px 20px; margin-bottom:16px; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  button { background:#2d6cdf; color:#fff; border:0; border-radius:7px; padding:9px 16px; font-size:14px; cursor:pointer; }
+  button.sec { background:#39414f; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  input[type=range] { width:340px; }
+  input[type=file] { color:#aab; }
+  .rate-btn.active { outline:3px solid #ffd24a; }
+  .grid { display:grid; grid-template-columns:auto 1fr; gap:6px 22px; align-items:baseline; margin-top:6px; }
+  .grid div:nth-child(odd) { color:#8a93a3; }
+  .big { font-size:34px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .mono { font-variant-numeric:tabular-nums; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:6px; font-weight:700; font-size:13px; }
+  .pass { background:#1b5e20; color:#b9f6ca; }
+  .fail { background:#7f1d1d; color:#ffcdd2; }
+  .wait { background:#3a3f4b; color:#aab; }
+  #log { font:12px/1.45 ui-monospace, Menlo, monospace; background:#0c0f15; border:1px solid #232a38;
+          border-radius:8px; padding:12px; height:170px; overflow:auto; white-space:pre-wrap; color:#9fb3c8; }
+  .verdict { font-size:17px; font-weight:700; }
+</style>
+</head>
+<body>
+<h1>Signalsmith Stretch — Phase 1 spike</h1>
+<p class="sub">Isolated go/no-go harness. Not wired to prod. Lib: vendored
+   <code>js/lib/signalsmith-stretch/SignalsmithStretch.mjs</code> (v1.3.2, MIT).</p>
+
+<div class="panel">
+  <div class="row">
+    <button id="genBtn" class="sec">1 · Load 440 Hz test tone (objective pitch test)</button>
+    <span style="color:#8a93a3">— or —</span>
+    <input type="file" id="file" accept="audio/*">
+    <span style="color:#8a93a3">(load a real solo stem for the ear test)</span>
+  </div>
+  <div class="row" style="margin-top:14px">
+    <button id="playBtn" disabled>▶ Play</button>
+    <button id="pauseBtn" class="sec" disabled>⏸ Pause</button>
+    <button id="seekBtn" class="sec" disabled>⤺ Seek → 0s</button>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="row">
+    <strong>Rate:</strong>
+    <button class="sec rate-btn" data-r="1">1.0×</button>
+    <button class="sec rate-btn" data-r="0.5">0.5×</button>
+    <button class="sec rate-btn" data-r="0.25">0.25×</button>
+    <input type="range" id="rate" min="0.25" max="2" step="0.01" value="1">
+    <span class="mono" id="rateLbl">1.00×</span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="row" style="justify-content:space-between">
+    <div>
+      <div style="color:#8a93a3;font-size:13px">Measured pitch (FFT peak, post-stretch)</div>
+      <div class="big" id="freq">— Hz</div>
+      <div class="mono" id="freqDetail" style="color:#8a93a3;font-size:13px"></div>
+    </div>
+    <div style="text-align:right">
+      <div style="color:#8a93a3;font-size:13px;margin-bottom:6px">Pitch-constancy verdict</div>
+      <span id="pitchBadge" class="badge wait">load tone &amp; play</span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div style="color:#8a93a3;font-size:13px;margin-bottom:8px">
+    Position-formula proof —
+    <code>formula = offset + (ctx.now − start) × rate</code> vs library ground-truth
+    <code>node.inputTime</code>
+  </div>
+  <div class="grid">
+    <div>Library inputTime</div><div class="mono" id="libPos">0.000 s</div>
+    <div>Engine formula</div><div class="mono" id="formPos">0.000 s</div>
+    <div>Delta (formula − lib)</div><div class="mono" id="delta">0.000 s</div>
+    <div>Max |delta| after settle</div><div class="mono" id="maxDelta">0.000 s</div>
+    <div>Formula-tracking verdict</div><div><span id="trackBadge" class="badge wait">play to measure</span></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="verdict" id="verdict">GO / NO-GO: <span class="badge wait">pending</span></div>
+  <div style="color:#8a93a3;font-size:13px;margin-top:6px">
+    PASS criteria — pitch peak stays within ±3 % across 1.0/0.5/0.25× AND max|delta| stays
+    bounded (&lt; ~0.15 s, constant not growing) over ≥15 s incl. a rate change.
+  </div>
+</div>
+
+<div class="panel"><div id="log"></div></div>
+
+<script type="module">
+import SignalsmithStretch from './js/lib/signalsmith-stretch/SignalsmithStretch.mjs';
+
+const $ = id => document.getElementById(id);
+const logEl = $('log');
+function log(...a){ const s='['+new Date().toISOString().substr(11,8)+'] '+a.join(' ');
+  logEl.textContent += s+'\n'; logEl.scrollTop = logEl.scrollHeight; console.log(...a); }
+
+let ctx, node, analyser, gain, freqData;
+let buffers = null, srcSampleRate = 0, expectedHz = 0, isTone = false;
+
+// engine-formula state (mirrors StemAudioEngine semantics)
+let _offset = 0, _startTime = 0, _rate = 1, playing = false;
+let settleAt = 0, maxAbsDelta = 0, pitchSamples = [], pitchByRate = {};
+
+function currentTimeFormula(){
+  if (!playing) return _offset;
+  return _offset + (ctx.currentTime - _startTime) * _rate;
+}
+// re-anchor exactly like the prod engine's setPlaybackRate
+function reanchor(newRate){
+  _offset = currentTimeFormula();
+  _startTime = ctx.currentTime;
+  _rate = newRate;
+}
+
+async function ensureCtx(){
+  if (ctx) { if (ctx.state==='suspended') await ctx.resume(); return; }
+  ctx = new (window.AudioContext||window.webkitAudioContext)();
+  await ctx.resume();
+  log('AudioContext sampleRate', ctx.sampleRate);
+  node = await SignalsmithStretch(ctx);
+  log('SignalsmithStretch node ready. latency()=', JSON.stringify(await node.latency?.()));
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 32768;            // ~1.46 Hz bins @48k — fine enough for 440 Hz
+  analyser.smoothingTimeConstant = 0.3;
+  freqData = new Float32Array(analyser.frequencyBinCount);
+  gain = ctx.createGain(); gain.gain.value = 0.85;
+  node.connect(analyser); analyser.connect(gain); gain.connect(ctx.destination);
+  node.setUpdateInterval(0.03);        // frequent inputTime updates
+}
+
+function makeTone(){
+  const sr = 48000, dur = 12, n = sr*dur;
+  const d = new Float32Array(n);
+  const f = 440;
+  for (let i=0;i<n;i++){
+    const t=i/sr;
+    // fundamental + soft harmonics so a peak is clearly the fundamental, still "instrument-ish"
+    d[i] = 0.6*Math.sin(2*Math.PI*f*t)
+         + 0.18*Math.sin(2*Math.PI*2*f*t)
+         + 0.07*Math.sin(2*Math.PI*3*f*t);
+  }
+  return { ch:[d], sr, hz:f };
+}
+
+async function loadIntoNode(chans, sr){
+  await ensureCtx();
+  await node.stop?.();
+  await node.dropBuffers?.();
+  // pass slice() copies (mirrors Phase-2 "copy before transfer" gotcha)
+  await node.addBuffers(chans.map(c => c.slice()));
+  srcSampleRate = sr;
+  _offset = 0; _startTime = ctx.currentTime; _rate = parseFloat($('rate').value);
+  await node.schedule({ rate:_rate, input:0 });
+  $('playBtn').disabled = $('pauseBtn').disabled = $('seekBtn').disabled = false;
+  log('Loaded', chans.length, 'ch,', (chans[0].length/sr).toFixed(2), 's @', sr, 'Hz src');
+}
+
+$('genBtn').onclick = async () => {
+  const t = makeTone(); isTone = true; expectedHz = t.hz; pitchByRate = {};
+  buffers = t.ch;
+  await loadIntoNode(t.ch, t.sr);
+  log('440 Hz tone loaded — Play, then toggle 1.0/0.5/0.25× and watch the peak.');
+};
+
+$('file').onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  isTone = false; expectedHz = 0;
+  await ensureCtx();
+  const ab = await f.arrayBuffer();
+  const buf = await ctx.decodeAudioData(ab);
+  const chans = []; for (let c=0;c<buf.numberOfChannels;c++) chans.push(buf.getChannelData(c).slice());
+  buffers = chans;
+  await loadIntoNode(chans, buf.sampleRate);
+  log('Decoded file:', f.name, buf.numberOfChannels+'ch', buf.duration.toFixed(1)+'s — ear test only (no FFT verdict).');
+};
+
+$('playBtn').onclick = async () => {
+  await ensureCtx();
+  _startTime = ctx.currentTime; playing = true;
+  settleAt = performance.now() + 1500; maxAbsDelta = 0;
+  await node.start();
+  log('start() @ rate', _rate);
+};
+$('pauseBtn').onclick = async () => {
+  _offset = currentTimeFormula(); playing = false;
+  await node.stop();
+  log('stop() at formula pos', _offset.toFixed(3));
+};
+$('seekBtn').onclick = async () => {
+  _offset = 0; _startTime = ctx.currentTime;
+  await node.schedule({ input:0 });
+  settleAt = performance.now()+1500; maxAbsDelta = 0;
+  log('seek → 0s');
+};
+
+async function setRate(r){
+  r = Math.max(0.25, Math.min(2, r));
+  $('rate').value = r; $('rateLbl').textContent = r.toFixed(2)+'×';
+  document.querySelectorAll('.rate-btn').forEach(b=>
+    b.classList.toggle('active', Math.abs(parseFloat(b.dataset.r)-r)<1e-6));
+  if (!node) return;
+  reanchor(r);                                  // engine-formula re-anchor
+  await node.schedule({ rate:r });              // lib rate change
+  settleAt = performance.now()+1200;            // let FFT + latency settle
+  log('rate →', r.toFixed(2), '(stretch ratio', (1/r).toFixed(2)+')');
+}
+document.querySelectorAll('.rate-btn').forEach(b=>
+  b.onclick=()=>setRate(parseFloat(b.dataset.r)));
+$('rate').oninput = e => setRate(parseFloat(e.target.value));
+
+function dominantHz(){
+  analyser.getFloatFrequencyData(freqData);
+  let peak=-Infinity, idx=0;
+  // ignore sub-50Hz rumble bins
+  const lo = Math.floor(50/(ctx.sampleRate/analyser.fftSize));
+  for (let i=lo;i<freqData.length;i++) if (freqData[i]>peak){ peak=freqData[i]; idx=i; }
+  if (peak < -90) return null;                  // effectively silent
+  // parabolic interpolation for sub-bin accuracy
+  const a=freqData[idx-1]??peak, b=peak, c=freqData[idx+1]??peak;
+  const corr = (a-c)/(2*(a-2*b+c) || 1);
+  return (idx+corr) * (ctx.sampleRate/analyser.fftSize);
+}
+
+function tick(){
+  requestAnimationFrame(tick);
+  if (!node) return;
+  const lib = node.inputTime||0, form = currentTimeFormula(), d = form-lib;
+  $('libPos').textContent  = lib.toFixed(3)+' s';
+  $('formPos').textContent = form.toFixed(3)+' s';
+  $('delta').textContent   = d.toFixed(3)+' s';
+
+  const settled = performance.now() > settleAt;
+  if (playing && settled){
+    maxAbsDelta = Math.max(maxAbsDelta, Math.abs(d));
+    $('maxDelta').textContent = maxAbsDelta.toFixed(3)+' s';
+    const ok = maxAbsDelta < 0.15;
+    setBadge('trackBadge', ok, ok?'TRACKS (Δ bounded)':'DRIFTS — investigate');
+  }
+
+  if (playing && isTone){
+    const hz = dominantHz();
+    if (hz){
+      $('freq').textContent = hz.toFixed(1)+' Hz';
+      $('freqDetail').textContent =
+        `expected ${expectedHz} Hz · err ${(100*(hz-expectedHz)/expectedHz).toFixed(2)} %`;
+      if (settled){
+        const rkey = _rate.toFixed(2);
+        (pitchByRate[rkey] ||= []).push(hz);
+        if (pitchByRate[rkey].length>120) pitchByRate[rkey].shift();
+        evalPitch();
+      }
+    }
+  }
+  updateVerdict();
+}
+
+function median(a){ const s=[...a].sort((x,y)=>x-y); return s[s.length>>1]; }
+function setBadge(id, ok, txt){
+  const el=$(id); el.className='badge '+(ok?'pass':'fail'); el.textContent=txt;
+}
+
+function evalPitch(){
+  const rates = Object.keys(pitchByRate).filter(r=>pitchByRate[r].length>=20);
+  if (rates.length<1){ return; }
+  const meds = rates.map(r=>median(pitchByRate[r]));
+  const worstErr = Math.max(...meds.map(m=>Math.abs(m-expectedHz)/expectedHz));
+  const ok = worstErr < 0.03;
+  setBadge('pitchBadge', ok,
+    ok ? `CONSTANT ±${(worstErr*100).toFixed(1)}% over ${rates.length} rate(s)`
+       : `MOVES ${(worstErr*100).toFixed(1)}% — pitch NOT preserved`);
+}
+
+function updateVerdict(){
+  const pB=$('pitchBadge'), tB=$('trackBadge');
+  const haveAll = isTone &&
+    ['1.00','0.50','0.25'].every(r => (pitchByRate[r]||[]).length>=20);
+  const pitchPass = pB.classList.contains('pass') && haveAll;
+  const trackPass = tB.classList.contains('pass');
+  const span = $('verdict').querySelector('.badge');
+  if (pitchPass && trackPass){
+    span.className='badge pass';
+    span.textContent='GO — pitch constant across 1/0.5/0.25× + formula tracks';
+  } else if (!isTone){
+    span.className='badge wait';
+    span.textContent='ear test (load 440 tone for objective GO/NO-GO)';
+  } else {
+    span.className='badge wait';
+    span.textContent= haveAll ? 'evaluating…' : 'cycle 1.0 → 0.5 → 0.25× while playing';
+  }
+}
+window.__spike = () => ({
+  ctxNow: ctx ? ctx.currentTime : null, startTime: _startTime, offset: _offset,
+  rate: _rate, inputTime: node ? node.inputTime : null, playing,
+  formula: ctx ? currentTimeFormula() : null
+});
+requestAnimationFrame(tick);
+log('Spike ready. Click "Load 440 Hz test tone", Play, then cycle the rate buttons.');
+</script>
+</body>
+</html>
