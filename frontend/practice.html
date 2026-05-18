@@ -2692,13 +2692,56 @@
         // ── Pitch-locked time-stretch (Signalsmith Stretch, MIT, WASM AudioWorklet) ──
         // Single-file ESM, no build system — dynamic import() (UMD .js has no global).
         // Cached: one factory promise for the whole page.
+        //
+        // CRITICAL (real-browser fix, 2026-05-17): the lib's DEFAULT path builds the
+        // worklet module as a `blob:` URL and calls `audioWorklet.addModule(blob:…)`.
+        // Our production CSP `script-src` has NO `blob:` (only worker-src/img/media
+        // do), so addModule throws `AbortError: Unable to load a worklet's module`
+        // on EVERY real browser (Chrome AND WebKit/iOS) — NOT just iOS. (The prior
+        // "headless Chrome pass" never hit the prod CSP.) Fix: point the lib at a
+        // STATIC same-origin worklet file (covered by script-src 'self'); the lib
+        // honours `createNode.moduleUrl` and skips the blob path entirely.
+        var STRETCH_WORKLET_URL = new URL(
+            './js/lib/signalsmith-stretch/SignalsmithStretch.worklet.js',
+            document.baseURI).href;
         var _stretchFactoryP = null;
         function loadStretchFactory() {
             return _stretchFactoryP || (_stretchFactoryP =
                 import('./js/lib/signalsmith-stretch/SignalsmithStretch.mjs')
-                    .then(function(m) { return m.default; }));
+                    .then(function(m) {
+                        // m.default IS the lib's `createNode`; set .moduleUrl so it
+                        // addModule()s the static file instead of a CSP-blocked blob.
+                        try { m.default.moduleUrl = STRETCH_WORKLET_URL; } catch (e) {}
+                        return m.default;
+                    }));
         }
         var SCHED_LEAD = 0.15; // seconds: lead so all stems' schedule msgs land on a common quantum
+
+        // ── Pitch-lock fallback strategy (runtime, NEVER UA-sniffing) ──
+        // We DON'T probe in a throwaway AudioContext: WebKit/iOS chokes on a 2nd
+        // concurrent AudioContext + AudioWorklet (the factory() call simply hangs —
+        // empirically confirmed: separate-context probe never resolves on WebKit,
+        // yet the worklet works fine in the MAIN context). OfflineAudioContext is
+        // also unreliable (renders silence before the async worklet produces samples).
+        //
+        // Strategy that actually works: build the worklet path on the real engine
+        // graph (optimistic), and run an OUTPUT WATCHDOG on the live mix after
+        // play(). If the worklet produced no audible output within a bounded window
+        // while isPlaying — the documented iOS silent-worklet case, or a CSP/addModule
+        // failure — transparently demote the WHOLE engine to the legacy BufferSource
+        // path (audio ALWAYS plays; pitch drops when slowed = today's honest shipped
+        // behavior) and rebuild nodes in place. Detection is empirical & on the real
+        // graph, so it catches exactly the iOS failure without a fragile pre-probe.
+        //
+        // ?forceLegacy=1 / ?forceStretch=1 — deterministic test overrides.
+        function _forcedEngineMode() {
+            try {
+                var q = new URLSearchParams(location.search);
+                if (q.get('forceLegacy') === '1') return 'legacy';
+                if (q.get('forceStretch') === '1') return 'stretch';
+            } catch (e) {}
+            return null;
+        }
 
         // ── Web Audio API Engine (replaces <audio> elements for iOS Safari multi-track) ──
         // PUSH MODEL: each stem owns a SignalsmithStretch AudioWorkletNode that IS the
@@ -2722,6 +2765,24 @@
                 this._loopStart = 0;
                 this._loopEnd = 0;
                 this._loopEnabled = false;
+                // Fallback engine state. _stretchMode:
+                //   null  = not yet resolved (decided on first _createNode call)
+                //   true  = worklet path (optimistic; output watchdog confirms/demotes)
+                //   false = legacy: per-stem BufferSource + playbackRate
+                // When false the engine is functionally the legacy engine: audio ALWAYS
+                // plays; pitch drops with speed (honest, today's shipped behavior).
+                this._stretchMode = null;
+                this._watchdogActive = false;
+                // App layer reads this: legacy mode has no gapless native loop, so the
+                // RAF seek(loopStart) loop must be re-enabled for it (Phase 3's native
+                // loop only exists in the worklet path).
+                this.needsRafLoop = false;
+            }
+
+            // Public: 'stretch' | 'legacy' | 'probing'. For diagnostics/overlay.
+            get engineMode() {
+                return this._stretchMode === true ? 'stretch'
+                     : this._stretchMode === false ? 'legacy' : 'probing';
             }
 
             // Create AudioContext if needed, resume if suspended.
@@ -2785,8 +2846,15 @@
                     var stemData = self.stems[name];
                     // Disconnect old gain node
                     if (stemData.gain) try { stemData.gain.disconnect(); } catch(e) {}
-                    // The old worklet node is bound to the dead context — tear it down.
-                    if (stemData.node) {
+                    // The old source node is bound to the dead context — tear it down.
+                    if (stemData._legacy) {
+                        if (stemData._src) {
+                            try { stemData._src.stop(); } catch(e) {}
+                            try { stemData._src.disconnect(); } catch(e) {}
+                            stemData._src = null;
+                        }
+                        stemData.node = null;
+                    } else if (stemData.node) {
                         try { stemData.node.disconnect(); } catch(e) {}
                         try { if (stemData.node.port) stemData.node.port.close(); } catch(e) {}
                         stemData.node = null;
@@ -2915,47 +2983,187 @@
                 });
             }
 
-            // Create the per-stem SignalsmithStretch worklet node (pitch-locked),
-            // load its PCM, wire node -> gain. Async (WASM/worklet bootstrap).
-            // If the engine is already playing when it resolves, it self-schedules.
+            // Create the per-stem source node. OPTIMISTIC: use the pitch-lock
+            // worklet unless a forced override or a prior runtime demotion says
+            // legacy. The output watchdog (started in play()) demotes the whole
+            // engine to legacy if the worklet turns out silent on this device.
             _createNode(name) {
                 var self = this;
                 var stemData = this.stems[name];
                 if (!stemData || !stemData.buffer || !this.ctx) return;
                 if (stemData.node || stemData._nodePending) return; // already built/building
                 stemData._nodePending = true;
-                loadStretchFactory().then(function(SignalsmithStretch) {
+
+                // Resolve engine mode once: forced override > prior demotion >
+                // optimistic 'stretch'. No separate-context probe (WebKit-hostile).
+                if (this._stretchMode === null) {
+                    var forced = _forcedEngineMode();
+                    if (forced === 'legacy') {
+                        console.log('[StemAudio:Practice] ?forceLegacy=1 → legacy fallback');
+                        this._stretchMode = false; this.needsRafLoop = true;
+                    } else {
+                        if (forced === 'stretch')
+                            console.log('[StemAudio:Practice] ?forceStretch=1 → worklet path (watchdog off)');
+                        this._stretchMode = true; // optimistic; watchdog may demote
+                    }
+                }
+
+                if (this._stretchMode === false) {
+                    this._createLegacyNode(name);
+                } else {
+                    this._createStretchNode(name);
+                }
+            }
+
+            // Demote the entire engine from worklet→legacy at runtime (called by
+            // the output watchdog when the worklet produced no audio). Rebuilds
+            // every stem's source as a BufferSource and resumes playback in sync.
+            _demoteToLegacy(reason) {
+                if (this._stretchMode === false) return;
+                console.warn('[StemAudio:Practice] DEMOTING to legacy fallback: ' + reason +
+                    ' (audio will play; pitch shifts when slowed)');
+                this._stretchMode = false;
+                this.needsRafLoop = true;
+                var self = this;
+                var resumeAt = this.isPlaying ? this.getCurrentTime() : this._offset;
+                Object.keys(this.stems).forEach(function(name) {
+                    var s = self.stems[name];
+                    // Tear down the (silent) worklet node.
+                    if (s.node && !s._legacy) {
+                        try { s.node.disconnect(); } catch (e) {}
+                        try { if (s.node.port) s.node.port.close(); } catch (e) {}
+                    }
+                    s.node = null; s._nodePending = false; s._legacy = false; s._src = null;
+                    if (s.buffer) self._createLegacyNode(name);
+                });
+                // Re-anchor and restart from where the (silent) worklet had reached.
+                this._offset = resumeAt;
+                if (this.isPlaying && this.ctx) {
+                    this._scheduleAt = this.ctx.currentTime + SCHED_LEAD;
+                    this._startTime = this._scheduleAt;
+                    Object.keys(this.stems).forEach(function(name) {
+                        if (self.stems[name].loaded) self._scheduleStem(name);
+                    });
+                }
+            }
+
+            // Output watchdog: after play(), tap an analyser on the live mix and
+            // confirm the worklet is actually producing audio. If silent for the
+            // whole window while isPlaying → demote to legacy. This is the real
+            // iOS-silent-worklet detector (runs on the actual playback graph, no
+            // fragile second AudioContext). No-op in legacy or forced-stretch mode.
+            _startOutputWatchdog() {
+                var self = this;
+                if (this._stretchMode === false) return;          // already legacy
+                if (_forcedEngineMode() === 'stretch') return;     // test: don't demote
+                if (this._watchdogActive) return;
+                this._watchdogActive = true;
+                var an;
+                try {
+                    an = this.ctx.createAnalyser();
+                    an.fftSize = 2048;
+                    var connected = 0;
+                    Object.keys(this.stems).forEach(function(nm) {
+                        var g = self.stems[nm].gain;
+                        if (g) { try { g.connect(an); connected++; } catch (e) {} }
+                    });
+                    if (!connected) { this._watchdogActive = false; return; }
+                } catch (e) { this._watchdogActive = false; return; }
+                var buf = new Float32Array(an.fftSize);
+                var startedAt = this.ctx.currentTime;
+                var checks = 0;
+                var iv = setInterval(function() {
+                    checks++;
+                    if (!self.isPlaying || self._stretchMode === false || !self.ctx) {
+                        clearInterval(iv); self._watchdogActive = false;
+                        try { an.disconnect(); } catch (e) {}
+                        return;
+                    }
+                    var heard = false;
+                    try {
+                        an.getFloatTimeDomainData(buf);
+                        var sum = 0;
+                        for (var i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+                        if (Math.sqrt(sum / buf.length) > 1e-3) heard = true;
+                    } catch (e) {}
+                    var elapsed = self.ctx.currentTime - startedAt;
+                    if (heard) {
+                        // Worklet is producing audio — pitch-lock confirmed live.
+                        console.log('[StemAudio:Practice] output watchdog: worklet AUDIBLE (pitch-lock live)');
+                        clearInterval(iv); self._watchdogActive = false;
+                        try { an.disconnect(); } catch (e) {}
+                    } else if (elapsed > 2.6 && checks > 6) {
+                        // Played for >2.6s of ctx time with zero output → silent worklet.
+                        clearInterval(iv); self._watchdogActive = false;
+                        try { an.disconnect(); } catch (e) {}
+                        self._demoteToLegacy('worklet produced no audio in ' +
+                            elapsed.toFixed(1) + 's');
+                    }
+                }, 250);
+            }
+
+            // Pitch-locked worklet node (the verified Phase 1-3 path, unchanged).
+            _createStretchNode(name) {
+                var self = this;
+                var stemData = this.stems[name];
+                return loadStretchFactory().then(function(SignalsmithStretch) {
                     return SignalsmithStretch(self.ctx);
                 }).then(function(node) {
                     stemData._nodePending = false;
-                    // Context may have been swapped (rebuild) while we awaited.
                     if (!self.ctx || !self.stems[name] || self.stems[name] !== stemData) {
                         try { node.disconnect(); } catch (e) {}
                         return;
                     }
                     var buf = stemData.buffer;
-                    // slice() copies — passing getChannelData views would detach the AudioBuffer.
                     var chans = [];
                     for (var c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c).slice());
                     node.connect(stemData.gain);
                     stemData.node = node;
-                    // Latency comp: lib reports its own latency; Phase-1 proved the
-                    // position formula needs only a constant subtract (~const across rates).
+                    stemData._legacy = false;
                     try {
                         Promise.resolve(node.latency()).then(function(L) {
                             if (typeof L === 'number' && L > self._latencyComp) self._latencyComp = L;
                         });
                     } catch (e) {}
                     Promise.resolve(node.addBuffers(chans)).then(function() {
-                        // If playback started while this node was loading, join in sync.
                         if (self.isPlaying) self._scheduleStem(name);
                     }).catch(function(e) {
                         console.error('[StemAudio:Practice] addBuffers failed "' + name + '":', e);
                     });
                 }).catch(function(e) {
                     stemData._nodePending = false;
-                    console.error('[StemAudio:Practice] stretch node create failed "' + name + '":', e);
+                    // Late, per-stem worklet failure (e.g. addModule races): demote the
+                    // WHOLE engine to legacy so we never end up with mixed/silent stems.
+                    console.error('[StemAudio:Practice] stretch node failed "' + name + '" — demoting engine to legacy:', e);
+                    if (self._stretchMode !== false) {
+                        self._stretchMode = false;
+                        self.needsRafLoop = true;
+                    }
+                    stemData.node = null;
+                    self._createNode(name);
                 });
+            }
+
+            // Legacy fallback: a BufferSource adapter that exposes the SAME tiny
+            // surface the engine uses on a stem node (.connect implicit; we track a
+            // `_legacy` flag and a `_src` BufferSource). Pitch is NOT preserved — it
+            // shifts with playbackRate (honest, today's shipped behavior). Audio
+            // ALWAYS plays. setLoop/seek/rate/pause all branch on stemData._legacy.
+            _createLegacyNode(name) {
+                var self = this;
+                var stemData = this.stems[name];
+                stemData._nodePending = false;
+                if (!self.ctx || !self.stems[name] || self.stems[name] !== stemData) return;
+                // Mark the stem ready in legacy mode. The actual BufferSource is
+                // (re)created per play/seek/rate change in _scheduleStem (BufferSources
+                // are one-shot). `node` is a sentinel so "is this stem ready?" checks
+                // (which test stemData.node) pass uniformly across both modes.
+                stemData._legacy = true;
+                stemData._src = null;
+                stemData.node = { _legacySentinel: true };
+                self._latencyComp = 0; // BufferSource path has no worklet latency
+                if (self.isPlaying) self._scheduleStem(name);
+                return Promise.resolve();
             }
 
             // Schedule one stem's playback at the shared output time (sample-lock).
@@ -2967,6 +3175,33 @@
                 var offset = this._offset;
                 if (stemData.buffer && offset >= stemData.buffer.duration) offset = 0;
                 if (offset < 0) offset = 0;
+
+                // ── Legacy fallback path: one-shot BufferSource + playbackRate ──
+                if (stemData._legacy) {
+                    if (stemData._src) {
+                        try { stemData._src.stop(); } catch (e) {}
+                        try { stemData._src.disconnect(); } catch (e) {}
+                        stemData._src = null;
+                    }
+                    var src = this.ctx.createBufferSource();
+                    src.buffer = stemData.buffer;
+                    src.playbackRate.value = this._playbackRate; // pitch shifts — honest
+                    // Native loop on the BufferSource gives a tight (sample-accurate)
+                    // loop too; cursor wrap is handled by getCurrentTime()/RAF.
+                    if (this._loopEnabled && this._loopEnd > this._loopStart) {
+                        src.loop = true;
+                        src.loopStart = this._loopStart;
+                        src.loopEnd = this._loopEnd;
+                    }
+                    src.connect(stemData.gain);
+                    stemData._src = src;
+                    try { src.start(this._scheduleAt, offset); } catch (e) {
+                        try { src.start(0, offset); } catch (e2) {}
+                    }
+                    return;
+                }
+
+                // ── Pitch-locked worklet path (verified Phase 1-3) ──
                 // Phase 3: native loop. Input==track seconds (whole stem added 1:1).
                 // Equal loopStart/loopEnd disables looping (per lib README).
                 var lpS = 0, lpE = 0;
@@ -3018,6 +3253,9 @@
                         }
                     });
                     console.log('[StemAudio:Practice] Scheduled', started, 'stems at offset', self._offset.toFixed(2), 'startAt', self._scheduleAt.toFixed(3), 'ctx.state:', self.ctx.state);
+                    // Verify on the live mix that the worklet actually outputs audio;
+                    // demote to the legacy BufferSource path if it's silent (iOS).
+                    self._startOutputWatchdog();
                 }
 
                 // iOS Safari: context may be suspended — must resume before starting sources
@@ -3045,7 +3283,13 @@
                 var self = this;
                 Object.keys(this.stems).forEach(function(name) {
                     var s = self.stems[name];
-                    if (s.node) {
+                    if (s._legacy) {
+                        if (s._src) {
+                            try { s._src.stop(); } catch (e) {}
+                            try { s._src.disconnect(); } catch (e) {}
+                            s._src = null;
+                        }
+                    } else if (s.node) {
                         try { s.node.stop(); } catch (e) {}
                     }
                 });
@@ -3139,6 +3383,22 @@
                 }
                 this._playbackRate = rate;
                 var self = this;
+
+                // Legacy: BufferSource.playbackRate is live-settable, but we also
+                // re-anchored _offset/_startTime above, so the cleanest correct path
+                // is a full reschedule (recreates each BufferSource from the new
+                // offset at the new rate, sample-locked at a fresh _scheduleAt).
+                if (this._stretchMode === false) {
+                    if (this.isPlaying && this.ctx) {
+                        this._scheduleAt = this.ctx.currentTime + SCHED_LEAD;
+                        this._startTime = this._scheduleAt;
+                        Object.keys(this.stems).forEach(function(name) {
+                            if (self.stems[name].loaded) self._scheduleStem(name);
+                        });
+                    }
+                    return;
+                }
+
                 // Re-pass loop bounds with the rate change: a partial schedule()
                 // must not drop the active loop (defensive — keeps loop + rate atomic).
                 var lpS = 0, lpE = 0;
@@ -3150,7 +3410,7 @@
                 // Lib `rate` IS playback rate (0.5 == half speed) — NO 1/rate inversion.
                 Object.keys(this.stems).forEach(function(name) {
                     var s = self.stems[name];
-                    if (s.node) {
+                    if (s.node && !s._legacy) {
                         try { s.node.schedule({ rate: rate, loopStart: lpS, loopEnd: lpE }); } catch (e) {}
                     }
                 });
@@ -3192,7 +3452,10 @@
                 var self = this;
                 Object.keys(this.stems).forEach(function(name) {
                     var s = self.stems[name];
-                    if (s.node) {
+                    if (s._legacy) {
+                        if (s._src) { try { s._src.stop(); } catch (e) {} try { s._src.disconnect(); } catch (e) {} s._src = null; }
+                        s.node = null;
+                    } else if (s.node) {
                         try { s.node.disconnect(); } catch (e) {}
                         try { if (s.node.port) s.node.port.close(); } catch (e) {}
                         s.node = null;
@@ -3237,6 +3500,9 @@
                 }
                 lines.push('');
                 lines.push('-- Engine State --');
+                lines.push('engineMode: ' + this.engineMode +
+                    (this._stretchMode === true ? ' (PITCH-LOCKED)' :
+                     this._stretchMode === false ? ' (legacy: pitch shifts when slowed)' : ''));
                 lines.push('isPlaying: ' + this.isPlaying);
                 lines.push('_offset: ' + this._offset.toFixed(4));
                 lines.push('_startTime: ' + this._startTime.toFixed(4));
