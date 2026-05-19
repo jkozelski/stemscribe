@@ -33,6 +33,7 @@ Usage:
 
 import json
 import logging
+import os
 import re
 from typing import List, Dict, Optional, Tuple
 from collections import Counter
@@ -174,27 +175,56 @@ def format_chart(
             combine_with_detector_quality, smooth_qualities, promote_diatonic_maj7,
         )
         bar_grid = combine_with_detector_quality(bass_roots, chords, grid)
-        bar_grid = smooth_qualities(bar_grid)
-        # Re-detect key from the smoothed bar_grid before maj7 promotion.
-        # The raw chord_events feed detect_key_from_chords with mostly plain
-        # 'maj' qualities (the detector emits triads; family-aware promotion
-        # to dom7/9 happens INSIDE smooth_qualities). The static-dominant
-        # heuristic in detect_key_from_chords needs the dom-quality labels
-        # to fire — so we re-detect here, after smoothing.
-        key = _redetect_key_from_bargrid(bar_grid, fallback=key)
-        # Key-aware maj7 promotion: when a song is in a major key, the
-        # detector tends to label I and IV chords as A9/D9 (dom7) when
-        # the song actually uses Amaj7/Dmaj7. Fix only fires for major
-        # keys, only on I/IV degrees, and only if the song doesn't look
-        # like a 12-bar blues (V also dom-7).
-        bar_grid = promote_diatonic_maj7(bar_grid, key)
-        smoothed_count = sum(1 for b in bar_grid if "smoothed" in (b.get("source") or ""))
-        promoted_count = sum(1 for b in bar_grid if "maj7promoted" in (b.get("source") or ""))
-        logger.info(
-            f"chart_formatter: bar grid built from bass+detector "
-            f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
-            f"{promoted_count} maj7-promoted, key={key})"
-        )
+        # ------------------------------------------------------------------
+        # LANDMINE DISARM (2026-05-19, flag-gated, default = exact prod path)
+        #
+        # `smooth_qualities` + `promote_diatonic_maj7` were tuned for the
+        # legacy NOISY stem-aware detector, whose per-bar quality labels
+        # flicker and need majority-vote collapsing. Applied to an already
+        # CLEAN per-bar detector (ACE / Jiang), the same passes destroy
+        # signal: forensic measurement showed oracle-quality input degrading
+        # 0.833 -> 0.075 composite once routed through smooth_qualities.
+        #
+        # When CHART_FORMATTER_DISARM_SMOOTHING is truthy we keep the useful
+        # bass-anchored bar grid from combine_with_detector_quality but skip
+        # the two destructive cleanup passes (and the key re-detect, whose
+        # sole purpose is to feed maj7 promotion). The flag is OFF by default
+        # so production behavior is byte-identical unless explicitly opted in
+        # — intended for clean detectors (V3.1 ACE/Jiang router) only.
+        # ------------------------------------------------------------------
+        _disarm = os.environ.get(
+            'CHART_FORMATTER_DISARM_SMOOTHING', ''
+        ).strip().lower() in ('1', 'true', 'yes', 'on')
+        if _disarm:
+            smoothed_count = 0
+            promoted_count = 0
+            logger.info(
+                f"chart_formatter: bar grid built from bass+detector "
+                f"(DISARMED: smoothing/promotion skipped, "
+                f"{len(bar_grid)} bars, key={key})"
+            )
+        else:
+            bar_grid = smooth_qualities(bar_grid)
+            # Re-detect key from the smoothed bar_grid before maj7 promotion.
+            # The raw chord_events feed detect_key_from_chords with mostly plain
+            # 'maj' qualities (the detector emits triads; family-aware promotion
+            # to dom7/9 happens INSIDE smooth_qualities). The static-dominant
+            # heuristic in detect_key_from_chords needs the dom-quality labels
+            # to fire — so we re-detect here, after smoothing.
+            key = _redetect_key_from_bargrid(bar_grid, fallback=key)
+            # Key-aware maj7 promotion: when a song is in a major key, the
+            # detector tends to label I and IV chords as A9/D9 (dom7) when
+            # the song actually uses Amaj7/Dmaj7. Fix only fires for major
+            # keys, only on I/IV degrees, and only if the song doesn't look
+            # like a 12-bar blues (V also dom-7).
+            bar_grid = promote_diatonic_maj7(bar_grid, key)
+            smoothed_count = sum(1 for b in bar_grid if "smoothed" in (b.get("source") or ""))
+            promoted_count = sum(1 for b in bar_grid if "maj7promoted" in (b.get("source") or ""))
+            logger.info(
+                f"chart_formatter: bar grid built from bass+detector "
+                f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
+                f"{promoted_count} maj7-promoted, key={key})"
+            )
     elif grid:
         bar_grid = _quantize_chords_to_bars(chords, grid)
         logger.info(f"chart_formatter: bar grid built from detector-only ({len(bar_grid)} bars)")
