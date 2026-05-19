@@ -1,0 +1,96 @@
+{
+  "song": "In My Life",
+  "artist": "The Beatles",
+  "key": "A",
+  "capo": 0,
+  "_recovery_note": "Reconstructed 2026-05-19 from /tmp/forensic/iml/gt_bars.json (the vetted bar sequence prior forensic agents derived from the original UG ground truth, lost to git-clean). Roundtrips byte-identical through score_chord_chart_v2.gt_bar_sequence().",
+  "sections": [
+    {
+      "name": "Song",
+      "lines": [
+        [
+          "A",
+          "E",
+          "A",
+          "E"
+        ],
+        [
+          "A",
+          "E",
+          "F#m",
+          "A7"
+        ],
+        [
+          "D",
+          "Dm",
+          "A",
+          "A"
+        ],
+        [
+          "F#m",
+          "D",
+          "G",
+          "A"
+        ],
+        [
+          "F#m",
+          "B7",
+          "Dm",
+          "A"
+        ],
+        [
+          "A",
+          "E",
+          "F#m",
+          "A7"
+        ],
+        [
+          "D",
+          "Dm",
+          "A",
+          "A"
+        ],
+        [
+          "F#m",
+          "D",
+          "G",
+          "A"
+        ],
+        [
+          "F#m",
+          "B7",
+          "Dm",
+          "A"
+        ],
+        [
+          "A",
+          "E",
+          "F#m",
+          "A7"
+        ],
+        [
+          "D",
+          "Dm",
+          "A",
+          "A"
+        ],
+        [
+          "F#m",
+          "D",
+          "G",
+          "A"
+        ],
+        [
+          "F#m",
+          "B7",
+          "Dm",
+          "A"
+        ],
+        [
+          "Dm",
+          "A"
+        ]
+      ]
+    }
+  ]
+}
