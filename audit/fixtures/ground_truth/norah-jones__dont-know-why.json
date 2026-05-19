@@ -1,0 +1,74 @@
+{
+  "song": "Don't Know Why",
+  "artist": "Norah Jones",
+  "key": "Bb",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19. Diagnostic fixture for the v2 scorer extension/flavor axis (lost to git-clean, never committed). Rebuilt from the canonical published Don't Know Why jazz-pop changes (maj7/7/m7-rich by design so extension-stripping must collapse the flavor axis). Used only by test_score_chord_chart_v2.py mechanics tests, not by the headline detector A/B.",
+  "sections": [
+    {
+      "name": "Song",
+      "lines": [
+        [
+          "Bbmaj7",
+          "Bb7",
+          "Ebmaj7",
+          "D7"
+        ],
+        [
+          "Gm7",
+          "C7",
+          "F7sus",
+          "F7"
+        ],
+        [
+          "Bbmaj7",
+          "Bb7",
+          "Ebmaj7",
+          "D7"
+        ],
+        [
+          "Gm7",
+          "C7",
+          "F7sus",
+          "F7"
+        ],
+        [
+          "Bbmaj7",
+          "Bb7",
+          "Ebmaj7",
+          "Ab7"
+        ],
+        [
+          "Dm7",
+          "Db7",
+          "Cm7",
+          "F7"
+        ],
+        [
+          "Bbmaj7",
+          "Bb7",
+          "Ebmaj7",
+          "D7"
+        ],
+        [
+          "Gm7",
+          "C7",
+          "F7sus",
+          "F7"
+        ],
+        [
+          "Bbmaj7",
+          "Bb7",
+          "Ebmaj7",
+          "D7"
+        ],
+        [
+          "Gm7",
+          "C7",
+          "F7sus",
+          "F7"
+        ]
+      ]
+    }
+  ]
+}
