@@ -1,0 +1,86 @@
+{
+  "song": "Sultans of Swing",
+  "artist": "Dire Straits",
+  "key": "Dm",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: Dire Straits, 'Sultans of Swing', Dire Straits (1978) studio album version. DIAGNOSTIC AXIS = long instrumental OUTRO (the extended Knopfler guitar-solo coda vamping one progression to the fade — a detector must keep calling the right chords through minutes of soloing with no vocal anchor). Concert key D minor, standard tuning, no capo. Intro/verse: Dm - C - Bb - A; mid-verse lift F - C; chorus: Bb - C - Dm - Bb - C; outro coda vamp: Dm - C - Bb - C repeated to fade under the solo. Cross-checked against >=3 independent sources: amchords.com simplified (intro Dm C-C, verse Dm/C Bb A with F C mid, chorus Bb-C/Dm/Dm-C-Bb-C, outro Dm-C-Bb-C repeating to fade), Hooktheory dire-straits/sultans-of-swing analysis (Dm key, Dm C Bb A), Songsterr s30084, Ultimate Guitar ver2 267976 / ver3 791868, e-chords. ROCK-SOLID at root, key and the Dm-C-Bb-A vocabulary. The number of outro vamp repeats before the fade is DIRECTIONAL (it is a long fade, not a fixed bar count) - the outro is deliberately written as several Dm-C-Bb-C cycles to exercise the long-instrumental axis; treat outro length as directional, the progression itself as authoritative.",
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        ["Dm", "Dm", "C", "C"],
+        ["Dm", "Dm", "C", "C"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["Dm", "C", "Bb", "A"],
+        ["Dm", "C", "Bb", "A"],
+        ["F", "F", "C", "C"],
+        ["Dm", "C", "Bb", "A"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["Bb", "C", "Dm", "Dm"],
+        ["Bb", "C", "Dm", "C"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["Dm", "C", "Bb", "A"],
+        ["Dm", "C", "Bb", "A"],
+        ["F", "F", "C", "C"],
+        ["Dm", "C", "Bb", "A"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["Bb", "C", "Dm", "Dm"],
+        ["Bb", "C", "Dm", "C"]
+      ]
+    },
+    {
+      "name": "Guitar Solo",
+      "lines": [
+        ["Dm", "C", "Bb", "A"],
+        ["Dm", "C", "Bb", "A"],
+        ["F", "F", "C", "C"],
+        ["Dm", "C", "Bb", "A"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["Dm", "C", "Bb", "A"],
+        ["Dm", "C", "Bb", "A"],
+        ["F", "F", "C", "C"],
+        ["Dm", "C", "Bb", "A"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["Bb", "C", "Dm", "Dm"],
+        ["Bb", "C", "Dm", "C"]
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"],
+        ["Dm", "C", "Bb", "C"]
+      ]
+    }
+  ]
+}

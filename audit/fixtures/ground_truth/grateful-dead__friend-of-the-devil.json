@@ -1,0 +1,76 @@
+{
+  "song": "Friend of the Devil",
+  "artist": "Grateful Dead",
+  "key": "G",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: Grateful Dead, 'Friend of the Devil', American Beauty (1970) STUDIO version (the up-tempo Garcia/Dawson/Hunter take, NOT the later slowed live arrangement). DIAGNOSTIC AXIS = walking bass under a static chord (Garcia's signature descending G-major bass run played out of a held G, then C, so a root detector must NOT be fooled into calling each passing bass note a chord change). Concert key G major, standard tuning, no capo on the studio recording. Structure: verse alternates G (2 bars) and C (2 bars) with the walking-bass motif; chorus D - Am - D - Am - D; bridge D - C - D - Am - C - D. Cross-checked against >=3 independent sources: heartwoodguitar.com (key G no capo; verse G|C alternation, chorus D Am D Am D, bridge D D C C D D Am C D), guitarplayer.com 'Three Ways to Play' lesson (walking bass out of G then C, Am7/G landing), jonmaclennan.com chords (G C D Am, key G no capo), Ultimate Guitar ver2 1087323. ROCK-SOLID at root and key. The walking-bass passing tones are deliberately NOT charted as chords (that is exactly the detector trap this fixture exists to expose). Section/repeat count is directional; the verse/chorus/bridge harmonic blocks are authoritative.",
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["D", "D", "Am", "Am"],
+        ["D", "D", "Am", "Am"],
+        ["D", "D", "D", "D"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["D", "D", "Am", "Am"],
+        ["D", "D", "Am", "Am"],
+        ["D", "D", "D", "D"]
+      ]
+    },
+    {
+      "name": "Bridge",
+      "lines": [
+        ["D", "D", "D", "D"],
+        ["C", "C", "C", "C"],
+        ["D", "D", "D", "D"],
+        ["Am", "Am", "C", "D"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"],
+        ["G", "G", "C", "C"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["D", "D", "Am", "Am"],
+        ["D", "D", "Am", "Am"],
+        ["D", "D", "D", "D"]
+      ]
+    }
+  ]
+}

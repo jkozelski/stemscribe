@@ -1,0 +1,50 @@
+{
+  "song": "Free Fallin'",
+  "artist": "Tom Petty",
+  "key": "F",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: Tom Petty, 'Free Fallin'' from Full Moon Fever (1989) studio master. DIAGNOSTIC AXIS = suspension/quality handling. The record is a single repeating I-IV-I-V cycle; on the recording the IV and V are voiced as suspensions (capo-3 D-shape playing: D / Gsus2 / D / Asus4), which at concert pitch (capo 0) is F / Bbsus2 / F / Csus4. The whole song is this one cycle through verse, chorus and outro. Cross-checked against >=3 independent sources: jonmaclennan.com Free Fallin' lesson (I-IV-I-V, Gsus2/Asus4 capo3), richterguitar.com (F major, capo 3, Gsus2 300233 / Asus4 x02230), Songsterr s15887 and Ultimate Guitar vers 4/2 (D Gsus2 D Asus4 capo 3). Concert key F is unambiguous (capo 3 + D shape = F). ROCK-SOLID at root + key level. The exact bar count per section is directional (the cycle simply repeats for the song's length); the harmonic vocabulary and the sus character are authoritative.",
+  "sections": [
+    {
+      "name": "Verse",
+      "lines": [
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"]
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"],
+        ["F", "Bbsus2", "F", "Csus4"]
+      ]
+    }
+  ]
+}

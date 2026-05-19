@@ -1,0 +1,57 @@
+{
+  "song": "Folsom Prison Blues",
+  "artist": "Johnny Cash",
+  "key": "F",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: Johnny Cash, 'Folsom Prison Blues', 1955 Sun Records studio single (Cash vox/gtr, Luther Perkins gtr, Marshall Grant bass). DIAGNOSTIC AXIS = dominant-7 blues/shuffle (the V chord is a dom7, the rest are plain triads in a 12-bar shuffle). Concert key F major (the lesson sources teach it capo-1 with E shapes, but state plainly the concert pitch / actual key is F). 12-bar form, harmonically: I(4 bars) - IV(2) - I(2) - V7(2) - I(2) => F F F F | Bb Bb | F F | C7 C7 | F F. Cross-checked against >=3 independent sources: jonmaclennan.com Folsom lesson (12-bar E/A/B7 capo1, concert F), CountryTabs key-of-E chart, Ultimate Guitar vers 4/202632, nationalguitaracademy.com (I-IV-V7 12-bar, E A B7). ROCK-SOLID at root, key and flavor (dom7) level. Number of 12-bar choruses is directional; one canonical 12-bar cycle is the authoritative unit.",
+  "sections": [
+    {
+      "name": "12-Bar Blues",
+      "lines": [
+        ["F", "F", "F", "F"],
+        ["Bb", "Bb", "F", "F"],
+        ["C7", "C7", "F", "F"]
+      ]
+    },
+    {
+      "name": "12-Bar Blues",
+      "lines": [
+        ["F", "F", "F", "F"],
+        ["Bb", "Bb", "F", "F"],
+        ["C7", "C7", "F", "F"]
+      ]
+    },
+    {
+      "name": "12-Bar Blues",
+      "lines": [
+        ["F", "F", "F", "F"],
+        ["Bb", "Bb", "F", "F"],
+        ["C7", "C7", "F", "F"]
+      ]
+    },
+    {
+      "name": "12-Bar Blues",
+      "lines": [
+        ["F", "F", "F", "F"],
+        ["Bb", "Bb", "F", "F"],
+        ["C7", "C7", "F", "F"]
+      ]
+    },
+    {
+      "name": "12-Bar Blues",
+      "lines": [
+        ["F", "F", "F", "F"],
+        ["Bb", "Bb", "F", "F"],
+        ["C7", "C7", "F", "F"]
+      ]
+    },
+    {
+      "name": "12-Bar Blues",
+      "lines": [
+        ["F", "F", "F", "F"],
+        ["Bb", "Bb", "F", "F"],
+        ["C7", "C7", "F", "F"]
+      ]
+    }
+  ]
+}

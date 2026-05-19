@@ -1,0 +1,80 @@
+{
+  "song": "Hallelujah",
+  "artist": "Jeff Buckley",
+  "key": "C",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: Jeff Buckley, 'Hallelujah', Grace (1994) studio version (solo electric guitar, the John Cale / Leonard Cohen arrangement Buckley covered). DIAGNOSTIC AXIS = loose / rubato tempo (Buckley's free, breathing, no-click delivery - a beat-grid or bar-locked detector must not smear chords across the elastic timing). Concert key C major, no capo on the Grace recording. Verse: C - Am - C - Am - F - G - C - G - C - F - G - Am - F - G - E7 - Am (the famous 'it goes like this, the fourth (F), the fifth (G), the minor fall (Am), the major lift (F-G)' with the E7 'baffled king' before resolving to Am). Chorus: F - Am - F - C - G - C. Cross-checked against >=3 independent sources: amchords.com Leonard Cohen guitar (key C; verse C Am C Am F G C G C F G Am F G E7 Am; chorus F Am F C G C), maartenmassa.be CohenChords Hallelujah, Hooktheory jeff-buckley/hallelujah analysis (C major), Ultimate Guitar Jeff Buckley 27336 / Leonard Cohen 64977, Songsterr s4366. ROCK-SOLID at root, key and the E7 (V/vi) flavor that defines the 'minor fall / major lift'. Verse/chorus repeat count is directional (Buckley's version uses Cohen's verses with rubato phrasing); the per-verse and chorus harmonic blocks are authoritative.",
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        ["C", "C", "G", "G"],
+        ["C", "C", "G", "G"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["C", "Am", "C", "Am"],
+        ["F", "G", "C", "G"],
+        ["C", "F", "G", "Am"],
+        ["F", "G", "E7", "Am"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["F", "Am", "F", "C"],
+        ["G", "C", "C", "C"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["C", "Am", "C", "Am"],
+        ["F", "G", "C", "G"],
+        ["C", "F", "G", "Am"],
+        ["F", "G", "E7", "Am"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["F", "Am", "F", "C"],
+        ["G", "C", "C", "C"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["C", "Am", "C", "Am"],
+        ["F", "G", "C", "G"],
+        ["C", "F", "G", "Am"],
+        ["F", "G", "E7", "Am"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["F", "Am", "F", "C"],
+        ["G", "C", "C", "C"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["C", "Am", "C", "Am"],
+        ["F", "G", "C", "G"],
+        ["C", "F", "G", "Am"],
+        ["F", "G", "E7", "Am"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["F", "Am", "F", "C"],
+        ["G", "C", "C", "C"]
+      ]
+    }
+  ]
+}
