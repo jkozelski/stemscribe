@@ -147,6 +147,34 @@ def format_chart(
     chords = _consolidate_chord_events(chords)
     logger.info(f"Consolidated chord events: {before_count} -> {len(chords)}")
 
+    # Step 1a': PLACEMENT consolidation (flag-gated, default OFF).
+    #
+    # Snap chord boundaries to the beat grid and absorb sub-beat flicker that
+    # sits inside a held chord, so the per-bar placement downstream is not
+    # hijacked by detector over-segmentation.
+    #
+    # SCOPE: this pass changes event DURATIONS. In the `grid and bass_roots`
+    # branch, combine_with_detector_quality assigns each bar's QUALITY from
+    # the max-overlap detector event — a duration-sensitive vote. Re-timing
+    # events there flips qualities (measured: House of the Rising Sun flavor
+    # 0.887 -> 0.493, the same class of landmine as smooth_qualities). So
+    # the raw-event consolidation is applied ONLY on the bass-LESS paths
+    # (detector-only quantize / raw events), where it cannot corrupt a
+    # quality vote. The bass+detector branch is intentionally left untouched:
+    # its bar_grid is already one-chord-per-bar and _bar_grid_to_chord_events
+    # already merges held bars, so there is no safe additional placement lever
+    # here without re-timing the duration-sensitive quality vote (rejected).
+    #
+    # Byte-identical to prod when the flag is unset.
+    _pc_on = _placement_consolidate_enabled()
+    _use_bass_branch = bool(grid and bass_roots)
+    if _pc_on and not _use_bass_branch:
+        pc_before = len(chords)
+        chords = _placement_consolidate_to_beatgrid(chords, grid)
+        logger.info(
+            f"Placement-consolidated chord events: {pc_before} -> {len(chords)}"
+        )
+
     # Step 1: Split words into lyric lines
     lyric_lines = _split_into_lines(words)
     logger.info(f"Split {len(words)} words into {len(lyric_lines)} lyric lines")
@@ -1586,6 +1614,201 @@ def _consolidate_chord_events(
                     else:
                         final.append(dict(c))
                 return final
+    return merged
+
+
+# ---------------------------------------------------------------------------
+# PLACEMENT consolidation — beat-grid snap + in-stable-context flicker absorb
+#
+# Lever identified by 3 forensic agents + the 5-song honest v2 bench: the
+# dominant systematic defect is PLACEMENT, root-caused to detector-side
+# chord-event OVER-segmentation. librosa emits ~per-beat events with quality
+# flicker (e.g. Free Fallin' = F/Bb/C song, but detector emits 348 events
+# with 14× transient Fm, 8× Am, 5× Cm inside held F/Bb/C). When such a
+# cluster of wrong sub-beat fragments straddles a bar boundary it can win
+# that bar's max-overlap vote in _quantize_chords_to_bars /
+# combine_with_detector_quality, putting the wrong chord in the bar.
+#
+# This pass is CONSERVATIVE and REVERSIBLE:
+#   1. snap every event boundary to the nearest beat-grid time (harmonic
+#      changes land on beats; sub-beat boundaries are detector jitter),
+#   2. drop now-empty events and re-merge consecutive duplicates,
+#   3. absorb any event shorter than ~one beat that is *sandwiched between
+#      two occurrences of the SAME chord* (a one-beat flicker inside a held
+#      chord — the exact over-segmentation failure mode) into that chord.
+#
+# It does NOT change the chord vocabulary the way the legacy min_count /
+# pareto passes do, does NOT swap detectors, does NOT touch smooth_qualities.
+# Gated behind CHART_FORMATTER_PLACEMENT_CONSOLIDATE, default OFF, so prod
+# output is byte-identical unless explicitly opted in.
+# ---------------------------------------------------------------------------
+
+def _placement_consolidate_enabled() -> bool:
+    return os.environ.get(
+        'CHART_FORMATTER_PLACEMENT_CONSOLIDATE', ''
+    ).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def _placement_consolidate_to_beatgrid(
+    chords: List[Dict],
+    grid: Optional[Dict],
+) -> List[Dict]:
+    """Snap chord-event boundaries to the beat grid and absorb sub-beat
+    flicker that sits inside a held chord. Returns a new list; never mutates
+    inputs. No-op (returns the input list unchanged object-wise) when there
+    is no usable beat grid so the caller's downstream path is identical.
+    """
+    if not chords or not grid:
+        return chords
+    beats = grid.get("beat_times") or []
+    if len(beats) < 2:
+        return chords
+
+    import bisect
+
+    beats = sorted(float(b) for b in beats)
+    # Median beat period — the "one beat" threshold for flicker absorption.
+    deltas = [beats[i + 1] - beats[i] for i in range(len(beats) - 1)]
+    deltas.sort()
+    beat_period = deltas[len(deltas) // 2] if deltas else 0.5
+    if beat_period <= 0:
+        return chords
+
+    def _snap(t: float) -> float:
+        # Nearest beat time to t.
+        j = bisect.bisect_left(beats, t)
+        cands = []
+        if j < len(beats):
+            cands.append(beats[j])
+        if j > 0:
+            cands.append(beats[j - 1])
+        if not cands:
+            return t
+        return min(cands, key=lambda b: abs(b - t))
+
+    # Pass A: snap boundaries to beats.
+    snapped: List[Dict] = []
+    for c in chords:
+        t0 = float(c["time"])
+        t1 = t0 + float(c.get("duration", beat_period))
+        s0 = _snap(t0)
+        s1 = _snap(t1)
+        if s1 <= s0:
+            # Event collapsed to (or below) zero length after snapping —
+            # it was a strictly sub-beat fragment. Skip it; its time is
+            # reclaimed by the neighbour that snaps over the same beat.
+            continue
+        nc = dict(c)
+        nc["time"] = s0
+        nc["duration"] = s1 - s0
+        snapped.append(nc)
+
+    if not snapped:
+        return chords
+
+    # Pass B: re-merge consecutive duplicates created by the snap.
+    merged: List[Dict] = [dict(snapped[0])]
+    for c in snapped[1:]:
+        if c["chord"] == merged[-1]["chord"]:
+            merged[-1]["duration"] = (
+                merged[-1].get("duration", beat_period)
+                + c.get("duration", beat_period)
+            )
+        else:
+            merged.append(dict(c))
+
+    # Pass C: absorb a short event that is sandwiched between two
+    # occurrences of the SAME chord (the held-chord flicker case). Only
+    # fires when both neighbours agree — never invents a chord, never
+    # rewrites an isolated genuine change. Iterate to a fixed point so a
+    # run of flickers inside one held chord all collapse.
+    flicker_max = beat_period * 1.5  # up to ~one bar-quarter of jitter
+    changed = True
+    while changed and len(merged) >= 3:
+        changed = False
+        out: List[Dict] = [merged[0]]
+        i = 1
+        while i < len(merged) - 1:
+            prev, cur, nxt = out[-1], merged[i], merged[i + 1]
+            if (
+                cur.get("duration", beat_period) <= flicker_max
+                and prev["chord"] == nxt["chord"]
+                and cur["chord"] != prev["chord"]
+            ):
+                # Fold cur + nxt into prev (prev already in `out`).
+                prev["duration"] = (
+                    prev.get("duration", beat_period)
+                    + cur.get("duration", beat_period)
+                    + nxt.get("duration", beat_period)
+                )
+                i += 2  # consumed cur and nxt
+                changed = True
+                continue
+            out.append(merged[i])
+            i += 1
+        if i == len(merged) - 1:
+            out.append(merged[-1])
+        # Re-merge in case the fold produced new adjacency duplicates.
+        remerged: List[Dict] = [dict(out[0])]
+        for c in out[1:]:
+            if c["chord"] == remerged[-1]["chord"]:
+                remerged[-1]["duration"] = (
+                    remerged[-1].get("duration", beat_period)
+                    + c.get("duration", beat_period)
+                )
+            else:
+                remerged.append(dict(c))
+        merged = remerged
+
+    # Pass D: absorb a STRICTLY sub-beat fragment (shorter than ~0.85 of a
+    # beat) into whichever adjacent event is longer and clearly established
+    # (>= ~one bar). This is the textbook over-segmentation fix: a quarter-
+    # beat blip between two real chords is detector jitter, not a chord the
+    # musician plays. It is conservative — it never rewrites an event that
+    # is itself a beat or longer, and only folds into a neighbour that is
+    # already a substantial held chord, so genuine fast changes survive.
+    frag_max = beat_period * 0.85
+    strong_min = beat_period * 3.0  # ~ a 4/4 bar of hold = "established"
+    while len(merged) >= 2:
+        best_i = -1
+        best_dur = None
+        for i in range(len(merged)):
+            d = merged[i].get("duration", beat_period)
+            if d > frag_max:
+                continue
+            left = merged[i - 1] if i > 0 else None
+            right = merged[i + 1] if i + 1 < len(merged) else None
+            ld = left.get("duration", 0.0) if left else -1.0
+            rd = right.get("duration", 0.0) if right else -1.0
+            if max(ld, rd) < strong_min:
+                continue  # no established neighbour to absorb into
+            if best_dur is None or d < best_dur:
+                best_dur, best_i = d, i
+        if best_i < 0:
+            break
+        i = best_i
+        left = merged[i - 1] if i > 0 else None
+        right = merged[i + 1] if i + 1 < len(merged) else None
+        ld = left.get("duration", 0.0) if left else -1.0
+        rd = right.get("duration", 0.0) if right else -1.0
+        target = left if ld >= rd else right
+        target["duration"] = (
+            target.get("duration", beat_period)
+            + merged[i].get("duration", beat_period)
+        )
+        del merged[i]
+        # Re-merge adjacents the deletion may have created.
+        remerged2: List[Dict] = [dict(merged[0])]
+        for c in merged[1:]:
+            if c["chord"] == remerged2[-1]["chord"]:
+                remerged2[-1]["duration"] = (
+                    remerged2[-1].get("duration", beat_period)
+                    + c.get("duration", beat_period)
+                )
+            else:
+                remerged2.append(dict(c))
+        merged = remerged2
+
     return merged
 
 
