@@ -1,0 +1,61 @@
+{
+  "song": "House of the Rising Sun",
+  "artist": "The Animals",
+  "key": "Am",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: The Animals, 'The House of the Rising Sun', 1964 MGM single (Alan Price arrangement, 6/8). DIAGNOSTIC AXIS = minor key with borrowed major IV and major V (D major instead of Dm, E major instead of Em). The Animals recording is in A minor at concert pitch (the arpeggiated electric-organ/guitar arrangement; standard tuning, no capo on the record). Repeating verse cycle: Am - C - D - F - Am - C - E - E (the final E often voiced E7 on the turnaround). Cross-checked against >=3 independent sources: appliedguitartheory.com riff breakdown (Am C D F Am E Am E, key Am, major IV/V over Dm/Em), goodguitarist.com chart, JustinGuitar BS-610, Ultimate Guitar 18688/763620. ROCK-SOLID at root, key and the borrowed-major-IV/V flavor. The turnaround E vs E7 is directional (sources split); plain E used to stay conservative. Verse-count is directional; one verse cycle is the authoritative unit.",
+  "sections": [
+    {
+      "name": "Verse",
+      "lines": [
+        ["Am", "C", "D", "F"],
+        ["Am", "C", "E", "E"],
+        ["Am", "C", "D", "F"],
+        ["Am", "E", "Am", "E"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["Am", "C", "D", "F"],
+        ["Am", "C", "E", "E"],
+        ["Am", "C", "D", "F"],
+        ["Am", "E", "Am", "E"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["Am", "C", "D", "F"],
+        ["Am", "C", "E", "E"],
+        ["Am", "C", "D", "F"],
+        ["Am", "E", "Am", "E"]
+      ]
+    },
+    {
+      "name": "Organ Solo",
+      "lines": [
+        ["Am", "C", "D", "F"],
+        ["Am", "C", "E", "E"],
+        ["Am", "C", "D", "F"],
+        ["Am", "E", "Am", "E"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["Am", "C", "D", "F"],
+        ["Am", "C", "E", "E"],
+        ["Am", "C", "D", "F"],
+        ["Am", "E", "Am", "E"]
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        ["Am", "C", "D", "F"],
+        ["Am", "E", "Am", "Am"]
+      ]
+    }
+  ]
+}

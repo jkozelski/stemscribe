@@ -1,0 +1,112 @@
+{
+  "_about": "Manifest of diagnostic ground-truth chord fixtures for the audit bench. Rebuilt 2026-05-19 after the original untracked diagnostic GT set was lost to a git-clean incident. Each fixture is concert-pitch with capo:0 (the convention of the three fixtures that survived the incident). Schema matches audit/score_chord_chart.py / score_chord_chart_v2.py: {song, artist, key, capo, sections:[{name, lines:[[bar,...],...]}]}. One line cell == one bar. GT-vs-GT scores 1.0 on every axis of both scorers for all entries.",
+  "rebuilt": "2026-05-19",
+  "scoring_commands": {
+    "v1_bag": "./venv311/bin/python audit/score_chord_chart.py audit/fixtures/ground_truth/<slug>.json <detector_chart.json> --json",
+    "v2_axes": "./venv311/bin/python audit/score_chord_chart_v2.py audit/fixtures/ground_truth/<slug>.json <detector_chart.json>"
+  },
+  "fixtures": [
+    {
+      "slug": "bob-dylan__positively-4th-street",
+      "song": "Positively 4th Street",
+      "artist": "Bob Dylan",
+      "status": "survived_incident",
+      "gt_confidence": "directional (harmony authoritative, bar/section count approximate)",
+      "note": "Not rebuilt by this pass; pre-existing. Diagnostic anchor pair with In My Life."
+    },
+    {
+      "slug": "the-beatles__in-my-life",
+      "song": "In My Life",
+      "artist": "The Beatles",
+      "status": "survived_incident",
+      "gt_confidence": "rock-solid (reconstructed byte-identical from forensic gt_bars)",
+      "note": "Not rebuilt by this pass; pre-existing. Keystone v2 test fixture."
+    },
+    {
+      "slug": "norah-jones__dont-know-why",
+      "song": "Don't Know Why",
+      "artist": "Norah Jones",
+      "status": "survived_incident",
+      "gt_confidence": "rock-solid (extension/flavor diagnostic axis)",
+      "note": "Not rebuilt by this pass; pre-existing. v2 extension-stripping mechanics test."
+    },
+    {
+      "slug": "tom-petty__free-fallin",
+      "song": "Free Fallin'",
+      "artist": "Tom Petty",
+      "status": "rebuilt_2026-05-19",
+      "recording": "Full Moon Fever (1989) studio master",
+      "key": "F",
+      "capo": 0,
+      "diagnostic_axis": "suspension / chord-quality (sus2/sus4 embellishment of IV and V)",
+      "gt_confidence": "rock-solid at root+key+sus flavor; section repeat-count directional"
+    },
+    {
+      "slug": "johnny-cash__folsom-prison-blues",
+      "song": "Folsom Prison Blues",
+      "artist": "Johnny Cash",
+      "status": "rebuilt_2026-05-19",
+      "recording": "1955 Sun Records studio single",
+      "key": "F",
+      "capo": 0,
+      "diagnostic_axis": "dominant-7 blues/shuffle (V is dom7 in a 12-bar form)",
+      "gt_confidence": "rock-solid at root+key+dom7 flavor; chorus-count directional"
+    },
+    {
+      "slug": "the-animals__house-of-the-rising-sun",
+      "song": "House of the Rising Sun",
+      "artist": "The Animals",
+      "status": "rebuilt_2026-05-19",
+      "recording": "1964 MGM single (Alan Price arrangement)",
+      "key": "Am",
+      "capo": 0,
+      "diagnostic_axis": "minor key with borrowed major IV (D) and major V (E)",
+      "gt_confidence": "rock-solid at root+key+borrowed-major flavor; turnaround E vs E7 and verse-count directional"
+    },
+    {
+      "slug": "procol-harum__a-whiter-shade-of-pale",
+      "song": "A Whiter Shade of Pale",
+      "artist": "Procol Harum",
+      "status": "rebuilt_2026-05-19",
+      "recording": "1967 Deram single",
+      "key": "C",
+      "capo": 0,
+      "diagnostic_axis": "descending-bass slash chords (Bach-derived stepwise bass)",
+      "gt_confidence": "rock-solid at root+key; slash spelling directional (scorer weights slash 0)"
+    },
+    {
+      "slug": "grateful-dead__friend-of-the-devil",
+      "song": "Friend of the Devil",
+      "artist": "Grateful Dead",
+      "status": "rebuilt_2026-05-19",
+      "recording": "American Beauty (1970) studio version",
+      "key": "G",
+      "capo": 0,
+      "diagnostic_axis": "walking bass under a static chord (passing tones must NOT be called as chord changes)",
+      "gt_confidence": "rock-solid at root+key; section repeat-count directional"
+    },
+    {
+      "slug": "dire-straits__sultans-of-swing",
+      "song": "Sultans of Swing",
+      "artist": "Dire Straits",
+      "status": "rebuilt_2026-05-19",
+      "recording": "Dire Straits (1978) studio album version",
+      "key": "Dm",
+      "capo": 0,
+      "diagnostic_axis": "long instrumental outro (extended solo coda vamp, no vocal anchor)",
+      "gt_confidence": "rock-solid at root+key+vocabulary; outro vamp-repeat count directional (long fade)"
+    },
+    {
+      "slug": "jeff-buckley__hallelujah",
+      "song": "Hallelujah",
+      "artist": "Jeff Buckley",
+      "status": "rebuilt_2026-05-19",
+      "recording": "Grace (1994) studio version",
+      "key": "C",
+      "capo": 0,
+      "diagnostic_axis": "loose / rubato tempo (elastic non-click delivery)",
+      "gt_confidence": "rock-solid at root+key+E7 flavor; verse/chorus repeat-count directional"
+    }
+  ],
+  "excluded": []
+}

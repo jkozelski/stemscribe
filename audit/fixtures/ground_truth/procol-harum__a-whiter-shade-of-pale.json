@@ -1,0 +1,71 @@
+{
+  "song": "A Whiter Shade of Pale",
+  "artist": "Procol Harum",
+  "key": "C",
+  "capo": 0,
+  "_recovery_note": "RECONSTRUCTED 2026-05-19 after the original diagnostic GT was lost to a git-clean incident. Pinned recording: Procol Harum, 'A Whiter Shade of Pale', 1967 Deram single (Gary Brooker vox, Matthew Fisher Hammond organ). DIAGNOSTIC AXIS = descending-bass slash chords (the Bach-derived stepwise descending bass line under largely diatonic triads). Concert key C major. The signature descending figure is C - C/B - Am - Am/G - F - F/E - Dm - Dm/C - G - G/F - Em - G/D, then cadencing C - F - C - G. Cross-checked against >=3 independent sources: pianowithnate.com (key C, exact descending-bass verse C Em/B Am C/G F Am/E Dm F/C G G/F Em G/D and chorus tag C F C G7), Ultimate Guitar ver2 958255 / 887587, e-chords Procol Harum (full C/B Am/G F/E Dm/C G/F Em/D slash set). ROCK-SOLID at root and key. NOTE: the scorer treats slash detection as DIRECTIONAL ONLY (flavor weight 0), and chart sources legitimately split between the C-side (C/B, Am/G ...) and the organ-line (Em/B, C/G ...) reading of the SAME descending bass; the C-side reading is encoded as the canonical guitar voicing. The bass-motion roots are authoritative; exact slash spelling is directional.",
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"],
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"]
+      ]
+    },
+    {
+      "name": "Verse",
+      "lines": [
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"],
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"]
+      ]
+    },
+    {
+      "name": "Chorus",
+      "lines": [
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"]
+      ]
+    },
+    {
+      "name": "Organ Outro",
+      "lines": [
+        ["C", "C/B", "Am", "Am/G"],
+        ["F", "F/E", "Dm", "Dm/C"],
+        ["G", "G/F", "Em", "G/D"],
+        ["C", "F", "C", "G"]
+      ]
+    }
+  ]
+}
