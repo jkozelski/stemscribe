@@ -1,0 +1,5931 @@
+{
+  "title": "Positively 4th Street",
+  "artist": "Bob Dylan",
+  "key": "F#",
+  "capo": 4,
+  "capo_shape_map": {
+    "F#": "D",
+    "G#m": "Em",
+    "C#": "A",
+    "D#m": "Bm",
+    "B": "G"
+  },
+  "source": "StemScriber AI",
+  "chords_used": [
+    "F",
+    "C",
+    "Bb",
+    "Dm",
+    "Am",
+    "Gm"
+  ],
+  "sections": [
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "G#m ////  G#m ////  F#  ////  F#  ////",
+          "lyrics": "nerve to say you are my friend When I was down you",
+          "segments": [
+            {
+              "chord": "G#m",
+              "start": 11.935,
+              "end": 14.164,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "nerve",
+                  "t": 12.23
+                },
+                {
+                  "w": "to",
+                  "t": 12.75
+                },
+                {
+                  "w": "say",
+                  "t": 13.77
+                },
+                {
+                  "w": "you",
+                  "t": 13.97
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 14.164,
+              "end": 16.37,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "are",
+                  "t": 14.65
+                },
+                {
+                  "w": "my",
+                  "t": 15.01
+                },
+                {
+                  "w": "friend",
+                  "t": 15.61
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 16.37,
+              "end": 18.576,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "When",
+                  "t": 17.17
+                },
+                {
+                  "w": "I",
+                  "t": 18.35
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 18.576,
+              "end": 20.828,
+              "duration": 2.252,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "was",
+                  "t": 18.91
+                },
+                {
+                  "w": "down",
+                  "t": 19.31
+                },
+                {
+                  "w": "you",
+                  "t": 20.13
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  C#  ////  C#  ////  F#  ////",
+          "lyrics": "just there grinning You got a lot",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 20.828,
+              "end": 23.034,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "just",
+                  "t": 20.55
+                },
+                {
+                  "w": "there",
+                  "t": 21.49
+                },
+                {
+                  "w": "grinning",
+                  "t": 22.33
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 23.034,
+              "end": 25.217,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 25.217,
+              "end": 27.399,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 27.06
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 27.399,
+              "end": 29.629,
+              "duration": 2.23,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "got",
+                  "t": 27.92
+                },
+                {
+                  "w": "a",
+                  "t": 28.4
+                },
+                {
+                  "w": "lot",
+                  "t": 29.16
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "G#m ////  D#m ////  F#  ////  F#  ////",
+          "lyrics": "of nerve to say you got a helping hand to lend You just want to be",
+          "segments": [
+            {
+              "chord": "G#m",
+              "start": 29.629,
+              "end": 31.835,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "of",
+                  "t": 29.42
+                },
+                {
+                  "w": "nerve",
+                  "t": 29.8
+                },
+                {
+                  "w": "to",
+                  "t": 30.4
+                },
+                {
+                  "w": "say",
+                  "t": 30.82
+                },
+                {
+                  "w": "you",
+                  "t": 31.08
+                },
+                {
+                  "w": "got",
+                  "t": 31.44
+                },
+                {
+                  "w": "a",
+                  "t": 31.68
+                }
+              ]
+            },
+            {
+              "chord": "D#m",
+              "start": 31.835,
+              "end": 34.041,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "helping",
+                  "t": 32.0
+                },
+                {
+                  "w": "hand",
+                  "t": 32.4
+                },
+                {
+                  "w": "to",
+                  "t": 33.2
+                },
+                {
+                  "w": "lend",
+                  "t": 33.64
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 34.041,
+              "end": 36.246,
+              "duration": 2.205,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 34.3
+                },
+                {
+                  "w": "just",
+                  "t": 36.0
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 36.246,
+              "end": 38.475,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "want",
+                  "t": 36.62
+                },
+                {
+                  "w": "to",
+                  "t": 37.36
+                },
+                {
+                  "w": "be",
+                  "t": 37.76
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "B   ////  C#  ////  C#  ////  F#  ////",
+          "lyrics": "on the side that's winning You say I let",
+          "segments": [
+            {
+              "chord": "B",
+              "start": 38.475,
+              "end": 40.658,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "on",
+                  "t": 38.12
+                },
+                {
+                  "w": "the",
+                  "t": 38.54
+                },
+                {
+                  "w": "side",
+                  "t": 38.92
+                },
+                {
+                  "w": "that's",
+                  "t": 39.36
+                },
+                {
+                  "w": "winning",
+                  "t": 40.12
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 40.658,
+              "end": 42.841,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 42.841,
+              "end": 45.047,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 43.96
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 45.047,
+              "end": 47.253,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "say",
+                  "t": 45.54
+                },
+                {
+                  "w": "I",
+                  "t": 45.88
+                },
+                {
+                  "w": "let",
+                  "t": 46.66
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "G#m ////  D#m ////  F#  ////  F#  ////",
+          "lyrics": "you down, you know it's it's not like that If you're so hurt why",
+          "segments": [
+            {
+              "chord": "G#m",
+              "start": 47.253,
+              "end": 49.459,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 46.9
+                },
+                {
+                  "w": "down,",
+                  "t": 47.4
+                },
+                {
+                  "w": "you",
+                  "t": 48.9
+                },
+                {
+                  "w": "know",
+                  "t": 48.98
+                },
+                {
+                  "w": "it's",
+                  "t": 49.36
+                }
+              ]
+            },
+            {
+              "chord": "D#m",
+              "start": 49.459,
+              "end": 51.688,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "it's",
+                  "t": 49.36
+                },
+                {
+                  "w": "not",
+                  "t": 50.0
+                },
+                {
+                  "w": "like",
+                  "t": 50.28
+                },
+                {
+                  "w": "that",
+                  "t": 51.06
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 51.688,
+              "end": 53.87,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "If",
+                  "t": 51.84
+                },
+                {
+                  "w": "you're",
+                  "t": 53.32
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 53.87,
+              "end": 56.099,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "so",
+                  "t": 54.0
+                },
+                {
+                  "w": "hurt",
+                  "t": 54.6
+                },
+                {
+                  "w": "why",
+                  "t": 55.1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  C#  ////  C#  ////  F#  ////",
+          "lyrics": "then don't you show it You say you've lost",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 56.099,
+              "end": 58.305,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "then",
+                  "t": 55.82
+                },
+                {
+                  "w": "don't",
+                  "t": 56.44
+                },
+                {
+                  "w": "you",
+                  "t": 56.86
+                },
+                {
+                  "w": "show",
+                  "t": 57.72
+                },
+                {
+                  "w": "it",
+                  "t": 58.14
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 58.305,
+              "end": 60.465,
+              "duration": 2.16,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 60.465,
+              "end": 62.647,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 62.18
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 62.647,
+              "end": 64.83,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "say",
+                  "t": 63.2
+                },
+                {
+                  "w": "you've",
+                  "t": 63.72
+                },
+                {
+                  "w": "lost",
+                  "t": 64.4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "G#m ////  F#  ////  F#  ////  F#  ////",
+          "lyrics": "your faith but that's not where it's at You have no faith to lose",
+          "segments": [
+            {
+              "chord": "G#m",
+              "start": 64.83,
+              "end": 67.013,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "your",
+                  "t": 64.6
+                },
+                {
+                  "w": "faith",
+                  "t": 65.24
+                },
+                {
+                  "w": "but",
+                  "t": 65.9
+                },
+                {
+                  "w": "that's",
+                  "t": 66.38
+                },
+                {
+                  "w": "not",
+                  "t": 66.86
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 67.013,
+              "end": 69.195,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "where",
+                  "t": 67.34
+                },
+                {
+                  "w": "it's",
+                  "t": 68.02
+                },
+                {
+                  "w": "at",
+                  "t": 68.72
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 69.195,
+              "end": 71.355,
+              "duration": 2.16,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 69.5
+                },
+                {
+                  "w": "have",
+                  "t": 70.62
+                },
+                {
+                  "w": "no",
+                  "t": 71.1
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 71.355,
+              "end": 73.538,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "faith",
+                  "t": 71.94
+                },
+                {
+                  "w": "to",
+                  "t": 72.48
+                },
+                {
+                  "w": "lose",
+                  "t": 72.94
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "B   ////  C#  ////  C#  ////  F#  ////",
+          "lyrics": "and you know it I know the reason",
+          "segments": [
+            {
+              "chord": "B",
+              "start": 73.538,
+              "end": 75.72,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "and",
+                  "t": 73.66
+                },
+                {
+                  "w": "you",
+                  "t": 74.7
+                },
+                {
+                  "w": "know",
+                  "t": 75.0
+                },
+                {
+                  "w": "it",
+                  "t": 75.44
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 75.72,
+              "end": 77.903,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 77.903,
+              "end": 80.062,
+              "duration": 2.159,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F#",
+              "start": 80.062,
+              "end": 82.245,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 80.14
+                },
+                {
+                  "w": "know",
+                  "t": 80.56
+                },
+                {
+                  "w": "the",
+                  "t": 81.38
+                },
+                {
+                  "w": "reason",
+                  "t": 81.74
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {
+          "chords": "G#m ////  B   ////  F#  ////  F#  ////",
+          "lyrics": "that you talk behind my back I used to be among",
+          "segments": [
+            {
+              "chord": "G#m",
+              "start": 82.245,
+              "end": 84.451,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "that",
+                  "t": 82.62
+                },
+                {
+                  "w": "you",
+                  "t": 83.48
+                },
+                {
+                  "w": "talk",
+                  "t": 83.92
+                },
+                {
+                  "w": "behind",
+                  "t": 84.3
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 84.451,
+              "end": 86.61,
+              "duration": 2.159,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "my",
+                  "t": 85.22
+                },
+                {
+                  "w": "back",
+                  "t": 85.98
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 86.61,
+              "end": 88.793,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 86.64
+                },
+                {
+                  "w": "used",
+                  "t": 88.24
+                },
+                {
+                  "w": "to",
+                  "t": 88.64
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 88.793,
+              "end": 90.976,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "be",
+                  "t": 89.4
+                },
+                {
+                  "w": "among",
+                  "t": 89.98
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  C#  ////  C#  ////  F#  ////",
+          "lyrics": "the crowd you're in with Do you take me for such",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 90.976,
+              "end": 93.135,
+              "duration": 2.159,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "the",
+                  "t": 90.68
+                },
+                {
+                  "w": "crowd",
+                  "t": 91.42
+                },
+                {
+                  "w": "you're",
+                  "t": 91.96
+                },
+                {
+                  "w": "in",
+                  "t": 92.66
+                },
+                {
+                  "w": "with",
+                  "t": 92.94
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 93.135,
+              "end": 95.318,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 95.318,
+              "end": 97.524,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "Do",
+                  "t": 96.94
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 97.524,
+              "end": 99.73,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 97.72
+                },
+                {
+                  "w": "take",
+                  "t": 98.08
+                },
+                {
+                  "w": "me",
+                  "t": 98.42
+                },
+                {
+                  "w": "for",
+                  "t": 98.9
+                },
+                {
+                  "w": "such",
+                  "t": 99.24
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "G#m ////  B   ////  F#  ////  F#  ////",
+          "lyrics": "a fool to think think I'd make contact With one who tries to hide what they",
+          "segments": [
+            {
+              "chord": "G#m",
+              "start": 99.73,
+              "end": 101.936,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "a",
+                  "t": 99.54
+                },
+                {
+                  "w": "fool",
+                  "t": 99.84
+                },
+                {
+                  "w": "to",
+                  "t": 100.56
+                },
+                {
+                  "w": "think",
+                  "t": 101.86
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 101.936,
+              "end": 104.118,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "think",
+                  "t": 101.86
+                },
+                {
+                  "w": "I'd",
+                  "t": 102.18
+                },
+                {
+                  "w": "make",
+                  "t": 102.9
+                },
+                {
+                  "w": "contact",
+                  "t": 103.34
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 104.118,
+              "end": 106.324,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "With",
+                  "t": 104.66
+                },
+                {
+                  "w": "one",
+                  "t": 105.5
+                },
+                {
+                  "w": "who",
+                  "t": 106.02
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 106.324,
+              "end": 108.507,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "tries",
+                  "t": 106.34
+                },
+                {
+                  "w": "to",
+                  "t": 106.82
+                },
+                {
+                  "w": "hide",
+                  "t": 107.32
+                },
+                {
+                  "w": "what",
+                  "t": 107.68
+                },
+                {
+                  "w": "they",
+                  "t": 107.96
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "D#m ////  C#  ////  C#  ////",
+          "lyrics": "don't know to begin with You",
+          "segments": [
+            {
+              "chord": "D#m",
+              "start": 108.507,
+              "end": 110.689,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "don't",
+                  "t": 108.28
+                },
+                {
+                  "w": "know",
+                  "t": 108.76
+                },
+                {
+                  "w": "to",
+                  "t": 109.54
+                },
+                {
+                  "w": "begin",
+                  "t": 109.88
+                },
+                {
+                  "w": "with",
+                  "t": 110.3
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 110.689,
+              "end": 112.872,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 112.872,
+              "end": 115.078,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 114.73
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 4",
+      "lines": [
+        {
+          "chords": "F#  ////  G#m ////  B   ////  F#  ////",
+          "lyrics": "see me on the street you always act surprised You say",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 115.078,
+              "end": 117.307,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "see",
+                  "t": 115.61
+                },
+                {
+                  "w": "me",
+                  "t": 116.45
+                },
+                {
+                  "w": "on",
+                  "t": 116.79
+                },
+                {
+                  "w": "the",
+                  "t": 117.13
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 117.307,
+              "end": 119.49,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "street",
+                  "t": 117.57
+                },
+                {
+                  "w": "you",
+                  "t": 118.13
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 119.49,
+              "end": 121.696,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "always",
+                  "t": 119.53
+                },
+                {
+                  "w": "act",
+                  "t": 120.27
+                },
+                {
+                  "w": "surprised",
+                  "t": 120.83
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 121.696,
+              "end": 123.879,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You",
+                  "t": 122.03
+                },
+                {
+                  "w": "say",
+                  "t": 123.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  F#  ////  C#  ////  C#  ////",
+          "lyrics": "how are you, good luck, but you don't mean it When you",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 123.879,
+              "end": 126.084,
+              "duration": 2.205,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "how",
+                  "t": 123.57
+                },
+                {
+                  "w": "are",
+                  "t": 123.93
+                },
+                {
+                  "w": "you,",
+                  "t": 124.37
+                },
+                {
+                  "w": "good",
+                  "t": 125.03
+                },
+                {
+                  "w": "luck,",
+                  "t": 125.35
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 126.084,
+              "end": 128.267,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "but",
+                  "t": 126.45
+                },
+                {
+                  "w": "you",
+                  "t": 126.61
+                },
+                {
+                  "w": "don't",
+                  "t": 126.97
+                },
+                {
+                  "w": "mean",
+                  "t": 127.69
+                },
+                {
+                  "w": "it",
+                  "t": 128.11
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 128.267,
+              "end": 130.45,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "When",
+                  "t": 130.25
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 130.45,
+              "end": 132.609,
+              "duration": 2.159,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 131.79
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  G#m ////  D#m ////  F#  ////",
+          "lyrics": "know as well as me you'd you'd rather see me paralyzed Why",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 132.609,
+              "end": 134.815,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "know",
+                  "t": 132.37
+                },
+                {
+                  "w": "as",
+                  "t": 132.89
+                },
+                {
+                  "w": "well",
+                  "t": 133.31
+                },
+                {
+                  "w": "as",
+                  "t": 133.55
+                },
+                {
+                  "w": "me",
+                  "t": 134.13
+                },
+                {
+                  "w": "you'd",
+                  "t": 134.81
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 134.815,
+              "end": 136.998,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you'd",
+                  "t": 134.81
+                },
+                {
+                  "w": "rather",
+                  "t": 135.67
+                },
+                {
+                  "w": "see",
+                  "t": 136.05
+                },
+                {
+                  "w": "me",
+                  "t": 136.63
+                }
+              ]
+            },
+            {
+              "chord": "D#m",
+              "start": 136.998,
+              "end": 139.204,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "paralyzed",
+                  "t": 137.59
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 139.204,
+              "end": 141.386,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "Why",
+                  "t": 139.39
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  D#m ////  C#  ////  C#  ////",
+          "lyrics": "don't you just come out once and scream it No",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 141.386,
+              "end": 143.569,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "don't",
+                  "t": 141.17
+                },
+                {
+                  "w": "you",
+                  "t": 141.69
+                },
+                {
+                  "w": "just",
+                  "t": 142.45
+                },
+                {
+                  "w": "come",
+                  "t": 142.87
+                },
+                {
+                  "w": "out",
+                  "t": 143.43
+                }
+              ]
+            },
+            {
+              "chord": "D#m",
+              "start": 143.569,
+              "end": 145.775,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "once",
+                  "t": 143.99
+                },
+                {
+                  "w": "and",
+                  "t": 144.61
+                },
+                {
+                  "w": "scream",
+                  "t": 145.53
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 145.775,
+              "end": 147.934,
+              "duration": 2.159,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "it",
+                  "t": 146.25
+                },
+                {
+                  "w": "No",
+                  "t": 147.03
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 147.934,
+              "end": 150.14,
+              "duration": 2.206,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 5",
+      "lines": [
+        {
+          "chords": "F#  ////  G#m ////  B   ////  F#  ////",
+          "lyrics": "I do not feel that good when I see the heartbreaks you embrace If I",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 150.14,
+              "end": 152.346,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 150.43
+                },
+                {
+                  "w": "do",
+                  "t": 150.87
+                },
+                {
+                  "w": "not",
+                  "t": 151.01
+                },
+                {
+                  "w": "feel",
+                  "t": 151.51
+                },
+                {
+                  "w": "that",
+                  "t": 152.11
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 152.346,
+              "end": 154.529,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "good",
+                  "t": 152.53
+                },
+                {
+                  "w": "when",
+                  "t": 153.03
+                },
+                {
+                  "w": "I",
+                  "t": 153.35
+                },
+                {
+                  "w": "see",
+                  "t": 153.67
+                },
+                {
+                  "w": "the",
+                  "t": 153.93
+                },
+                {
+                  "w": "heartbreaks",
+                  "t": 154.35
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 154.529,
+              "end": 156.735,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 155.19
+                },
+                {
+                  "w": "embrace",
+                  "t": 155.81
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 156.735,
+              "end": 158.941,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "If",
+                  "t": 156.95
+                },
+                {
+                  "w": "I",
+                  "t": 158.43
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  D#m ////  C#  ////  C#  ////",
+          "lyrics": "was was a master thief perhaps I'd rob them And though",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 158.941,
+              "end": 161.123,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "was",
+                  "t": 158.85
+                },
+                {
+                  "w": "was",
+                  "t": 158.85
+                },
+                {
+                  "w": "a",
+                  "t": 159.31
+                },
+                {
+                  "w": "master",
+                  "t": 159.73
+                },
+                {
+                  "w": "thief",
+                  "t": 160.35
+                },
+                {
+                  "w": "perhaps",
+                  "t": 160.95
+                }
+              ]
+            },
+            {
+              "chord": "D#m",
+              "start": 161.123,
+              "end": 163.352,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I'd",
+                  "t": 162.03
+                },
+                {
+                  "w": "rob",
+                  "t": 162.85
+                },
+                {
+                  "w": "them",
+                  "t": 163.19
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 163.352,
+              "end": 165.512,
+              "duration": 2.16,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 165.512,
+              "end": 167.695,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "And",
+                  "t": 166.15
+                },
+                {
+                  "w": "though",
+                  "t": 167.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  G#m ////  B   ////  F#  ////",
+          "lyrics": "I know you're dissatisfied with your position and your place Don't",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 167.695,
+              "end": 169.9,
+              "duration": 2.205,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 167.55
+                },
+                {
+                  "w": "know",
+                  "t": 168.03
+                },
+                {
+                  "w": "you're",
+                  "t": 168.53
+                },
+                {
+                  "w": "dissatisfied",
+                  "t": 169.21
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 169.9,
+              "end": 172.083,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "with",
+                  "t": 170.63
+                },
+                {
+                  "w": "your",
+                  "t": 171.01
+                },
+                {
+                  "w": "position",
+                  "t": 171.29
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 172.083,
+              "end": 174.243,
+              "duration": 2.16,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "and",
+                  "t": 172.23
+                },
+                {
+                  "w": "your",
+                  "t": 172.89
+                },
+                {
+                  "w": "place",
+                  "t": 173.49
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 174.243,
+              "end": 176.402,
+              "duration": 2.159,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "Don't",
+                  "t": 175.04
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  B   ////  C#  ////  C#  ////",
+          "lyrics": "you you understand it's not my problem I",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 176.402,
+              "end": 178.608,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 176.32
+                },
+                {
+                  "w": "you",
+                  "t": 176.32
+                },
+                {
+                  "w": "understand",
+                  "t": 177.02
+                },
+                {
+                  "w": "it's",
+                  "t": 178.48
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 178.608,
+              "end": 180.767,
+              "duration": 2.159,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "not",
+                  "t": 179.2
+                },
+                {
+                  "w": "my",
+                  "t": 179.4
+                },
+                {
+                  "w": "problem",
+                  "t": 180.14
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 180.767,
+              "end": 182.973,
+              "duration": 2.206,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 182.973,
+              "end": 185.133,
+              "duration": 2.16,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 184.31
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 6",
+      "lines": [
+        {
+          "chords": "F#  ////  G#m ////  G#m ////  F#  ////",
+          "lyrics": "wish that for just one time you could stand inside my shoes And just",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 185.133,
+              "end": 187.339,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "wish",
+                  "t": 185.67
+                },
+                {
+                  "w": "that",
+                  "t": 186.29
+                },
+                {
+                  "w": "for",
+                  "t": 186.59
+                },
+                {
+                  "w": "just",
+                  "t": 186.89
+                },
+                {
+                  "w": "one",
+                  "t": 187.23
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 187.339,
+              "end": 189.544,
+              "duration": 2.205,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "time",
+                  "t": 187.79
+                },
+                {
+                  "w": "you",
+                  "t": 188.41
+                },
+                {
+                  "w": "could",
+                  "t": 188.95
+                },
+                {
+                  "w": "stand",
+                  "t": 189.33
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 189.544,
+              "end": 191.727,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "inside",
+                  "t": 189.83
+                },
+                {
+                  "w": "my",
+                  "t": 190.67
+                },
+                {
+                  "w": "shoes",
+                  "t": 191.31
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 191.727,
+              "end": 193.933,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "And",
+                  "t": 192.09
+                },
+                {
+                  "w": "just",
+                  "t": 193.41
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  B   ////  C#  ////  C#  ////",
+          "lyrics": "for that one moment I could be you Yes",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 193.933,
+              "end": 196.116,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "for",
+                  "t": 193.79
+                },
+                {
+                  "w": "that",
+                  "t": 194.45
+                },
+                {
+                  "w": "one",
+                  "t": 194.89
+                },
+                {
+                  "w": "moment",
+                  "t": 195.35
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 196.116,
+              "end": 198.322,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 196.33
+                },
+                {
+                  "w": "could",
+                  "t": 196.97
+                },
+                {
+                  "w": "be",
+                  "t": 197.43
+                },
+                {
+                  "w": "you",
+                  "t": 198.19
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 198.322,
+              "end": 200.504,
+              "duration": 2.182,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 200.504,
+              "end": 202.687,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "Yes",
+                  "t": 200.67
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  G#m ////  B   ////  F#  ////",
+          "lyrics": "I wish that for just one time you could stand inside my shoes You'd",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 202.687,
+              "end": 204.916,
+              "duration": 2.229,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 202.43
+                },
+                {
+                  "w": "wish",
+                  "t": 203.05
+                },
+                {
+                  "w": "that",
+                  "t": 203.59
+                },
+                {
+                  "w": "for",
+                  "t": 204.07
+                },
+                {
+                  "w": "just",
+                  "t": 204.41
+                },
+                {
+                  "w": "one",
+                  "t": 204.73
+                }
+              ]
+            },
+            {
+              "chord": "G#m",
+              "start": 204.916,
+              "end": 207.099,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "time",
+                  "t": 205.37
+                },
+                {
+                  "w": "you",
+                  "t": 205.91
+                },
+                {
+                  "w": "could",
+                  "t": 206.51
+                },
+                {
+                  "w": "stand",
+                  "t": 206.91
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 207.099,
+              "end": 209.281,
+              "duration": 2.182,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "inside",
+                  "t": 207.37
+                },
+                {
+                  "w": "my",
+                  "t": 207.95
+                },
+                {
+                  "w": "shoes",
+                  "t": 208.77
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 209.281,
+              "end": 211.464,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "You'd",
+                  "t": 209.71
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#  ////  F#  ////  C#  ////  C#  ////",
+          "lyrics": "know what a drag it is to see you",
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 211.464,
+              "end": 213.67,
+              "duration": 2.206,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "know",
+                  "t": 211.51
+                },
+                {
+                  "w": "what",
+                  "t": 212.03
+                },
+                {
+                  "w": "a",
+                  "t": 212.71
+                },
+                {
+                  "w": "drag",
+                  "t": 213.31
+                }
+              ]
+            },
+            {
+              "chord": "F#",
+              "start": 213.67,
+              "end": 215.853,
+              "duration": 2.183,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "it",
+                  "t": 213.79
+                },
+                {
+                  "w": "is",
+                  "t": 214.17
+                },
+                {
+                  "w": "to",
+                  "t": 214.79
+                },
+                {
+                  "w": "see",
+                  "t": 215.25
+                },
+                {
+                  "w": "you",
+                  "t": 215.75
+                }
+              ]
+            },
+            {
+              "chord": "C#",
+              "start": 215.853,
+              "end": 218.012,
+              "duration": 2.159,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 218.012,
+              "end": 220.195,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        {
+          "chords": "F#  ////  G#m ////  B   ////  F#  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "F#",
+              "start": 220.195,
+              "end": 222.424,
+              "duration": 2.229,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "G#m",
+              "start": 222.424,
+              "end": 224.607,
+              "duration": 2.183,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "B",
+              "start": 224.607,
+              "end": 226.789,
+              "duration": 2.182,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F#",
+              "start": 226.789,
+              "end": 232.05,
+              "duration": 5.261,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "bar_grid": [
+    {
+      "bar": 1,
+      "chord": "F",
+      "start_time": 0.79,
+      "end_time": 3.019,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.477,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2444,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.0905,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0042,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 2,
+      "chord": "F",
+      "start_time": 3.019,
+      "end_time": 5.248,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.4925,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2574,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.1019,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0147,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 3,
+      "chord": "F",
+      "start_time": 5.248,
+      "end_time": 7.477,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.4925,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2574,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.1019,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0147,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 4,
+      "chord": "F",
+      "start_time": 7.477,
+      "end_time": 9.706,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.4925,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2574,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.1019,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0147,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 5,
+      "chord": "F",
+      "start_time": 9.706,
+      "end_time": 11.935,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1349,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.9561,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.8379,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.7716,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 6,
+      "chord": "F",
+      "start_time": 11.935,
+      "end_time": 14.164,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.4275,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.3966,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 1.0187,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.0123,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 7,
+      "chord": "F",
+      "start_time": 14.164,
+      "end_time": 16.37,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 0.7214,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 0.5678,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5269,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5152,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 8,
+      "chord": "F",
+      "start_time": 16.37,
+      "end_time": 18.576,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0618,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.0288,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0139,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0124,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 9,
+      "chord": "F",
+      "start_time": 18.576,
+      "end_time": 20.828,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2351,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1831,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0134,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5364,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 10,
+      "chord": "F",
+      "start_time": 20.828,
+      "end_time": 23.034,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 0.8672,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.8379,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.7546,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 0.5701,
+            "root": "B",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 11,
+      "chord": "F",
+      "start_time": 23.034,
+      "end_time": 25.217,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3845,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.2881,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1231,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0555,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 12,
+      "chord": "F",
+      "start_time": 25.217,
+      "end_time": 27.399,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3994,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.2907,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1352,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0537,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 13,
+      "chord": "F",
+      "start_time": 27.399,
+      "end_time": 29.629,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.5465,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2934,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1363,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.0275,
+            "root": "D#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 14,
+      "chord": "F",
+      "start_time": 29.629,
+      "end_time": 31.835,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.5176,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 1.2347,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#",
+            "score": 1.197,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "B",
+            "score": 1.0488,
+            "root": "B",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 15,
+      "chord": "F",
+      "start_time": 31.835,
+      "end_time": 34.041,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D#m",
+            "score": 1.2814,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 1.1334,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 1.0923,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#",
+            "score": 0.9046,
+            "root": "D#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "D#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 16,
+      "chord": "F",
+      "start_time": 34.041,
+      "end_time": 36.246,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.2164,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1438,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.9367,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9313,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 17,
+      "chord": "F",
+      "start_time": 36.246,
+      "end_time": 38.475,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.1478,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0893,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.9788,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.6453,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 18,
+      "chord": "F",
+      "start_time": 38.475,
+      "end_time": 40.658,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.9514,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.8689,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.7991,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5344,
+            "root": "B",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 19,
+      "chord": "F",
+      "start_time": 40.658,
+      "end_time": 42.841,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2451,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2007,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.083,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0647,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 20,
+      "chord": "F",
+      "start_time": 42.841,
+      "end_time": 45.047,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2317,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1317,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0946,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.9198,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 21,
+      "chord": "F",
+      "start_time": 45.047,
+      "end_time": 47.253,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3053,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2042,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1477,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0941,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 22,
+      "chord": "F",
+      "start_time": 47.253,
+      "end_time": 49.459,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.3202,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.2779,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.052,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Fm",
+            "score": 1.0195,
+            "root": "F",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 23,
+      "chord": "F",
+      "start_time": 49.459,
+      "end_time": 51.688,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0692,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.7649,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.6053,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#",
+            "score": 0.5541,
+            "root": "D#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "D#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 24,
+      "chord": "F",
+      "start_time": 51.688,
+      "end_time": 53.87,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1447,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0643,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0183,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9913,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 25,
+      "chord": "F",
+      "start_time": 53.87,
+      "end_time": 56.099,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.1078,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1059,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0475,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5741,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 26,
+      "chord": "F",
+      "start_time": 56.099,
+      "end_time": 58.305,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.047,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "B",
+            "score": 0.5538,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.532,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.5261,
+            "root": "G#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 27,
+      "chord": "F",
+      "start_time": 58.305,
+      "end_time": 60.465,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0189,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0157,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9302,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.8964,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 28,
+      "chord": "F",
+      "start_time": 60.465,
+      "end_time": 62.647,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2537,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2082,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0352,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0134,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 29,
+      "chord": "F",
+      "start_time": 62.647,
+      "end_time": 64.83,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.4817,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.3491,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.0333,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.9207,
+            "root": "D",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 30,
+      "chord": "F",
+      "start_time": 64.83,
+      "end_time": 67.013,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.3496,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.3246,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.9941,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9932,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 31,
+      "chord": "F",
+      "start_time": 67.013,
+      "end_time": 69.195,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.1555,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.6105,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5759,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5544,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 32,
+      "chord": "F",
+      "start_time": 69.195,
+      "end_time": 71.355,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1517,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1087,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 1.0482,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0048,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 33,
+      "chord": "F",
+      "start_time": 71.355,
+      "end_time": 73.538,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1035,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0835,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.6466,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5901,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 34,
+      "chord": "F",
+      "start_time": 73.538,
+      "end_time": 75.72,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.9836,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.7922,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.6233,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.5566,
+            "root": "G#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 35,
+      "chord": "F",
+      "start_time": 75.72,
+      "end_time": 77.903,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3871,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.3058,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1145,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 1.0257,
+            "root": "A",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 36,
+      "chord": "F",
+      "start_time": 77.903,
+      "end_time": 80.062,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3199,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.2347,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.86,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 0.7915,
+            "root": "A",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 37,
+      "chord": "F",
+      "start_time": 80.062,
+      "end_time": 82.245,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.2323,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.125,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.091,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.9963,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 38,
+      "chord": "F",
+      "start_time": 82.245,
+      "end_time": 84.451,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 0.8326,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 0.7857,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.7749,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.7385,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 39,
+      "chord": "F",
+      "start_time": 84.451,
+      "end_time": 86.61,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.6842,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.5797,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5736,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5393,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 40,
+      "chord": "F",
+      "start_time": 86.61,
+      "end_time": 88.793,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1096,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0818,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0776,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0684,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 41,
+      "chord": "F",
+      "start_time": 88.793,
+      "end_time": 90.976,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2317,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1578,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5728,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5666,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 42,
+      "chord": "F",
+      "start_time": 90.976,
+      "end_time": 93.135,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1364,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.7817,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.549,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.5482,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 43,
+      "chord": "F",
+      "start_time": 93.135,
+      "end_time": 95.318,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.1475,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1207,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1068,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.045,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 44,
+      "chord": "F",
+      "start_time": 95.318,
+      "end_time": 97.524,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1617,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1416,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0447,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.8388,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 45,
+      "chord": "F",
+      "start_time": 97.524,
+      "end_time": 99.73,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.2899,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2578,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.123,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0436,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 46,
+      "chord": "F",
+      "start_time": 99.73,
+      "end_time": 101.936,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.1425,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0656,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#",
+            "score": 0.8485,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.8052,
+            "root": "E",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 47,
+      "chord": "F",
+      "start_time": 101.936,
+      "end_time": 104.118,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.9775,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.8077,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.5961,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.5607,
+            "root": "D#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 48,
+      "chord": "F",
+      "start_time": 104.118,
+      "end_time": 106.324,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0965,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0511,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.0403,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0367,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 49,
+      "chord": "F",
+      "start_time": 106.324,
+      "end_time": 108.507,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.2496,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0857,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.6708,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.6648,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 50,
+      "chord": "F",
+      "start_time": 108.507,
+      "end_time": 110.689,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.2192,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.9138,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#",
+            "score": 0.5642,
+            "root": "D#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Cm",
+            "score": 0.5167,
+            "root": "C",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "D#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 51,
+      "chord": "F",
+      "start_time": 110.689,
+      "end_time": 112.872,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2646,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2213,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0761,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0554,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 52,
+      "chord": "F",
+      "start_time": 112.872,
+      "end_time": 115.078,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2531,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0917,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0911,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.9355,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 53,
+      "chord": "F",
+      "start_time": 115.078,
+      "end_time": 117.307,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.2073,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1745,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1016,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0643,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 54,
+      "chord": "F",
+      "start_time": 117.307,
+      "end_time": 119.49,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.2334,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.2301,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1319,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Fm",
+            "score": 1.0856,
+            "root": "F",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 55,
+      "chord": "F",
+      "start_time": 119.49,
+      "end_time": 121.696,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.2218,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 1.0959,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.7964,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5749,
+            "root": "B",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 56,
+      "chord": "F",
+      "start_time": 121.696,
+      "end_time": 123.879,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0571,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "B",
+            "score": 1.0195,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0111,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.9747,
+            "root": "G#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 57,
+      "chord": "F",
+      "start_time": 123.879,
+      "end_time": 126.084,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1194,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1181,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.5875,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5848,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 58,
+      "chord": "F",
+      "start_time": 126.084,
+      "end_time": 128.267,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.6825,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.6065,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6025,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5312,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 59,
+      "chord": "F",
+      "start_time": 128.267,
+      "end_time": 130.45,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2795,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2085,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.142,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.094,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 60,
+      "chord": "F",
+      "start_time": 130.45,
+      "end_time": 132.609,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2823,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2215,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1433,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0931,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 61,
+      "chord": "F",
+      "start_time": 132.609,
+      "end_time": 134.815,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.006,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9707,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.9256,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.7591,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 62,
+      "chord": "F",
+      "start_time": 134.815,
+      "end_time": 136.998,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.1801,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1616,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 0.8995,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.8746,
+            "root": "E",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 63,
+      "chord": "F",
+      "start_time": 136.998,
+      "end_time": 139.204,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D#m",
+            "score": 0.9311,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.7752,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#",
+            "score": 0.5924,
+            "root": "D#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5722,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "D#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 64,
+      "chord": "F",
+      "start_time": 139.204,
+      "end_time": 141.386,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3182,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2122,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.9527,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.9365,
+            "root": "B",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 65,
+      "chord": "F",
+      "start_time": 141.386,
+      "end_time": 143.569,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.171,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6804,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 0.6488,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5917,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 66,
+      "chord": "F",
+      "start_time": 143.569,
+      "end_time": 145.775,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D#m",
+            "score": 0.878,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 0.8636,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#",
+            "score": 0.819,
+            "root": "D#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Cm",
+            "score": 0.532,
+            "root": "C",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "D#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 67,
+      "chord": "F",
+      "start_time": 145.775,
+      "end_time": 147.934,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3365,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2102,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0996,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.8883,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 68,
+      "chord": "F",
+      "start_time": 147.934,
+      "end_time": 150.14,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3216,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1821,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0977,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.9074,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 69,
+      "chord": "F",
+      "start_time": 150.14,
+      "end_time": 152.346,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.2051,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1784,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1249,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.016,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 70,
+      "chord": "F",
+      "start_time": 152.346,
+      "end_time": 154.529,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.0562,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.0293,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.0025,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 0.7999,
+            "root": "E",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 71,
+      "chord": "F",
+      "start_time": 154.529,
+      "end_time": 156.735,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.963,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.85,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.58,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.542,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 72,
+      "chord": "F",
+      "start_time": 156.735,
+      "end_time": 158.941,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0871,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0705,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0129,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.8057,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 73,
+      "chord": "F",
+      "start_time": 158.941,
+      "end_time": 161.123,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.0554,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6802,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 0.6678,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.6334,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 74,
+      "chord": "F",
+      "start_time": 161.123,
+      "end_time": 163.352,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.2425,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.111,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.9986,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.6441,
+            "root": "B",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "D#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 75,
+      "chord": "F",
+      "start_time": 163.352,
+      "end_time": 165.512,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3639,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2473,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1607,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1413,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 76,
+      "chord": "F",
+      "start_time": 165.512,
+      "end_time": 167.695,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3787,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2608,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1733,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1417,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 77,
+      "chord": "F",
+      "start_time": 167.695,
+      "end_time": 169.9,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3757,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.338,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.0227,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.0041,
+            "root": "D#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 78,
+      "chord": "F",
+      "start_time": 169.9,
+      "end_time": 172.083,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.1825,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.1219,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.0511,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.5541,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 79,
+      "chord": "F",
+      "start_time": 172.083,
+      "end_time": 174.243,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.9138,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.8797,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.7819,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.511,
+            "root": "B",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 80,
+      "chord": "F",
+      "start_time": 174.243,
+      "end_time": 176.402,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.0484,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.0015,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9788,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.9788,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 81,
+      "chord": "F",
+      "start_time": 176.402,
+      "end_time": 178.608,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2136,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1386,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.9859,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.5629,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 82,
+      "chord": "F",
+      "start_time": 178.608,
+      "end_time": 180.767,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.9154,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.8075,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.6011,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5699,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 83,
+      "chord": "F",
+      "start_time": 180.767,
+      "end_time": 182.973,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.4161,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.3134,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0873,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.041,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 84,
+      "chord": "F",
+      "start_time": 182.973,
+      "end_time": 185.133,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.3484,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1026,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0823,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.0134,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 85,
+      "chord": "F",
+      "start_time": 185.133,
+      "end_time": 187.339,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3813,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.217,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1146,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.081,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 86,
+      "chord": "F",
+      "start_time": 187.339,
+      "end_time": 189.544,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.1786,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 0.8209,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.8009,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 0.7574,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 87,
+      "chord": "F",
+      "start_time": 189.544,
+      "end_time": 191.727,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 0.6696,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.6146,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.5876,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 0.5476,
+            "root": "E",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 88,
+      "chord": "F",
+      "start_time": 191.727,
+      "end_time": 193.933,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3467,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2646,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.944,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.9163,
+            "root": "C#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 89,
+      "chord": "F",
+      "start_time": 193.933,
+      "end_time": 196.116,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.1685,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1596,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6892,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.6311,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 90,
+      "chord": "F",
+      "start_time": 196.116,
+      "end_time": 198.322,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1076,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "B",
+            "score": 1.0757,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.9881,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.6258,
+            "root": "D#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 91,
+      "chord": "F",
+      "start_time": 198.322,
+      "end_time": 200.504,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.1674,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.1176,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0636,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0446,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 92,
+      "chord": "F",
+      "start_time": 200.504,
+      "end_time": 202.687,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 0.9038,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.8652,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 0.8235,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.7987,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 93,
+      "chord": "F",
+      "start_time": 202.687,
+      "end_time": 204.916,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3152,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2248,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.1126,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.0123,
+            "root": "D",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 94,
+      "chord": "F",
+      "start_time": 204.916,
+      "end_time": 207.099,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 1.2495,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "G#",
+            "score": 1.2001,
+            "root": "G#",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 1.0347,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Fm",
+            "score": 1.0229,
+            "root": "F",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 95,
+      "chord": "F",
+      "start_time": 207.099,
+      "end_time": 209.281,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Bm",
+            "score": 1.1391,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 1.062,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#m",
+            "score": 0.8606,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.7575,
+            "root": "D#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 96,
+      "chord": "F",
+      "start_time": 209.281,
+      "end_time": 211.464,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.179,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0959,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0095,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.0062,
+            "root": "B",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 97,
+      "chord": "F",
+      "start_time": 211.464,
+      "end_time": 213.67,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A#m",
+            "score": 1.0107,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "C#",
+            "score": 0.6788,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.6315,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6081,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 98,
+      "chord": "F",
+      "start_time": 213.67,
+      "end_time": 215.853,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 0.8311,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 0.5773,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.5681,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5673,
+            "root": "F#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 99,
+      "chord": "F",
+      "start_time": 215.853,
+      "end_time": 218.012,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2971,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 1.2167,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1083,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0492,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 100,
+      "chord": "F",
+      "start_time": 218.012,
+      "end_time": 220.195,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "C#",
+            "score": 1.2618,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.1069,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.0785,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.929,
+            "root": "C#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "C#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 101,
+      "chord": "F",
+      "start_time": 220.195,
+      "end_time": 222.424,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.1667,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#",
+            "score": 1.1091,
+            "root": "C#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0763,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0655,
+            "root": "A#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 102,
+      "chord": "F",
+      "start_time": 222.424,
+      "end_time": 224.607,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "G#m",
+            "score": 0.9397,
+            "root": "G#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.8305,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 0.8066,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G#",
+            "score": 0.5835,
+            "root": "G#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "G#m",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 103,
+      "chord": "F",
+      "start_time": 224.607,
+      "end_time": 226.789,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.5054,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.2523,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 1.2323,
+            "root": "D#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1048,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ],
+        "replaced_from": "B",
+        "reason": "anthropic-replace-mode"
+      }
+    },
+    {
+      "bar": 104,
+      "chord": "F",
+      "start_time": 226.789,
+      "end_time": 232.05,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#",
+            "score": 1.3032,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#m",
+            "score": 1.0732,
+            "root": "A#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.789,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.6854,
+            "root": "D#",
+            "quality": "min"
+          }
+        ],
+        "replaced_from": "F#",
+        "reason": "anthropic-replace-mode"
+      }
+    }
+  ],
+  "grid": {
+    "tempo_bpm": 107.67,
+    "time_signature": "4/4",
+    "bar_count": 99
+  },
+  "anthropic_correction": {
+    "mode": "full",
+    "model": "claude-sonnet-4-5-20250929",
+    "claude_chord_set": [
+      "A#",
+      "Am",
+      "C",
+      "Dm",
+      "F",
+      "Gm"
+    ],
+    "claude_key": "F",
+    "claude_notes": "Recorded in F; straightforward folk-rock progression with I-IV-V and relative minor substitutions",
+    "status": "applied",
+    "bars_replaced": 104,
+    "sections_relabeled": 1,
+    "chord_lines_rewritten": 0,
+    "lines_moved": 20,
+    "drop_ratio": 1.0,
+    "claude_format_notes": "Split two over-merged sections into six distinct verses. This song has a consistent verse structure with no chorus - each four-line block is a separate verse."
+  }
+}
