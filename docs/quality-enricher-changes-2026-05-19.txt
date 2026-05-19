@@ -1,0 +1,35 @@
+# Quality-Only Enricher — isolated changes
+
+## New file: backend/processing/quality_enricher.py
+## New file: backend/tests/test_quality_enricher.py
+
+## Hunk 1: backend/chart_formatter.py — add audio_path param
++    audio_path: Optional[str] = None,
+
+## Hunk 2: backend/chart_formatter.py — enricher call (flag-gated OFF by default)
++    # Quality-only enricher (ACE-secondary). Production librosa stays the
++    # authoritative ROOT detector — this only promotes its plain triads to a
++    # richer 7th/maj7/m7/sus/6 quality on bars where a secondary ACE pass
++    # agrees with librosa on the root. ACE never changes a root. OFF unless
++    # ENABLE_QUALITY_ENRICHER=true. No-op when there is no audio_path or no
++    # bar_grid.
++    if bar_grid and audio_path:
++        try:
++            from processing.quality_enricher import (
++                enrich_qualities_from_ace, is_enricher_enabled,
++            )
++            if is_enricher_enabled():
++                bar_grid, _enrich_tel = enrich_qualities_from_ace(
++                    bar_grid, str(audio_path),
++                )
++                logger.info(
++                    "chart_formatter: quality enricher promoted "
++                    f"{_enrich_tel.get('promoted', 0)}/"
++                    f"{_enrich_tel.get('bars_total', 0)} bars"
++                )
++        except Exception as e:
++            logger.warning(
++                f"chart_formatter: quality enricher skipped (non-fatal): {e}"
+
+## Hunk 3: backend/processing/pipeline.py — pass audio_path
++                    audio_path=str(audio_path),

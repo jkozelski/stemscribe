@@ -1,0 +1,184 @@
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="eisbn" version="3.0" xml:lang="en-us" prefix="calibre: https://calibre-ebook.com">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+    <dc:title id="t1">All You Need to Know About the Music Business</dc:title>
+    <dc:title id="t2">Eleventh Edition</dc:title>
+    <dc:creator id="id-1">Donald S. Passman</dc:creator>
+    <dc:identifier>calibre:13636</dc:identifier>
+    <dc:identifier>uuid:ddfd6093-e177-47ab-8470-3fd8456068bb</dc:identifier>
+    <dc:identifier id="eisbn">9781668011072</dc:identifier>
+    <dc:source id="srcisbn">9781668011065</dc:source>
+    <dc:language>en-US</dc:language>
+    <dc:contributor id="id">calibre (4.23.0) [https://calibre-ebook.com]</dc:contributor>
+    <dc:date>2023-10-24T00:00:00+00:00</dc:date>
+    <dc:description>&lt;B&gt;Dubbed "the industry bible" by the &lt;I&gt;Los Angeles Times&lt;/I&gt;, &lt;I&gt;All You Need to Know About the Music Business&lt;/I&gt; by veteran music lawyer Donald Passman is the go-to guide for everyone in the music business through ten editions, over thirty years, and over a half a million copies sold. Now with updates explaining why musicians have more power today than ever in history; discussion of the mega-million-dollar sales of artists' songs and record catalogs; how artist access to streaming media, and particularly TikTok, has completely reshaped the music business; the latest on music created by AI; and a full update of the latest numbers and trends.&lt;/B&gt;&lt;BR&gt;For more than thirty years, &lt;I&gt;All You Need to Know About the Music Business&lt;/I&gt; has been universally regarded as the definitive guide to the music industry. Now in its eleventh edition, Passman leads novices and experts alike through what has been the most profound change in the music business since the days of wax cylinders and...</dc:description>
+    <dc:publisher>Simon &amp; Schuster</dc:publisher>
+    <opf:meta refines="#t1" property="title-type">main</opf:meta>
+    <opf:meta refines="#t1" property="file-as">All You Need to Know About the Music Business</opf:meta>
+    <meta property="title-type" refines="#t2">subtitle</meta>
+    <meta property="source-of" refines="#srcisbn">pagination</meta>
+    <meta property="dcterms:modified">2023-10-24T12:00:00Z</meta>
+    <meta content="cover-image" name="cover"/>
+    <opf:meta property="role" refines="#id" scheme="marc:relators">bkp</opf:meta>
+    <opf:meta property="role" refines="#id-1" scheme="marc:relators">aut</opf:meta>
+    <opf:meta property="file-as" refines="#id-1">Passman, Donald S.</opf:meta>
+    <opf:meta property="calibre:author_link_map">{"Donald S. Passman": ""}</opf:meta>
+  </metadata>
+  <manifest>
+    <item href="e9781668011072/xhtml/cover.xhtml" id="cover" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/SS_US_adult_signup_front.xhtml" id="SS_US_adult_signup_front" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/title.xhtml" id="title" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/fm01.xhtml" id="fm01" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/dedication.xhtml" id="dedication" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ack.xhtml" id="ack" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/fm02.xhtml" id="fm02" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch01.xhtml" id="ch01" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part01.xhtml" id="part01" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch02.xhtml" id="ch02" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch03.xhtml" id="ch03" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch04.xhtml" id="ch04" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch05.xhtml" id="ch05" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch06.xhtml" id="ch06" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part02.xhtml" id="part02" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch07.xhtml" id="ch07" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch08.xhtml" id="ch08" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch09.xhtml" id="ch09" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch10.xhtml" id="ch10" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch11.xhtml" id="ch11" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch12.xhtml" id="ch12" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch13.xhtml" id="ch13" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch14.xhtml" id="ch14" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part03.xhtml" id="part03" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch15.xhtml" id="ch15" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch16.xhtml" id="ch16" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch17.xhtml" id="ch17" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch17_sub01.xhtml" id="ch17_sub01" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch17_sub02.xhtml" id="ch17_sub02" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch18.xhtml" id="ch18" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch19.xhtml" id="ch19" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch20.xhtml" id="ch20" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part04.xhtml" id="part04" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch21.xhtml" id="ch21" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch22.xhtml" id="ch22" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part05.xhtml" id="part05" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch23.xhtml" id="ch23" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part06.xhtml" id="part06" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch24.xhtml" id="ch24" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch25.xhtml" id="ch25" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part07.xhtml" id="part07" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch26.xhtml" id="ch26" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/part08.xhtml" id="part08" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch27.xhtml" id="ch27" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch28.xhtml" id="ch28" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch29.xhtml" id="ch29" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch30.xhtml" id="ch30" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch31.xhtml" id="ch31" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch32.xhtml" id="ch32" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/ch33.xhtml" id="ch33" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/appendix.xhtml" id="appendix" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/bm01.xhtml" id="bm01" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/SS_recommendpage.xhtml" id="SS_recommendpage" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/authorbio.xhtml" id="authorbio" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/adcard.xhtml" id="adcard" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/SS_US_adult_signup_back.xhtml" id="SS_US_adult_signup_back" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/index.xhtml" id="index" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/copyright.xhtml" id="copyright" media-type="application/xhtml+xml"/>
+    <item href="e9781668011072/xhtml/nav.xhtml" id="nav" media-type="application/xhtml+xml" properties="nav"/>
+    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
+    <item href="e9781668011072/styles/9781668011072.css" id="css" media-type="text/css"/>
+    <item href="e9781668011072/styles/SS_global.css" id="css1" media-type="text/css"/>
+    <item href="e9781668011072/styles/SS_recommendpage.css" id="SS_recommendpage_1" media-type="text/css"/>
+    <item href="e9781668011072/styles/SS_signup.css" id="SS_signup" media-type="text/css"/>
+    <item href="e9781668011072/images/9781668011072.jpg" id="cover-image" media-type="image/jpeg" properties="cover-image"/>
+    <item href="e9781668011072/images/author.jpg" id="author" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/buylink_9781982151157_cover.jpg" id="buylink_9781982151157_cover" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0056-01.jpg" id="f0056-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0073-01.jpg" id="f0073-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0074-01.jpg" id="f0074-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0081-01.jpg" id="f0081-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0087-01.jpg" id="f0087-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0089-01.jpg" id="f0089-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0196-01.jpg" id="f0196-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0197-01.jpg" id="f0197-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0225-01.jpg" id="f0225-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0226-01.jpg" id="f0226-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0342-01.jpg" id="f0342-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/f0508-01.jpg" id="f0508-01" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/facebook.jpg" id="facebook" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/instagram.jpg" id="instagram" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/logo1.jpg" id="logo1" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/title.jpg" id="titlea" media-type="image/jpeg"/>
+    <item href="e9781668011072/images/twitter.jpg" id="twitter" media-type="image/jpeg"/>
+    <item href="e9781668011072/fonts/EBGaramond-Bold.ttf" id="EBGaramond-Bold" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/EBGaramond-BoldItalic.ttf" id="EBGaramond-BoldItalic" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/EBGaramond-Italic.ttf" id="EBGaramond-Italic" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/EBGaramond-Regular.ttf" id="EBGaramond-Regular" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/Montserrat-Bold.ttf" id="Montserrat-Bold" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/Montserrat-BoldItalic.ttf" id="Montserrat-BoldItalic" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/Montserrat-Italic.ttf" id="Montserrat-Italic" media-type="application/vnd.ms-opentype"/>
+    <item href="e9781668011072/fonts/Montserrat-Regular.ttf" id="Montserrat-Regular" media-type="application/vnd.ms-opentype"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="cover"/>
+    <itemref idref="SS_US_adult_signup_front"/>
+    <itemref idref="title"/>
+    <itemref idref="fm01"/>
+    <itemref idref="dedication"/>
+    <itemref idref="ack"/>
+    <itemref idref="fm02"/>
+    <itemref idref="ch01"/>
+    <itemref idref="part01"/>
+    <itemref idref="ch02"/>
+    <itemref idref="ch03"/>
+    <itemref idref="ch04"/>
+    <itemref idref="ch05"/>
+    <itemref idref="ch06"/>
+    <itemref idref="part02"/>
+    <itemref idref="ch07"/>
+    <itemref idref="ch08"/>
+    <itemref idref="ch09"/>
+    <itemref idref="ch10"/>
+    <itemref idref="ch11"/>
+    <itemref idref="ch12"/>
+    <itemref idref="ch13"/>
+    <itemref idref="ch14"/>
+    <itemref idref="part03"/>
+    <itemref idref="ch15"/>
+    <itemref idref="ch16"/>
+    <itemref idref="ch17"/>
+    <itemref idref="ch17_sub01"/>
+    <itemref idref="ch17_sub02"/>
+    <itemref idref="ch18"/>
+    <itemref idref="ch19"/>
+    <itemref idref="ch20"/>
+    <itemref idref="part04"/>
+    <itemref idref="ch21"/>
+    <itemref idref="ch22"/>
+    <itemref idref="part05"/>
+    <itemref idref="ch23"/>
+    <itemref idref="part06"/>
+    <itemref idref="ch24"/>
+    <itemref idref="ch25"/>
+    <itemref idref="part07"/>
+    <itemref idref="ch26"/>
+    <itemref idref="part08"/>
+    <itemref idref="ch27"/>
+    <itemref idref="ch28"/>
+    <itemref idref="ch29"/>
+    <itemref idref="ch30"/>
+    <itemref idref="ch31"/>
+    <itemref idref="ch32"/>
+    <itemref idref="ch33"/>
+    <itemref idref="appendix"/>
+    <itemref idref="bm01"/>
+    <itemref idref="SS_recommendpage"/>
+    <itemref idref="authorbio"/>
+    <itemref idref="adcard"/>
+    <itemref idref="SS_US_adult_signup_back"/>
+    <itemref idref="index"/>
+    <itemref idref="copyright"/>
+  </spine>
+  <guide>
+    <reference href="e9781668011072/xhtml/cover.xhtml" title="Cover" type="cover"/>
+    <reference href="e9781668011072/xhtml/cover.xhtml" title="SRL" type="text"/>
+  </guide>
+</package>

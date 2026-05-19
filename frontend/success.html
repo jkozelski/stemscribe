@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Welcome to Pro &mdash; StemScriber</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d12;
+            --bg-card: rgba(26, 26, 36, 0.6);
+            --text: #e8e4df;
+            --text-dim: #9a96a0;
+            --orange: #ff7b54;
+            --pink: #ff6b9d;
+            --green: #98c379;
+            --border: rgba(255,255,255,0.08);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Outfit', system-ui, sans-serif;
+            background: radial-gradient(ellipse at top, #1a1530 0%, var(--bg) 60%);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        .card {
+            max-width: 520px;
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .check-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), #5eb463);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 30px rgba(152, 195, 121, 0.3);
+        }
+        .check-circle svg {
+            width: 36px;
+            height: 36px;
+            stroke: #0d0d12;
+            stroke-width: 3;
+        }
+        h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 2rem;
+            margin: 0 0 0.5rem;
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sub {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            margin: 0 0 2rem;
+            line-height: 1.5;
+        }
+        .plan-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(255, 123, 84, 0.12);
+            border: 1px solid rgba(255, 123, 84, 0.3);
+            color: var(--orange);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.1s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--orange), var(--pink));
+            color: #0d0d12;
+        }
+        .btn-primary:hover { opacity: 0.92; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--text);
+        }
+        .btn-secondary:hover { border-color: rgba(255,255,255,0.3); }
+        .footnote {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .footnote a { color: var(--orange); text-decoration: none; }
+        .footnote a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="check-circle">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 12l5 5L20 7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <h1>You're in.</h1>
+        <p class="sub" id="subMessage">Payment confirmed. Your account has been upgraded.</p>
+        <div class="plan-badge" id="planBadge">Pro</div>
+        <div class="actions">
+            <a href="/app" class="btn btn-primary">Open StemScriber</a>
+            <a href="/landing.html" class="btn btn-secondary">Back to home</a>
+        </div>
+        <p class="footnote">
+            Receipt sent to your email. Manage your subscription anytime from your profile menu.
+            Questions? <a href="mailto:support@stemscriber.com">support@stemscriber.com</a>
+        </p>
+    </div>
+    <script>
+        // Best-effort: read the user's plan from /billing/status to update the badge
+        // (works only if a JWT is in localStorage; otherwise leave the default "Pro").
+        (async function () {
+            try {
+                var token = localStorage.getItem('access_token');
+                if (!token) return;
+                var r = await fetch('/billing/status', {
+                    headers: { 'Authorization': 'Bearer ' + token },
+                });
+                if (!r.ok) return;
+                var data = await r.json();
+                var badge = document.getElementById('planBadge');
+                var sub = document.getElementById('subMessage');
+                if (data.plan === 'lifetime') {
+                    badge.textContent = 'Lifetime Founder';
+                    sub.textContent = 'Lifetime access locked in. Welcome to the founders.';
+                } else if (data.plan === 'pro') {
+                    badge.textContent = 'Pro';
+                } else if (data.plan === 'premium') {
+                    badge.textContent = 'Premium';
+                }
+                // Stash the plan so the beta gate at index.html lets paid users in.
+                if (['pro', 'premium', 'lifetime'].indexOf(data.plan) !== -1) {
+                    try { localStorage.setItem('stemscribe-paid-plan', data.plan); } catch (e) {}
+                }
+            } catch (e) {
+                // silent — page still works without dynamic plan
+            }
+        })();
+    </script>
+</body>
+</html>

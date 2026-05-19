@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en">
+<head>
+<meta name="dtb:uid" content="9781668011072"/>
+</head>
+<docTitle>
+<text>All You Need to Know About the Music Business, Eleventh Edition</text>
+</docTitle>
+<navMap>
+<navPoint id="navpoint_1" playOrder="1"><navLabel><text>Cover</text></navLabel><content src="e9781668011072/xhtml/cover.xhtml"/></navPoint>
+<navPoint id="navpoint_2" playOrder="2"><navLabel><text>Title Page</text></navLabel><content src="e9781668011072/xhtml/title.xhtml"/></navPoint>
+<navPoint id="navpoint_3" playOrder="3"><navLabel><text>Dedication</text></navLabel><content src="e9781668011072/xhtml/dedication.xhtml"/></navPoint>
+<navPoint id="navpoint_4" playOrder="4"><navLabel><text>Acknowledgments</text></navLabel><content src="e9781668011072/xhtml/ack.xhtml"/></navPoint>
+<navPoint id="navpoint_5" playOrder="5"><navLabel><text>Important</text></navLabel><content src="e9781668011072/xhtml/fm02.xhtml"/></navPoint>
+<navPoint id="navpoint_6" playOrder="6"><navLabel><text>Chapter 1: First Steps</text></navLabel><content src="e9781668011072/xhtml/ch01.xhtml"/></navPoint>
+<navPoint id="navpoint_7" playOrder="7"><navLabel><text>Part I: Your Team of Advisors</text></navLabel><content src="e9781668011072/xhtml/part01.xhtml"/>
+<navPoint id="navpoint_8" playOrder="8"><navLabel><text>Chapter 2: How to Pick a Team</text></navLabel><content src="e9781668011072/xhtml/ch02.xhtml"/>
+<navPoint id="navpoint_9" playOrder="9"><navLabel><text>Getting Your Team Together</text></navLabel><content src="e9781668011072/xhtml/ch02.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_10" playOrder="10"><navLabel><text>Business Philosophy</text></navLabel><content src="e9781668011072/xhtml/ch02.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_11" playOrder="11"><navLabel><text>Hiring a Team</text></navLabel><content src="e9781668011072/xhtml/ch02.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_12" playOrder="12"><navLabel><text>Changing a Team Member</text></navLabel><content src="e9781668011072/xhtml/ch02.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_13" playOrder="13"><navLabel><text>Cocktail Party Talk</text></navLabel><content src="e9781668011072/xhtml/ch02.xhtml#lev11"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_14" playOrder="14"><navLabel><text>Chapter 3: Personal Managers</text></navLabel><content src="e9781668011072/xhtml/ch03.xhtml"/>
+<navPoint id="navpoint_15" playOrder="15"><navLabel><text>Role</text></navLabel><content src="e9781668011072/xhtml/ch03.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_16" playOrder="16"><navLabel><text>Commission Overview</text></navLabel><content src="e9781668011072/xhtml/ch03.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_17" playOrder="17"><navLabel><text>Negotiating the Manager’s Deal</text></navLabel><content src="e9781668011072/xhtml/ch03.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_18" playOrder="18"><navLabel><text>Picking the Right Manager</text></navLabel><content src="e9781668011072/xhtml/ch03.xhtml#lev10"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_19" playOrder="19"><navLabel><text>Chapter 4: Business Managers</text></navLabel><content src="e9781668011072/xhtml/ch04.xhtml"/>
+<navPoint id="navpoint_20" playOrder="20"><navLabel><text>Role</text></navLabel><content src="e9781668011072/xhtml/ch04.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_21" playOrder="21"><navLabel><text>How to Pick a Business Manager</text></navLabel><content src="e9781668011072/xhtml/ch04.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_22" playOrder="22"><navLabel><text>Business Manager Checklist</text></navLabel><content src="e9781668011072/xhtml/ch04.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_23" playOrder="23"><navLabel><text>Fees</text></navLabel><content src="e9781668011072/xhtml/ch04.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_24" playOrder="24"><navLabel><text>Your Half of the Job</text></navLabel><content src="e9781668011072/xhtml/ch04.xhtml#lev7"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_25" playOrder="25"><navLabel><text>Chapter 5: Attorneys</text></navLabel><content src="e9781668011072/xhtml/ch05.xhtml"/>
+<navPoint id="navpoint_26" playOrder="26"><navLabel><text>Picking a Lawyer</text></navLabel><content src="e9781668011072/xhtml/ch05.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_27" playOrder="27"><navLabel><text>Fees</text></navLabel><content src="e9781668011072/xhtml/ch05.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_28" playOrder="28"><navLabel><text>Conflicts of Interest</text></navLabel><content src="e9781668011072/xhtml/ch05.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_29" playOrder="29"><navLabel><text>Attorney Checklist</text></navLabel><content src="e9781668011072/xhtml/ch05.xhtml#lev8"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_30" playOrder="30"><navLabel><text>Chapter 6: Agents</text></navLabel><content src="e9781668011072/xhtml/ch06.xhtml"/>
+<navPoint id="navpoint_31" playOrder="31"><navLabel><text>Role</text></navLabel><content src="e9781668011072/xhtml/ch06.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_32" playOrder="32"><navLabel><text>Fees</text></navLabel><content src="e9781668011072/xhtml/ch06.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_33" playOrder="33"><navLabel><text>Deal Points</text></navLabel><content src="e9781668011072/xhtml/ch06.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_34" playOrder="34"><navLabel><text>Picking an Agent</text></navLabel><content src="e9781668011072/xhtml/ch06.xhtml#lev8"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_35" playOrder="35"><navLabel><text>Part II: Record Deals</text></navLabel><content src="e9781668011072/xhtml/part02.xhtml"/>
+<navPoint id="navpoint_36" playOrder="36"><navLabel><text>Chapter 7: Broad-Strokes Overview of the Record Business</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml"/>
+<navPoint id="navpoint_37" playOrder="37"><navLabel><text>Industry Structure</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_38" playOrder="38"><navLabel><text>A Word About Retailers</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml#lev4"/></navPoint>
+<navPoint id="navpoint_39" playOrder="39"><navLabel><text>Do You Need a Record Label?</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_40" playOrder="40"><navLabel><text>What’s a Record?</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_41" playOrder="41"><navLabel><text>Masters/Recordings</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_42" playOrder="42"><navLabel><text>Royalty Computation</text></navLabel><content src="e9781668011072/xhtml/ch07.xhtml#lev9"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_43" playOrder="43"><navLabel><text>Chapter 8: Advances and Recoupment</text></navLabel><content src="e9781668011072/xhtml/ch08.xhtml"/>
+<navPoint id="navpoint_44" playOrder="44"><navLabel><text>Advances: The Basic Concept</text></navLabel><content src="e9781668011072/xhtml/ch08.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_45" playOrder="45"><navLabel><text>Other Goodies</text></navLabel><content src="e9781668011072/xhtml/ch08.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_46" playOrder="46"><navLabel><text>Cross-Collateralization</text></navLabel><content src="e9781668011072/xhtml/ch08.xhtml#lev4"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_47" playOrder="47"><navLabel><text>Chapter 9: Real-Life Numbers</text></navLabel><content src="e9781668011072/xhtml/ch09.xhtml"/>
+<navPoint id="navpoint_48" playOrder="48"><navLabel><text>Overview</text></navLabel><content src="e9781668011072/xhtml/ch09.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_49" playOrder="49"><navLabel><text>Royalties</text></navLabel><content src="e9781668011072/xhtml/ch09.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_50" playOrder="50"><navLabel><text>Advances</text></navLabel><content src="e9781668011072/xhtml/ch09.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_51" playOrder="51"><navLabel><text>360 Rights</text></navLabel><content src="e9781668011072/xhtml/ch09.xhtml#lev12"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_52" playOrder="52"><navLabel><text>Chapter 10: Other Major Deal Points</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml"/>
+<navPoint id="navpoint_53" playOrder="53"><navLabel><text>Amount of Product</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_54" playOrder="54"><navLabel><text>How Long?</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_55" playOrder="55"><navLabel><text>Delivery Requirements</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev11"/></navPoint>
+<navPoint id="navpoint_56" playOrder="56"><navLabel><text>Guaranteed Release</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev15"/></navPoint>
+<navPoint id="navpoint_57" playOrder="57"><navLabel><text>Controlled Compositions</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev16"/></navPoint>
+<navPoint id="navpoint_58" playOrder="58"><navLabel><text>Greatest Hits</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev17"/></navPoint>
+<navPoint id="navpoint_59" playOrder="59"><navLabel><text>Live Albums</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev18"/></navPoint>
+<navPoint id="navpoint_60" playOrder="60"><navLabel><text>Independents Day</text></navLabel><content src="e9781668011072/xhtml/ch10.xhtml#lev19"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_61" playOrder="61"><navLabel><text>Chapter 11: Producer and Mixer Deals</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml"/>
+<navPoint id="navpoint_62" playOrder="62"><navLabel><text>What’s a Producer?</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_63" playOrder="63"><navLabel><text>Royalties</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_64" playOrder="64"><navLabel><text>Advances</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_65" playOrder="65"><navLabel><text>Other Royalty Computations</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_66" playOrder="66"><navLabel><text>Who Hires the Producer?</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_67" playOrder="67"><navLabel><text>Mixers</text></navLabel><content src="e9781668011072/xhtml/ch11.xhtml#lev12"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_68" playOrder="68"><navLabel><text>Chapter 12: Advanced Royalty Computations</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml"/>
+<navPoint id="navpoint_69" playOrder="69"><navLabel><text>Royalties for the United States</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_70" playOrder="70"><navLabel><text>Foreign Royalties</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_71" playOrder="71"><navLabel><text>R.O.W.</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_72" playOrder="72"><navLabel><text>Electronic Transmissions</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_73" playOrder="73"><navLabel><text>On-Demand Streaming</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_74" playOrder="74"><navLabel><text>Downloads</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev14"/></navPoint>
+<navPoint id="navpoint_75" playOrder="75"><navLabel><text>Non-Interactive Streaming and Satellite Radio</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev15"/></navPoint>
+<navPoint id="navpoint_76" playOrder="76"><navLabel><text>Video Streaming</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev16"/></navPoint>
+<navPoint id="navpoint_77" playOrder="77"><navLabel><text>Samples</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev18"/></navPoint>
+<navPoint id="navpoint_78" playOrder="78"><navLabel><text>Guest Artists, Featured Artists, and Joint Recordings</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev19"/></navPoint>
+<navPoint id="navpoint_79" playOrder="79"><navLabel><text>Apps</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev21"/></navPoint>
+<navPoint id="navpoint_80" playOrder="80"><navLabel><text>Video Games</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev22"/></navPoint>
+<navPoint id="navpoint_81" playOrder="81"><navLabel><text>Web3, the Metaverse, NFTs, and Things That Go Bump in the Night</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev23"/></navPoint>
+<navPoint id="navpoint_82" playOrder="82"><navLabel><text>Bundles</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev24"/></navPoint>
+<navPoint id="navpoint_83" playOrder="83"><navLabel><text>Television and Other Advertising</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev25"/></navPoint>
+<navPoint id="navpoint_84" playOrder="84"><navLabel><text>Podcasts</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev26"/></navPoint>
+<navPoint id="navpoint_85" playOrder="85"><navLabel><text>Multiple Albums/Box Sets</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev27"/></navPoint>
+<navPoint id="navpoint_86" playOrder="86"><navLabel><text>Profit Share</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev28"/></navPoint>
+<navPoint id="navpoint_87" playOrder="87"><navLabel><text>Dearly Departing Contract Clauses</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev31"/></navPoint>
+<navPoint id="navpoint_88" playOrder="88"><navLabel><text>DVDs</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev43"/></navPoint>
+<navPoint id="navpoint_89" playOrder="89"><navLabel><text>Accountings</text></navLabel><content src="e9781668011072/xhtml/ch12.xhtml#lev46"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_90" playOrder="90"><navLabel><text>Chapter 13: Advanced Record Deal Points</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml"/>
+<navPoint id="navpoint_91" playOrder="91"><navLabel><text>Exclusivity</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_92" playOrder="92"><navLabel><text>Websites/Social Media</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_93" playOrder="93"><navLabel><text>Single-Song Videos</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_94" playOrder="94"><navLabel><text>Independent Promotion and Radio Concerts</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev14"/></navPoint>
+<navPoint id="navpoint_95" playOrder="95"><navLabel><text>Merchandising Rights</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev15"/></navPoint>
+<navPoint id="navpoint_96" playOrder="96"><navLabel><text>Tour Support</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev16"/></navPoint>
+<navPoint id="navpoint_97" playOrder="97"><navLabel><text>Territory</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev17"/></navPoint>
+<navPoint id="navpoint_98" playOrder="98"><navLabel><text>Creative, Marketing, and Other Controls</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev18"/></navPoint>
+<navPoint id="navpoint_99" playOrder="99"><navLabel><text>Artwork</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev19"/></navPoint>
+<navPoint id="navpoint_100" playOrder="100"><navLabel><text>Union Exploitation Charges</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev20"/></navPoint>
+<navPoint id="navpoint_101" playOrder="101"><navLabel><text>Loan-Out Deals</text></navLabel><content src="e9781668011072/xhtml/ch13.xhtml#lev21"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_102" playOrder="102"><navLabel><text>Chapter 14: Independent Production, Label, and Distribution Deals</text></navLabel><content src="e9781668011072/xhtml/ch14.xhtml"/>
+<navPoint id="navpoint_103" playOrder="103"><navLabel><text>Independent Production Agreements</text></navLabel><content src="e9781668011072/xhtml/ch14.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_104" playOrder="104"><navLabel><text>Joint Ventures/Profit Share</text></navLabel><content src="e9781668011072/xhtml/ch14.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_105" playOrder="105"><navLabel><text>Distribution Deals</text></navLabel><content src="e9781668011072/xhtml/ch14.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_106" playOrder="106"><navLabel><text>Label Services Deals</text></navLabel><content src="e9781668011072/xhtml/ch14.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_107" playOrder="107"><navLabel><text>Upstream Deals</text></navLabel><content src="e9781668011072/xhtml/ch14.xhtml#lev8"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_108" playOrder="108"><navLabel><text>Part III: Songwriting and Music Publishing</text></navLabel><content src="e9781668011072/xhtml/part03.xhtml"/>
+<navPoint id="navpoint_109" playOrder="109"><navLabel><text>Chapter 15: Copyright Basics</text></navLabel><content src="e9781668011072/xhtml/ch15.xhtml"/>
+<navPoint id="navpoint_110" playOrder="110"><navLabel><text>Basic Copyright Concepts</text></navLabel><content src="e9781668011072/xhtml/ch15.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_111" playOrder="111"><navLabel><text>What Are All These Rights You Get?</text></navLabel><content src="e9781668011072/xhtml/ch15.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_112" playOrder="112"><navLabel><text>Exceptions to the Copyright Monopoly</text></navLabel><content src="e9781668011072/xhtml/ch15.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_113" playOrder="113"><navLabel><text>Compulsory Mechanical Licenses</text></navLabel><content src="e9781668011072/xhtml/ch15.xhtml#lev8"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_114" playOrder="114"><navLabel><text>Chapter 16: Publishing Companies and Major Income Sources</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml"/>
+<navPoint id="navpoint_115" playOrder="115"><navLabel><text>Publishing Overview</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_116" playOrder="116"><navLabel><text>Sources of Income</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_117" playOrder="117"><navLabel><text>Public Performance Royalties</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_118" playOrder="118"><navLabel><text>More About Mechanical Royalties</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml#lev15"/></navPoint>
+<navPoint id="navpoint_119" playOrder="119"><navLabel><text>Streaming and Downloads</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml#lev17"/></navPoint>
+<navPoint id="navpoint_120" playOrder="120"><navLabel><text>Music Modernization Act</text></navLabel><content src="e9781668011072/xhtml/ch16.xhtml#lev23"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_121" playOrder="121"><navLabel><text>Chapter 17: Even More Publishing Income</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml"/>
+<navPoint id="navpoint_122" playOrder="122"><navLabel><text>Synchronization and Transcription Licenses</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_123" playOrder="123"><navLabel><text>Samples</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_124" playOrder="124"><navLabel><text>Foreign Subpublishing</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev4"/></navPoint>
+<navPoint id="navpoint_125" playOrder="125"><navLabel><text>Printed Music</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev14"/></navPoint>
+<navPoint id="navpoint_126" playOrder="126"><navLabel><text>Controlled Composition Clauses</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev18"/></navPoint>
+<navPoint id="navpoint_127" playOrder="127"><navLabel><text>Maximum Rate per Song</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev19"/></navPoint>
+<navPoint id="navpoint_128" playOrder="128"><navLabel><text>Maximum Rate per Album, EPs, and Singles</text></navLabel><content src="e9781668011072/xhtml/ch17.xhtml#lev21"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_129" playOrder="129"><navLabel><text>Bonus Section!</text></navLabel><content src="e9781668011072/xhtml/ch17_sub01.xhtml"/>
+<navPoint id="navpoint_130" playOrder="130"><navLabel><text>How to Set Up a Publishing Company</text></navLabel><content src="e9781668011072/xhtml/ch17_sub01.xhtml#lev1"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_131" playOrder="131"><navLabel><text>Double Bonus Section!!</text></navLabel><content src="e9781668011072/xhtml/ch17_sub02.xhtml"/>
+<navPoint id="navpoint_132" playOrder="132"><navLabel><text>Hey, Kids, Let’s Sell a Catalog!</text></navLabel><content src="e9781668011072/xhtml/ch17_sub02.xhtml#lev1"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_133" playOrder="133"><navLabel><text>Chapter 18: Songwriter, Co-Publishing, and Administration Deals</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml"/>
+<navPoint id="navpoint_134" playOrder="134"><navLabel><text>Songwriter Agreements</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_135" playOrder="135"><navLabel><text>What’s in the Pot?</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_136" playOrder="136"><navLabel><text>Charges Against Royalties</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_137" playOrder="137"><navLabel><text>Copyright Ownership</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_138" playOrder="138"><navLabel><text>Single-Song Contracts</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_139" playOrder="139"><navLabel><text>Term Songwriter Agreements</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_140" playOrder="140"><navLabel><text>Pop Quiz</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev12"/></navPoint>
+<navPoint id="navpoint_141" playOrder="141"><navLabel><text>Co-writes (Songs Written by Two or More Writers)</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev13"/></navPoint>
+<navPoint id="navpoint_142" playOrder="142"><navLabel><text>Creative Control</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev15"/></navPoint>
+<navPoint id="navpoint_143" playOrder="143"><navLabel><text>Reversion of Copyright</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev17"/></navPoint>
+<navPoint id="navpoint_144" playOrder="144"><navLabel><text>Administration Agreements</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev22"/></navPoint>
+<navPoint id="navpoint_145" playOrder="145"><navLabel><text>Co-administration Agreements</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev25"/></navPoint>
+<navPoint id="navpoint_146" playOrder="146"><navLabel><text>Now Look Where You Are!</text></navLabel><content src="e9781668011072/xhtml/ch18.xhtml#lev28"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_147" playOrder="147"><navLabel><text>Chapter 19: Advanced Copyright Concepts</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml"/>
+<navPoint id="navpoint_148" playOrder="148"><navLabel><text>Who Owns the Copyright?</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_149" playOrder="149"><navLabel><text>Works for Hire</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_150" playOrder="150"><navLabel><text>Duration of Copyright</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_151" playOrder="151"><navLabel><text>Right of Termination</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_152" playOrder="152"><navLabel><text>Public Performance of Recordings</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev10"/></navPoint>
+<navPoint id="navpoint_153" playOrder="153"><navLabel><text>What Happens When Someone Rips Off Your Copyright?</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev13"/></navPoint>
+<navPoint id="navpoint_154" playOrder="154"><navLabel><text>Artifical Intelligence and Monkey Selfies</text></navLabel><content src="e9781668011072/xhtml/ch19.xhtml#lev15"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_155" playOrder="155"><navLabel><text>Chapter 20: Even More Advanced Copyright Concepts</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml"/>
+<navPoint id="navpoint_156" playOrder="156"><navLabel><text>Sound Recording Copyrights</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_157" playOrder="157"><navLabel><text>How to Terminate a Copyright Transfer in Your Spare Time, for Fun and Profit</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_158" playOrder="158"><navLabel><text>Extension Rights</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_159" playOrder="159"><navLabel><text>The Copyright Notice</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml#lev9"/></navPoint>
+<navPoint id="navpoint_160" playOrder="160"><navLabel><text>Registration and Deposit</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml#lev10"/></navPoint>
+<navPoint id="navpoint_161" playOrder="161"><navLabel><text>Moral Rights</text></navLabel><content src="e9781668011072/xhtml/ch20.xhtml#lev14"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_162" playOrder="162"><navLabel><text>Part IV: Group Issues</text></navLabel><content src="e9781668011072/xhtml/part04.xhtml"/>
+<navPoint id="navpoint_163" playOrder="163"><navLabel><text>Chapter 21: Groups</text></navLabel><content src="e9781668011072/xhtml/ch21.xhtml"/>
+<navPoint id="navpoint_164" playOrder="164"><navLabel><text>Group Provisions in Record Deals</text></navLabel><content src="e9781668011072/xhtml/ch21.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_165" playOrder="165"><navLabel><text>Trivia Quiz</text></navLabel><content src="e9781668011072/xhtml/ch21.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_166" playOrder="166"><navLabel><text>Internal Group Deals</text></navLabel><content src="e9781668011072/xhtml/ch21.xhtml#lev7"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_167" playOrder="167"><navLabel><text>Chapter 22: What’s in a Name?</text></navLabel><content src="e9781668011072/xhtml/ch22.xhtml"/>
+<navPoint id="navpoint_168" playOrder="168"><navLabel><text>Rights in a Name</text></navLabel><content src="e9781668011072/xhtml/ch22.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_169" playOrder="169"><navLabel><text>Registration</text></navLabel><content src="e9781668011072/xhtml/ch22.xhtml#lev4"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_170" playOrder="170"><navLabel><text>Part V: Touring</text></navLabel><content src="e9781668011072/xhtml/part05.xhtml"/>
+<navPoint id="navpoint_171" playOrder="171"><navLabel><text>Chapter 23: Personal Appearances—Touring</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml"/>
+<navPoint id="navpoint_172" playOrder="172"><navLabel><text>Roles of Team Members</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_173" playOrder="173"><navLabel><text>Marketing</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_174" playOrder="174"><navLabel><text>Personal Appearance Deals</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_175" playOrder="175"><navLabel><text>New Artists</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev9"/></navPoint>
+<navPoint id="navpoint_176" playOrder="176"><navLabel><text>Internet Phenoms</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev13"/></navPoint>
+<navPoint id="navpoint_177" playOrder="177"><navLabel><text>Midlevel Artists</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev14"/></navPoint>
+<navPoint id="navpoint_178" playOrder="178"><navLabel><text>Heritage Acts</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev15"/></navPoint>
+<navPoint id="navpoint_179" playOrder="179"><navLabel><text>Superstar Touring</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev16"/></navPoint>
+<navPoint id="navpoint_180" playOrder="180"><navLabel><text>VIP Ticketing</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev21"/></navPoint>
+<navPoint id="navpoint_181" playOrder="181"><navLabel><text>Sponsorship</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev22"/></navPoint>
+<navPoint id="navpoint_182" playOrder="182"><navLabel><text>Hall Fees</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev23"/></navPoint>
+<navPoint id="navpoint_183" playOrder="183"><navLabel><text>Riders</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev24"/></navPoint>
+<navPoint id="navpoint_184" playOrder="184"><navLabel><text>I’ll Take the Whole Thing…</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev25"/></navPoint>
+<navPoint id="navpoint_185" playOrder="185"><navLabel><text>Multi-Show Deals</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev26"/></navPoint>
+<navPoint id="navpoint_186" playOrder="186"><navLabel><text>Lining Your Pockets with More Gold</text></navLabel><content src="e9781668011072/xhtml/ch23.xhtml#lev27"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_187" playOrder="187"><navLabel><text>Part VI: Merchandising</text></navLabel><content src="e9781668011072/xhtml/part06.xhtml"/>
+<navPoint id="navpoint_188" playOrder="188"><navLabel><text>Chapter 24: Tour Merchandising</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml"/>
+<navPoint id="navpoint_189" playOrder="189"><navLabel><text>Tour Merchandisers</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_190" playOrder="190"><navLabel><text>Royalties</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_191" playOrder="191"><navLabel><text>Hall Fees</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_192" playOrder="192"><navLabel><text>Advances</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev4"/></navPoint>
+<navPoint id="navpoint_193" playOrder="193"><navLabel><text>Term</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_194" playOrder="194"><navLabel><text>Advance Repayment</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_195" playOrder="195"><navLabel><text>Exclusivity</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_196" playOrder="196"><navLabel><text>Creative Control</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev8"/></navPoint>
+<navPoint id="navpoint_197" playOrder="197"><navLabel><text>Exclusions</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev9"/></navPoint>
+<navPoint id="navpoint_198" playOrder="198"><navLabel><text>Sell-off Rights</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev10"/></navPoint>
+<navPoint id="navpoint_199" playOrder="199"><navLabel><text>Bootleggers</text></navLabel><content src="e9781668011072/xhtml/ch24.xhtml#lev11"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_200" playOrder="200"><navLabel><text>Chapter 25: Retail, Direct to Consumer (D2C) Merchandising, and Fan Clubs</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml"/>
+<navPoint id="navpoint_201" playOrder="201"><navLabel><text>Retail Merchandising</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_202" playOrder="202"><navLabel><text>Royalties</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_203" playOrder="203"><navLabel><text>Other Deal Points</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_204" playOrder="204"><navLabel><text>Direct to Consumer (D2C) (E-commerce/Web Store Sales)</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml#lev4"/></navPoint>
+<navPoint id="navpoint_205" playOrder="205"><navLabel><text>Fan Clubs</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_206" playOrder="206"><navLabel><text>Caution</text></navLabel><content src="e9781668011072/xhtml/ch25.xhtml#lev6"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_207" playOrder="207"><navLabel><text>Part VII: Classical Music</text></navLabel><content src="e9781668011072/xhtml/part07.xhtml"/>
+<navPoint id="navpoint_208" playOrder="208"><navLabel><text>Chapter 26: Classical Music</text></navLabel><content src="e9781668011072/xhtml/ch26.xhtml"/>
+<navPoint id="navpoint_209" playOrder="209"><navLabel><text>Term and Product</text></navLabel><content src="e9781668011072/xhtml/ch26.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_210" playOrder="210"><navLabel><text>Royalties</text></navLabel><content src="e9781668011072/xhtml/ch26.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_211" playOrder="211"><navLabel><text>Advances</text></navLabel><content src="e9781668011072/xhtml/ch26.xhtml#lev3"/></navPoint>
+<navPoint id="navpoint_212" playOrder="212"><navLabel><text>Mechanical Royalties</text></navLabel><content src="e9781668011072/xhtml/ch26.xhtml#lev4"/></navPoint>
+<navPoint id="navpoint_213" playOrder="213"><navLabel><text>Marketing Tie-ins</text></navLabel><content src="e9781668011072/xhtml/ch26.xhtml#lev5"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_214" playOrder="214"><navLabel><text>Part VIII: Motion Picture Music</text></navLabel><content src="e9781668011072/xhtml/part08.xhtml"/>
+<navPoint id="navpoint_215" playOrder="215"><navLabel><text>Chapter 27: Overview of Motion Picture Music</text></navLabel><content src="e9781668011072/xhtml/ch27.xhtml"/>
+<navPoint id="navpoint_216" playOrder="216"><navLabel><text>Introduction</text></navLabel><content src="e9781668011072/xhtml/ch27.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_217" playOrder="217"><navLabel><text>One Song—Eight Deals</text></navLabel><content src="e9781668011072/xhtml/ch27.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_218" playOrder="218"><navLabel><text>The Rights Involved</text></navLabel><content src="e9781668011072/xhtml/ch27.xhtml#lev3"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_219" playOrder="219"><navLabel><text>Chapter 28: Performer Deals</text></navLabel><content src="e9781668011072/xhtml/ch28.xhtml"/>
+<navPoint id="navpoint_220" playOrder="220"><navLabel><text>Overview</text></navLabel><content src="e9781668011072/xhtml/ch28.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_221" playOrder="221"><navLabel><text>Performance in the Film (No Record Rights)</text></navLabel><content src="e9781668011072/xhtml/ch28.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_222" playOrder="222"><navLabel><text>Record Rights to Film Performances</text></navLabel><content src="e9781668011072/xhtml/ch28.xhtml#lev7"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_223" playOrder="223"><navLabel><text>Chapter 29: Film Songwriter Deals</text></navLabel><content src="e9781668011072/xhtml/ch29.xhtml"/>
+<navPoint id="navpoint_224" playOrder="224"><navLabel><text>Terminology</text></navLabel><content src="e9781668011072/xhtml/ch29.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_225" playOrder="225"><navLabel><text>Deal Points</text></navLabel><content src="e9781668011072/xhtml/ch29.xhtml#lev2"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_226" playOrder="226"><navLabel><text>Chapter 30: Composer Agreements</text></navLabel><content src="e9781668011072/xhtml/ch30.xhtml"/>
+<navPoint id="navpoint_227" playOrder="227"><navLabel><text>Deal Points</text></navLabel><content src="e9781668011072/xhtml/ch30.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_228" playOrder="228"><navLabel><text>Package Deals</text></navLabel><content src="e9781668011072/xhtml/ch30.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_229" playOrder="229"><navLabel><text>Creative Financing</text></navLabel><content src="e9781668011072/xhtml/ch30.xhtml#lev5"/></navPoint>
+<navPoint id="navpoint_230" playOrder="230"><navLabel><text>Television Composers</text></navLabel><content src="e9781668011072/xhtml/ch30.xhtml#lev6"/></navPoint>
+<navPoint id="navpoint_231" playOrder="231"><navLabel><text>Video Game Composers</text></navLabel><content src="e9781668011072/xhtml/ch30.xhtml#lev9"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_232" playOrder="232"><navLabel><text>Chapter 31: Licensing Existing Recordings and Existing Songs for Motion Pictures</text></navLabel><content src="e9781668011072/xhtml/ch31.xhtml"/>
+<navPoint id="navpoint_233" playOrder="233"><navLabel><text>Recording Licenses</text></navLabel><content src="e9781668011072/xhtml/ch31.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_234" playOrder="234"><navLabel><text>Licensing Existing Musical Compositions for Films</text></navLabel><content src="e9781668011072/xhtml/ch31.xhtml#lev7"/></navPoint>
+<navPoint id="navpoint_235" playOrder="235"><navLabel><text>Film Music Quiz</text></navLabel><content src="e9781668011072/xhtml/ch31.xhtml#lev9"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_236" playOrder="236"><navLabel><text>Chapter 32: Music Supervisors</text></navLabel><content src="e9781668011072/xhtml/ch32.xhtml"/>
+<navPoint id="navpoint_237" playOrder="237"><navLabel><text>Role</text></navLabel><content src="e9781668011072/xhtml/ch32.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_238" playOrder="238"><navLabel><text>Motion Picture Supervisor Fees and Royalties</text></navLabel><content src="e9781668011072/xhtml/ch32.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_239" playOrder="239"><navLabel><text>Television Supervisors</text></navLabel><content src="e9781668011072/xhtml/ch32.xhtml#lev3"/></navPoint>
+</navPoint>
+<navPoint id="navpoint_240" playOrder="240"><navLabel><text>Chapter 33: Soundtrack Record Deals</text></navLabel><content src="e9781668011072/xhtml/ch33.xhtml"/>
+<navPoint id="navpoint_241" playOrder="241"><navLabel><text>Score Albums</text></navLabel><content src="e9781668011072/xhtml/ch33.xhtml#lev1"/></navPoint>
+<navPoint id="navpoint_242" playOrder="242"><navLabel><text>Song Albums</text></navLabel><content src="e9781668011072/xhtml/ch33.xhtml#lev2"/></navPoint>
+<navPoint id="navpoint_243" playOrder="243"><navLabel><text>Other Issues</text></navLabel><content src="e9781668011072/xhtml/ch33.xhtml#lev3"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="navpoint_244" playOrder="244"><navLabel><text>Appendix: Ye Olde Royalty Calculations</text></navLabel><content src="e9781668011072/xhtml/appendix.xhtml"/></navPoint>
+<navPoint id="navpoint_245" playOrder="245"><navLabel><text>Conclusion</text></navLabel><content src="e9781668011072/xhtml/bm01.xhtml"/></navPoint>
+<navPoint id="navpoint_246" playOrder="246"><navLabel><text>About the Author</text></navLabel><content src="e9781668011072/xhtml/authorbio.xhtml"/></navPoint>
+<navPoint id="navpoint_247" playOrder="247"><navLabel><text>Index</text></navLabel><content src="e9781668011072/xhtml/index.xhtml"/></navPoint>
+<navPoint id="navpoint_248" playOrder="248"><navLabel><text>Copyright</text></navLabel><content src="e9781668011072/xhtml/copyright.xhtml"/></navPoint>
+</navMap>
+</ncx>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Got the file? — StemScriber</title>
+    <link rel="canonical" href="https://stemscriber.com/audio-capture-help.html">
+    <meta name="theme-color" content="#ff7b54">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,400;1,600&family=JetBrains+Mono:wght@400;600&family=Righteous&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0a0a0e; --paper:#f5f1ea; --ink:#1a1a1f; --text-dim:#6f6960; --orange:#ff7b54; --pink:#ff6b9d; --rule:#d8d2c5; }
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{background:var(--paper);color:var(--ink);font-family:'Space Grotesk',sans-serif;line-height:1.55;min-height:100vh}
+        a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:3px;text-decoration-thickness:2px}
+        a:hover{background:#ffe8df}
+        code,kbd{font-family:'JetBrains Mono',monospace;font-size:.92em;background:var(--ink);color:var(--paper);padding:.15rem .45rem;border-radius:3px}
+
+        /* Top bar — minimal, returns to app */
+        nav{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;border-bottom:1px solid var(--rule);background:var(--paper);position:sticky;top:0;z-index:10}
+        nav .home{font-family:'Righteous',cursive;font-size:1rem;color:var(--ink);text-decoration:none;background:none}
+        nav .home:hover{background:none;color:var(--orange)}
+        nav .back{font-size:.82rem;color:var(--text-dim);text-decoration:none;background:none}
+        nav .back:hover{background:none;color:var(--ink)}
+
+        /* Layout — editorial, not card-grid */
+        main{max-width:680px;margin:0 auto;padding:3rem 2rem 6rem}
+
+        /* Big confident H1 — different from the chunky H1 on the landing */
+        h1{font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:2.8rem;line-height:1.05;letter-spacing:-.02em;margin-bottom:.7rem}
+        h1 .punc{color:var(--orange)}
+
+        .deck{font-family:'Space Grotesk',sans-serif;font-size:1.05rem;color:var(--text-dim);margin-bottom:2.5rem;line-height:1.5;max-width:580px}
+
+        h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);margin:3rem 0 .5rem;padding-bottom:.5rem;border-bottom:1px solid var(--rule)}
+
+        p{margin-bottom:1rem;font-size:1.02rem}
+        p strong{color:var(--ink);font-weight:600}
+
+        .lead{font-size:1.1rem;line-height:1.55}
+
+        /* Inline list (no bullets, just typography) */
+        .ways{margin:.5rem 0 1.5rem;padding-left:0;list-style:none}
+        .ways li{padding:.6rem 0;border-bottom:1px solid var(--rule);font-size:.98rem}
+        .ways li:last-child{border-bottom:0}
+        .ways li b{display:inline-block;min-width:7rem;font-weight:700;font-family:'JetBrains Mono',monospace;font-size:.86rem;color:var(--orange);text-transform:uppercase;letter-spacing:.08em;vertical-align:top}
+
+        /* Pull-quote style for the rule */
+        .rule{font-family:'Fraunces',serif;font-style:italic;font-size:1.45rem;line-height:1.35;color:var(--ink);border-left:4px solid var(--orange);padding:.4rem 0 .4rem 1.4rem;margin:2.5rem 0}
+        .rule small{display:block;margin-top:.6rem;font-family:'Space Grotesk',sans-serif;font-style:normal;font-size:.78rem;color:var(--text-dim);letter-spacing:.05em}
+
+        /* Footer CTA */
+        .end{margin-top:4rem;padding-top:2rem;border-top:2px solid var(--ink);display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:1rem}
+        .end a.cta{font-family:'Righteous',cursive;font-size:1rem;letter-spacing:.5px;background:var(--ink);color:var(--paper);padding:.7rem 1.4rem;border-radius:0;text-decoration:none}
+        .end a.cta:hover{background:var(--orange);color:var(--ink)}
+        .end .meta{font-size:.78rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+
+        @media (max-width: 600px){
+            h1{font-size:2.1rem}
+            main{padding:2rem 1.4rem 4rem}
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="home">StemScriber</a>
+        <a href="/app" class="back">← Back to upload</a>
+    </nav>
+
+    <main>
+        <h1>Got the file<span class="punc">?</span></h1>
+        <p class="deck">If you have the audio, upload it. If you don't have the audio, this page tells you how musicians actually get it. Read this first — the rule at the bottom matters.</p>
+
+        <h2>The clean way</h2>
+        <p class="lead">Most of the time you already have the file and don't realize it. Try these before anything else.</p>
+        <ul class="ways">
+            <li><b>Bandcamp</b> Re-download anything you've bought from your collection page. Best quality, fully yours.</li>
+            <li><b>iTunes / Music app</b> Right-click any track → <em>Show in Finder</em>. The file is sitting on your computer.</li>
+            <li><b>Amazon Music</b> Open the app, My Music, hit Download.</li>
+            <li><b>Internet Archive</b> Free, public-domain, or artist-permissioned recordings. Paste the URL into StemScriber directly.</li>
+            <li><b>Your own DAW</b> Bounce your demo, your livestream archive, your jam recording.</li>
+        </ul>
+
+        <h2>The DIY way</h2>
+        <p>If the audio is something you have the right to use but it's stuck inside a video or a stream you can play on your computer or phone, you can record it yourself. The tools below are widely used by archivists, podcasters, and musicians for legitimate work.</p>
+
+        <ul class="ways">
+            <li><b>Mac</b> <strong>QuickTime Player</strong> + <a href="https://existential.audio/blackhole/" target="_blank" rel="noopener">BlackHole</a> (both free) records system audio to .m4a. <strong>Audio Hijack</strong> (~$70) is the no-fuss option if you do this often.</li>
+            <li><b>Windows</b> <strong>OBS Studio</strong> (free) records desktop audio. <strong>Audacity</strong> (free) does the same with WASAPI loopback.</li>
+            <li><b>iPhone</b> Built-in screen recorder captures whatever's playing. Save the .mov, drop it on StemScriber — we extract the audio for you.</li>
+            <li><b>Android</b> Same idea — built-in screen recorder, enable internal audio.</li>
+            <li><b>Power users</b> <code>yt-dlp -x --audio-format mp3 &lt;URL&gt;</code> on your own machine. <a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noopener">It's free</a>. We don't run it for you, but you can run it for yourself.</li>
+        </ul>
+
+        <h2>The rule</h2>
+        <div class="rule">
+            "Whatever you upload, you're saying you have the right to use it.<br>That part doesn't change because the file came from somewhere convenient."
+            <small>— StemScriber Terms §4.3 + §4.4, in plain English</small>
+        </div>
+        <p>Audio you own, audio licensed to you, or audio in the public domain — you're set. For everything else, the rights question travels with the file: whoever uploads it is the one who needs the right to use it. We're the tool that splits and charts what you bring.</p>
+
+        <div class="end">
+            <a href="/app" class="cta">← Back to upload</a>
+            <span class="meta">stemscriber.com / capture-help</span>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,628 @@
+                 THE COMMITTEE ON ENTERTAINMENT LAW
+                                 OF THE
+             ASSOCIATION OF THE BAR OF THE CITY OF NEW YORK
+
+                                                                              January, 2003
+
+The Committee gratefully acknowledges the contributions of prior chairpersons, Noel L.
+Silverman and Victoria G. Traube, and of H. Joseph Mello, the initial editor.
+
+
+
+
+                                 MUSIC RIGHTS PRIMER
+                                           Introduction
+         This Primer is intended to assist lawyers who are not actively engaged in the music sub-
+
+specialty of entertainment law, but who, from time to time, may be involved with matters
+
+pertaining to that area. It is also intended for law students and non-lawyers who have an interest
+
+or involvement in the entertainment industry.
+
+         We envision this Primer to be used primarily to explain the different rights that fall under
+
+the generic term “music rights”, and to delineate generally which rights are necessary for
+
+projects or product in this medium. It is not intended as a replacement for an exhaustive treatise
+
+and should not be considered a substitute for specialized legal representation required to resolve
+
+the complex issues that often arise in transactions involving music rights. Rather, it is designed
+
+to highlight issues and to provide the basic understanding of the foundations of a music project.
+
+Specialists in the field should be consulted when additional legal assistance is needed. They can
+
+easily be found in New York, Los Angeles and Nashville, and to a lesser extent, in other parts of
+
+the country.
+
+         This Primer deals with music rights in the United States only. While many of the
+
+principles discussed below apply in other countries as well, there may be significant differences,
+
+and resolution of foreign issues is outside the scope of this Primer. In general, if it is intended
+
+
+
+
+LH002381.4                                        1
+that particular rights may be exercised outside the United States, the license with the rights
+
+owner should specify all territories granted.
+
+
+                 Music Copyright Versus Sound Recording Copyright
+         At the outset it is important to distinguish between rights in a song, and rights in a sound
+
+recording that may embody the song. When we hear a recorded song, two separate and distinct
+
+intellectual properties are involved that need to be identified and understood. The first property is
+
+the music composition, itself—the words and music composed by the songwriter(s). The second
+
+property is the sound recording—the fixed embodiment of sounds resulting from the recorded
+
+performance of that musical composition. Publishing rights in a song include the right to exploit
+
+the song in any medium, and are unrelated to the identity of the performer or performers of a
+
+particular recorded version of the song. Sound or master recording rights, on the other hand,
+
+include only the rights in a particular fixed performance of a musical composition. A user will
+
+have to consider obtaining separate rights for both the use of the song and the sound recording.
+
+         The author of each property—as to the musical composition usually the songwriter, and
+
+as to the sound recording the producer (often, the record company)—is the initial owner of the
+
+intellectual property, in each case a copyright.
+
+         Copyright affords its owner the following exclusive rights which are itemized in Section
+
+106 of the Copyright Act (17 U.S.C.106):
+
+                        (1)     to reproduce the copyrighted work in copies or phonorecords;
+                        (2)     to prepare derivative works based upon the copyrighted work;
+                        (3)     to distribute copies or phonorecords of the copyrighted work to the
+         public by sale or other transfer of ownership, or by rental, lease or lending;
+                        (4)     in the case of literary, musical, dramatic, and choreographic works,
+         pantomimes, and motion pictures and other audiovisual works to perform the copyrighted
+         work publicly;
+                        (5)     in the case of literary, musical, dramatic, and choreographic works,
+         pantomimes, and pictorial, graphic, or sculptural works including the individual images
+         of a motion picture or other audiovisual work, to display the copyrighted work publicly;
+         and
+                        (6)     in the case of sound recordings, to perform the copyrighted work
+         publicly by means of a digital audio transmission.
+
+
+LH002381.4                                         2
+                                      “Publishing” Rights
+         So-called music publishing rights generally encompass the right to record, the right to
+
+perform, the right to duplicate, and the right to include the work in a new or different work,
+
+sometimes called a derivative work. In order to facilitate the exploitation of the songwriter’s
+
+songs, the songwriter generally transfers the publishing rights to an entity identified as “the
+
+publisher,” pursuant to a music publishing agreement that assigns the copyright or administration
+
+rights to the publisher, which then shares publishing income with the songwriter as stipulated in
+
+the agreement. In music parlance, the categories under the umbrella called publishing rights—all
+derived from Section 106 of the Copyright Act—are referred to as mechanical rights,
+
+synchronization rights, print rights and public performance rights.
+
+
+
+Mechanical Rights
+         The right to reproduce and distribute to the public a copyrighted musical composition on
+
+phonorecords (which include audiotapes, compact discs and any other material object in which
+
+sounds are fixed, except those accompanying motion pictures and other audiovisual works), is
+
+called the mechanical right. (The terminology “mechanical” dates from the days of the player
+
+piano, when a perforated cylinder was inserted into the mechanism and a composition literally
+was “mechanically reproduced.”)
+
+         Licenses granted to the user to exploit the mechanical rights are called mechanical
+
+licenses. Once the copyright owner of a musical composition authorizes the public distribution
+
+of phonorecords embodying the composition for the first time, anyone else may then also record
+
+that musical composition and distribute phonorecords of that new recording by following the
+procedure established by the Copyright Act, which requires giving notice to the owner and
+
+paying a statutory royalty for each phonorecord manufactured and distributed. This is called a
+
+compulsory license. Publishers may, and more frequently do, issue such licenses voluntarily;
+
+
+
+LH002381.4                                        3
+many utilize The Harry Fox Agency (see "Resources" at the end of this Primer) to handle
+
+mechanical license grants on their behalf.
+
+         The compulsory license is available only for audio recordings which are manufactured
+
+for distribution primarily to the public for private use. It does not extend to use of music in
+
+audiovisual works such as television programming or motion pictures (see "synchronization
+
+rights," in next section), nor to services which furnish background music to commercial
+
+establishments (see "public performance rights"), nor to broadcast transcriptions.
+
+         As of January 1, 2002, the statutory mechanical rate is 8 cents per song or 1.55 cents per
+
+minute of playing time per unit sold/distributed (whichever is greater). This rate is scheduled to
+
+increase in 2004 (8.5 cents) and 2006 (9.1 cents). The statutory rate applies only if the record
+
+company elects to utilize the compulsory mechanical license provisions of the Copyright Act or
+
+if it is incorporated by reference in a consensual license. However, the record company is free to
+
+bargain with the publisher for a lower rate.
+
+
+
+Synchronization Rights
+         The right to record a musical composition in synchronized relation to the frames or
+
+pictures in an audiovisual production, such as a motion picture, television program, television
+
+commercial, or video production, is called the synchronization (or “synch”) right. There is no
+compulsory license for this right; it is subject to the licensor and licensee reaching mutual
+
+agreement as to terms. In addition to mechanical rights, The Harry Fox Agency represents many
+
+music publishers in handling synchronization licensing.
+
+         As a result of antitrust claims in the middle of the last century, the synchronization right
+
+for a theatrical motion picture must also afford to the film producer the theatrical performance
+
+right (see “public performance rights” below), that is, the right publicly to exhibit the motion
+
+picture, including the song, in theaters. On the other hand, the producer of a television show
+which includes a musical composition generally acquires only the synchronization license, while
+
+
+
+LH002381.4                                         4
+the television station—the broadcaster—must acquire the public performance license, discussed
+
+below.
+
+
+
+Print Rights
+         The rights to print and sell single song and multiple song (or folio) copies of sheet music
+
+of musical compositions are the print rights licensed by the publisher. Over time, income from
+
+sales of single song sheet music have diminished. An active market exists, however, for folios
+
+and other compilations, which often are constructed around specific artists, styles of music,
+
+record albums, Broadway shows, motion pictures, and similar themes.
+
+
+
+Public Performance Rights
+         Just over 100 years ago the Copyright Act recognized the right of public performance in
+
+musical compositions. Today, this is generally the most lucrative source of income for many, if
+
+not most songwriters. The Act defines public performance in part as: “to perform or display [the
+
+work] at a place open to the public or at any place where a substantial number of persons outside
+
+of a normal circle of a family and its social acquaintances is gathered.”
+
+         Public performance rights can be broken down into two categories – “small” or “non-
+
+dramatic” rights, and “grand” or “dramatic” rights. Small performance rights include concert
+and other so-called “live” performances, incidental and background music on television
+
+programs, and radio airplay. A grand right covers performance of music in a dramatic setting or
+
+in any way which directly advances the plot of the production in which it is included.
+         However, the public performance right is not self-enforcing. Performances of
+
+copyrighted music were so numerous, widespread, and transitory that it was virtually impossible
+
+to police the right. By the same token, it was impractical for a performer or band to negotiate a
+
+license for every song played at each performance or venue. This led to songwriters and
+
+publishers joining together to create performing rights organizations, which act as licensing
+
+clearinghouses to facilitate licensing and monitor compliance. In the United States there are
+
+LH002381.4                                        5
+three such organizations: ASCAP (American Society of Composers, Authors and Publishers),
+
+BMI (Broadcast Music, Inc.) and SESAC (Society of European Stage Authors and Composers),
+
+which represent songwriters and publishers domestically and, through reciprocal arrangements
+
+with similar organizations in other countries, around the world. (See "Resources" section for
+
+contact information).
+
+         Performing rights societies offer so-called “blanket” licenses of their entire catalog,
+
+licenses for a particular production or so-called “per-program” licenses, and individual licenses.
+
+Alternatively, a license may be negotiated directly with the publisher. Performing rights
+
+societies do not, however, grant dramatic (“grand”) performing rights, and such a license must be
+
+obtained directly from the publisher or songwriter, as their respective interests may appear.
+
+         A songwriter and a publisher may belong to only one performance rights society. Since
+
+music publishers may acquire music from writers affiliated with any of the above societies, they
+
+typically form separate companies to affiliate with each society.
+
+
+
+Distribution of Income
+         Income received by the publisher from mechanical rights, synchronization rights, print
+
+rights, and other licenses are shared with, and paid directly by the publisher to, the songwriter
+
+pursuant to the terms negotiated in the music publishing agreement. Such sharing may be
+governed by a variety of formulas which generally reflect the bargaining power of the parties.
+
+However, income from licenses of performing rights issued by performing rights societies do not
+
+pass through the publishing agreement. ASCAP and BMI generally pay fifty percent of
+
+licensing income directly to the songwriter, and fifty percent directly to the publisher, after
+
+deduction of the costs of administration.
+
+
+
+
+LH002381.4                                         6
+                                      Master Recordings
+         The term Master Recording (or "Master" for short) refers to the original, produced
+
+recording of sounds (on a tape or other storage form) from which a record company makes CD’s
+
+or tapes (or in the old days, LP’s) which it sells to the public. Federal copyright protection was
+
+established for sound recordings fixed on and after February 15, 1972. Sound recordings first
+
+fixed before February 15, 1972 may nonetheless enjoy protection under various state common
+
+law theories or antipiracy statutes. A potential licensee of a master recording who clears the
+
+mechanical rights to use the underlying composition on a record yet fails to secure the master use
+
+right to reproduce the sound recording may be subject, depending on the circumstances, to action
+
+under the Copyright Act or state law.
+
+         Because the Master Recording embodies creative material from a number of different
+
+persons, it can be complicated to obtain the proper clearances. Below is a basic checklist of the
+
+creative rights that need to be secured in order to create a Master to be released to the public by
+
+or under the authority of the copyright owner pursuant to Section 106(3) of the Copyright Act.
+
+
+
+The Songs
+         The starting point for any Master is the music—the songs. Whether the songs included
+
+on the Master are written by the performing artist or by another songwriter, the record company
+is required to obtain a license to use those songs—the mechanical license (discussed above). If
+
+the song is written by the recording artist (or musical group), that license is either included in the
+
+recording agreement or the rate(s) at which such license must be issued is specified. Musical
+
+compositions written or controlled and performed by a recording artist are called “controlled
+
+compositions.” If the song was controlled by a third party, a mechanical license to use it must be
+
+obtained either through a clearance company such as The Harry Fox Agency or directly from the
+
+publisher.
+
+
+
+
+LH002381.4                                        7
+The Arrangements
+         The musical arrangements often represent a creative contribution separate from the songs
+
+that are arranged. For example, Frank Sinatra often recorded standards by the likes of George
+
+and Ira Gershwin, arranged by the well-known arranger Nelson Riddle. In this example, the
+
+producer of the Frank Sinatra recording would need a license to use both the Gershwin
+
+composition and the Riddle arrangement. If the arranger is a member of the American
+
+Federation of Musicians (“AF of M”), care must be exercised because of certain rules requiring
+
+payments for what qualify as “new uses.”
+
+
+
+The Performances
+         The fixation of the actual performances embodied on the Master also constitute a creative
+
+contribution, generally owned or controlled by the owner of the Master. This pertains to
+
+everyone who performs on the Master, both vocalists and musicians. Usually, this is
+
+accomplished by the recording agreement between the owner of the Master and the performer.
+
+Often, for back-up musicians who are members of the AF of M, a transfer of rights is included in
+
+the standard union contract. However, as in the case of arrangers, those union contracts are not
+
+without strings and do provide for additional payments for so-called “new uses.”
+
+
+
+The Producer
+         The Producer and sometimes others (perhaps the engineer) make many creative
+
+contributions to the final Master. Most of those contributions relate to choices of various
+
+technological settings that can significantly alter the final sound. Producers normally select or
+
+consult on the compositions to be recorded, the arranger and the supporting musicians, supervise
+
+the recording session as well as the mixing and mastering process, and determine the order of
+
+performance of the recorded compositions. To avoid any problems, record companies routinely
+
+seek to provide in their agreements with the Producer that the Producer’s contributions and those
+
+of the other participants in the production are owned by the owner of the Master.
+
+LH002381.4                                       8
+Limitations on Rights To The Master
+         While the record company owns the Master, such ownership does not convey unlimited
+
+rights to the Master’s use. Rather, the Master owner’s rights are a matter of contract between the
+
+parties. For example, if the owner of the Master does not also own the copyright in the music
+
+embodied in the Master, then (absent specific language and clearance), while the Master owner
+
+would have the right to license the Master to be used as part of a movie or television soundtrack,
+
+such license does not include synchronization rights in the music, and the licensee must obtain
+
+the consent of the owner of the song. Thus, in order to synchronize Frank Sinatra’s recording of
+
+Kander and Ebb’s “New York, New York” in a film soundtrack, the film company would need a
+
+synchronization license from both the music publisher of the song and the record company which
+
+owns the Sinatra recording. If the record company wishes to use the name and likeness of the
+
+artist to promote the Master or its business activities in general, the agreement with the artist
+
+should include a provision authorizing such use (although such explicit permission might not be
+
+required for the promotion of the Master).
+
+
+
+Reproduction Rights
+         “Master recording rights” or “master use rights” are required to reproduce and distribute
+a sound recording embodying the specific performance of a musical composition by a specific
+
+artist. A potential licensee who seeks to manufacture an existing recording must contact its
+
+copyright owner. The Copyright Act does not, however, recognize a public performance right in
+
+sound recordings (except for digital audio transmission), so that a license is not needed to
+
+perform the recording (in contrast to any copyrighted music embodied in the recording). Yankee
+
+Stadium needs a BMI license to publicly perform the Sinatra recording of “New York, New
+
+York” after Yankee ball games, but does not need a license from the owner of the Sinatra
+
+recording.
+
+
+
+LH002381.4                                        9
+                                      New Technologies
+         This Primer is not intended to provide a comprehensive discussion of the many important
+
+changes in copyright law and music industry business practices that have occurred in response to
+
+the Internet and other new technologies. What follows is a succinct outline of these
+
+developments.
+
+
+
+Public Performance Rights for Digital Audio Transmissions and Webcasting
+
+         The Digital Performance Right in Sound Recordings Act (DPRSRA) of 1995 created a
+
+new right for owners of certain digital sound recordings. (See “Music Copyright Versus Sound
+
+Recording Copyright,” above.) Under the DPRSRA, owners of copyrights in the sound
+
+recordings covered by the Act were given exclusive "public performance" rights for the purposes
+
+of “digital audio transmissions.” This means that an on-line music service may not be able to use
+
+pre-recorded music covered by the Act without permission.
+
+         Notwithstanding this new digital public performance right in sound recordings,
+
+certain digital music services are entitled to a compulsory license to use pre-recorded music. The
+
+Digital Millennium Copyright Act of 1998 provided for a statutory license that granted
+
+“webcasters” the automatic right to use sound recordings in their non-interactive streamed
+
+programming, sometimes referred to as "Internet radio." Downloading, which refers to making
+
+permanent copies of music, and on-demand streaming, which permits listeners to hear particular
+
+recordings on demand, are not within the scope of the compulsory license. Thus, those wishing
+
+to provide digital downloads and inter-active streaming must negotiate with sound recording
+
+copyright owners to do so.
+
+         The Digital Millennium Copyright Act also limits the compulsory license by setting up
+
+stringent restrictions that are intended to avoid displacement of record sales. For instance, the
+
+compulsory license may only be secured if the webcaster does not play in any three-hour period
+
+more than three songs from a particular album, including no more than two consecutively, or
+
+
+LH002381.4                                       10
+four songs by a particular artist or from a boxed set, including no more than three consecutively.
+
+These restrictions contemplate that a listener will not use the webcasting service to create his
+
+own custom designed loops featuring a single artist or album.
+
+
+Downloading and On-Demand Streaming
+
+         With respect to the digital downloading of sound recordings, a mechanical license is
+
+necessary because downloading results in a new copy of a musical composition. However, a
+
+"compulsory" license also applies to downloading or “DPDs”. The licensee is required to pay
+
+the same license fee (currently the greater of 8 cents, or 1.55 cents per minute of playing time or
+
+fraction thereof) required for traditional copying of musical compositions. In addition, at least
+
+one court has found that a mechanical license is indeed necessary to digitally stream music (see
+
+The Rodgers and Hammerstein Organization v. UMG Recordings Inc., 60 U.S. P.Q. 2d 1354
+
+(2001)).
+
+         Finally, playing musical compositions on the Internet is a “public performance” requiring
+
+permission from copyright owners of the songs through ASCAP, BMI and SESAC.
+
+Robert C. Harris, Chair
+David H. Friedlander, Secretary
+
+Alyson K. Adler                                       Victor Knapp
+Michael A. Adler                                      Diane T. Krausz
+Arlen M. Appelbaum                                    Eleanor M. Lackman
+Corey D. Boddie                                       Teena Heejung Lee
+Paul A. Chin                                          Arthur G. Levy
+Timothy M. Craig                                      David Gerard Leyden
+Jeffrey M. Dine                                       Rosalind S. Lichter
+Yvette W. Encarnacion                                 Alon M. Markowitz
+Sebastian Evans                                       Mirna E. Martinez
+Carrie E. Flynn                                       Susan B. Master
+Andrew J. Gerber                                      Margaret A. O'Brien
+Eric S. Goldman                                       Nicole S. Page
+Steven R. Gordon                                      Judith B. Prowda
+Jill C. Greenwald                                     Sivan Rhodes
+Alan J. Hartnick                                      Scott Jon Shagin
+James T. Hausman                                      Miriam Stern
+Jeffrey E. Jacobson                                   Jaime M. Wolf
+Stuart Thomas Kleinman                                Michelle E. Zierler
+
+
+LH002381.4                                       11
+                                         References
+United States Copyright Act (17 U.S.C.A. Sec. 101 et seq.).
+
+BRABEC, JEFFREY AND BRABEC, TODD, MUSIC, MONEY AND SUCCESS: THE INSIDER’S GUIDE TO
+THE MUSIC INDUSTRY (Schirmer Books 2000).
+
+Gordon, Steven R., Clearing Music Recordings and Compositions for Use in Digital Music
+Services, ENTERTAINMENT LAW & FINANCE, February, 2002.
+
+FARBER, DONALD C. ENTERTAINMENT INDUSTRY CONTRACTS (Matthew Bender 1986).
+
+KOHN, AL, AND KOHN, BOB, KOHN ON MUSIC LICENSING, THIRD EDITION (Aspen Law and
+Business, 2001).
+
+KRASILOVSKY, M. WILLIAM, AND SHEMEL, SIDNEY, THIS BUSINESS OF MUSIC, EIGHTH EDITION
+(Billboard Books, 2000).
+
+LINDEY, ALEXANDER, LINDEY ON ENTERTAINMENT, PUBLISHING AND THE ARTS (West Group
+1980).
+
+NEGOTIATING CONTRACTS IN THE ENTERTAINMENT INDUSTRY (New York Law Journal Seminar
+Press Annual Editions).
+
+NIMMER, MELVILLE B., AND DAVID NIMMER, NIMMER ON COPYRIGHT (Matthew Bender & Co.
+1998).
+
+PASSMAN, DONALD S., ALL YOU NEED TO KNOW ABOUT THE MUSIC BUSINESS (Simon &
+Schuster 2000).
+
+PRACTISING LAW INSTITUTE COURSE HANDBOOKS (PLI Annual Editions).
+
+SCHULENBERG, RICHARD, LEGAL ASPECTS OF THE MUSIC INDUSTRY: AN INSIDER’S VIEW
+(Watson-Guptill Publications Incorporated 1998).
+
+SIEGEL, ALAN H., BREAKING IN TO THE MUSIC BUSINESS (Fireside/Simon & Schuster 1991).
+
+SIEGEL, HOWARD, ED., ENTERTAINMENT LAW (New York State Bar Association 1990).
+
+TAUBMAN, JOSEPH, PERFORMING ARTS, MANAGEMENT AND LAW (Law-Arts Publishers Inc.
+1978).
+
+WEILER, PAUL C., ENTERTAINMENT, MEDIA AND THE LAW (West Publishing 1998).
+
+
+
+
+LH002381.4                                    12
+                                        Resources
+The American Society of Composers, Authors and Producers (www.ascap.com)
+
+Broadcast Music Inc. (www.bmi.com)
+The Harry Fox Agency (www.nmpa.org)
+
+Music Publishers' Association of the United States (www.mpa.org)
+
+Recording Industry Association of America (www.RIAA.com)
+
+SESAC (www.sesac.com)
+
+The Songwriters Guild of America (www.songwriters.org)
+
+The U.S. Copyright Office (www.loc.gov/copyright)
+
+
+
+
+LH002381.4                                   13
+

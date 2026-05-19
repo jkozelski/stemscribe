@@ -1,0 +1,669 @@
+{
+  "9 to 5|||dolly parton": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country-pop; simple major triad vocabulary, no jazz extensions"
+  },
+  "a song for you|||donny hathaway": {
+    "confidence": 0.75,
+    "path": "general",
+    "reasoning": "Soul/R&B ballad; rich harmonies but not jazz-standard vocabulary"
+  },
+  "africa|||toto": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Iconic 80s pop-rock; straightforward major-key harmony, no jazz extensions"
+  },
+  "ain t no sunshine|||bill withers": {
+    "confidence": 0.94,
+    "path": "general",
+    "reasoning": "Soul/R&B classic; Am-D-E progression, no jazz extensions"
+  },
+  "air on the g string|||johann sebastian bach": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Baroque classical; diatonic harmony, not jazz extensions"
+  },
+  "aja|||steely dan": {
+    "_cached_at": 1778693664,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Steely Dan jazz-fusion; m9/m11 extensions throughout"
+  },
+  "all along the watchtower|||bob dylan": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock; Cm-B\u266d vamp, minimal extensions; not jazz standard"
+  },
+  "all along the watchtower|||jimi hendrix": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Classic rock; simple minor pentatonic-based blues-rock, not jazz extended harmony"
+  },
+  "all the things you are|||charlie parker": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Jazz standard; complex chromatic changes, m7-maj7 vocabulary throughout"
+  },
+  "alright|||jamiroquai": {
+    "_cached_at": 1778693668,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.96,
+    "path": "jazz",
+    "reasoning": "Jamiroquai acid-jazz; m7 vamp and extended chord vocabulary"
+  },
+  "anti hero|||taylor swift": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Pop song; standard triadic harmony, not jazz-fusion vocabulary"
+  },
+  "as it was|||harry styles": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop ballad; simple diatonic chord progression, no jazz extensions"
+  },
+  "autumn leaves|||bill evans": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Jazz standard; Bill Evans trio; extended chords (m7, maj7, 9) throughout"
+  },
+  "bad guy|||billie eilish": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Darkwave/pop; minimalist production, simple harmonic structure"
+  },
+  "beast of burden|||the rolling stones": {
+    "_cached_at": 1778693673,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock blues-based; simple major/minor vocabulary, not jazz-fusion"
+  },
+  "beautiful crazy|||luke combs": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country ballad; straightforward major/minor diatonic harmony, not jazz-fusion"
+  },
+  "before he cheats|||carrie underwood": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Country pop; straightforward major/minor triads, no jazz extensions"
+  },
+  "big fish|||vince staples": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Hip-hop/rap track; uses standard pop/hip-hop chord vocabulary, not jazz extensions"
+  },
+  "black cow|||steely dan": {
+    "confidence": 0.98,
+    "path": "jazz",
+    "reasoning": "Steely Dan jazz-fusion; sophisticated extended chords and jazz voicings"
+  },
+  "blinding lights|||the weeknd": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Synthwave pop; simple triadic changes, not jazz vocabulary"
+  },
+  "blood and thunder|||mastodon": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Progressive metal; complex but not jazz-vocabulary based"
+  },
+  "bloodbuzz ohio|||the national": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Indie rock; minor key but simple vocabulary, not jazz-fusion extensions"
+  },
+  "blue in green|||miles davis": {
+    "confidence": 0.98,
+    "path": "jazz",
+    "reasoning": "Modal jazz standard; rich extended harmony (maj7, m7, sus); Davis/Evans composition"
+  },
+  "body and soul|||coleman hawkins": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Jazz standard; m7-m7-7 changes, rich extension vocabulary"
+  },
+  "bohemian rhapsody live aid|||queen": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Queen rock-opera; live version of original. Route by original genre: rock/pop with classical elements, not jazz-fusion"
+  },
+  "brackish vector|||the lambent nine": {
+    "confidence": 0.3,
+    "path": "general",
+    "reasoning": "Unknown song/artist; insufficient recognition; default to general"
+  },
+  "brown sugar|||d angelo": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "R&B/soul; funk-based grooves, not jazz-fusion extension vocabulary"
+  },
+  "cherish the day|||robert glasper": {
+    "confidence": 0.96,
+    "path": "jazz",
+    "reasoning": "Robert Glasper neo-soul/jazz pianist; rich m7/maj7 harmonies throughout"
+  },
+  "chicago|||sufjan stevens": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Indie folk-pop; diatonic chord vocabulary, not jazz-fusion extensions"
+  },
+  "clair de lune|||claude debussy": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Classical piano; impressionistic harmony, not jazz-fusion extension vocabulary"
+  },
+  "come down|||anderson paak": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "R&B/hip-hop; funk-soul groove without jazz extension vocabulary"
+  },
+  "cosmic girl|||jamiroquai": {
+    "confidence": 0.97,
+    "path": "jazz",
+    "reasoning": "Acid-jazz/funk fusion; m7/m9 vamp"
+  },
+  "crazy on you|||heart": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "1970s hard rock; power chords and rock vocabulary, not jazz-fusion"
+  },
+  "creep|||radiohead": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Alternative rock; G-B-D-A progression, no jazz extensions"
+  },
+  "cruel summer|||taylor swift": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop song; standard triad-based chord progression, not jazz-fusion"
+  },
+  "do it again|||steely dan": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Steely Dan jazz-fusion classic; features m7, maj7, extended chord vocabulary"
+  },
+  "don t know why|||norah jones": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "Contemporary pop-soul with jazz influences; not canonical jazz standard"
+  },
+  "dragonball durag|||thundercat": {
+    "confidence": 0.85,
+    "path": "jazz",
+    "reasoning": "Thundercat; jazz-fusion bassist with extended harmonic vocabulary"
+  },
+  "drivers license|||olivia rodrigo": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Pop ballad; simple diatonic chords, no jazz extensions"
+  },
+  "enter sandman|||metallica": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Heavy metal; power chords and straightforward rock vocabulary"
+  },
+  "eres|||caf tacvba": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "Caf\u00e9 Tacvba is Latin rock/alternative; not jazz-fusion standard"
+  },
+  "espresso|||sabrina carpenter": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop song; simple diatonic chord vocabulary, no jazz extensions"
+  },
+  "fake empire|||the national": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Indie rock; minor-key atmosphere but standard rock chord vocabulary, not jazz-fusion extensions"
+  },
+  "folsom prison blues|||johnny cash": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic country; I-IV-I blues progression, not jazz"
+  },
+  "fortunate son|||creedence clearwater revival": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock protest song; power-chord rock vocab, not jazz"
+  },
+  "friends in low places|||garth brooks": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country anthem; simple I-IV-V-I progression, no jazz extensions"
+  },
+  "garden song|||phoebe bridgers": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Indie folk-singer-songwriter; diatonic chord progressions, not jazz extensions"
+  },
+  "get lucky|||daft punk": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Electronic/funk-disco; simple chord vocabulary, not jazz-fusion"
+  },
+  "giant steps|||john coltrane": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Coltrane jazz standard; famous for rapid chord changes (Bmaj7-D7-Gmaj7 cycle)"
+  },
+  "good 4 u|||olivia rodrigo": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Pop-rock ballad; basic triad vocabulary, no jazz extensions"
+  },
+  "heart of gold|||neil young": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock; simple major-key progression (D-A-G), folk-rock roots"
+  },
+  "hells bells|||ac dc": {
+    "_cached_at": 1778693671,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Hard rock; simple power chord progression, no jazz extensions"
+  },
+  "holocene|||bon iver": {
+    "confidence": 0.95,
+    "path": "general",
+    "reasoning": "Indie folk; diatonic guitar progression, not jazz-fusion vocabulary"
+  },
+  "hotel california|||eagles": {
+    "confidence": 0.95,
+    "path": "general",
+    "reasoning": "Classic rock; Bm-F#7-A-E vocabulary, not jazz-fusion"
+  },
+  "hotle california|||eagles": {
+    "confidence": 0.95,
+    "path": "general",
+    "reasoning": "Classic rock; Bm-F#7-A-E vocabulary, not jazz-fusion"
+  },
+  "house of the rising sun|||the animals": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Classic rock blues; Am-C-D-F progression, not jazz vocabulary"
+  },
+  "hurricane|||luke combs": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country pop; straightforward diatonic chord vocabulary, not jazz-fusion"
+  },
+  "into the great wide open|||tom petty and the heartbreakers": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Heartland rock; straightforward rock chord vocabulary, not jazz"
+  },
+  "iron man|||black sabbath": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Heavy metal; iconic riff-based song with simple power chord vocabulary, not jazz"
+  },
+  "isn t she lovely|||stevie wonder": {
+    "confidence": 0.75,
+    "path": "general",
+    "reasoning": "Soul/funk with jazz elements; primarily pop-soul vocabulary despite sophisticated harmonies"
+  },
+  "jolene|||dolly parton": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country ballad; simple major/minor triad vocabulary, no jazz extensions"
+  },
+  "just the way you are|||bruno mars": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop ballad; simple major-key triadic harmony, not jazz vocabulary"
+  },
+  "karma police|||radiohead": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Alternative rock; primarily diatonic changes, not jazz-fusion vocabulary"
+  },
+  "kyoto|||phoebe bridgers": {
+    "confidence": 0.95,
+    "path": "general",
+    "reasoning": "Indie singer-songwriter; uses diatonic rock/pop chord vocabulary, not jazz extensions"
+  },
+  "lateralus|||tool": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Progressive metal; complex time signatures and riffs, not jazz-standard vocabulary"
+  },
+  "lavender|||badbadnotgood": {
+    "confidence": 0.85,
+    "path": "jazz",
+    "reasoning": "BadBadNotGood is jazz-fusion/acid-jazz collective; extended harmony typical"
+  },
+  "lean on me|||bill withers": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Soul/R&B classic; straightforward chord progression, not jazz-fusion extended vocabulary"
+  },
+  "let s get it on|||marvin gaye": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Soul/R&B; smooth but uses basic diatonic harmony, not jazz extensions"
+  },
+  "levitating|||dua lipa": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop-disco; simple diatonic chord vocabulary, no jazz extensions"
+  },
+  "lingus|||snarky puppy": {
+    "confidence": 0.96,
+    "path": "jazz",
+    "reasoning": "Snarky Puppy jazz-fusion; m7/m9 vamp with sophisticated harmonic extensions"
+  },
+  "live like you were dying|||tim mcgraw": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country ballad; straightforward chord vocabulary, not jazz-fusion"
+  },
+  "lovely day|||bill withers": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Soul/R&B classic; simple major chord changes, not jazz extension vocab"
+  },
+  "mary jane s last dance|||tom petty and the heartbreakers": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock; simple major-key progression, no jazz extensions"
+  },
+  "master of puppets|||metallica": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Thrash metal; power chords and minor pentatonic, not jazz extensions"
+  },
+  "misty|||erroll garner": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Classic jazz standard; Erroll Garner piano trio; m7/maj7 harmonic vocabulary"
+  },
+  "moonlight sonata|||ludwig van beethoven": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Classical piano sonata; functional harmony, not jazz chord vocabulary"
+  },
+  "more than a feeling|||boston": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock anthem; I-V-vi-IV progression, rock vocabulary"
+  },
+  "motion sickness|||phoebe bridgers": {
+    "confidence": 0.95,
+    "path": "general",
+    "reasoning": "Indie singer-songwriter; sparse guitar-driven arrangement, diatonic chord vocabulary"
+  },
+  "my funny valentine|||chet baker": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Jazz standard; Chet Baker ballad with maj7, m7, extensions throughout"
+  },
+  "mystery of love|||sufjan stevens": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Indie folk-singer-songwriter; diatonic chord progressions without jazz extensions"
+  },
+  "nakamarra|||hiatus kaiyote": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "Contemporary R&B/soul with jazz influences; modern detector ensemble better suited"
+  },
+  "ocean eyes|||billie eilish": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Billie Eilish pop/alternative; sparse, minimalist chord vocabulary, not jazz"
+  },
+  "on on|||erykah badu": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "Neo-soul/R&B; jazz influences but primarily modern soul vocabulary"
+  },
+  "one|||metallica": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Thrash metal; power chords and minor pentatonic, not jazz vocabulary"
+  },
+  "paint it black|||the rolling stones": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock; minor key blues-rock with simple diatonic changes, not jazz-fusion"
+  },
+  "peg|||steely dan": {
+    "_cached_at": 1778693665,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Steely Dan jazz-fusion classic; complex extensions and jazz harmony throughout"
+  },
+  "perfect|||ed sheeran": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop ballad; I-V-vi-IV progression, no jazz extensions"
+  },
+  "pyramid song|||radiohead": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Alternative rock; piano-based but uses simple triadic harmony, not jazz extensions"
+  },
+  "quartz meridian|||helio carapace": {
+    "confidence": 0.25,
+    "path": "general",
+    "reasoning": "Unknown song and artist; default to general path"
+  },
+  "raining blood|||slayer": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Thrash metal; minor key riff-based, no jazz extensions"
+  },
+  "red room|||hiatus kaiyote": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "Neo-soul/R&B with jazz influences; modern detector handles extended chords better"
+  },
+  "rikki don t lose that number|||steely dan": {
+    "_cached_at": 1778693666,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.98,
+    "path": "jazz",
+    "reasoning": "Steely Dan jazz-fusion classic; sophisticated m7/maj7 chord vocabulary"
+  },
+  "ring of fire|||johnny cash": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country classic; G-D-A straightforward progression, not jazz vocabulary"
+  },
+  "round midnight|||thelonious monk": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Thelonious Monk jazz standard; chromatic, extended harmonies, m7b5 changes"
+  },
+  "runaway|||kanye west": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Hip-hop/pop; simple chord progressions, not jazz-fusion vocabulary"
+  },
+  "schism|||tool": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Progressive metal; complex time signatures and modal harmony, not jazz-fusion extensions"
+  },
+  "shake it off|||taylor swift": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Pop song; simple major-key chord vocabulary, no jazz extensions"
+  },
+  "shape of you|||ed sheeran": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Pop song; simple major triad changes, no jazz extensions"
+  },
+  "sir duke|||stevie wonder": {
+    "confidence": 0.92,
+    "path": "jazz",
+    "reasoning": "Stevie Wonder funk-soul with jazz harmony; m7 chords and extensions throughout"
+  },
+  "skinny love|||bon iver": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Indie folk; sparse fingerpicking, Am-based changes, no jazz extensions"
+  },
+  "so what|||miles davis": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Modal jazz standard; Dm7 vamp with extensions, canonical jazz vocabulary"
+  },
+  "something in the orange|||zach bryan": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country singer-songwriter; straightforward diatonic chord progression"
+  },
+  "stairway to heaven|||led zeppelin": {
+    "_cached_at": 1778693669,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Classic rock; complex structure but uses rock/folk vocabulary, not jazz extensions"
+  },
+  "stella by starlight|||miles davis": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Jazz standard; sophisticated m7/maj7/m9 harmonic vocabulary"
+  },
+  "sunshine of your love|||cream": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock; D-A-G progression, blues-rock vocabulary"
+  },
+  "superstition|||stevie wonder": {
+    "_cached_at": 1778693672,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Funk-R&B; Eb minor vamp with basic triadic vocabulary, not jazz extensions"
+  },
+  "symphony of destruction|||megadeth": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Thrash metal; power chords and modal riffing, not jazz harmony"
+  },
+  "take five|||dave brubeck": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Dave Brubeck jazz standard; complex m7/7alt changes, 5/4 time signature"
+  },
+  "take the a train|||duke ellington": {
+    "confidence": 0.99,
+    "path": "jazz",
+    "reasoning": "Duke Ellington jazz standard; swing era with jazz harmonic vocabulary"
+  },
+  "tennessee whiskey|||chris stapleton": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country/Americana; I-V-vi-IV progression, no jazz extensions"
+  },
+  "the dance|||garth brooks": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Country ballad; straightforward major/minor vocabulary, not jazz-fusion"
+  },
+  "the trooper|||iron maiden": {
+    "confidence": 0.99,
+    "path": "general",
+    "reasoning": "Heavy metal; power chords and rock vocabulary, not jazz"
+  },
+  "them changes|||thundercat": {
+    "confidence": 0.94,
+    "path": "jazz",
+    "reasoning": "Thundercat jazz-fusion; m7 vamp with extended harmony and funk fusion vocabulary"
+  },
+  "thinking out loud|||ed sheeran": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop ballad; simple diatonic changes (Em7-Asus2-Dmaj7), not jazz-fusion"
+  },
+  "time moves slow|||badbadnotgood": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "BadBadNotGood is jazz-influenced but primarily hip-hop/electronic producer; this track is beat-driven"
+  },
+  "two thousand and seventeen|||four tet": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Four Tet is electronic/IDM; minimal harmonic structure, not jazz-fusion"
+  },
+  "untitled demo 3|||unknown": {
+    "confidence": 0.2,
+    "path": "general",
+    "reasoning": "Unknown song and artist; insufficient data to classify"
+  },
+  "untitled how does it feel|||d angelo": {
+    "confidence": 0.75,
+    "path": "general",
+    "reasoning": "Neo-soul with jazz influences; modern R&B production despite harmonic sophistication"
+  },
+  "uptown funk|||bruno mars": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Funk-pop; simple diatonic vocabulary, not jazz-fusion extensions"
+  },
+  "vampire|||olivia rodrigo": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Pop-rock ballad; diatonic chord progression, no jazz extensions"
+  },
+  "virtual insanity|||jamiroquai": {
+    "_cached_at": 1778693667,
+    "_model": "claude-haiku-4-5-20251001",
+    "_prompt_hash": "475571c2",
+    "confidence": 0.96,
+    "path": "jazz",
+    "reasoning": "Jamiroquai acid-jazz; m7 vamp with extended harmonic vocabulary"
+  },
+  "wagon wheel|||old crow medicine show": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Americana/folk-rock; simple major key progression (D-A-Bm-G), no jazz extensions"
+  },
+  "wake up|||arcade fire": {
+    "confidence": 0.96,
+    "path": "general",
+    "reasoning": "Indie rock; post-punk revival with diatonic chords, not jazz-fusion extensions"
+  },
+  "watermelon sugar|||harry styles": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Pop-rock with simple triadic harmony; no jazz extensions"
+  },
+  "what about me|||snarky puppy": {
+    "confidence": 0.72,
+    "path": "general",
+    "reasoning": "Snarky Puppy is fusion-adjacent but primarily progressive/funk; modern ensemble handles better"
+  },
+  "what s going on|||marvin gaye": {
+    "confidence": 0.85,
+    "path": "general",
+    "reasoning": "Soul/R&B classic; uses extensions but not jazz-fusion standard"
+  },
+  "wild horses|||the rolling stones": {
+    "confidence": 0.98,
+    "path": "general",
+    "reasoning": "Classic rock ballad; Gm-Bb-F progression, no jazz extensions"
+  },
+  "windowlicker|||aphex twin": {
+    "confidence": 0.92,
+    "path": "general",
+    "reasoning": "Experimental electronic/IDM; minimal harmonic structure, not jazz"
+  }
+}

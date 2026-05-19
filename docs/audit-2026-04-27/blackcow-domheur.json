@@ -1,0 +1,2404 @@
+{
+  "title": "Steely_Dan_-_Black_Cow.mp3",
+  "artist": "",
+  "key": "A",
+  "capo": 0,
+  "source": "StemScriber AI",
+  "chords_used": [
+    "C9",
+    "A",
+    "D"
+  ],
+  "sections": [
+    {
+      "name": "Instrumental",
+      "lines": [
+        {
+          "chords": "C9  ////  C9  ////  C9  ////  C9  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "C9",
+              "start": 1.765,
+              "end": 4.435,
+              "duration": 2.67,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 4.435,
+              "end": 7.082,
+              "duration": 2.647,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 7.082,
+              "end": 9.683,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 9.683,
+              "end": 12.283,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "C9  ////  C9  ////  C9  ////  C9  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "C9",
+              "start": 12.283,
+              "end": 14.884,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 14.884,
+              "end": 17.485,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 17.485,
+              "end": 20.062,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 20.062,
+              "end": 22.64,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  C9  ////  Amaj9 ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 22.64,
+              "end": 25.24,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 25.24,
+              "end": 27.841,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 27.841,
+              "end": 30.465,
+              "duration": 2.624,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 30.465,
+              "end": 33.065,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  E   ////  D#  ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 33.065,
+              "end": 35.736,
+              "duration": 2.671,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 35.736,
+              "end": 38.336,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 38.336,
+              "end": 40.914,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 40.914,
+              "end": 43.537,
+              "duration": 2.623,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  Amaj9 ////  Amaj9 ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 43.537,
+              "end": 46.138,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 46.138,
+              "end": 48.739,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 48.739,
+              "end": 51.362,
+              "duration": 2.623,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 51.362,
+              "end": 53.963,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "E   ////  D#  ////  E   ////  E   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "E",
+              "start": 53.963,
+              "end": 56.564,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 56.564,
+              "end": 59.141,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 59.141,
+              "end": 61.719,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 61.719,
+              "end": 64.25,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  Amaj9 ////  D   ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 64.25,
+              "end": 66.874,
+              "duration": 2.624,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 66.874,
+              "end": 69.474,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 69.474,
+              "end": 72.052,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 72.052,
+              "end": 74.652,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "A   ////  D#  ////  C#  ////  D   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "A",
+              "start": 74.652,
+              "end": 77.253,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 77.253,
+              "end": 79.853,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 79.853,
+              "end": 82.384,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 82.384,
+              "end": 84.915,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  D   ////  E   ////  E   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 84.915,
+              "end": 87.493,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 87.493,
+              "end": 90.047,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 90.047,
+              "end": 92.624,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 92.624,
+              "end": 95.155,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  C9  ////  C9  ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 95.155,
+              "end": 97.756,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 97.756,
+              "end": 100.333,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 100.333,
+              "end": 102.888,
+              "duration": 2.555,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 102.888,
+              "end": 105.511,
+              "duration": 2.623,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  E   ////  D#  ////  C9  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 105.511,
+              "end": 108.112,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 108.112,
+              "end": 110.689,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 110.689,
+              "end": 113.221,
+              "duration": 2.532,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 113.221,
+              "end": 115.821,
+              "duration": 2.6,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "C9  ////  C9  ////  Amaj9 ////  D   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "C9",
+              "start": 115.821,
+              "end": 118.398,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 118.398,
+              "end": 120.976,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 120.976,
+              "end": 123.577,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 123.577,
+              "end": 126.154,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "E   ////  D#  ////  E   ////  E   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "E",
+              "start": 126.154,
+              "end": 128.755,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 128.755,
+              "end": 131.309,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 131.309,
+              "end": 133.84,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 133.84,
+              "end": 136.348,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  Amaj9 ////  D   ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 136.348,
+              "end": 138.925,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 138.925,
+              "end": 141.526,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 141.526,
+              "end": 144.103,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 144.103,
+              "end": 146.704,
+              "duration": 2.601,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  D#  ////  C#  ////  D   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 146.704,
+              "end": 149.281,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 149.281,
+              "end": 151.812,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C#",
+              "start": 151.812,
+              "end": 154.343,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 154.343,
+              "end": 156.804,
+              "duration": 2.461,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  D   ////  E   ////  F   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 156.804,
+              "end": 159.382,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 159.382,
+              "end": 161.913,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 161.913,
+              "end": 164.467,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F",
+              "start": 164.467,
+              "end": 166.975,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "A   ////  G   ////  G   ////  G   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "A",
+              "start": 166.975,
+              "end": 169.506,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "G",
+              "start": 169.506,
+              "end": 172.037,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "G",
+              "start": 172.037,
+              "end": 174.521,
+              "duration": 2.484,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "G",
+              "start": 174.521,
+              "end": 177.029,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  Amaj9 ////  A#  ////  A#  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 177.029,
+              "end": 179.606,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 179.606,
+              "end": 182.114,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A#",
+              "start": 182.114,
+              "end": 184.691,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A#",
+              "start": 184.691,
+              "end": 187.222,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  D   ////  D   ////  D   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 187.222,
+              "end": 189.754,
+              "duration": 2.532,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 189.754,
+              "end": 192.284,
+              "duration": 2.53,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 192.284,
+              "end": 194.862,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 194.862,
+              "end": 197.393,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "E   ////  E   ////  F   ////  F   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "E",
+              "start": 197.393,
+              "end": 199.947,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 199.947,
+              "end": 202.501,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F",
+              "start": 202.501,
+              "end": 205.079,
+              "duration": 2.578,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F",
+              "start": 205.079,
+              "end": 207.586,
+              "duration": 2.507,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "E   ////  E   ////  Amaj9 ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "E",
+              "start": 207.586,
+              "end": 210.117,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 210.117,
+              "end": 212.625,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 212.625,
+              "end": 215.156,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 215.156,
+              "end": 217.733,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  Amaj9 ////  A   ////  D#  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 217.733,
+              "end": 220.288,
+              "duration": 2.555,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 220.288,
+              "end": 222.865,
+              "duration": 2.577,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 222.865,
+              "end": 225.419,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D#",
+              "start": 225.419,
+              "end": 227.974,
+              "duration": 2.555,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "C#  ////  D   ////  Amaj9 ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "C#",
+              "start": 227.974,
+              "end": 230.458,
+              "duration": 2.484,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 230.458,
+              "end": 232.943,
+              "duration": 2.485,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 232.943,
+              "end": 235.474,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 235.474,
+              "end": 238.028,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  Amaj9 ////  Amaj9 ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 238.028,
+              "end": 240.536,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 240.536,
+              "end": 243.043,
+              "duration": 2.507,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 243.043,
+              "end": 245.551,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 245.551,
+              "end": 248.105,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Amaj9 ////  Amaj9 ////  Amaj9 ////  D   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Amaj9",
+              "start": 248.105,
+              "end": 250.636,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 250.636,
+              "end": 253.144,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 253.144,
+              "end": 255.675,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 255.675,
+              "end": 258.229,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  Amaj9 ////  A   ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 258.229,
+              "end": 260.76,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 260.76,
+              "end": 263.291,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 263.291,
+              "end": 265.822,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 265.822,
+              "end": 268.376,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  A   ////  Amaj9 ////  D   ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 268.376,
+              "end": 270.907,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 270.907,
+              "end": 273.438,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 273.438,
+              "end": 275.946,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "D",
+              "start": 275.946,
+              "end": 278.477,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  Amaj9 ////  Amaj9 ////  C9  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 278.477,
+              "end": 281.008,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 281.008,
+              "end": 283.562,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 283.562,
+              "end": 286.07,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "C9",
+              "start": 286.07,
+              "end": 288.624,
+              "duration": 2.554,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  Amaj9 ////  Amaj9 ////  Amaj9 ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 288.624,
+              "end": 291.132,
+              "duration": 2.508,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 291.132,
+              "end": 293.663,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 293.663,
+              "end": 296.194,
+              "duration": 2.531,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Amaj9",
+              "start": 296.194,
+              "end": 310.63,
+              "duration": 14.436,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "bar_grid": [
+    {
+      "bar": 1,
+      "chord": "C9",
+      "start_time": 1.765,
+      "end_time": 4.435,
+      "bass_root": "C",
+      "bass_confidence": 0.486,
+      "detector_root": "",
+      "detector_quality": "9",
+      "source": "bass+smoothed"
+    },
+    {
+      "bar": 2,
+      "chord": "C9",
+      "start_time": 4.435,
+      "end_time": 7.082,
+      "bass_root": "C",
+      "bass_confidence": 0.41,
+      "detector_root": "",
+      "detector_quality": "9",
+      "source": "bass+smoothed"
+    },
+    {
+      "bar": 3,
+      "chord": "C9",
+      "start_time": 7.082,
+      "end_time": 9.683,
+      "bass_root": "C",
+      "bass_confidence": 0.371,
+      "detector_root": "",
+      "detector_quality": "9",
+      "source": "hold+smoothed"
+    },
+    {
+      "bar": 4,
+      "chord": "C9",
+      "start_time": 9.683,
+      "end_time": 12.283,
+      "bass_root": "C",
+      "bass_confidence": 0.526,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 5,
+      "chord": "C9",
+      "start_time": 12.283,
+      "end_time": 14.884,
+      "bass_root": "C",
+      "bass_confidence": 0.447,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 6,
+      "chord": "C9",
+      "start_time": 14.884,
+      "end_time": 17.485,
+      "bass_root": "C",
+      "bass_confidence": 0.487,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 7,
+      "chord": "C9",
+      "start_time": 17.485,
+      "end_time": 20.062,
+      "bass_root": "C",
+      "bass_confidence": 0.462,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 8,
+      "chord": "C9",
+      "start_time": 20.062,
+      "end_time": 22.64,
+      "bass_root": "C",
+      "bass_confidence": 0.263,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 9,
+      "chord": "Amaj9",
+      "start_time": 22.64,
+      "end_time": 25.24,
+      "bass_root": "A",
+      "bass_confidence": 0.526,
+      "detector_root": "C",
+      "detector_quality": "maj9",
+      "source": "bass+detector+maj7promoted"
+    },
+    {
+      "bar": 10,
+      "chord": "C9",
+      "start_time": 25.24,
+      "end_time": 27.841,
+      "bass_root": "C",
+      "bass_confidence": 0.514,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 11,
+      "chord": "Amaj9",
+      "start_time": 27.841,
+      "end_time": 30.465,
+      "bass_root": "A",
+      "bass_confidence": 0.641,
+      "detector_root": "C",
+      "detector_quality": "maj9",
+      "source": "bass+detector+maj7promoted"
+    },
+    {
+      "bar": 12,
+      "chord": "Amaj9",
+      "start_time": 30.465,
+      "end_time": 33.065,
+      "bass_root": "A",
+      "bass_confidence": 0.474,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 13,
+      "chord": "D",
+      "start_time": 33.065,
+      "end_time": 35.736,
+      "bass_root": "D",
+      "bass_confidence": 0.634,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 14,
+      "chord": "E",
+      "start_time": 35.736,
+      "end_time": 38.336,
+      "bass_root": "E",
+      "bass_confidence": 0.974,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 15,
+      "chord": "D#",
+      "start_time": 38.336,
+      "end_time": 40.914,
+      "bass_root": "D#",
+      "bass_confidence": 0.417,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 16,
+      "chord": "Amaj9",
+      "start_time": 40.914,
+      "end_time": 43.537,
+      "bass_root": "A",
+      "bass_confidence": 0.605,
+      "detector_root": "C",
+      "detector_quality": "maj9",
+      "source": "bass+detector+maj7promoted"
+    },
+    {
+      "bar": 17,
+      "chord": "Amaj9",
+      "start_time": 43.537,
+      "end_time": 46.138,
+      "bass_root": "A",
+      "bass_confidence": 0.325,
+      "detector_root": "C",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+maj7promoted"
+    },
+    {
+      "bar": 18,
+      "chord": "Amaj9",
+      "start_time": 46.138,
+      "end_time": 48.739,
+      "bass_root": "A",
+      "bass_confidence": 0.525,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 19,
+      "chord": "Amaj9",
+      "start_time": 48.739,
+      "end_time": 51.362,
+      "bass_root": "A",
+      "bass_confidence": 0.615,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 20,
+      "chord": "Amaj9",
+      "start_time": 51.362,
+      "end_time": 53.963,
+      "bass_root": "A",
+      "bass_confidence": 0.6,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 21,
+      "chord": "E",
+      "start_time": 53.963,
+      "end_time": 56.564,
+      "bass_root": "E",
+      "bass_confidence": 0.906,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 22,
+      "chord": "D#",
+      "start_time": 56.564,
+      "end_time": 59.141,
+      "bass_root": "D#",
+      "bass_confidence": 0.528,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 23,
+      "chord": "E",
+      "start_time": 59.141,
+      "end_time": 61.719,
+      "bass_root": "E",
+      "bass_confidence": 0.676,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 24,
+      "chord": "E",
+      "start_time": 61.719,
+      "end_time": 64.25,
+      "bass_root": "E",
+      "bass_confidence": 0.97,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 25,
+      "chord": "Amaj9",
+      "start_time": 64.25,
+      "end_time": 66.874,
+      "bass_root": "A",
+      "bass_confidence": 0.718,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 26,
+      "chord": "Amaj9",
+      "start_time": 66.874,
+      "end_time": 69.474,
+      "bass_root": "A",
+      "bass_confidence": 0.938,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 27,
+      "chord": "D",
+      "start_time": 69.474,
+      "end_time": 72.052,
+      "bass_root": "D",
+      "bass_confidence": 0.474,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 28,
+      "chord": "Amaj9",
+      "start_time": 72.052,
+      "end_time": 74.652,
+      "bass_root": "A",
+      "bass_confidence": 0.514,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 29,
+      "chord": "A",
+      "start_time": 74.652,
+      "end_time": 77.253,
+      "bass_root": "F",
+      "bass_confidence": 0.297,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 30,
+      "chord": "D#",
+      "start_time": 77.253,
+      "end_time": 79.853,
+      "bass_root": "D#",
+      "bass_confidence": 0.692,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 31,
+      "chord": "C#",
+      "start_time": 79.853,
+      "end_time": 82.384,
+      "bass_root": "C#",
+      "bass_confidence": 0.692,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 32,
+      "chord": "D",
+      "start_time": 82.384,
+      "end_time": 84.915,
+      "bass_root": "D",
+      "bass_confidence": 0.737,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 33,
+      "chord": "D",
+      "start_time": 84.915,
+      "end_time": 87.493,
+      "bass_root": "D",
+      "bass_confidence": 0.784,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 34,
+      "chord": "D",
+      "start_time": 87.493,
+      "end_time": 90.047,
+      "bass_root": "D",
+      "bass_confidence": 1.0,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 35,
+      "chord": "E",
+      "start_time": 90.047,
+      "end_time": 92.624,
+      "bass_root": "E",
+      "bass_confidence": 0.722,
+      "detector_root": "",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 36,
+      "chord": "E",
+      "start_time": 92.624,
+      "end_time": 95.155,
+      "bass_root": "E",
+      "bass_confidence": 0.6,
+      "detector_root": "C",
+      "detector_quality": "",
+      "source": "bass+detector+smoothed"
+    },
+    {
+      "bar": 37,
+      "chord": "Amaj9",
+      "start_time": 95.155,
+      "end_time": 97.756,
+      "bass_root": "A",
+      "bass_confidence": 0.615,
+      "detector_root": "C",
+      "detector_quality": "maj9",
+      "source": "bass+detector+maj7promoted"
+    },
+    {
+      "bar": 38,
+      "chord": "C9",
+      "start_time": 97.756,
+      "end_time": 100.333,
+      "bass_root": "C",
+      "bass_confidence": 0.342,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 39,
+      "chord": "C9",
+      "start_time": 100.333,
+      "end_time": 102.888,
+      "bass_root": "C",
+      "bass_confidence": 0.314,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 40,
+      "chord": "Amaj9",
+      "start_time": 102.888,
+      "end_time": 105.511,
+      "bass_root": "A",
+      "bass_confidence": 0.389,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 41,
+      "chord": "D",
+      "start_time": 105.511,
+      "end_time": 108.112,
+      "bass_root": "D",
+      "bass_confidence": 0.818,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 42,
+      "chord": "E",
+      "start_time": 108.112,
+      "end_time": 110.689,
+      "bass_root": "E",
+      "bass_confidence": 0.559,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 43,
+      "chord": "D#",
+      "start_time": 110.689,
+      "end_time": 113.221,
+      "bass_root": "D#",
+      "bass_confidence": 0.405,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 44,
+      "chord": "C9",
+      "start_time": 113.221,
+      "end_time": 115.821,
+      "bass_root": "C",
+      "bass_confidence": 0.452,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 45,
+      "chord": "C9",
+      "start_time": 115.821,
+      "end_time": 118.398,
+      "bass_root": "C",
+      "bass_confidence": 0.613,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 46,
+      "chord": "C9",
+      "start_time": 118.398,
+      "end_time": 120.976,
+      "bass_root": "C",
+      "bass_confidence": 0.452,
+      "detector_root": "C",
+      "detector_quality": "9",
+      "source": "bass+detector"
+    },
+    {
+      "bar": 47,
+      "chord": "Amaj9",
+      "start_time": 120.976,
+      "end_time": 123.577,
+      "bass_root": "A",
+      "bass_confidence": 0.395,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 48,
+      "chord": "D",
+      "start_time": 123.577,
+      "end_time": 126.154,
+      "bass_root": "D",
+      "bass_confidence": 0.972,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 49,
+      "chord": "E",
+      "start_time": 126.154,
+      "end_time": 128.755,
+      "bass_root": "E",
+      "bass_confidence": 0.75,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 50,
+      "chord": "D#",
+      "start_time": 128.755,
+      "end_time": 131.309,
+      "bass_root": "D#",
+      "bass_confidence": 0.5,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 51,
+      "chord": "E",
+      "start_time": 131.309,
+      "end_time": 133.84,
+      "bass_root": "E",
+      "bass_confidence": 1.0,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 52,
+      "chord": "E",
+      "start_time": 133.84,
+      "end_time": 136.348,
+      "bass_root": "E",
+      "bass_confidence": 0.833,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 53,
+      "chord": "Amaj9",
+      "start_time": 136.348,
+      "end_time": 138.925,
+      "bass_root": "A",
+      "bass_confidence": 0.941,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 54,
+      "chord": "Amaj9",
+      "start_time": 138.925,
+      "end_time": 141.526,
+      "bass_root": "A",
+      "bass_confidence": 0.943,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 55,
+      "chord": "D",
+      "start_time": 141.526,
+      "end_time": 144.103,
+      "bass_root": "D",
+      "bass_confidence": 0.816,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 56,
+      "chord": "Amaj9",
+      "start_time": 144.103,
+      "end_time": 146.704,
+      "bass_root": "A",
+      "bass_confidence": 0.538,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 57,
+      "chord": "D",
+      "start_time": 146.704,
+      "end_time": 149.281,
+      "bass_root": "F#",
+      "bass_confidence": 0.324,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 58,
+      "chord": "D#",
+      "start_time": 149.281,
+      "end_time": 151.812,
+      "bass_root": "D#",
+      "bass_confidence": 0.684,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 59,
+      "chord": "C#",
+      "start_time": 151.812,
+      "end_time": 154.343,
+      "bass_root": "C#",
+      "bass_confidence": 0.711,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 60,
+      "chord": "D",
+      "start_time": 154.343,
+      "end_time": 156.804,
+      "bass_root": "D",
+      "bass_confidence": 0.737,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 61,
+      "chord": "D",
+      "start_time": 156.804,
+      "end_time": 159.382,
+      "bass_root": "D",
+      "bass_confidence": 0.771,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 62,
+      "chord": "D",
+      "start_time": 159.382,
+      "end_time": 161.913,
+      "bass_root": "D",
+      "bass_confidence": 0.771,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 63,
+      "chord": "E",
+      "start_time": 161.913,
+      "end_time": 164.467,
+      "bass_root": "E",
+      "bass_confidence": 0.581,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 64,
+      "chord": "F",
+      "start_time": 164.467,
+      "end_time": 166.975,
+      "bass_root": "F",
+      "bass_confidence": 0.486,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 65,
+      "chord": "A",
+      "start_time": 166.975,
+      "end_time": 169.506,
+      "bass_root": "G",
+      "bass_confidence": 0.389,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 66,
+      "chord": "G",
+      "start_time": 169.506,
+      "end_time": 172.037,
+      "bass_root": "G",
+      "bass_confidence": 0.469,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 67,
+      "chord": "G",
+      "start_time": 172.037,
+      "end_time": 174.521,
+      "bass_root": "G",
+      "bass_confidence": 0.657,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 68,
+      "chord": "G",
+      "start_time": 174.521,
+      "end_time": 177.029,
+      "bass_root": "G",
+      "bass_confidence": 0.471,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 69,
+      "chord": "Amaj9",
+      "start_time": 177.029,
+      "end_time": 179.606,
+      "bass_root": "A",
+      "bass_confidence": 0.958,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 70,
+      "chord": "Amaj9",
+      "start_time": 179.606,
+      "end_time": 182.114,
+      "bass_root": "A",
+      "bass_confidence": 1.0,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 71,
+      "chord": "A#",
+      "start_time": 182.114,
+      "end_time": 184.691,
+      "bass_root": "A#",
+      "bass_confidence": 0.615,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 72,
+      "chord": "A#",
+      "start_time": 184.691,
+      "end_time": 187.222,
+      "bass_root": "A#",
+      "bass_confidence": 0.947,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 73,
+      "chord": "D",
+      "start_time": 187.222,
+      "end_time": 189.754,
+      "bass_root": "D",
+      "bass_confidence": 0.973,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 74,
+      "chord": "D",
+      "start_time": 189.754,
+      "end_time": 192.284,
+      "bass_root": "D",
+      "bass_confidence": 0.946,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 75,
+      "chord": "D",
+      "start_time": 192.284,
+      "end_time": 194.862,
+      "bass_root": "D",
+      "bass_confidence": 0.556,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 76,
+      "chord": "D",
+      "start_time": 194.862,
+      "end_time": 197.393,
+      "bass_root": "D",
+      "bass_confidence": 0.471,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 77,
+      "chord": "E",
+      "start_time": 197.393,
+      "end_time": 199.947,
+      "bass_root": "E",
+      "bass_confidence": 0.875,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 78,
+      "chord": "E",
+      "start_time": 199.947,
+      "end_time": 202.501,
+      "bass_root": "E",
+      "bass_confidence": 1.0,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 79,
+      "chord": "F",
+      "start_time": 202.501,
+      "end_time": 205.079,
+      "bass_root": "F",
+      "bass_confidence": 0.528,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 80,
+      "chord": "F",
+      "start_time": 205.079,
+      "end_time": 207.586,
+      "bass_root": "F",
+      "bass_confidence": 0.865,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 81,
+      "chord": "E",
+      "start_time": 207.586,
+      "end_time": 210.117,
+      "bass_root": "E",
+      "bass_confidence": 0.962,
+      "detector_root": "",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 82,
+      "chord": "E",
+      "start_time": 210.117,
+      "end_time": 212.625,
+      "bass_root": "E",
+      "bass_confidence": 1.0,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 83,
+      "chord": "Amaj9",
+      "start_time": 212.625,
+      "end_time": 215.156,
+      "bass_root": "A",
+      "bass_confidence": 0.957,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 84,
+      "chord": "Amaj9",
+      "start_time": 215.156,
+      "end_time": 217.733,
+      "bass_root": "A",
+      "bass_confidence": 0.719,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 85,
+      "chord": "D",
+      "start_time": 217.733,
+      "end_time": 220.288,
+      "bass_root": "D",
+      "bass_confidence": 0.839,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 86,
+      "chord": "Amaj9",
+      "start_time": 220.288,
+      "end_time": 222.865,
+      "bass_root": "A",
+      "bass_confidence": 0.342,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 87,
+      "chord": "A",
+      "start_time": 222.865,
+      "end_time": 225.419,
+      "bass_root": "F",
+      "bass_confidence": 0.278,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 88,
+      "chord": "D#",
+      "start_time": 225.419,
+      "end_time": 227.974,
+      "bass_root": "D#",
+      "bass_confidence": 0.692,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 89,
+      "chord": "C#",
+      "start_time": 227.974,
+      "end_time": 230.458,
+      "bass_root": "C#",
+      "bass_confidence": 0.684,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 90,
+      "chord": "D",
+      "start_time": 230.458,
+      "end_time": 232.943,
+      "bass_root": "D",
+      "bass_confidence": 0.737,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 91,
+      "chord": "Amaj9",
+      "start_time": 232.943,
+      "end_time": 235.474,
+      "bass_root": "A",
+      "bass_confidence": 0.639,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 92,
+      "chord": "Amaj9",
+      "start_time": 235.474,
+      "end_time": 238.028,
+      "bass_root": "A",
+      "bass_confidence": 0.778,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 93,
+      "chord": "D",
+      "start_time": 238.028,
+      "end_time": 240.536,
+      "bass_root": "D",
+      "bass_confidence": 0.516,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 94,
+      "chord": "Amaj9",
+      "start_time": 240.536,
+      "end_time": 243.043,
+      "bass_root": "A",
+      "bass_confidence": 0.25,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 95,
+      "chord": "Amaj9",
+      "start_time": 243.043,
+      "end_time": 245.551,
+      "bass_root": "A",
+      "bass_confidence": 0.469,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 96,
+      "chord": "Amaj9",
+      "start_time": 245.551,
+      "end_time": 248.105,
+      "bass_root": "A",
+      "bass_confidence": 0.417,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "bass+smoothed+maj7promoted"
+    },
+    {
+      "bar": 97,
+      "chord": "Amaj9",
+      "start_time": 248.105,
+      "end_time": 250.636,
+      "bass_root": "A",
+      "bass_confidence": 0.394,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 98,
+      "chord": "Amaj9",
+      "start_time": 250.636,
+      "end_time": 253.144,
+      "bass_root": "A",
+      "bass_confidence": 0.323,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 99,
+      "chord": "Amaj9",
+      "start_time": 253.144,
+      "end_time": 255.675,
+      "bass_root": "A",
+      "bass_confidence": 0.257,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 100,
+      "chord": "D",
+      "start_time": 255.675,
+      "end_time": 258.229,
+      "bass_root": "E",
+      "bass_confidence": 0.3,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 101,
+      "chord": "D",
+      "start_time": 258.229,
+      "end_time": 260.76,
+      "bass_root": "D",
+      "bass_confidence": 0.485,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 102,
+      "chord": "Amaj9",
+      "start_time": 260.76,
+      "end_time": 263.291,
+      "bass_root": "A",
+      "bass_confidence": 0.31,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 103,
+      "chord": "A",
+      "start_time": 263.291,
+      "end_time": 265.822,
+      "bass_root": "B",
+      "bass_confidence": 0.286,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 104,
+      "chord": "Amaj9",
+      "start_time": 265.822,
+      "end_time": 268.376,
+      "bass_root": "A",
+      "bass_confidence": 0.387,
+      "detector_root": "D",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 105,
+      "chord": "D",
+      "start_time": 268.376,
+      "end_time": 270.907,
+      "bass_root": "D",
+      "bass_confidence": 0.407,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 106,
+      "chord": "A",
+      "start_time": 270.907,
+      "end_time": 273.438,
+      "bass_root": "C#",
+      "bass_confidence": 0.273,
+      "detector_root": "A",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 107,
+      "chord": "Amaj9",
+      "start_time": 273.438,
+      "end_time": 275.946,
+      "bass_root": "A",
+      "bass_confidence": 0.3,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 108,
+      "chord": "D",
+      "start_time": 275.946,
+      "end_time": 278.477,
+      "bass_root": "E",
+      "bass_confidence": 0.364,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "detector-fallback"
+    },
+    {
+      "bar": 109,
+      "chord": "D",
+      "start_time": 278.477,
+      "end_time": 281.008,
+      "bass_root": "D",
+      "bass_confidence": 0.5,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 110,
+      "chord": "Amaj9",
+      "start_time": 281.008,
+      "end_time": 283.562,
+      "bass_root": "A",
+      "bass_confidence": 0.333,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 111,
+      "chord": "Amaj9",
+      "start_time": 283.562,
+      "end_time": 286.07,
+      "bass_root": "A",
+      "bass_confidence": 0.343,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 112,
+      "chord": "C9",
+      "start_time": 286.07,
+      "end_time": 288.624,
+      "bass_root": "C",
+      "bass_confidence": 0.212,
+      "detector_root": "A",
+      "detector_quality": "9",
+      "source": "detector-fallback+smoothed"
+    },
+    {
+      "bar": 113,
+      "chord": "D",
+      "start_time": 288.624,
+      "end_time": 291.132,
+      "bass_root": "D",
+      "bass_confidence": 0.448,
+      "detector_root": "D",
+      "detector_quality": "",
+      "source": "bass"
+    },
+    {
+      "bar": 114,
+      "chord": "Amaj9",
+      "start_time": 291.132,
+      "end_time": 293.663,
+      "bass_root": "A",
+      "bass_confidence": 0.333,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 115,
+      "chord": "Amaj9",
+      "start_time": 293.663,
+      "end_time": 296.194,
+      "bass_root": "A",
+      "bass_confidence": 0.343,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    },
+    {
+      "bar": 116,
+      "chord": "Amaj9",
+      "start_time": 296.194,
+      "end_time": 310.63,
+      "bass_root": "A",
+      "bass_confidence": 0.33,
+      "detector_root": "A",
+      "detector_quality": "maj9",
+      "source": "detector-fallback+smoothed+maj7promoted"
+    }
+  ],
+  "grid": {
+    "tempo_bpm": 95.7,
+    "time_signature": "4/4",
+    "bar_count": 116
+  }
+}
