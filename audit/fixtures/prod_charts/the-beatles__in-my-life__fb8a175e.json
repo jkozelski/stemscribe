@@ -1,0 +1,3282 @@
+{
+  "title": "In My Life",
+  "artist": "The Beatles",
+  "key": "A",
+  "capo": 0,
+  "capo_shape_map": {},
+  "source": "StemScriber AI",
+  "chords_used": [
+    "A",
+    "E",
+    "D",
+    "F#m",
+    "Gm",
+    "B",
+    "Dm",
+    "Am",
+    "A#"
+  ],
+  "sections": [
+    {
+      "name": "Intro",
+      "lines": [
+        {
+          "chords": "A   ////  E   ////  A   ////  E   ////",
+          "lyrics": "There are places,",
+          "segments": [
+            {
+              "chord": "A",
+              "start": 0.511,
+              "end": 2.856,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 2.856,
+              "end": 5.201,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 5.201,
+              "end": 7.546,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 7.546,
+              "end": 9.892,
+              "duration": 2.346,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "There",
+                  "t": 8.3
+                },
+                {
+                  "w": "are",
+                  "t": 9.02
+                },
+                {
+                  "w": "places,",
+                  "t": 9.36
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 1",
+      "lines": [
+        {
+          "chords": "A   ////  D   ////  D   ////  A   ////",
+          "lyrics": "I remember all my life Though some have changed, some forever",
+          "segments": [
+            {
+              "chord": "A",
+              "start": 9.892,
+              "end": 12.237,
+              "duration": 2.345,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 10.42
+                },
+                {
+                  "w": "remember",
+                  "t": 11.18
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 12.237,
+              "end": 14.559,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "all",
+                  "t": 12.58
+                },
+                {
+                  "w": "my",
+                  "t": 13.74
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 14.559,
+              "end": 16.881,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "life",
+                  "t": 14.62
+                },
+                {
+                  "w": "Though",
+                  "t": 15.72
+                },
+                {
+                  "w": "some",
+                  "t": 16.28
+                },
+                {
+                  "w": "have",
+                  "t": 16.72
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 16.881,
+              "end": 19.203,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "changed,",
+                  "t": 17.14
+                },
+                {
+                  "w": "some",
+                  "t": 18.18
+                },
+                {
+                  "w": "forever",
+                  "t": 18.3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "A   ////  F#m ////  D   ////  A   ////",
+          "lyrics": "not for better Some have gone, and some remain All these places",
+          "segments": [
+            {
+              "chord": "A",
+              "start": 19.203,
+              "end": 21.525,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "not",
+                  "t": 19.56
+                },
+                {
+                  "w": "for",
+                  "t": 20.34
+                },
+                {
+                  "w": "better",
+                  "t": 21.02
+                }
+              ]
+            },
+            {
+              "chord": "F#m",
+              "start": 21.525,
+              "end": 23.847,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "Some",
+                  "t": 22.28
+                },
+                {
+                  "w": "have",
+                  "t": 22.94
+                },
+                {
+                  "w": "gone,",
+                  "t": 23.32
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 23.847,
+              "end": 26.169,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "and",
+                  "t": 25.24
+                },
+                {
+                  "w": "some",
+                  "t": 25.6
+                },
+                {
+                  "w": "remain",
+                  "t": 26.04
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 26.169,
+              "end": 28.514,
+              "duration": 2.345,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "All",
+                  "t": 27.0
+                },
+                {
+                  "w": "these",
+                  "t": 27.68
+                },
+                {
+                  "w": "places",
+                  "t": 27.96
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  D   ////  Gm  ////  A   ////",
+          "lyrics": "have their moments With lovers and friends, I still can recall Some are dead",
+          "segments": [
+            {
+              "chord": "D",
+              "start": 28.514,
+              "end": 30.836,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "have",
+                  "t": 29.06
+                },
+                {
+                  "w": "their",
+                  "t": 29.7
+                },
+                {
+                  "w": "moments",
+                  "t": 30.26
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 30.836,
+              "end": 33.181,
+              "duration": 2.345,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "With",
+                  "t": 31.88
+                },
+                {
+                  "w": "lovers",
+                  "t": 32.54
+                },
+                {
+                  "w": "and",
+                  "t": 33.0
+                }
+              ]
+            },
+            {
+              "chord": "Gm",
+              "start": 33.181,
+              "end": 35.457,
+              "duration": 2.276,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "friends,",
+                  "t": 33.56
+                },
+                {
+                  "w": "I",
+                  "t": 34.44
+                },
+                {
+                  "w": "still",
+                  "t": 34.8
+                },
+                {
+                  "w": "can",
+                  "t": 35.18
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 35.457,
+              "end": 37.779,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "recall",
+                  "t": 35.52
+                },
+                {
+                  "w": "Some",
+                  "t": 36.3
+                },
+                {
+                  "w": "are",
+                  "t": 36.86
+                },
+                {
+                  "w": "dead",
+                  "t": 37.2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "F#m ////  B   ////  D   ////  A   ////",
+          "lyrics": "and some are living In my life, I've loved them all",
+          "segments": [
+            {
+              "chord": "F#m",
+              "start": 37.779,
+              "end": 40.078,
+              "duration": 2.299,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "and",
+                  "t": 37.8
+                },
+                {
+                  "w": "some",
+                  "t": 38.36
+                },
+                {
+                  "w": "are",
+                  "t": 38.98
+                },
+                {
+                  "w": "living",
+                  "t": 39.5
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 40.078,
+              "end": 42.376,
+              "duration": 2.298,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "In",
+                  "t": 40.34
+                },
+                {
+                  "w": "my",
+                  "t": 41.76
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 42.376,
+              "end": 44.675,
+              "duration": 2.299,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "life,",
+                  "t": 42.94
+                },
+                {
+                  "w": "I've",
+                  "t": 43.68
+                },
+                {
+                  "w": "loved",
+                  "t": 44.26
+                },
+                {
+                  "w": "them",
+                  "t": 44.52
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 44.675,
+              "end": 46.997,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "all",
+                  "t": 45.08
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "A   ////  E   ////  A   ////  F#m ////",
+          "lyrics": "But of all these, there is no",
+          "segments": [
+            {
+              "chord": "A",
+              "start": 46.997,
+              "end": 49.342,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 49.342,
+              "end": 51.688,
+              "duration": 2.346,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "But",
+                  "t": 50.18
+                },
+                {
+                  "w": "of",
+                  "t": 50.84
+                },
+                {
+                  "w": "all",
+                  "t": 51.2
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 51.688,
+              "end": 54.033,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F#m",
+              "start": 54.033,
+              "end": 56.355,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "these,",
+                  "t": 54.86
+                },
+                {
+                  "w": "there",
+                  "t": 55.12
+                },
+                {
+                  "w": "is",
+                  "t": 55.54
+                },
+                {
+                  "w": "no",
+                  "t": 55.94
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 2",
+      "lines": [
+        {
+          "chords": "D   ////  A   ////  E   ////  F#m ////",
+          "lyrics": "And these memories lose their meaning And I",
+          "segments": [
+            {
+              "chord": "D",
+              "start": 56.355,
+              "end": 58.746,
+              "duration": 2.391,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 58.746,
+              "end": 61.092,
+              "duration": 2.346,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "And",
+                  "t": 59.52
+                },
+                {
+                  "w": "these",
+                  "t": 60.12
+                },
+                {
+                  "w": "memories",
+                  "t": 60.6
+                }
+              ]
+            },
+            {
+              "chord": "E",
+              "start": 61.092,
+              "end": 63.437,
+              "duration": 2.345,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "lose",
+                  "t": 61.58
+                },
+                {
+                  "w": "their",
+                  "t": 62.36
+                }
+              ]
+            },
+            {
+              "chord": "F#m",
+              "start": 63.437,
+              "end": 65.759,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "meaning",
+                  "t": 64.16
+                },
+                {
+                  "w": "And",
+                  "t": 64.4
+                },
+                {
+                  "w": "I",
+                  "t": 64.96
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  A   ////  F#m ////  D   ////",
+          "lyrics": "think of love as something new Though I know I'll never lose affection For people and",
+          "segments": [
+            {
+              "chord": "D",
+              "start": 65.759,
+              "end": 68.127,
+              "duration": 2.368,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "think",
+                  "t": 65.34
+                },
+                {
+                  "w": "of",
+                  "t": 66.04
+                },
+                {
+                  "w": "love",
+                  "t": 66.5
+                },
+                {
+                  "w": "as",
+                  "t": 67.04
+                },
+                {
+                  "w": "something",
+                  "t": 67.6
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 68.127,
+              "end": 70.496,
+              "duration": 2.369,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "new",
+                  "t": 68.28
+                },
+                {
+                  "w": "Though",
+                  "t": 69.04
+                },
+                {
+                  "w": "I",
+                  "t": 69.64
+                },
+                {
+                  "w": "know",
+                  "t": 69.88
+                }
+              ]
+            },
+            {
+              "chord": "F#m",
+              "start": 70.496,
+              "end": 72.818,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I'll",
+                  "t": 70.6
+                },
+                {
+                  "w": "never",
+                  "t": 71.12
+                },
+                {
+                  "w": "lose",
+                  "t": 71.6
+                },
+                {
+                  "w": "affection",
+                  "t": 72.08
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 72.818,
+              "end": 75.093,
+              "duration": 2.275,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "For",
+                  "t": 73.14
+                },
+                {
+                  "w": "people",
+                  "t": 74.42
+                },
+                {
+                  "w": "and",
+                  "t": 74.96
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "Gm  ////  A   ////  F#m ////  B   ////",
+          "lyrics": "things that went before I know I'll often stop and think about them In my",
+          "segments": [
+            {
+              "chord": "Gm",
+              "start": 75.093,
+              "end": 77.392,
+              "duration": 2.299,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "things",
+                  "t": 75.44
+                },
+                {
+                  "w": "that",
+                  "t": 76.28
+                },
+                {
+                  "w": "went",
+                  "t": 76.86
+                },
+                {
+                  "w": "before",
+                  "t": 77.16
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 77.392,
+              "end": 79.714,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 78.28
+                },
+                {
+                  "w": "know",
+                  "t": 79.12
+                },
+                {
+                  "w": "I'll",
+                  "t": 79.54
+                }
+              ]
+            },
+            {
+              "chord": "F#m",
+              "start": 79.714,
+              "end": 82.082,
+              "duration": 2.368,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "often",
+                  "t": 79.96
+                },
+                {
+                  "w": "stop",
+                  "t": 80.28
+                },
+                {
+                  "w": "and",
+                  "t": 80.68
+                },
+                {
+                  "w": "think",
+                  "t": 80.9
+                },
+                {
+                  "w": "about",
+                  "t": 81.34
+                },
+                {
+                  "w": "them",
+                  "t": 81.9
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 82.082,
+              "end": 84.404,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "In",
+                  "t": 82.7
+                },
+                {
+                  "w": "my",
+                  "t": 83.78
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "D   ////  A   ////  A   ////  F#m ////",
+          "lyrics": "life, I love you you more",
+          "segments": [
+            {
+              "chord": "D",
+              "start": 84.404,
+              "end": 86.657,
+              "duration": 2.253,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "life,",
+                  "t": 85.04
+                },
+                {
+                  "w": "I",
+                  "t": 85.8
+                },
+                {
+                  "w": "love",
+                  "t": 86.16
+                },
+                {
+                  "w": "you",
+                  "t": 86.58
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 86.657,
+              "end": 88.979,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 86.58
+                },
+                {
+                  "w": "more",
+                  "t": 87.08
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 88.979,
+              "end": 91.324,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F#m",
+              "start": 91.324,
+              "end": 93.646,
+              "duration": 2.322,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 3",
+      "lines": [
+        {
+          "chords": "D   ////  A   ////  A   ////  F#m ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "D",
+              "start": 93.646,
+              "end": 95.945,
+              "duration": 2.299,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 95.945,
+              "end": 98.267,
+              "duration": 2.322,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 98.267,
+              "end": 100.589,
+              "duration": 2.322,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "F#m",
+              "start": 100.589,
+              "end": 102.911,
+              "duration": 2.322,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        },
+        {
+          "chords": "Dm  ////  A   ////  F#m ////  D   ////",
+          "lyrics": "Though I know I'll I'll never lose affection For people and",
+          "segments": [
+            {
+              "chord": "Dm",
+              "start": 102.911,
+              "end": 105.186,
+              "duration": 2.275,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 105.186,
+              "end": 107.555,
+              "duration": 2.369,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "Though",
+                  "t": 106.1
+                },
+                {
+                  "w": "I",
+                  "t": 106.72
+                },
+                {
+                  "w": "know",
+                  "t": 106.94
+                },
+                {
+                  "w": "I'll",
+                  "t": 107.52
+                }
+              ]
+            },
+            {
+              "chord": "F#m",
+              "start": 107.555,
+              "end": 109.854,
+              "duration": 2.299,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I'll",
+                  "t": 107.52
+                },
+                {
+                  "w": "never",
+                  "t": 108.12
+                },
+                {
+                  "w": "lose",
+                  "t": 108.62
+                },
+                {
+                  "w": "affection",
+                  "t": 109.14
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 109.854,
+              "end": 112.129,
+              "duration": 2.275,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "For",
+                  "t": 110.12
+                },
+                {
+                  "w": "people",
+                  "t": 111.52
+                },
+                {
+                  "w": "and",
+                  "t": 112.02
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Verse 4",
+      "lines": [
+        {
+          "chords": "Gm  ////  Am  ////  D   ////  B   ////",
+          "lyrics": "things that went before I know I'll often stop and think about them In my",
+          "segments": [
+            {
+              "chord": "Gm",
+              "start": 112.129,
+              "end": 114.405,
+              "duration": 2.276,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "things",
+                  "t": 112.54
+                },
+                {
+                  "w": "that",
+                  "t": 113.32
+                },
+                {
+                  "w": "went",
+                  "t": 113.86
+                },
+                {
+                  "w": "before",
+                  "t": 114.22
+                }
+              ]
+            },
+            {
+              "chord": "Am",
+              "start": 114.405,
+              "end": 116.727,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "I",
+                  "t": 115.46
+                },
+                {
+                  "w": "know",
+                  "t": 116.1
+                },
+                {
+                  "w": "I'll",
+                  "t": 116.52
+                }
+              ]
+            },
+            {
+              "chord": "D",
+              "start": 116.727,
+              "end": 119.072,
+              "duration": 2.345,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "often",
+                  "t": 116.94
+                },
+                {
+                  "w": "stop",
+                  "t": 117.26
+                },
+                {
+                  "w": "and",
+                  "t": 117.7
+                },
+                {
+                  "w": "think",
+                  "t": 118.02
+                },
+                {
+                  "w": "about",
+                  "t": 118.36
+                },
+                {
+                  "w": "them",
+                  "t": 118.82
+                }
+              ]
+            },
+            {
+              "chord": "B",
+              "start": 119.072,
+              "end": 121.371,
+              "duration": 2.299,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "In",
+                  "t": 119.62
+                },
+                {
+                  "w": "my",
+                  "t": 120.7
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chords": "Dm  ////  A   ////  A   ////  Am  ////",
+          "lyrics": "life, I love you you more",
+          "segments": [
+            {
+              "chord": "Dm",
+              "start": 121.371,
+              "end": 123.623,
+              "duration": 2.252,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "life,",
+                  "t": 121.98
+                },
+                {
+                  "w": "I",
+                  "t": 123.12
+                },
+                {
+                  "w": "love",
+                  "t": 123.12
+                },
+                {
+                  "w": "you",
+                  "t": 123.56
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 123.623,
+              "end": 125.945,
+              "duration": 2.322,
+              "bars": 1,
+              "words": [
+                {
+                  "w": "you",
+                  "t": 123.56
+                },
+                {
+                  "w": "more",
+                  "t": 124.08
+                }
+              ]
+            },
+            {
+              "chord": "A",
+              "start": 125.945,
+              "end": 128.267,
+              "duration": 2.322,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "Am",
+              "start": 128.267,
+              "end": 130.612,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Outro",
+      "lines": [
+        {
+          "chords": "Dm  ////  E   ////  A   ////  A#  ////",
+          "lyrics": null,
+          "segments": [
+            {
+              "chord": "Dm",
+              "start": 130.612,
+              "end": 133.027,
+              "duration": 2.415,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "E",
+              "start": 133.027,
+              "end": 135.372,
+              "duration": 2.345,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A",
+              "start": 135.372,
+              "end": 137.741,
+              "duration": 2.369,
+              "bars": 1,
+              "words": []
+            },
+            {
+              "chord": "A#",
+              "start": 137.741,
+              "end": 144.59,
+              "duration": 6.849,
+              "bars": 1,
+              "words": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "bar_grid": [
+    {
+      "bar": 1,
+      "chord": "A",
+      "start_time": 0.511,
+      "end_time": 2.856,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1561,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 0.9024,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.897,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.8739,
+            "root": "F#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 2,
+      "chord": "E",
+      "start_time": 2.856,
+      "end_time": 5.201,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Am",
+            "score": 1.2365,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 1.2037,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.9916,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.5166,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 3,
+      "chord": "A",
+      "start_time": 5.201,
+      "end_time": 7.546,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1568,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 0.8923,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5487,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 0.5444,
+            "root": "F",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 4,
+      "chord": "E",
+      "start_time": 7.546,
+      "end_time": 9.892,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "E",
+            "score": 1.2693,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1666,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 1.1239,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 1.1235,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 5,
+      "chord": "A",
+      "start_time": 9.892,
+      "end_time": 12.237,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1771,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.126,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.0749,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.7924,
+            "root": "F#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 6,
+      "chord": "D",
+      "start_time": 12.237,
+      "end_time": 14.559,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 0.7927,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.7697,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Gm",
+            "score": 0.4939,
+            "root": "G",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.2709,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 7,
+      "chord": "D",
+      "start_time": 14.559,
+      "end_time": 16.881,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Dm",
+            "score": 1.1744,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.1602,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#",
+            "score": 0.5684,
+            "root": "A#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Gm",
+            "score": 0.5018,
+            "root": "G",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 8,
+      "chord": "A",
+      "start_time": 16.881,
+      "end_time": 19.203,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.2318,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1742,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.1526,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 1.0842,
+            "root": "F",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 9,
+      "chord": "A",
+      "start_time": 19.203,
+      "end_time": 21.525,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.15,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1427,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 0.5962,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.5918,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 10,
+      "chord": "F#m",
+      "start_time": 21.525,
+      "end_time": 23.847,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 0.795,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5506,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.534,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5325,
+            "root": "B",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 11,
+      "chord": "D",
+      "start_time": 23.847,
+      "end_time": 26.169,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.3069,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.2873,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5908,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "A#",
+            "score": 0.5623,
+            "root": "A#",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 12,
+      "chord": "A",
+      "start_time": 26.169,
+      "end_time": 28.514,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1126,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.1102,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 1.0729,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.0611,
+            "root": "D",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 13,
+      "chord": "D",
+      "start_time": 28.514,
+      "end_time": 30.836,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.086,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5859,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5646,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 0.5332,
+            "root": "D",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 14,
+      "chord": "D",
+      "start_time": 30.836,
+      "end_time": 33.181,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.351,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.2995,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "A#",
+            "score": 0.5505,
+            "root": "A#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Gm",
+            "score": 0.5399,
+            "root": "G",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 15,
+      "chord": "Gm",
+      "start_time": 33.181,
+      "end_time": 35.457,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Gm",
+            "score": 1.1303,
+            "root": "G",
+            "quality": "min"
+          },
+          {
+            "chord": "D#",
+            "score": 0.825,
+            "root": "D#",
+            "quality": "maj"
+          },
+          {
+            "chord": "G",
+            "score": 0.821,
+            "root": "G",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.795,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 16,
+      "chord": "A",
+      "start_time": 35.457,
+      "end_time": 37.779,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.023,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 0.9896,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.7701,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.7459,
+            "root": "D",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 17,
+      "chord": "F#m",
+      "start_time": 37.779,
+      "end_time": 40.078,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.2341,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.2327,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "B",
+            "score": 1.124,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "D",
+            "score": 0.8231,
+            "root": "D",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 18,
+      "chord": "B",
+      "start_time": 40.078,
+      "end_time": 42.376,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Bm",
+            "score": 1.1565,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "Em",
+            "score": 1.0663,
+            "root": "E",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 0.9821,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "G",
+            "score": 0.797,
+            "root": "G",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 19,
+      "chord": "D",
+      "start_time": 42.376,
+      "end_time": 44.675,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.1321,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.1142,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5827,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 0.5546,
+            "root": "G",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 20,
+      "chord": "A",
+      "start_time": 44.675,
+      "end_time": 46.997,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.2481,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.2143,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 1.1181,
+            "root": "F",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.0961,
+            "root": "D",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 21,
+      "chord": "A",
+      "start_time": 46.997,
+      "end_time": 49.342,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Dm",
+            "score": 1.1858,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 1.167,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "D",
+            "score": 0.6143,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 0.6132,
+            "root": "A",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 22,
+      "chord": "E",
+      "start_time": 49.342,
+      "end_time": 51.688,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "E",
+            "score": 0.8881,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.8744,
+            "root": "C#",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 0.8365,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 0.5342,
+            "root": "A",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 23,
+      "chord": "A",
+      "start_time": 51.688,
+      "end_time": 54.033,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.0186,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.634,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.6127,
+            "root": "E",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.5352,
+            "root": "D",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 24,
+      "chord": "F#m",
+      "start_time": 54.033,
+      "end_time": 56.355,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 0.8248,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.5623,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "D",
+            "score": 0.5544,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.551,
+            "root": "B",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 25,
+      "chord": "D",
+      "start_time": 56.355,
+      "end_time": 58.746,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.3193,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.2581,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5771,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "A#",
+            "score": 0.5251,
+            "root": "A#",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 26,
+      "chord": "A",
+      "start_time": 58.746,
+      "end_time": 61.092,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.2715,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1849,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.1037,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 1.0416,
+            "root": "F",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 27,
+      "chord": "E",
+      "start_time": 61.092,
+      "end_time": 63.437,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Am",
+            "score": 1.0403,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 0.5717,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "A",
+            "score": 0.5613,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.5498,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 28,
+      "chord": "F#m",
+      "start_time": 63.437,
+      "end_time": 65.759,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.1126,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.8559,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.8438,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.841,
+            "root": "D",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 29,
+      "chord": "D",
+      "start_time": 65.759,
+      "end_time": 68.127,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.3287,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.2722,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5807,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 0.5033,
+            "root": "G",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 30,
+      "chord": "A",
+      "start_time": 68.127,
+      "end_time": 70.496,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Am",
+            "score": 1.1225,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.1106,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 0.865,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "F",
+            "score": 0.8455,
+            "root": "F",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 31,
+      "chord": "F#m",
+      "start_time": 70.496,
+      "end_time": 72.818,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.1845,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 1.173,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.1631,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1571,
+            "root": "F#",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 32,
+      "chord": "D",
+      "start_time": 72.818,
+      "end_time": 75.093,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.301,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.2312,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.6066,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "Gm",
+            "score": 0.5652,
+            "root": "G",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 33,
+      "chord": "Gm",
+      "start_time": 75.093,
+      "end_time": 77.392,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Gm",
+            "score": 1.1617,
+            "root": "G",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 0.8411,
+            "root": "G",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#",
+            "score": 0.8093,
+            "root": "D#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.7741,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 34,
+      "chord": "A",
+      "start_time": 77.392,
+      "end_time": 79.714,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1704,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1291,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 1.0818,
+            "root": "F",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.0663,
+            "root": "D",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 35,
+      "chord": "F#m",
+      "start_time": 79.714,
+      "end_time": 82.082,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.26,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 1.2253,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.0692,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 0.5917,
+            "root": "B",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 36,
+      "chord": "B",
+      "start_time": 82.082,
+      "end_time": 84.404,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.3915,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.3213,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 1.0085,
+            "root": "G",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.999,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 37,
+      "chord": "D",
+      "start_time": 84.404,
+      "end_time": 86.657,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Dm",
+            "score": 1.1642,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.157,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#",
+            "score": 0.5411,
+            "root": "A#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.537,
+            "root": "B",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 38,
+      "chord": "A",
+      "start_time": 86.657,
+      "end_time": 88.979,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1447,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1008,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 0.8755,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 0.8457,
+            "root": "F",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 39,
+      "chord": "A",
+      "start_time": 88.979,
+      "end_time": 91.324,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Am",
+            "score": 1.1049,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "E",
+            "score": 0.6895,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.5962,
+            "root": "E",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 0.5897,
+            "root": "A",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 40,
+      "chord": "F#m",
+      "start_time": 91.324,
+      "end_time": 93.646,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.1851,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.1036,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 0.9397,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#m",
+            "score": 0.8258,
+            "root": "D#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 41,
+      "chord": "D",
+      "start_time": 93.646,
+      "end_time": 95.945,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.3997,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.343,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.5418,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "A#",
+            "score": 0.505,
+            "root": "A#",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 42,
+      "chord": "A",
+      "start_time": 95.945,
+      "end_time": 98.267,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.2318,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.159,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1177,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.1077,
+            "root": "F#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 43,
+      "chord": "A",
+      "start_time": 98.267,
+      "end_time": 100.589,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "E",
+            "score": 0.6472,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "A",
+            "score": 0.647,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 0.6014,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 0.5871,
+            "root": "A",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 44,
+      "chord": "F#m",
+      "start_time": 100.589,
+      "end_time": 102.911,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.0949,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6144,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "D",
+            "score": 0.5713,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5456,
+            "root": "B",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 45,
+      "chord": "Dm",
+      "start_time": 102.911,
+      "end_time": 105.186,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 1.2753,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.2688,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.1151,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "A#",
+            "score": 0.6284,
+            "root": "A#",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 46,
+      "chord": "A",
+      "start_time": 105.186,
+      "end_time": 107.555,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.2441,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1512,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.1246,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0847,
+            "root": "F#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 47,
+      "chord": "F#m",
+      "start_time": 107.555,
+      "end_time": 109.854,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.1327,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 1.1112,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.899,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 0.837,
+            "root": "D",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 48,
+      "chord": "D",
+      "start_time": 109.854,
+      "end_time": 112.129,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Dm",
+            "score": 1.2205,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.0366,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.7857,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "Gm",
+            "score": 0.7594,
+            "root": "G",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 49,
+      "chord": "Gm",
+      "start_time": 112.129,
+      "end_time": 114.405,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Gm",
+            "score": 0.8633,
+            "root": "G",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 0.844,
+            "root": "G",
+            "quality": "maj"
+          },
+          {
+            "chord": "D#",
+            "score": 0.7806,
+            "root": "D#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.758,
+            "root": "E",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 50,
+      "chord": "Am",
+      "start_time": 114.405,
+      "end_time": 116.727,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Dm",
+            "score": 1.0234,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 0.8686,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 0.8623,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "F",
+            "score": 0.7993,
+            "root": "F",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 51,
+      "chord": "D",
+      "start_time": 116.727,
+      "end_time": 119.072,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "F#m",
+            "score": 1.1304,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "D",
+            "score": 1.0276,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#",
+            "score": 0.6389,
+            "root": "F#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.5029,
+            "root": "B",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 52,
+      "chord": "B",
+      "start_time": 119.072,
+      "end_time": 121.371,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "B",
+            "score": 1.4081,
+            "root": "B",
+            "quality": "maj"
+          },
+          {
+            "chord": "Bm",
+            "score": 1.2934,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "Em",
+            "score": 1.0435,
+            "root": "E",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 1.0083,
+            "root": "G",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 53,
+      "chord": "Dm",
+      "start_time": 121.371,
+      "end_time": 123.623,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "D",
+            "score": 0.8531,
+            "root": "D",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 0.8428,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Bm",
+            "score": 0.6022,
+            "root": "B",
+            "quality": "min"
+          },
+          {
+            "chord": "G",
+            "score": 0.5127,
+            "root": "G",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 54,
+      "chord": "A",
+      "start_time": 123.623,
+      "end_time": 125.945,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1868,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 1.1836,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "F",
+            "score": 1.0609,
+            "root": "F",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 0.778,
+            "root": "F#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 55,
+      "chord": "A",
+      "start_time": 125.945,
+      "end_time": 128.267,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.1561,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.0293,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 0.6086,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 0.5962,
+            "root": "A",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 56,
+      "chord": "Am",
+      "start_time": 128.267,
+      "end_time": 130.612,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Am",
+            "score": 1.1982,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 1.1535,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "E",
+            "score": 0.8432,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "C#m",
+            "score": 0.7869,
+            "root": "C#",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 57,
+      "chord": "Dm",
+      "start_time": 130.612,
+      "end_time": 133.027,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "Dm",
+            "score": 1.0104,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "A",
+            "score": 0.9752,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "A#",
+            "score": 0.9666,
+            "root": "A#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Am",
+            "score": 0.9523,
+            "root": "A",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 58,
+      "chord": "E",
+      "start_time": 133.027,
+      "end_time": 135.372,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "E",
+            "score": 0.8761,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Em",
+            "score": 0.8567,
+            "root": "E",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 0.495,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "B",
+            "score": 0.4907,
+            "root": "B",
+            "quality": "maj"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 59,
+      "chord": "A",
+      "start_time": 135.372,
+      "end_time": 137.741,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "A",
+            "score": 1.3541,
+            "root": "A",
+            "quality": "maj"
+          },
+          {
+            "chord": "F#m",
+            "score": 1.2169,
+            "root": "F#",
+            "quality": "min"
+          },
+          {
+            "chord": "Am",
+            "score": 1.0728,
+            "root": "A",
+            "quality": "min"
+          },
+          {
+            "chord": "Dm",
+            "score": 1.062,
+            "root": "D",
+            "quality": "min"
+          }
+        ]
+      }
+    },
+    {
+      "bar": 60,
+      "chord": "A#",
+      "start_time": 137.741,
+      "end_time": 144.59,
+      "source_meta": {
+        "top_k": [
+          {
+            "chord": "E",
+            "score": 0.8972,
+            "root": "E",
+            "quality": "maj"
+          },
+          {
+            "chord": "Dm",
+            "score": 0.7814,
+            "root": "D",
+            "quality": "min"
+          },
+          {
+            "chord": "A#",
+            "score": 0.7044,
+            "root": "A#",
+            "quality": "maj"
+          },
+          {
+            "chord": "Gm",
+            "score": 0.6959,
+            "root": "G",
+            "quality": "min"
+          }
+        ]
+      }
+    }
+  ],
+  "grid": {
+    "tempo_bpm": 103.36,
+    "time_signature": "4/4",
+    "bar_count": 56
+  },
+  "anthropic_correction": {
+    "mode": "full",
+    "model": "claude-sonnet-4-5-20250929",
+    "claude_chord_set": [
+      "A",
+      "A7",
+      "B7",
+      "D",
+      "Dm",
+      "E",
+      "E7",
+      "F#m",
+      "G"
+    ],
+    "claude_key": "A",
+    "claude_notes": "Bridge modulates briefly through G and B7 before returning to A; Dm is borrowed from parallel minor",
+    "status": "skipped_quality_flip",
+    "drop_ratio": 0.44,
+    "quality_flips": 2,
+    "qf_threshold": 2,
+    "qf_drop_ceiling": 0.0,
+    "detector_chord_set": [
+      "A",
+      "A#",
+      "Am",
+      "B",
+      "D",
+      "Dm",
+      "E",
+      "F#m",
+      "Gm"
+    ]
+  }
+}
