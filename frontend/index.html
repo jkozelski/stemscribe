@@ -903,6 +903,7 @@
     <script src="js/results.js"></script>
     <script src="js/trackinfo.js"></script>
     <script src="js/archive.js"></script>
+    <script src="js/upload-options-modal.js"></script>
     <script src="js/upload.js"></script>
     <script src="js/panels.js"></script>
     <script src="js/waveform.js"></script>
@@ -919,5 +920,33 @@
             void(0);
         }
     </script>
+
+    <!-- Upload Options Modal: appears after file pick, before upload starts -->
+    <div id="uploadOptionsModal" class="upload-options-modal" role="dialog" aria-modal="true" aria-labelledby="uploadOptionsTitle" aria-hidden="true">
+        <div class="upload-options-backdrop"></div>
+        <div class="upload-options-content">
+            <h2 id="uploadOptionsTitle" class="upload-options-title">What do you want from this song?</h2>
+            <p class="upload-options-subtitle">Pick a path — you can always re-process later.</p>
+            <span id="uploadOptionsFileName" class="upload-options-filename" aria-live="polite"></span>
+
+            <div class="upload-options-cards" role="radiogroup" aria-label="Processing options">
+                <div class="upload-option-card" data-choice="stems_only" role="radio" tabindex="0" aria-checked="true">
+                    <div class="upload-option-icon">🎚️</div>
+                    <div class="upload-option-title">Just split into stems</div>
+                    <div class="upload-option-desc">Faster, free-tier friendly. Vocals, drums, bass &amp; more — isolated.</div>
+                </div>
+                <div class="upload-option-card" data-choice="full" role="radio" tabindex="0" aria-checked="false">
+                    <div class="upload-option-icon">🎸</div>
+                    <div class="upload-option-title">Stems + chord chart + tabs</div>
+                    <div class="upload-option-desc">The full practice room. Adds chord detection &amp; Guitar Pro tabs (+5–10 min).</div>
+                </div>
+            </div>
+
+            <div class="upload-options-actions">
+                <button id="uploadOptionsCancelBtn" class="upload-options-cancel" type="button">Cancel</button>
+                <button id="uploadOptionsProcessBtn" class="upload-options-process" type="button" disabled>Process</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

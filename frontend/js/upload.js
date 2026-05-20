@@ -78,9 +78,30 @@ window.StemScriber = window.StemScriber || {};
 
     SS.handleFile = function(file) {
         SS.selectedFile = file;
-        document.querySelector('.drop-title').textContent = file.name;
-        document.querySelector('.drop-icon').textContent = '\u2713';
+        var titleEl = document.querySelector('.drop-title');
+        var iconEl = document.querySelector('.drop-icon');
+        if (titleEl) titleEl.textContent = file.name;
+        if (iconEl) iconEl.textContent = '\u2713';
         SS.updateSubmitBtn();
+
+        // After file pick: show options modal, then auto-start upload on confirm.
+        // If the modal helper isn't available for any reason, fall back to the
+        // legacy flow (user clicks the existing submit button).
+        if (typeof SS.showUploadOptionsModal === 'function') {
+            SS.showUploadOptionsModal(file.name).then(function(choice) {
+                if (!choice) {
+                    // User cancelled \u2014 clear selection so they can pick again deliberately
+                    SS.selectedFile = null;
+                    if (titleEl) titleEl.textContent = 'Drop a track here';
+                    if (iconEl) iconEl.textContent = '\u266b';
+                    SS.updateSubmitBtn();
+                    return;
+                }
+                // Choice has already applied gpTabsToggle + chordDetectionToggle.
+                // Hand off to the existing upload flow.
+                SS.startProcessing();
+            });
+        }
     };
 
     SS.updateSubmitBtn = function() {

@@ -722,3 +722,260 @@
     cursor: not-allowed;
     transform: none;
 }
+
+/* ===========================================
+   Upload Options Modal
+   Shown after file pick, before upload starts.
+   =========================================== */
+.upload-options-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    padding: 1rem;
+}
+
+.upload-options-modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.upload-options-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.upload-options-content {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 1.75rem 1.75rem 1.5rem;
+    max-width: 560px;
+    width: 100%;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(198, 120, 221, 0.08);
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.22s ease;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+.upload-options-modal.open .upload-options-content {
+    transform: scale(1) translateY(0);
+}
+
+.upload-options-title {
+    font-family: 'Righteous', cursive;
+    font-size: 1.4rem;
+    color: var(--psych-orange);
+    margin: 0 0 0.35rem;
+    letter-spacing: 0.5px;
+}
+
+.upload-options-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin: 0 0 0.25rem;
+    line-height: 1.45;
+}
+
+.upload-options-filename {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.35rem 0.7rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: var(--text);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+.upload-options-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin: 1.5rem 0 1.25rem;
+}
+
+.upload-option-card {
+    background: rgba(30, 30, 45, 0.55);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 1.1rem 1rem;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-height: 124px;
+}
+
+.upload-option-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 123, 84, 0.35);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+
+.upload-option-card.selected {
+    border-color: var(--psych-orange);
+    background: linear-gradient(135deg, rgba(255, 123, 84, 0.10), rgba(198, 120, 221, 0.08));
+    box-shadow: 0 0 0 1px rgba(255, 123, 84, 0.4),
+                0 8px 28px rgba(255, 123, 84, 0.18);
+}
+
+.upload-option-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--psych-orange);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(255, 123, 84, 0.45);
+}
+
+.upload-option-icon {
+    font-size: 1.7rem;
+    line-height: 1;
+    margin-bottom: 0.15rem;
+}
+
+.upload-option-title {
+    font-family: 'Outfit', 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--text);
+    line-height: 1.25;
+}
+
+.upload-option-card[data-choice="full"] .upload-option-title {
+    background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink) 55%, var(--psych-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.upload-option-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+.upload-options-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.upload-options-cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: var(--text-dim);
+    padding: 0.65rem 1.15rem;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.upload-options-cancel:hover {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.upload-options-process {
+    font-family: 'Righteous', cursive;
+    font-size: 0.95rem;
+    letter-spacing: 0.6px;
+    padding: 0.7rem 1.5rem;
+    background: linear-gradient(135deg, var(--psych-orange) 0%, var(--psych-pink) 55%, var(--psych-purple) 100%);
+    background-size: 180% 180%;
+    border: none;
+    border-radius: 11px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    box-shadow: 0 6px 22px rgba(255, 107, 157, 0.25);
+}
+
+.upload-options-process:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 30px rgba(255, 107, 157, 0.35);
+}
+
+.upload-options-process:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Lock background scroll while modal is open */
+body.upload-options-open {
+    overflow: hidden;
+}
+
+/* Mobile */
+@media (max-width: 560px) {
+    .upload-options-content {
+        padding: 1.3rem 1.1rem 1.1rem;
+        border-radius: 14px;
+    }
+    .upload-options-title {
+        font-size: 1.18rem;
+    }
+    .upload-options-cards {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        margin: 1.1rem 0 1rem;
+    }
+    .upload-option-card {
+        min-height: auto;
+        padding: 0.95rem 0.9rem;
+    }
+    .upload-options-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    .upload-options-cancel,
+    .upload-options-process {
+        width: 100%;
+        text-align: center;
+    }
+}
