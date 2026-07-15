@@ -151,8 +151,8 @@ def upload_audio():
     mdx_model = request.form.get('mdx_model', 'false').lower() == 'true'
     ensemble_mode = request.form.get('ensemble', 'false').lower() == 'true'
 
-    # Determine user plan
-    plan = request.form.get('plan', 'free')
+    # Determine user plan server-side (never trust the client field - RISK-10)
+    plan = g.current_user.plan if getattr(g, 'current_user', None) else 'free'
 
     # Create job with skills
     job_id = str(uuid.uuid4())
@@ -360,8 +360,8 @@ def process_url_endpoint():
     mdx_model = data.get('mdx_model', False)
     ensemble_mode = data.get('ensemble', False)
 
-    # Determine user plan
-    plan = data.get('plan', 'free')
+    # Determine user plan server-side (never trust the client field - RISK-10)
+    plan = g.current_user.plan if getattr(g, 'current_user', None) else 'free'
 
     # Create job with skills
     job = ProcessingJob(job_id, 'Downloading...', source_url=original_url, skills=skills)
