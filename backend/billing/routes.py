@@ -46,7 +46,7 @@ def list_plans():
     """Return available plans with pricing info (no auth required)."""
     plans_list = []
     for plan_id, info in PLANS.items():
-        plans_list.append({
+        entry = {
             'id': plan_id,
             'name': info['name'],
             'monthly_price': info['monthly_price'],
@@ -55,7 +55,13 @@ def list_plans():
             'max_duration_sec': info['max_duration_sec'],
             'stems': info['stems'],
             'features': info['features'],
-        })
+        }
+        # Lifetime Founder uses one_time_price + qty_cap
+        if 'one_time_price' in info:
+            entry['one_time_price'] = info['one_time_price']
+        if 'qty_cap' in info:
+            entry['qty_cap'] = info['qty_cap']
+        plans_list.append(entry)
     return jsonify({'plans': plans_list})
 
 
@@ -67,7 +73,7 @@ def create_checkout_session():
     """Create a Stripe Checkout Session for upgrading to a paid plan.
 
     Request JSON:
-        plan:     'pro'   (only paid subscription tier; Lifetime is a separate one-time checkout)
+        plan:     'premium' or 'pro'
         interval: 'monthly' or 'annual'
 
     Returns:
@@ -87,11 +93,13 @@ def create_checkout_session():
     plan = data.get('plan', '').lower()
     interval = data.get('interval', 'monthly').lower()
 
-    # Validate plan (subscription tiers only; Lifetime is a separate one-time checkout)
-    if plan not in ('pro',):
-        return jsonify({'error': 'Invalid plan. Choose "pro"'}), 400
+    # Validate plan
+    if plan not in ('premium', 'pro', 'lifetime'):
+        return jsonify({'error': 'Invalid plan. Choose "pro" or "lifetime"'}), 400
 
-    if interval not in ('monthly', 'annual'):
+    is_lifetime = (plan == 'lifetime')
+
+    if not is_lifetime and interval not in ('monthly', 'annual'):
         return jsonify({'error': 'Invalid interval. Choose "monthly" or "annual"'}), 400
 
     # Check if user is already on this plan
@@ -101,12 +109,32 @@ def create_checkout_session():
             'current_plan': user.plan,
         }), 409
 
+    # 100-customer cap on Lifetime Founder. Count active lifetime users in our DB.
+    # (Stripe count would be more authoritative, but adds latency on every checkout
+    # request — local count is good enough; ground truth resolves on webhook.)
+    if is_lifetime:
+        from billing.plans import LIFETIME_FOUNDER_CAP
+        from db import query_one
+        try:
+            row = query_one("SELECT COUNT(*) AS n FROM users WHERE plan = 'lifetime'")
+            seats_taken = (row or {}).get('n', 0) if isinstance(row, dict) else (row[0] if row else 0)
+        except Exception as e:
+            logger.warning(f"Lifetime cap count query failed: {e}; defaulting to 0")
+            seats_taken = 0
+        if seats_taken >= LIFETIME_FOUNDER_CAP:
+            return jsonify({
+                'error': 'Lifetime Founder is sold out — all 100 seats claimed.',
+                'seats_taken': seats_taken,
+                'cap': LIFETIME_FOUNDER_CAP,
+            }), 410
+
     # Look up the Stripe Price ID
-    price_id = get_price_id(plan, interval)
+    price_id = get_price_id(plan, '' if is_lifetime else interval)
     if not price_id:
+        env_var = 'STRIPE_PRICE_LIFETIME_FOUNDER' if is_lifetime else f'STRIPE_PRICE_{plan.upper()}_{interval.upper()}'
         return jsonify({
-            'error': f'Stripe price not configured for {plan}/{interval}. '
-                     f'Set STRIPE_PRICE_{plan.upper()}_{interval.upper()} env var.',
+            'error': f'Stripe price not configured for {plan}{"" if is_lifetime else "/"+interval}. '
+                     f'Set {env_var} env var.',
         }), 500
 
     app_url = _get_app_url()
@@ -119,24 +147,27 @@ def create_checkout_session():
         else:
             customer_kwargs['customer_email'] = user.email
 
-        session = stripe.checkout.Session.create(
-            mode='subscription',
-            line_items=[{'price': price_id, 'quantity': 1}],
-            success_url=f'{app_url}/billing/success?session_id={{CHECKOUT_SESSION_ID}}',
-            cancel_url=f'{app_url}/pricing',
-            metadata={
+        session_kwargs = {
+            'mode': 'payment' if is_lifetime else 'subscription',
+            'line_items': [{'price': price_id, 'quantity': 1}],
+            'success_url': f'{app_url}/success.html?session_id={{CHECKOUT_SESSION_ID}}',
+            'cancel_url': f'{app_url}/landing.html#pricing',
+            'metadata': {
                 'user_id': str(user.id),
                 'plan': plan,
             },
-            subscription_data={
+            'allow_promotion_codes': True,
+            **customer_kwargs,
+        }
+        # subscription_data is only valid in subscription mode
+        if not is_lifetime:
+            session_kwargs['subscription_data'] = {
                 'metadata': {
                     'user_id': str(user.id),
                     'plan': plan,
                 },
-            },
-            allow_promotion_codes=True,
-            **customer_kwargs,
-        )
+            }
+        session = stripe.checkout.Session.create(**session_kwargs)
 
         logger.info(f"Checkout session created for user {user_id}: {plan}/{interval}")
 
@@ -147,6 +178,66 @@ def create_checkout_session():
 
     except stripe.error.StripeError as e:
         logger.error(f"Stripe error creating checkout: {e}")
+        return jsonify({'error': f'Payment service error: {str(e)}'}), 500
+
+
+# ============ OVERAGE PACKS ============
+
+@billing_bp.route('/overage/checkout', methods=['POST'])
+@jwt_required()
+def create_overage_checkout():
+    """Create a Stripe Checkout Session for a 10-song overage pack ($5).
+
+    Only available to authenticated users on a paid plan (pro/lifetime/etc).
+    Returns the Stripe-hosted checkout URL — frontend redirects, Stripe
+    posts checkout.session.completed back to our webhook, webhook bumps
+    users.extras_balance by 10.
+    """
+    _init_stripe()
+
+    user_id = get_jwt_identity()
+    user = get_user_by_id(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    price_id = os.environ.get('STRIPE_PRICE_SONG_PACK_10', '')
+    if not price_id:
+        return jsonify({
+            'error': 'Overage packs are not configured yet. Set STRIPE_PRICE_SONG_PACK_10.',
+        }), 500
+
+    app_url = _get_app_url()
+
+    try:
+        customer_kwargs = {}
+        if user.stripe_customer_id:
+            customer_kwargs['customer'] = user.stripe_customer_id
+        else:
+            customer_kwargs['customer_email'] = user.email
+
+        session = stripe.checkout.Session.create(
+            mode='payment',
+            line_items=[{'price': price_id, 'quantity': 1}],
+            success_url=f'{app_url}/app?overage=success&session_id={{CHECKOUT_SESSION_ID}}',
+            cancel_url=f'{app_url}/app?overage=cancelled',
+            metadata={
+                'user_id': str(user.id),
+                'pack': 'song_pack_10',
+                'units': '10',
+            },
+            allow_promotion_codes=False,
+            **customer_kwargs,
+        )
+
+        logger.info(f"Overage checkout session created for user {user_id}: {session.id}")
+
+        return jsonify({
+            'checkout_url': session.url,
+            'session_id': session.id,
+        })
+
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error creating overage checkout: {e}")
         return jsonify({'error': f'Payment service error: {str(e)}'}), 500
 
 
@@ -214,20 +305,35 @@ def billing_status():
         'payment_failed': user.payment_failed_at is not None,
     }
 
-    # Fetch subscription details from Stripe if available
-    if user.stripe_subscription_id:
+    # Fetch subscription details from Stripe if available.
+    # Lifetime users don't have a recurring sub even if stripe_subscription_id is
+    # set from a prior plan, so skip the lookup for them.
+    if user.stripe_subscription_id and user.plan != 'lifetime':
         try:
             sub = stripe.Subscription.retrieve(user.stripe_subscription_id)
+            # Stripe API moved current_period_end from Subscription to its
+            # SubscriptionItem in 2024. Try both locations defensively, plus
+            # use getattr/dict access so any future field renames don't 500.
+            items_data = (sub.get('items') or {}).get('data') or []
+            first_item = items_data[0] if items_data else {}
+            cpe = (
+                getattr(sub, 'current_period_end', None)
+                or first_item.get('current_period_end')
+            )
+            recurring = ((first_item.get('price') or {}).get('recurring') or {})
             result['subscription'] = {
-                'id': sub.id,
-                'status': sub.status,
-                'current_period_end': sub.current_period_end,
-                'cancel_at_period_end': sub.cancel_at_period_end,
-                'interval': sub['items']['data'][0]['price']['recurring']['interval']
-                            if sub['items']['data'] else None,
+                'id': getattr(sub, 'id', None),
+                'status': getattr(sub, 'status', None),
+                'current_period_end': cpe,
+                'cancel_at_period_end': getattr(sub, 'cancel_at_period_end', False),
+                'interval': recurring.get('interval'),
             }
         except stripe.error.StripeError as e:
             logger.warning(f"Could not fetch subscription {user.stripe_subscription_id}: {e}")
+            result['subscription'] = None
+        except Exception as e:
+            # Any other Stripe-object access error: log + return None, don't 500
+            logger.warning(f"Subscription field-access error for {user.stripe_subscription_id}: {e}")
             result['subscription'] = None
     else:
         result['subscription'] = None

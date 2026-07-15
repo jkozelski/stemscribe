@@ -7,7 +7,7 @@ from pathlib import Path
 from flask import Blueprint, jsonify
 
 from models.job import get_job, save_job_to_disk, OUTPUT_DIR
-from auth.middleware import auth_required
+from auth.middleware import auth_required, authorize_job_access, forbidden_response
 from middleware.validation import validate_job_id
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,8 @@ def split_stem_endpoint(job_id, stem_name):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     if not STEREO_SPLITTER_AVAILABLE:
         return jsonify({'error': 'Stereo splitter not available'}), 500
@@ -89,6 +91,7 @@ def split_stem_endpoint(job_id, stem_name):
 
 
 @stems_bp.route('/api/analyze-stereo/<job_id>/<stem_name>', methods=['GET'])
+@auth_required(optional=True)
 def analyze_stereo_endpoint(job_id, stem_name):
     """Analyze a stem's stereo field without splitting it."""
     if not validate_job_id(job_id):
@@ -98,6 +101,8 @@ def analyze_stereo_endpoint(job_id, stem_name):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     if not STEREO_SPLITTER_AVAILABLE:
         return jsonify({'error': 'Stereo splitter not available'}), 500
@@ -138,6 +143,8 @@ def split_vocals_endpoint(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     if not ENHANCED_SEPARATOR_AVAILABLE:
         return jsonify({'error': 'Enhanced separator not available (audio-separator not installed)'}), 500

@@ -414,10 +414,6 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
         instrument_type: Type of instrument (guitar, bass, drums, piano, vocals)
         title: Song title (optional)
         artist: Artist name (optional)
-        tempo_override: If provided, overrides the tempo in the MIDI file.
-            Used by convert_job_midis_to_gp to keep all stems on the same tempo
-            (task #43 — per-stem transcribers each ran independent tempo detection,
-            producing .gp files with conflicting tempos for the same song).
 
     Returns:
         True if successful, False otherwise
@@ -740,53 +736,16 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
 # We use string=6 (bottom of staff) as a convention; GP picks the drum-line
 # from note.value alone. Unmapped pieces fall back to snare (38).
 _GM_DRUM_MAP = {
-    # Kick drums
-    35: (6, 35),  # Acoustic Bass Drum
-    36: (6, 36),  # Bass Drum 1
-    # Snares
-    37: (6, 37),  # Side Stick / Rim Shot
-    38: (6, 38),  # Acoustic Snare
-    39: (6, 39),  # Hand Clap
-    40: (6, 40),  # Electric Snare
-    # Toms
-    41: (6, 41),  # Low Floor Tom
-    43: (6, 43),  # High Floor Tom
-    45: (6, 45),  # Low Tom
-    47: (6, 47),  # Low-Mid Tom
-    48: (6, 48),  # Hi-Mid Tom
-    50: (6, 50),  # High Tom
-    # Hi-hats
-    42: (6, 42),  # Closed Hi-Hat
-    44: (6, 44),  # Pedal Hi-Hat
-    46: (6, 46),  # Open Hi-Hat
-    # Cymbals
-    49: (6, 49),  # Crash Cymbal 1
-    51: (6, 51),  # Ride Cymbal 1
-    52: (6, 52),  # Chinese Cymbal
-    53: (6, 53),  # Ride Bell
-    55: (6, 55),  # Splash Cymbal
-    57: (6, 57),  # Crash Cymbal 2
-    59: (6, 59),  # Ride Cymbal 2
-    # Latin / aux percussion (less common but worth supporting)
-    54: (6, 54),  # Tambourine
-    56: (6, 56),  # Cowbell
-    58: (6, 58),  # Vibraslap
-    60: (6, 60),  # High Bongo
-    61: (6, 61),  # Low Bongo
-    62: (6, 62),  # Mute High Conga
-    63: (6, 63),  # Open High Conga
-    64: (6, 64),  # Low Conga
-    65: (6, 65),  # High Timbale
-    66: (6, 66),  # Low Timbale
-    67: (6, 67),  # High Agogo
-    68: (6, 68),  # Low Agogo
-    69: (6, 69),  # Cabasa
-    70: (6, 70),  # Maracas
-    75: (6, 75),  # Claves
-    76: (6, 76),  # High Wood Block
-    77: (6, 77),  # Low Wood Block
-    80: (6, 80),  # Mute Triangle
-    81: (6, 81),  # Open Triangle
+    35: (6, 35), 36: (6, 36),  # Kick drums
+    37: (6, 37), 38: (6, 38), 39: (6, 39), 40: (6, 40),  # Snare / clap
+    41: (6, 41), 43: (6, 43), 45: (6, 45), 47: (6, 47), 48: (6, 48), 50: (6, 50),  # Toms
+    42: (6, 42), 44: (6, 44), 46: (6, 46),  # Hi-hats
+    49: (6, 49), 51: (6, 51), 52: (6, 52), 53: (6, 53), 55: (6, 55), 57: (6, 57), 59: (6, 59),  # Cymbals
+    54: (6, 54), 56: (6, 56), 58: (6, 58),  # Aux 1
+    60: (6, 60), 61: (6, 61), 62: (6, 62), 63: (6, 63), 64: (6, 64),  # Bongos / congas
+    65: (6, 65), 66: (6, 66), 67: (6, 67), 68: (6, 68),  # Timbales / agogo
+    69: (6, 69), 70: (6, 70), 75: (6, 75), 76: (6, 76), 77: (6, 77),  # Shakers / blocks
+    80: (6, 80), 81: (6, 81),  # Triangle
 }
 
 

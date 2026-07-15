@@ -111,9 +111,44 @@ def _forward_to_kozmo(body, sender, media=None):
         logger.error(f"Failed to forward SMS to KOZMO: {e}", exc_info=True)
 
 
+def _verify_twilio_signature():
+    """Verify X-Twilio-Signature on incoming webhook. Audit fix (2026-05-31):
+    without this, anyone who knows the URL can forge incoming SMS that look
+    like they came from Jeff's phone, spamming the KOZMO/n8n agent pipeline
+    and bypassing any caller-identity branching in those workflows.
+
+    Returns True if valid (or if dev-mode TWILIO_SKIP_SIG_VERIFY=true is set).
+    Returns False if signature missing/invalid — caller should 403.
+    """
+    if os.environ.get('TWILIO_SKIP_SIG_VERIFY', '').lower() in ('1', 'true', 'yes'):
+        logger.warning("Twilio signature verification SKIPPED (TWILIO_SKIP_SIG_VERIFY set)")
+        return True
+    auth_token = os.environ.get('TWILIO_AUTH_TOKEN', '')
+    if not auth_token:
+        logger.error("TWILIO_AUTH_TOKEN not set — refusing to accept unsigned webhook")
+        return False
+    sig = request.headers.get('X-Twilio-Signature', '')
+    if not sig:
+        return False
+    try:
+        from twilio.request_validator import RequestValidator
+    except ImportError:
+        logger.error("twilio package not installed — cannot verify webhook signature")
+        return False
+    validator = RequestValidator(auth_token)
+    # Twilio signs the FULL URL the request was sent to. Behind Cloudflare
+    # tunnel + gunicorn, request.url is the public https URL the user sees,
+    # which is what Twilio signed against.
+    public_url = request.url
+    return validator.validate(public_url, request.form.to_dict(), sig)
+
+
 @sms_bp.route('/incoming', methods=['POST'])
 def incoming_sms():
     """Twilio webhook — receives incoming SMS, stores it, and forwards to KOZMO for reply."""
+    if not _verify_twilio_signature():
+        logger.warning(f"Rejected unsigned /sms/incoming from {request.remote_addr}")
+        return jsonify({'error': 'Invalid signature'}), 403
     sender = request.form.get('From', '')
     body = request.form.get('Body', '')
     message_sid = request.form.get('MessageSid', '')
@@ -188,11 +223,13 @@ def mark_read():
 @sms_bp.route('/send', methods=['POST'])
 def send_sms():
     """Send an SMS reply back. Body: {"to": "+1...", "body": "text"}. Requires admin key."""
-    # Auth check — only allow from localhost or with admin key
-    admin_key = os.environ.get('BETA_ADMIN_KEY', 'stemscribe-beta-admin-2026')
+    # Auth check — admin key required. Audit fix (2026-05-31): dropped the
+    # hardcoded default fallback AND the localhost bypass (the latter was
+    # exploitable if any future middleware reflects X-Forwarded-For into
+    # request.remote_addr — attacker spoofs XFF: 127.0.0.1 and walks in).
+    admin_key = os.environ.get('BETA_ADMIN_KEY')
     req_key = request.headers.get('X-Admin-Key', '')
-    is_localhost = request.remote_addr in ('127.0.0.1', '::1', 'localhost')
-    if not is_localhost and req_key != admin_key:
+    if not admin_key or not req_key or req_key != admin_key:
         return jsonify({'error': 'Unauthorized'}), 401
     data = request.get_json(force=True, silent=True) or {}
     body = sanitize_text(data.get('body', ''), max_length=1600)

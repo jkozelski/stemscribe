@@ -51,7 +51,19 @@ logger = logging.getLogger(__name__)
 # ============ GPU QUEUING ============
 
 # Processing queue: only one separation job at a time (GPU memory constraint)
-_separation_semaphore = threading.Semaphore(1)
+_separation_semaphore = threading.BoundedSemaphore(1)
+
+
+def _release_sem():
+    """Release the separation semaphore, ignoring over-release. BoundedSemaphore
+    raises ValueError if released more than acquired — e.g. the watchdog force-
+    releases to unstick a stalled retry AND the stalled thread's finally also
+    releases. Capping keeps the count at 1 (a plain Semaphore could climb to 2
+    → two concurrent separations)."""
+    try:
+        _separation_semaphore.release()
+    except ValueError:
+        pass
 _active_runners = []  # Track active DemucsRunner instances for graceful shutdown
 _active_runners_lock = threading.Lock()
 
@@ -206,7 +218,7 @@ def separate_stems(job: ProcessingJob, audio_path: Path):
         job.error = str(e)
         return False
     finally:
-        _separation_semaphore.release()
+        _release_sem()
 
 
 def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
@@ -376,7 +388,7 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
 
         # Fallback to pure Demucs if RoFormer fails
         # Release semaphore first -- separate_stems() acquires its own
-        _separation_semaphore.release()
+        _release_sem()
         _sem_released = True
         logger.info("Falling back to standard Demucs separation...")
         job.stems = {}
@@ -384,7 +396,7 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
         return separate_stems(job, audio_path)
     finally:
         if not _sem_released:
-            _separation_semaphore.release()
+            _release_sem()
 
 
 def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar: bool = False):
@@ -539,7 +551,7 @@ def separate_stems_mdx(job: ProcessingJob, audio_path: Path, stereo_split_guitar
         job.error = str(e)
         return False
     finally:
-        _separation_semaphore.release()
+        _release_sem()
 
 
 def separate_stems_ensemble(job: ProcessingJob, audio_path: Path):
@@ -685,7 +697,7 @@ def separate_stems_ensemble(job: ProcessingJob, audio_path: Path):
         job.error = str(e)
         return False
     finally:
-        _separation_semaphore.release()
+        _release_sem()
 
 
 # ============ MODAL CLOUD GPU SEPARATION ============

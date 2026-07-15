@@ -341,6 +341,130 @@ def _api_key() -> Optional[str]:
     return None
 
 
+# ============================================================================
+# LOOKUP MODE (2026-05-27) — for famous songs, ignore the audio detector
+# entirely and use Claude's training-data knowledge as the source of truth.
+# ============================================================================
+
+LOOKUP_SYSTEM_PROMPT = """You are a music transcription expert. The user will give you a song title + artist and a number of bars from the audio. Your job: write out the chord PROGRESSION for that song, one chord per bar, as a flat list of exactly N chords.
+
+Rules:
+- Use musician-standard chord names: C, Cm, C7, Cmaj7, C#, Db, F#m, A/E (slash chords OK)
+- Return EXACTLY the requested number of bars — pad with the section's tonic if the song repeats out, truncate if your knowledge says it's shorter
+- Self-rate your confidence honestly. Cost of overconfidence is high.
+  * "high"   = you know this song well, you've seen the chart, you're confident
+  * "medium" = you know the song but unsure of exact bar count / minor variations
+  * "low"    = you're guessing or don't recognize it — DO NOT bluff
+- For instrumentals, jazz tunes, traditionals, classical, or songs you don't recognize, return confidence "low" and an empty chords_per_bar
+- Specify the song's actual recorded key (e.g. "B major", "F# minor"). If the song is commonly transcribed in a different key (capo'd), use the RECORDED key not the player's-perspective key.
+
+Return ONLY this JSON object. No prose, no code fences:
+{
+  "found": true|false,
+  "confidence": "high"|"medium"|"low",
+  "key": "B major",
+  "chords_per_bar": ["Bm","Bm","Em","Em",...],
+  "notes": "brief explanation of structure"
+}"""
+
+
+def _query_lookup_full_chart(
+    title: str,
+    artist: str,
+    target_bars: int,
+    model: str,
+) -> Optional[Dict[str, Any]]:
+    """Ask Claude for the full chord-per-bar sequence for a famous song.
+    Returns None on any failure — caller falls back to corrector mode."""
+    api_key = _api_key()
+    if not api_key:
+        return None
+    try:
+        import anthropic
+    except ImportError:
+        return None
+
+    client = anthropic.Anthropic(api_key=api_key)
+    user_msg = (
+        f'Song: "{title}"'
+        + (f' by {artist}' if artist else '')
+        + f'\nTarget bar count from audio: {target_bars}\n\n'
+        'Return ONLY the JSON object.'
+    )
+    try:
+        resp = client.messages.create(
+            model=model,
+            max_tokens=2000,
+            system=[{
+                "type": "text",
+                "text": LOOKUP_SYSTEM_PROMPT,
+                "cache_control": {"type": "ephemeral"},
+            }],
+            messages=[{"role": "user", "content": user_msg}],
+        )
+    except Exception as e:
+        logger.warning(f"[chord_corrector:lookup] Anthropic call failed: {e}")
+        return None
+
+    blocks = getattr(resp, "content", []) or []
+    text = ""
+    for b in blocks:
+        if getattr(b, "type", None) == "text":
+            text = (getattr(b, "text", "") or "").strip()
+            break
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except Exception:
+        m = re.search(r"\{.*\}", text, re.DOTALL)
+        if not m:
+            return None
+        try:
+            return json.loads(m.group(0))
+        except Exception:
+            return None
+
+
+def _apply_lookup_replacement(
+    chord_chart: Dict[str, Any],
+    lookup: Dict[str, Any],
+) -> Tuple[Dict[str, Any], int]:
+    """Replace bar_grid chord names with Claude's chords_per_bar. Keeps the
+    detector's bar TIMING (start_time/end_time) intact — only chord names
+    change. Returns (mutated chart, bars_replaced)."""
+    bar_grid = chord_chart.get("bar_grid") or []
+    chords = lookup.get("chords_per_bar") or []
+    if not bar_grid or not chords:
+        return chord_chart, 0
+
+    n = min(len(bar_grid), len(chords))
+    new_grid: List[Dict] = []
+    replaced = 0
+    for i, b in enumerate(bar_grid):
+        new_b = dict(b)
+        if i < n:
+            old = (b.get("chord") or "").strip()
+            new = (chords[i] or "").strip()
+            if new and new != old:
+                new_b["chord"] = new
+                replaced += 1
+        new_grid.append(new_b)
+    chord_chart["bar_grid"] = new_grid
+
+    # Recompute chords_used + key
+    seen: List[str] = []
+    for c in chords[:n]:
+        c = (c or "").strip()
+        if c and c not in seen:
+            seen.append(c)
+    if seen:
+        chord_chart["chords_used"] = seen
+    if lookup.get("key"):
+        chord_chart["key"] = lookup["key"]
+    return chord_chart, replaced
+
+
 def _query_canonical_chords(title: str, artist: str, model: str) -> Optional[Dict[str, Any]]:
     """Ask Claude for the canonical chord set. Returns None on any failure
     (network, parse, low confidence) so callers fall back to librosa's output."""
@@ -1177,9 +1301,59 @@ def apply_correction(
         return chord_chart
 
     use_mode = (mode or os.environ.get("ANTHROPIC_CORRECTION_MODE") or "drop").strip().lower()
-    if use_mode not in ("drop", "replace", "full"):
+    if use_mode not in ("drop", "replace", "full", "lookup", "lookup_then_full"):
         use_mode = "drop"
     use_model = model or os.environ.get("ANTHROPIC_CORRECTION_MODEL") or _DEFAULT_MODEL
+
+    # ---------- LOOKUP MODE (2026-05-27) ----------
+    # For famous songs Claude recognizes with high confidence, bypass the
+    # audio detector entirely. Replace bar_grid chord names with Claude's
+    # full chord-per-bar progression. Keeps audio-derived bar TIMING intact.
+    # Falls through to "full" corrector when confidence isn't high.
+    if use_mode in ("lookup", "lookup_then_full"):
+        bar_grid = chord_chart.get("bar_grid") or []
+        target_bars = len(bar_grid)
+        if target_bars > 0:
+            lookup = _query_lookup_full_chart(title, artist, target_bars, use_model)
+            if lookup is None:
+                logger.info(f"[chord_corrector:lookup] {title!r}: no Claude response")
+            else:
+                conf = (lookup.get("confidence") or "").lower()
+                found = bool(lookup.get("found"))
+                chords_per_bar = lookup.get("chords_per_bar") or []
+                if found and conf == "high" and len(chords_per_bar) >= max(4, target_bars // 4):
+                    chord_chart, n_rep = _apply_lookup_replacement(chord_chart, lookup)
+                    chord_chart["anthropic_correction"] = {
+                        "mode": "lookup",
+                        "model": use_model,
+                        "status": "applied",
+                        "confidence": conf,
+                        "claude_key": lookup.get("key", ""),
+                        "claude_notes": lookup.get("notes", ""),
+                        "bars_replaced": n_rep,
+                        "bars_total": target_bars,
+                        "bars_returned": len(chords_per_bar),
+                    }
+                    logger.info(
+                        f"[chord_corrector:lookup] {title!r}: replaced {n_rep}/{target_bars} "
+                        f"bars with Claude's high-confidence chart (key={lookup.get('key')!r})"
+                    )
+                    return chord_chart
+                else:
+                    logger.info(
+                        f"[chord_corrector:lookup] {title!r}: confidence={conf!r} "
+                        f"found={found} bars_returned={len(chords_per_bar)} — "
+                        f"{'falling through to full mode' if use_mode == 'lookup_then_full' else 'skipping'}"
+                    )
+        # If lookup-only mode and we didn't apply, mark and return.
+        if use_mode == "lookup":
+            chord_chart.setdefault("anthropic_correction", {}).update({
+                "mode": "lookup",
+                "status": "skipped_low_confidence_or_unknown",
+            })
+            return chord_chart
+        # lookup_then_full: continue into the canonical-chords flow below
+        use_mode = "full"
 
     canon = _query_canonical_chords(title, artist, use_model)
     if not canon:
@@ -1270,13 +1444,24 @@ def apply_correction(
         qf = _quality_flips(set(detected_norm.keys()), canonical_set)
         qf_threshold = int(os.environ.get("ANTHROPIC_CORRECTION_QFLIP_GATE") or "2")
         qf_drop_ceiling = float(os.environ.get("ANTHROPIC_CORRECTION_QFLIP_DROP_GATE") or "0.4")
-        if qf >= qf_threshold or (qf >= 1 and drop_ratio < qf_drop_ceiling):
+        # BYPASS the qflip gate at high drop_ratio. When Claude wants to
+        # replace 60%+ of detector chords, the detector is fundamentally
+        # wrong (often wrong KEY), and "quality flips" are evidence that
+        # Claude is correctly fixing key, not over-eagerly flipping
+        # qualities on a near-correct chart. Under My Thumb 2026-05-27:
+        # drop_ratio=0.86, qf=2 → was blocked, should have replaced.
+        qf_bypass_dropratio = float(
+            os.environ.get("ANTHROPIC_CORRECTION_QFLIP_BYPASS_DROPRATIO") or "0.6"
+        )
+        qf_should_block = (qf >= qf_threshold or (qf >= 1 and drop_ratio < qf_drop_ceiling))
+        if qf_should_block and drop_ratio < qf_bypass_dropratio:
             meta.update({
                 "status": "skipped_quality_flip",
                 "drop_ratio": round(drop_ratio, 2),
                 "quality_flips": qf,
                 "qf_threshold": qf_threshold,
                 "qf_drop_ceiling": qf_drop_ceiling,
+                "qf_bypass_dropratio": qf_bypass_dropratio,
                 "detector_chord_set": sorted(detected_norm.keys()),
             })
             chord_chart["anthropic_correction"] = meta
@@ -1286,6 +1471,12 @@ def apply_correction(
                 f"leaving detector output untouched"
             )
             return chord_chart
+        if qf_should_block:
+            logger.info(
+                f"[chord_corrector:qflip] {title!r}: qflip gate would block "
+                f"(qf={qf}, threshold={qf_threshold}) but drop_ratio={drop_ratio:.0%} "
+                f">= bypass {qf_bypass_dropratio:.0%} — letting Claude rewrite"
+            )
 
     # ---------- DROP MODE ----------
     if use_mode == "drop":

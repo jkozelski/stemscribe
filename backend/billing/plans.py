@@ -1,17 +1,8 @@
 """
-Plan definitions, canonical pricing, and Stripe price-ID mapping.
+Plan definitions and Stripe price ID mapping.
 
-⚠️  SINGLE SOURCE OF TRUTH FOR PRICING.
-If you change a price, change it HERE, then update the matching Stripe price
-and Apple IAP product, and walk the checklist in docs/PRICING.md so no surface
-drifts. Canonical prices (locked 2026-06-19):
-
-    Free       —  $0
-    Pro        —  $10/mo   or   $89/yr   (30 songs/mo)
-    Lifetime   —  $199 one-time          (50 songs/mo)
-    Song Pack  —  $5 / 10 songs          (overage add-on, not a tier)
-
-There is NO "Premium" tier (retired 2026-06-19) and NO $100/$200 pricing.
+Stripe price IDs are loaded from environment variables so that
+test-mode and live-mode keys can differ without code changes.
 """
 
 import os
@@ -23,24 +14,21 @@ PLANS = {
         'name': 'Free',
         'monthly_price': 0,
         'annual_price': 0,
-        'one_time_price': None,
-        'songs_per_month': 3,
+        'songs_per_month': 5,
         'max_duration_sec': 300,       # 5 minutes
-        'stems': 4,
-        'features': ['Basic 4-stem separation', 'MP3 output (128kbps)'],
+        'stems': 6,
+        'features': ['6-stem separation', 'MP3 output (128kbps)'],
     },
     'pro': {
         'name': 'Pro',
         'monthly_price': 10,
         'annual_price': 89,
-        'one_time_price': None,
         'songs_per_month': 30,
-        'max_duration_sec': 900,       # 15 minutes
+        'max_duration_sec': 1800,      # 30 minutes
         'stems': 6,
         'features': [
             '6-stem separation (+ guitar, piano)',
             'Chord detection + key analysis',
-            'Chord chart export (PDF + ChordPro)',
             'Guitar Pro tab export',
             'Priority processing',
         ],
@@ -50,70 +38,79 @@ PLANS = {
         'monthly_price': 0,
         'annual_price': 0,
         'one_time_price': 199,
-        'songs_per_month': 50,
+        'qty_cap': 100,
+        'songs_per_month': 50,         # 50/mo cap (margin) — NOT unlimited
         'max_duration_sec': 1800,      # 30 minutes
         'stems': 6,
         'features': [
-            'Everything in Pro',
-            '50 songs per month',
+            'Everything in Pro, 50 songs per month',
             'Lifetime access — never billed again',
             'Founding-customer badge',
+            'First-look on every new feature',
+            'Limited to first 100 customers',
         ],
     },
-    # 'beta' is retained ONLY for the transition off the invite gate. It grants
-    # Pro-equivalent access so existing beta-code redeemers are not downgraded.
-    # Remove once the beta gate is fully gone.
     'beta': {
         'name': 'Beta',
         'monthly_price': 0,
         'annual_price': 0,
-        'one_time_price': None,
-        'songs_per_month': 30,
-        'max_duration_sec': 900,
+        'songs_per_month': -1,         # unlimited (matches pro)
+        'max_duration_sec': 1800,      # 30 minutes
         'stems': 6,
-        'features': ['Pro-equivalent access (beta)'],
+        'features': [
+            '6-stem separation (+ guitar, piano)',
+            'Chord detection + key analysis',
+            'Guitar Pro tab export',
+            'Priority processing',
+            'WAV lossless output',
+        ],
     },
 }
 
 
 def get_stripe_prices():
-    """Return mapping of plan+interval to Stripe Price IDs from env vars.
-
-    Env-backed so test-mode and live-mode price IDs can differ without code
-    changes. Canonical live IDs are documented in docs/PRICING.md.
-    """
+    """Return mapping of plan+interval to Stripe Price IDs from env vars."""
     return {
+        'premium_monthly': os.environ.get('STRIPE_PRICE_PREMIUM_MONTHLY', ''),  # legacy
+        'premium_annual': os.environ.get('STRIPE_PRICE_PREMIUM_ANNUAL', ''),    # legacy
         'pro_monthly': os.environ.get('STRIPE_PRICE_PRO_MONTHLY', ''),
         'pro_annual': os.environ.get('STRIPE_PRICE_PRO_ANNUAL', ''),
-        'lifetime': os.environ.get('STRIPE_PRICE_LIFETIME_FOUNDER', ''),
-        'song_pack': os.environ.get('STRIPE_PRICE_SONG_PACK_10', ''),
+        'lifetime_founder': os.environ.get('STRIPE_PRICE_LIFETIME_FOUNDER', ''),
     }
 
 
-def get_price_id(plan: str, interval: str = 'monthly') -> str | None:
-    """Look up the Stripe Price ID for a plan (+ interval for subscriptions).
+def get_price_id(plan: str, interval: str = '') -> str | None:
+    """Look up the Stripe Price ID for a plan + interval combo.
 
     Args:
-        plan: 'pro' or 'lifetime'
-        interval: 'monthly' or 'annual' (ignored for one-time 'lifetime')
+        plan: 'pro', 'premium' (legacy), or 'lifetime'
+        interval: 'monthly' or 'annual' for subscription plans, ignored for lifetime
 
     Returns:
         Stripe price_xxx string, or None if not configured.
     """
     prices = get_stripe_prices()
     if plan == 'lifetime':
-        return prices.get('lifetime') or None
+        return prices.get('lifetime_founder') or None
     key = f'{plan}_{interval}'
-    return prices.get(key) or None
+    price_id = prices.get(key)
+    return price_id if price_id else None
 
 
 def plan_from_price_id(price_id: str) -> str | None:
     """Reverse lookup: given a Stripe Price ID, return the plan name.
 
-    Returns 'pro' or 'lifetime', or None if the price ID is not recognized.
+    Returns 'pro', 'premium' (legacy), 'lifetime', or None.
     """
     prices = get_stripe_prices()
     for key, pid in prices.items():
-        if pid and pid == price_id:
-            return key.split('_')[0]   # 'pro_monthly' -> 'pro', 'lifetime' -> 'lifetime'
+        if pid == price_id:
+            if key == 'lifetime_founder':
+                return 'lifetime'
+            # key is like 'premium_monthly' or 'pro_annual'
+            return key.split('_')[0]
     return None
+
+
+# Hard cap on Lifetime Founder seats. Enforced in create_checkout_session.
+LIFETIME_FOUNDER_CAP = 100

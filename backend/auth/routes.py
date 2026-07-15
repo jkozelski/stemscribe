@@ -266,7 +266,7 @@ def google_login_redirect_callback():
         'localStorage.setItem("ss_user_cache",' + safe_user + ');'
         # Mark the invite-gate as passed for paid/lifetime/admin BEFORE handing off
         # to /app, so a signed-in Lifetime user is not bounced to /beta.
-        'try{var _gp=((' + safe_user + ').plan||"").toLowerCase();if(_gp=="lifetime"||_gp=="pro"||_gp=="beta")localStorage.setItem("stemscribe-paid-plan",_gp);if(((' + safe_user + ').email||"")=="jkozelski@gmail.com")localStorage.setItem("stemscribe-admin","1");}catch(e){}'
+        'try{var _gp=((' + safe_user + ').plan||"").toLowerCase();if(_gp=="lifetime"||_gp=="pro"||_gp=="premium")localStorage.setItem("stemscribe-paid-plan",_gp);if(((' + safe_user + ').email||"")=="jkozelski@gmail.com")localStorage.setItem("stemscribe-admin","1");}catch(e){}'
         '}catch(e){}'
         'window.location.replace("/app");'
         '</script>'
@@ -361,7 +361,7 @@ def magic_link_verify():
         'localStorage.setItem("ss_user_cache",' + safe_user + ');'
         # Mark the invite-gate as passed for paid/lifetime/admin BEFORE handing off
         # to /app, so a signed-in Lifetime user is not bounced to /beta.
-        'try{var _gp=((' + safe_user + ').plan||"").toLowerCase();if(_gp=="lifetime"||_gp=="pro"||_gp=="beta")localStorage.setItem("stemscribe-paid-plan",_gp);if(((' + safe_user + ').email||"")=="jkozelski@gmail.com")localStorage.setItem("stemscribe-admin","1");}catch(e){}'
+        'try{var _gp=((' + safe_user + ').plan||"").toLowerCase();if(_gp=="lifetime"||_gp=="pro"||_gp=="premium")localStorage.setItem("stemscribe-paid-plan",_gp);if(((' + safe_user + ').email||"")=="jkozelski@gmail.com")localStorage.setItem("stemscribe-admin","1");}catch(e){}'
         '}catch(e){}'
         'window.location.replace("/app");'
         '</script>'

@@ -32,6 +32,8 @@ rc_webhooks_bp = Blueprint('revenuecat_webhooks', __name__, url_prefix='/webhook
 PRODUCT_PLAN = {
     'stemscriber_pro_monthly': 'pro',
     'stemscriber_pro_annual': 'pro',
+    'stemscriber_pro_monthly_v2': 'pro',   # live Apple IAP ids (old ones burned by Apple)
+    'stemscriber_pro_annual_v2': 'pro',
     'stemscriber_lifetime': 'lifetime',
 }
 
@@ -106,9 +108,17 @@ def revenuecat_webhook():
                 set_user_plan(str(user.id), plan)
                 logger.info(f"RevenueCat {etype}: user {user.id} -> {plan}")
         elif etype in REVOKE_EVENTS:
-            # Lifetime is a non-consumable: only a REFUND should revoke it.
-            set_user_plan(str(user.id), 'free')
-            logger.info(f"RevenueCat {etype}: user {user.id} -> free")
+            cur = getattr(user, 'plan', None)
+            # comped/beta accounts are manual — an Apple event must never touch them
+            if cur == 'beta':
+                logger.info(f"RevenueCat {etype}: user {user.id} is comped (beta) — NOT downgrading")
+            # Lifetime is a NON-CONSUMABLE: subscriptions EXPIRE, a one-time purchase
+            # does not. Only a real REFUND claws back lifetime. An EXPIRATION must NOT.
+            elif cur == 'lifetime' and etype != 'REFUND':
+                logger.info(f"RevenueCat {etype}: user {user.id} is lifetime — NOT downgrading on {etype} (only REFUND revokes)")
+            else:
+                set_user_plan(str(user.id), 'free')
+                logger.info(f"RevenueCat {etype}: user {user.id} -> free")
         else:
             logger.info(f"RevenueCat {etype}: no plan change for user {user.id}")
     except Exception as e:

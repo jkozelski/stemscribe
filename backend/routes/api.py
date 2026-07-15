@@ -26,7 +26,7 @@ from services.url_resolver import (
     validate_url_no_ssrf as _validate_url_no_ssrf,
 )
 
-from auth.middleware import auth_required, authorize_job_access, forbidden_response
+from auth.middleware import auth_required, authorize_job_access, forbidden_response, _ADMIN_EMAILS
 from middleware.rate_limit import enforce_plan_limits, record_usage_event
 from middleware.validation import (
     validate_job_id as _validate_job_id_v2,
@@ -1071,9 +1071,14 @@ def get_peaks(job_id, stem_name):
 @api_bp.route('/api/jobs', methods=['GET'])
 @auth_required(optional=True)
 def list_jobs():
-    """List all jobs"""
+    """List ONLY the caller's own jobs (owner / anonymous-session / admin),
+    plus public demo jobs. Previously returned ALL users' jobs to any
+    anonymous caller — a data leak of filenames, user_ids, source_urls and
+    chord data. Filtered via authorize_job_access, the same ownership rule
+    used by every per-job route."""
     return jsonify({
-        'jobs': [job.to_dict() for job in jobs.values()]
+        'jobs': [job.to_dict() for job in jobs.values()
+                 if authorize_job_access(job)]
     })
 
 
@@ -1135,7 +1140,11 @@ def get_chord_chart(job_id):
 @api_bp.route('/api/cleanup', methods=['POST'])
 @auth_required
 def cleanup_old_files():
-    """Clean up old stem files to save disk space"""
+    """Clean up old stem files to save disk space (ADMIN ONLY — deletes ANY
+    user's job dirs older than N days, so it must not be caller-triggerable)."""
+    from flask import g
+    if getattr(getattr(g, 'current_user', None), 'email', None) not in _ADMIN_EMAILS:
+        return forbidden_response()
     from dependencies import DRIVE_AVAILABLE
     data = request.get_json() or {}
     try:
@@ -1573,6 +1582,34 @@ def get_session_track(job_id, n):
     return send_file(str(wav), mimetype='audio/wav')
 
 
+@api_bp.route('/api/session-track/<job_id>/<n>', methods=['PATCH'])
+@auth_required
+def rename_session_track(job_id, n):
+    """Rename a session track (updates the sidecar the strips are built from)."""
+    import json as _json
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    user = getattr(g, 'current_user', None)
+    if not user or (job.user_id is not None and job.user_id != str(user.id)):
+        return jsonify({'error': 'Forbidden'}), 403
+    name = ((request.get_json(silent=True) or {}).get('name') or '').strip()[:40]
+    if not name:
+        return jsonify({'error': 'Name required'}), 400
+    side = OUTPUT_DIR / job_id / f'track_{n}.json'
+    meta = {}
+    try:
+        meta = _json.loads(side.read_text())
+    except Exception:
+        pass
+    meta['name'] = name
+    tmp = str(side) + '.new'
+    with open(tmp, 'w') as f:
+        _json.dump(meta, f)
+    os.replace(tmp, str(side))
+    return jsonify({'ok': True, 'name': name})
+
+
 @api_bp.route('/api/session-track/<job_id>/<n>', methods=['DELETE'])
 @auth_required
 def delete_session_track(job_id, n):
@@ -1614,3 +1651,158 @@ def list_session_tracks(job_id):
             except Exception:
                 pass
     return jsonify({'tracks': out})
+
+
+_chart_track_lock = threading.Lock()
+
+
+@api_bp.route('/api/chart-track/<job_id>/<int:n>', methods=['POST'])
+@auth_required
+def chart_session_track(job_id, n):
+    """Jeff's 4-track vision: generate a chord chart FROM a session track the
+    user recorded (solo guitar/piano = the detector's easiest input). Lite
+    pipeline: detection + measured key + Whisper + format_chart on one WAV —
+    no stem separation, no cloud GPU. One chart per session (latest wins).
+    """
+    import json as _json
+    from pathlib import Path as _Path
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    user = getattr(g, 'current_user', None)
+    if not user or (job.user_id is not None and job.user_id != str(user.id)):
+        return jsonify({'error': 'Forbidden'}), 403
+    if (job.metadata or {}).get('kind') != 'session':
+        return jsonify({'error': 'Charting is for session tracks (v1)'}), 400
+    wav = OUTPUT_DIR / job_id / f'track_{n}.wav'
+    side = OUTPUT_DIR / job_id / f'track_{n}.json'
+    if not wav.exists():
+        return jsonify({'error': 'No such track'}), 404
+    if not _chart_track_lock.acquire(blocking=False):
+        return jsonify({'error': 'Another track is being charted — try again in a minute'}), 429
+
+    track_name = f'TRACK {n}'
+    try:
+        meta = _json.loads(side.read_text())
+        track_name = meta.get('name') or track_name
+    except Exception:
+        pass
+
+    def _run():
+        try:
+            job.metadata['charting'] = 'running'
+            from models.job import save_job_checkpoint
+            from take_chord_detector import detect_take_chords
+            from word_timestamps import get_word_timestamps
+            from chart_formatter import format_chart
+            from chart_library_matcher import _measure_sounding_key, _spell_in_key, _parse_key
+
+            # TAKE-SIZED detector (7/6): the song detectors assume full-band
+            # full-length audio and went blind on a clean 19s G-Am-C-D take.
+            # Windowed chroma template-match reads solo takes correctly.
+            job.chord_progression = detect_take_chords(wav)
+            job.detected_key = None
+
+            key = job.detected_key or 'Unknown'
+            measured = _measure_sounding_key({'other': str(wav)})
+            if measured is not None:
+                dk = _parse_key(key)
+                minor = dk[1] if dk else False
+                key_pc = (measured - 3) % 12 if minor else measured
+                key = _spell_in_key(key_pc, measured) + ('m' if minor else '')
+
+            word_ts = []
+            try:
+                word_ts = get_word_timestamps(str(wav)) or []
+            except Exception:
+                pass
+
+            chart = format_chart(
+                chord_events=job.chord_progression or [],
+                word_timestamps=word_ts,
+                title=f'{job.filename} — {track_name}',
+                artist='',
+                key=key,
+                grid=(job.metadata or {}).get('grid'),
+            )
+            if chart and chart.get('sections'):
+                chart['charted_from'] = {'track': n, 'name': track_name}
+                out = OUTPUT_DIR / job_id / 'chord_chart.json'
+                tmp = str(out) + '.new'
+                with open(tmp, 'w') as f:
+                    _json.dump(chart, f, indent=2)
+                os.replace(tmp, str(out))
+                job.metadata['charting'] = 'done'
+            else:
+                job.metadata['charting'] = 'empty'
+            save_job_checkpoint(job)
+        except Exception as e:
+            logger.warning(f'chart-track failed for {job_id}/{n}: {e}')
+            job.metadata['charting'] = 'failed'
+        finally:
+            _chart_track_lock.release()
+
+    t = threading.Thread(target=_run)
+    t.daemon = True
+    t.start()
+    return jsonify({'ok': True, 'charting': n, 'name': track_name})
+
+@api_bp.route('/api/account', methods=['DELETE'])
+@auth_required
+def delete_account():
+    """Apple 5.1.1(v): full in-app account deletion. Removes the user's jobs
+    (disk + memory), chart library, edit history, and the user row. The JSON
+    body must contain {"confirm": "DELETE"} — a typed confirmation from the
+    UI, never a bare click."""
+    import shutil
+    from db import execute as db_execute, query_all as db_query_all
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    body = request.get_json(silent=True) or {}
+    if body.get('confirm') != 'DELETE':
+        return jsonify({'error': 'Confirmation required'}), 400
+    uid = str(user.id)
+
+    # 1) jobs: disk + memory
+    removed = 0
+    for job_id, job in list(jobs.items()):
+        owns = (getattr(job, 'user_id', None) == uid or
+                (isinstance(getattr(job, 'metadata', None), dict) and job.metadata.get('user_id') == uid))
+        if owns:
+            try:
+                d = OUTPUT_DIR / job_id
+                if d.exists():
+                    shutil.rmtree(d)
+            except Exception as e:
+                logger.warning(f'account-delete: job dir {job_id}: {e}')
+            jobs.pop(job_id, None)
+            removed += 1
+    # disk-only jobs the memory map missed
+    try:
+        import json as _json
+        for meta_path in OUTPUT_DIR.glob('*/job_metadata.json'):
+            try:
+                m = _json.loads(meta_path.read_text())
+            except Exception:
+                continue
+            if m.get('user_id') == uid or (m.get('metadata') or {}).get('user_id') == uid:
+                shutil.rmtree(meta_path.parent, ignore_errors=True)
+                removed += 1
+    except Exception as e:
+        logger.warning(f'account-delete disk sweep: {e}')
+
+    # 2) database rows (order matters for FKs)
+    for sql in [
+        "DELETE FROM chart_edit_history WHERE user_id = %s",
+        "DELETE FROM chart_library WHERE user_id = %s",
+        "DELETE FROM users WHERE id = %s",
+    ]:
+        try:
+            db_execute(sql, (uid,))
+        except Exception as e:
+            logger.warning(f'account-delete sql ({sql.split()[2]}): {e}')
+
+    logger.info(f'ACCOUNT DELETED: {uid} ({getattr(user, "email", "?")}), {removed} jobs removed')
+    return jsonify({'ok': True, 'jobs_removed': removed})

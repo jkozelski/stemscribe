@@ -73,8 +73,8 @@ def _songs_per_day():
     rows = query_all(
         """
         SELECT DATE(created_at) AS day, COUNT(*) AS cnt
-        FROM jobs
-        WHERE status = 'complete'
+        FROM usage
+        WHERE action = 'separation'
           AND created_at >= NOW() - INTERVAL '30 days'
         GROUP BY day
         ORDER BY day
@@ -87,7 +87,7 @@ def _daily_active_users():
     rows = query_all(
         """
         SELECT DATE(created_at) AS day, COUNT(DISTINCT user_id) AS cnt
-        FROM jobs
+        FROM usage
         WHERE user_id IS NOT NULL
           AND created_at >= NOW() - INTERVAL '30 days'
         GROUP BY day
@@ -101,8 +101,9 @@ def _peak_hours():
     rows = query_all(
         """
         SELECT EXTRACT(HOUR FROM created_at)::int AS hour, COUNT(*) AS cnt
-        FROM jobs
-        WHERE created_at >= NOW() - INTERVAL '30 days'
+        FROM usage
+        WHERE action = 'separation'
+          AND created_at >= NOW() - INTERVAL '30 days'
         GROUP BY hour
         ORDER BY hour
         """
@@ -140,7 +141,7 @@ def _summary_cards():
     )
     users_row = query_one("SELECT COUNT(*) AS cnt FROM users")
     jobs_row = query_one(
-        "SELECT COUNT(*) AS cnt FROM jobs WHERE status = 'complete'"
+        "SELECT COUNT(*) AS cnt FROM usage WHERE action = 'separation'"
     )
     return {
         'queue_depth': int(queue_row['cnt']) if queue_row else 0,

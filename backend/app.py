@@ -127,6 +127,18 @@ def create_app():
     def serve_app():
         return send_from_directory(FRONTEND_DIR, 'index.html')
 
+    @app.route('/tuner')
+    def serve_tuner():
+        return send_from_directory(FRONTEND_DIR, 'tuner.html')
+
+    @app.route('/fretboard')
+    def serve_fretboard():
+        return send_from_directory(FRONTEND_DIR, 'fretboard.html')
+
+    @app.route('/vocalcoach')
+    def serve_vocalcoach():
+        return send_from_directory(FRONTEND_DIR, 'vocalcoach.html')
+
     @app.route('/practice.html')
     def serve_practice():
         resp = send_from_directory(FRONTEND_DIR, 'practice.html')

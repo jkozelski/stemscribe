@@ -15,13 +15,30 @@ from html import escape
 from pathlib import Path
 
 import requests
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 
 from middleware.validation import validate_email_format as _validate_email, validate_job_id
+from functools import wraps
+from auth.middleware import auth_required
 
 logger = logging.getLogger(__name__)
 
 support_bp = Blueprint("support", __name__)
+
+# --- Security: ticket listing/responding/resolving expose customer PII (names,
+# emails, message bodies) + are admin actions. Gate to the staff allowlist. ---
+ADMIN_EMAILS = {'jkozelski@gmail.com'}
+
+
+def _admin_only(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user = getattr(g, 'current_user', None)
+        email = getattr(user, 'email', None) if user else None
+        if not user or email not in ADMIN_EMAILS:
+            return jsonify({'error': 'Forbidden'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 # Store tickets in data/ directory
 TICKETS_FILE = Path(__file__).parent.parent / 'data' / 'support_tickets.json'
@@ -167,6 +184,8 @@ def create_ticket():
 
 
 @support_bp.route('/api/support/tickets', methods=['GET'])
+@auth_required
+@_admin_only
 def list_tickets():
     """
     List all support tickets. Supports optional filtering.
@@ -192,6 +211,8 @@ def list_tickets():
 
 
 @support_bp.route('/api/support/ticket/<ticket_id>', methods=['GET'])
+@auth_required
+@_admin_only
 def get_ticket(ticket_id):
     """
     Get a single ticket by ID.
@@ -211,6 +232,8 @@ def get_ticket(ticket_id):
 
 
 @support_bp.route('/api/support/ticket/<ticket_id>/respond', methods=['POST'])
+@auth_required
+@_admin_only
 def respond_to_ticket(ticket_id):
     """
     Add a response to a ticket and update status.
@@ -258,6 +281,8 @@ def respond_to_ticket(ticket_id):
 
 
 @support_bp.route('/api/support/ticket/<ticket_id>/resolve', methods=['POST'])
+@auth_required
+@_admin_only
 def resolve_ticket(ticket_id):
     """
     Mark a ticket as resolved.

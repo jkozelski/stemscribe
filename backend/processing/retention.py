@@ -20,6 +20,7 @@ Runs as a background daemon thread started from app.create_app().
 """
 
 import os
+import json
 import time
 import shutil
 import logging
@@ -94,10 +95,19 @@ def _completion_time(job, dir_path: Path) -> float:
         return time.time()
 
 
+def _is_owned_by_user(uid) -> bool:
+    """A non-empty user_id means a registered user owns this job — it is their
+    saved library and must never be auto-deleted. Anonymous jobs have
+    user_id None (or empty/"None") and stay eligible for cleanup."""
+    return uid is not None and str(uid).strip() not in ('', 'None')
+
+
 def _is_exempt(job) -> bool:
     """Return True if the job should never be auto-deleted."""
     if job is None:
         return False
+    if _is_owned_by_user(getattr(job, 'user_id', None)):
+        return True
     meta = getattr(job, 'metadata', None) or {}
     if meta.get('retain') is True:
         return True
@@ -110,13 +120,56 @@ def _is_exempt(job) -> bool:
     return False
 
 
+def _is_exempt_from_disk(dir_path: Path) -> bool:
+    """Disk-fallback exemption check. Used when the in-memory job is None
+    (orphan case — service restarted before the job was reloaded into memory).
+    Previously these orphans bypassed all three protection flags
+    (retain / demo / kozelski-artist) because _is_exempt(None) returned False,
+    and the directory was deleted along with its protective metadata.
+    """
+    meta_path = dir_path / 'job_metadata.json'
+    if not meta_path.exists():
+        return False
+    try:
+        with open(meta_path, 'r') as f:
+            full = json.load(f)
+    except (OSError, ValueError, json.JSONDecodeError) as e:
+        logger.warning(f"[retention] could not read {meta_path}: {e}")
+        return False
+    # Owner check: user_id lives at the TOP level of job_metadata.json
+    # (alongside 'metadata'), not inside the metadata dict.
+    if isinstance(full, dict) and _is_owned_by_user(full.get('user_id')):
+        return True
+    # Job metadata stores top-level 'metadata' dict alongside other fields
+    meta = full.get('metadata') if isinstance(full, dict) else None
+    if not isinstance(meta, dict):
+        # Some metadata files put fields at top level
+        meta = full if isinstance(full, dict) else {}
+    if meta.get('retain') is True:
+        return True
+    if meta.get('demo') is True:
+        return True
+    artist = (meta.get('artist') or '').strip().lower()
+    if artist == 'kozelski':
+        return True
+    return False
+
+
 def _is_job_in_progress(job) -> bool:
     """Return True if the job is still being worked on (do not delete)."""
     if job is None:
         return False
     status = getattr(job, 'status', None)
     # Only 'completed' and 'failed' are safe to reap.
-    return status not in ('completed', 'failed')
+    if status not in ('completed', 'failed'):
+        return True
+    # Post-sep daemon may still be writing MIDI/MusicXML/GP after status='completed'
+    # was set early at chord_chart.json write. Don't reap until the daemon clears
+    # the flag (or the retention TTL elapses past any reasonable daemon runtime).
+    metadata = getattr(job, 'metadata', None) or {}
+    if metadata.get('post_sep_daemon'):
+        return True
+    return False
 
 
 def _delete_dir(path: Path, dry_run: bool) -> int:
@@ -178,7 +231,7 @@ def run_sweep(
             if _is_job_in_progress(job):
                 summary['skipped_in_progress'] += 1
                 continue
-            if _is_exempt(job):
+            if _is_exempt(job) or (job is None and _is_exempt_from_disk(job_dir)):
                 summary['skipped_exempt'] += 1
                 continue
             completed_at = _completion_time(job, job_dir)
@@ -204,7 +257,7 @@ def run_sweep(
             if _is_job_in_progress(job):
                 summary['skipped_in_progress'] += 1
                 continue
-            if _is_exempt(job):
+            if _is_exempt(job) or (job is None and _is_exempt_from_disk(job_dir)):
                 summary['skipped_exempt'] += 1
                 continue
             completed_at = _completion_time(job, job_dir)

@@ -10,6 +10,7 @@ import logging
 from flask import Blueprint, request, jsonify
 
 from middleware.validation import validate_job_id
+from auth.middleware import auth_required, authorize_job_access, forbidden_response
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ accuracy_bp = Blueprint("accuracy", __name__)
 
 
 @accuracy_bp.route('/api/accuracy/<job_id>', methods=['GET'])
+@auth_required(optional=True)
 def get_accuracy(job_id):
     """Return chord accuracy report for a job.
 
@@ -29,15 +31,17 @@ def get_accuracy(job_id):
     from chord_accuracy import get_accuracy_score, score_chord_accuracy, save_accuracy_score
     from models.job import get_job
 
+    # Authorize BEFORE returning cached score so cache doesn't bypass authz.
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+
     # Check for cached score
     cached = get_accuracy_score(job_id)
     if cached:
         return jsonify({'job_id': job_id, **cached})
-
-    # Try to compute on the fly
-    job = get_job(job_id)
-    if not job:
-        return jsonify({'error': 'Job not found'}), 404
 
     ai_chords = job.chord_progression
     if not ai_chords:

@@ -10,8 +10,8 @@ Two layers of rate limiting:
 
 2. **Plan-level** (song count + duration):
    - Enforced per-request via decorators applied to processing routes.
-   - Free: 3 songs/month, 5 min max duration
-   - Pro: 30 songs/month, 15 min max
+   - Free: 5 songs/month, 5 min max duration
+   - Pro: 30 songs/month, 30 min max
    - Lifetime: 50 songs/month, 30 min max
    - Anonymous users tracked by IP hash.
 
@@ -29,6 +29,8 @@ Usage:
 """
 
 import logging
+import os
+import hmac
 from functools import wraps
 
 from flask import jsonify, request, g
@@ -41,12 +43,38 @@ logger = logging.getLogger(__name__)
 # Flask-Limiter instance (request-level rate limiting)
 # ---------------------------------------------------------------------------
 
+_OWNER_EMAIL = 'jkozelski@gmail.com'
+
+
+def _is_owner_request():
+    """Return True if this request is from the owner's authenticated session.
+
+    Cheap when there's no JWT cookie (verify_jwt is fast). The DB lookup only
+    fires when a JWT identity is present.
+    """
+    try:
+        from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+        verify_jwt_in_request(optional=True)
+        uid = get_jwt_identity()
+        if not uid:
+            return False
+        from auth.models import get_user_by_id
+        u = get_user_by_id(uid)
+        return bool(u and u.email == _OWNER_EMAIL)
+    except Exception:
+        return False
+
+
 def _get_key():
     """Extract client IP for Flask-Limiter keying.
 
-    Priority: CF-Connecting-IP (Cloudflare Tunnel) > X-Forwarded-For > remote_addr.
+    Owner gets a unique per-request key (uuid4) so each request lands in its
+    own bucket — effectively no rate limit. Everyone else keys on real client
+    IP: CF-Connecting-IP > X-Forwarded-For > remote_addr.
     """
-    # Cloudflare Tunnel sets this to the real visitor IP
+    if _is_owner_request():
+        import uuid
+        return f"owner-bypass-{uuid.uuid4().hex}"
     cf_ip = request.headers.get('CF-Connecting-IP', '').strip()
     if cf_ip:
         return cf_ip
@@ -58,7 +86,7 @@ def _get_key():
 limiter = Limiter(
     
     key_func=_get_key,
-    default_limits=["60 per minute"],
+    default_limits=["120 per minute"],
     storage_uri="memory://",
     strategy="fixed-window",
 )
@@ -67,7 +95,7 @@ limiter = Limiter(
 AUTH_LIMIT = "5 per minute"
 WEBHOOK_LIMIT = "30 per minute"
 PROCESSING_LIMIT = "10 per minute"
-UPLOAD_LIMIT = "5 per minute"         # /api/url, /api/upload — expensive GPU work
+UPLOAD_LIMIT = "10 per minute"        # /api/url, /api/upload — audit fix 2026-05-31, dropped 60→10; owner bypassed via _is_owner_request in key_func
 SONGSTERR_LIMIT = "30 per minute"     # /api/songsterr/*
 LIBRARY_LIMIT = "60 per minute"       # /api/library
 BETA_LIMIT = "10 per minute"          # /api/beta/*
@@ -121,6 +149,22 @@ def enforce_plan_limits(fn):
         g.ip_hash = ip_hash
         plan = user.plan if user else 'free'
         g.plan_limits = get_plan_limits(plan)
+
+        # --- Owner bypass ---
+        # The owner account never gets rate-limited regardless of plan field.
+        # This protects against plan-name mismatches (e.g., 'premium' not being
+        # in PLAN_LIMITS) and JWT staleness after DB plan updates.
+        if user and user.email == 'jkozelski@gmail.com':
+            return fn(*args, **kwargs)
+
+        # --- Audit/internal bypass ---
+        # Set AUDIT_BYPASS_TOKEN in prod env; senders include matching
+        # X-Audit-Token header. Skips quota check only — usage still recorded.
+        audit_token = os.environ.get('AUDIT_BYPASS_TOKEN', '') or ''
+        _req_token = request.headers.get('X-Audit-Token', '') or ''
+        if len(audit_token) >= 16 and hmac.compare_digest(_req_token, audit_token):
+            logger.info("[rate_limit] audit bypass token accepted; skipping quota check")
+            return fn(*args, **kwargs)
 
         # --- Song quota check ---
         try:

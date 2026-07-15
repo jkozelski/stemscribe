@@ -6,6 +6,7 @@ import logging
 from flask import Blueprint, request, jsonify
 
 from models.job import get_job
+from auth.middleware import auth_required, authorize_job_access, forbidden_response
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,7 @@ theory_bp = Blueprint("theory", __name__)
 
 
 @theory_bp.route('/api/chords/<job_id>', methods=['GET'])
+@auth_required(optional=True)
 def get_chords(job_id):
     """Get detected chord progression for a job."""
     from dependencies import CHORD_DETECTOR_AVAILABLE, CHORD_DETECTOR_VERSION
@@ -20,6 +22,8 @@ def get_chords(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     return jsonify({
         'job_id': job_id,
@@ -33,6 +37,7 @@ def get_chords(job_id):
 
 
 @theory_bp.route('/api/theory/<job_id>', methods=['GET'])
+@auth_required(optional=True)
 def get_chord_theory(job_id):
     """Get scale suggestions and theory analysis for a job's chord progression."""
     from dependencies import CHORD_THEORY_AVAILABLE, _chord_theory_engine
@@ -43,6 +48,8 @@ def get_chord_theory(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     if not job.chord_progression:
         return jsonify({'error': 'No chord progression detected yet'}), 404

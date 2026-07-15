@@ -1051,22 +1051,10 @@ class ChordDetector:
             else:
                 btc_result = unconstrained_result
 
-            # Run Essentia ensemble if available (for root accuracy improvement)
+            # Essentia ensemble removed 2026-05-13 — essentia_chord_detector.py archived
+            # per docs/v3-agent-D-cleanup-deploy-2026-05-13.md (Essentia not installed
+            # on prod VPS; self-disabled in practice).
             result = btc_result
-            try:
-                from essentia_chord_detector import (
-                    detect_chords_essentia, ensemble_chords, ESSENTIA_AVAILABLE
-                )
-                if ESSENTIA_AVAILABLE and btc_result.chords:
-                    ess_result = detect_chords_essentia(audio_path, min_duration=self.min_duration)
-                    if ess_result.chords:
-                        merged = ensemble_chords(btc_result.chords, ess_result.chords)
-                        logger.info(f"Ensemble: BTC({len(btc_result.chords)}) + Essentia({len(ess_result.chords)}) -> {len(merged)} chords")
-                        result = ChordProgression(chords=merged, key=btc_result.key)
-            except ImportError:
-                pass  # Essentia ensemble not available, use BTC alone
-            except Exception as e:
-                logger.warning(f"Essentia ensemble failed, using BTC alone: {e}")
 
             # --- V8 Fallback: re-analyze low-confidence BTC segments ---
             # V8 has 337 chord classes vs BTC's 170, so it can identify chords

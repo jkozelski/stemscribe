@@ -59,17 +59,36 @@ def _current_queue_depth() -> int:
         logger.error(f'Outputs dir not found: {outputs_dir}')
         return -1
     count = 0
+    daemon_count = 0
+    audit_count = 0
     skipped = 0
+    # Attestation-type prefixes that mark synthetic dev-audit traffic. These
+    # are submitted via the AUDIT_BYPASS_TOKEN header path, not real users,
+    # so they shouldn't trigger queue-depth alerts (2026-05-12).
+    AUDIT_PREFIXES = ('audit', 'phase3', 'qflip', 'retention', 'reranker', 'collapse', 'dream')
     for meta_path in outputs_dir.glob('*/job_metadata.json'):
         try:
             with meta_path.open() as f:
                 meta = json.load(f)
             if meta.get('status') == 'processing':
+                # Post-sep daemon jobs run OUTSIDE the cap-4 slot. They do
+                # not contribute to queue pressure (Phase 3, 2026-05-11).
+                # Only count jobs competing for the post-sep slot or earlier.
+                if (meta.get('metadata') or {}).get('post_sep_daemon'):
+                    daemon_count += 1
+                    continue
+                # Synthetic audit jobs aren't real queue pressure.
+                attestation = (meta.get('metadata') or {}).get('attestation_type', '') or ''
+                if any(attestation.startswith(p) for p in AUDIT_PREFIXES):
+                    audit_count += 1
+                    continue
                 count += 1
         except Exception:
             skipped += 1
     if skipped:
         logger.debug(f'skipped {skipped} unreadable metadata files')
+    if daemon_count or audit_count:
+        logger.info(f'excluded daemon={daemon_count}, audit={audit_count} jobs from queue depth')
     return count
 
 

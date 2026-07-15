@@ -475,6 +475,23 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 except Exception as lib_err:
                     logger.warning(f"Chart library correction failed (non-fatal): {lib_err}")
 
+                # PUBLIC path (no library chart matched): anchor the key to
+                # the independent measurement BEFORE the chart is built —
+                # detector key calls were wrong 3x in two days, and public
+                # users deserve the right key + spellings too. (Cold-run
+                # finding 7/5: this originally ran after format_chart and
+                # the respellings missed the chart.)
+                if library_info is None:
+                    try:
+                        from chart_library_matcher import apply_measured_key_no_library
+                        _mk = apply_measured_key_no_library(job)
+                        if _mk:
+                            if _mk != key:
+                                logger.info(f"\u2713 Measured key override (no library): {key} -> {_mk}")
+                            key = _mk
+                    except Exception as mk_err:
+                        logger.warning(f"Measured-key correction failed (non-fatal): {mk_err}")
+
                 # Get word-level timestamps from vocal stem via Whisper.
                 # This is the longest sub-step of chord-chart generation
                 # (faster-whisper medium @ int8, CPU on the VPS, ~2-5 min
@@ -542,22 +559,6 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                     grid=job.metadata.get('grid') if job.metadata else None,
                     bass_roots=job.metadata.get('bass_roots') if job.metadata else None,
                 )
-
-                # PUBLIC path (no library chart matched): still anchor the
-                # key to the independent measurement — detector key calls were
-                # wrong three times in two days, and public users deserve the
-                # right key + right spellings too (Jeff: "this has to be for
-                # the public, coming out that way every time").
-                if library_info is None:
-                    try:
-                        from chart_library_matcher import apply_measured_key_no_library
-                        _mk = apply_measured_key_no_library(job)
-                        if _mk:
-                            if _mk != key:
-                                logger.info(f"\u2713 Measured key override (no library): {key} -> {_mk}")
-                            key = _mk
-                    except Exception as mk_err:
-                        logger.warning(f"Measured-key correction failed (non-fatal): {mk_err}")
 
                 # Degenerate detection + a real library chart: render the
                 # owner's chart outright instead of a one-chord grid (Jack

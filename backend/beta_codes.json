@@ -2,9 +2,9 @@
   "STEM-5D32-DE24": {
     "created": "2026-03-08T21:11:12.349837",
     "label": "musician-friends",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null
+    "redeemed": true,
+    "redeemed_by": "",
+    "redeemed_at": "2026-06-19T17:09:39.474624"
   },
   "STEM-B07D-D6CA": {
     "created": "2026-03-08T21:11:12.349860",
@@ -96,10 +96,11 @@
   "STEM-9A06-487A": {
     "created": "2026-03-17T16:02:52.391998",
     "label": "Tim Davis",
-    "redeemed": false,
-    "redeemed_by": null,
+    "redeemed": true,
+    "redeemed_by": "Tim Davis (KODA)",
     "redeemed_at": null,
-    "assigned_to": "Tim Davis"
+    "assigned_to": "Tim Davis",
+    "user_id": "5d6805cd-1bd1-4cfe-8036-c8cad7c4e39b"
   },
   "STEM-6188-8CA6": {
     "created": "2026-03-17T16:02:52.392012",
@@ -204,30 +205,33 @@
   },
   "WILLEVANS": {
     "created": "2026-06-01T17:04:52.451408",
-    "label": "Will Evans",
+    "label": "Will Evans [DEPRECATED \u2014 see WILLEVANSV2]",
     "assigned_to": "Will Evans",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null,
-    "alias_of": "STEM-53B2-2B70"
+    "redeemed": true,
+    "redeemed_by": "",
+    "redeemed_at": "2026-06-04T14:37:24.238563",
+    "alias_of": "STEM-53B2-2B70",
+    "deprecated": true
   },
   "TIMDAVIS": {
     "created": "2026-06-01T17:04:52.451410",
     "label": "Tim Davis",
     "assigned_to": "Tim Davis",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null,
-    "alias_of": "STEM-9A06-487A"
+    "redeemed": true,
+    "redeemed_by": "Tim Davis (KODA)",
+    "redeemed_at": "2026-06-25T23:19:32.691323",
+    "alias_of": "STEM-9A06-487A",
+    "user_id": "5d6805cd-1bd1-4cfe-8036-c8cad7c4e39b"
   },
   "FULLERCONDEN": {
     "created": "2026-06-01T17:04:52.451412",
-    "label": "Fuller Conden",
+    "label": "Fuller Conden [DEPRECATED \u2014 see FULLERCONDENV2]",
     "assigned_to": "Fuller Conden",
     "redeemed": true,
     "redeemed_by": "Fuller Conden",
     "redeemed_at": "2026-03-18T00:40:16.401581",
-    "alias_of": "STEM-6188-8CA6"
+    "alias_of": "STEM-6188-8CA6",
+    "deprecated": true
   },
   "BOBBYHOGG": {
     "created": "2026-06-01T17:04:52.451414",
@@ -240,12 +244,13 @@
   },
   "ELLIOTTGENTHER": {
     "created": "2026-06-01T17:04:52.451415",
-    "label": "Elliott Genther",
+    "label": "Elliott Genther [DEPRECATED \u2014 see ELLIOTTGENTHERV2]",
     "assigned_to": "Elliott Genther",
     "redeemed": true,
     "redeemed_by": "Elliott",
     "redeemed_at": "2026-03-18T03:46:23.934251",
-    "alias_of": "STEM-9ACF-F9D1"
+    "alias_of": "STEM-9ACF-F9D1",
+    "deprecated": true
   },
   "STEPHENJENKINS": {
     "created": "2026-06-01T17:04:52.451417",
@@ -267,12 +272,13 @@
   },
   "FRANKLEWIS": {
     "created": "2026-06-01T17:04:52.451421",
-    "label": "Frank Lewis",
+    "label": "Frank Lewis [DEPRECATED \u2014 see FRANKLEWISV2]",
     "assigned_to": "Frank Lewis",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null,
-    "alias_of": "STEM-CFC1-09EA"
+    "redeemed": true,
+    "redeemed_by": "",
+    "redeemed_at": "2026-06-05T21:20:06.175458",
+    "alias_of": "STEM-CFC1-09EA",
+    "deprecated": true
   },
   "REXWILKES": {
     "created": "2026-06-01T17:04:52.451422",
@@ -303,12 +309,13 @@
   },
   "TODDBRITTON": {
     "created": "2026-06-01T17:04:52.451428",
-    "label": "Todd Britton",
+    "label": "Todd Britton [DEPRECATED \u2014 see TODDBRITTONV2]",
     "assigned_to": "Todd Britton",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null,
-    "alias_of": "STEM-53CE-645E"
+    "redeemed": true,
+    "redeemed_by": "Todd Britton",
+    "redeemed_at": "2026-06-03T20:03:16.197542",
+    "alias_of": "STEM-53CE-645E",
+    "deprecated": true
   },
   "RYANMONROE": {
     "created": "2026-06-01T17:04:52.451449",
@@ -320,11 +327,12 @@
   },
   "RUSTYCOLE": {
     "created": "2026-06-01T17:04:52.451452",
-    "label": "refinery",
+    "label": "refinery [DEPRECATED \u2014 anonymously redeemed, Rusty getting Lifetime on his account]",
     "assigned_to": "Rusty Cole",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null
+    "redeemed": true,
+    "redeemed_by": "",
+    "redeemed_at": "2026-06-06T19:12:18.619938",
+    "deprecated": true
   },
   "RYANBONNER": {
     "created": "2026-06-01T17:04:52.451455",
@@ -378,9 +386,10 @@
     "created": "2026-06-01T17:35:09.376230",
     "label": "refinery",
     "assigned_to": "Madison Ruckel",
-    "redeemed": false,
-    "redeemed_by": null,
-    "redeemed_at": null
+    "redeemed": true,
+    "redeemed_by": "Madison",
+    "redeemed_at": "2026-06-03T20:23:58.766787",
+    "user_id": "e5821ab4-388e-43a7-b5db-a3078666adbf"
   },
   "MDRICKERS": {
     "created": "2026-06-01T17:35:09.376231",
@@ -392,10 +401,285 @@
   },
   "MATTTHOMPSON": {
     "created": "2026-06-01T17:56:59.247907",
-    "label": "refinery",
+    "label": "refinery [DEPRECATED \u2014 see MATTTHOMPSONV2]",
     "assigned_to": "Matt Thompson",
+    "redeemed": true,
+    "redeemed_by": "",
+    "redeemed_at": "2026-06-01T18:35:27.079556",
+    "user_id": "7884023b-3748-4d5c-9abf-71ba0119cb92",
+    "deprecated": true
+  },
+  "MACELYNBATTEN": {
+    "created": "2026-06-02T20:34:03.666291",
+    "label": "matt-thompson-referral [DEPRECATED \u2014 see MACELYNBATTENV2]",
+    "assigned_to": "Macelyn Batten",
+    "redeemed": true,
+    "redeemed_by": "Macelyn",
+    "redeemed_at": "2026-06-02T21:12:51.170059",
+    "deprecated": true
+  },
+  "DANLOTTI": {
+    "created": "2026-06-03T20:01:59.693420",
+    "label": "refinery",
+    "assigned_to": "Dan Lotti",
     "redeemed": false,
     "redeemed_by": null,
     "redeemed_at": null
+  },
+  "STEVENSANDIFER": {
+    "created": "2026-06-03T20:01:59.693439",
+    "label": "refinery",
+    "assigned_to": "Steven Sandifer",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null
+  },
+  "JEFFKOZELSKI": {
+    "created": "2026-06-04T13:06:47.543394+00:00",
+    "label": "Jeff Kozelski (Founder)",
+    "assigned_to": "Jeff Kozelski",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "founder"
+  },
+  "FULLERCONDENV2": {
+    "created": "2026-06-04T21:16:56.604860+00:00",
+    "label": "Fuller Conden (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Fuller Conden",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "FULLERCONDEN"
+  },
+  "ELLIOTTGENTHERV2": {
+    "created": "2026-06-04T21:16:56.604860+00:00",
+    "label": "Elliott Genther (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Elliott Genther",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "ELLIOTTGENTHER"
+  },
+  "TODDBRITTONV2": {
+    "created": "2026-06-04T21:16:56.604860+00:00",
+    "label": "Todd Britton (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Todd Britton",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "TODDBRITTON"
+  },
+  "WILLEVANSV2": {
+    "created": "2026-06-04T21:16:56.604860+00:00",
+    "label": "Will Evans (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Will Evans",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "WILLEVANS"
+  },
+  "MATTTHOMPSONV2": {
+    "created": "2026-06-04T21:16:56.604860+00:00",
+    "label": "Matt Thompson (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Matt Thompson",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "MATTTHOMPSON"
+  },
+  "MACELYNBATTENV2": {
+    "created": "2026-06-04T21:16:56.604860+00:00",
+    "label": "Macelyn Batten (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Macelyn Batten",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "MACELYNBATTEN"
+  },
+  "FRANKLEWISV2": {
+    "created": "2026-06-06T13:23:34.628647+00:00",
+    "label": "Frank Lewis (refinery V2 \u2014 auth-aware)",
+    "assigned_to": "Frank Lewis",
+    "redeemed": true,
+    "redeemed_by": "flewis@comcast.net",
+    "redeemed_at": "2026-06-06T15:30:29.332064",
+    "plan": "lifetime",
+    "source": "refinery_v2_migration",
+    "supersedes": "FRANKLEWIS",
+    "user_id": "11c2dd84-773f-4e1f-9ade-a290ae4279c0"
+  },
+  "REFINERY-76E6-1E08": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-D4B6-38A0": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-088C-7344": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-BE3F-18D5": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-2CCF-6E60": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-65C8-9630": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-870F-7AB4": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-1967-A63E": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-3E2A-80B7": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-FF8D-978E": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-1FC4-937B": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-F3D1-5DFF": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-28BF-8F81": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-03B2-20FA": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-00FF-E99F": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-C416-DEF2": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-1024-D51A": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-A88D-128D": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-1AC8-183B": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
+  },
+  "REFINERY-5CD4-08F9": {
+    "created": "2026-06-19T17:25:55.857621",
+    "label": "refinery-2026-06-20",
+    "redeemed": false,
+    "redeemed_by": null,
+    "redeemed_at": null,
+    "assigned_to": "Refinery 2026"
   }
 }

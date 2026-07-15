@@ -203,6 +203,15 @@ def _check_jobs():
                 _job_snapshots.pop(job_id, None)
             continue
 
+        # Skip jobs running in the post-separation daemon thread. Once the
+        # main pipeline thread releases the post-sep slot at chord_chart
+        # write and spawns the daemon for MIDI/MusicXML/GP/Songsterr, the
+        # daemon owns the job. Its sub-steps can run for 5-15 min without
+        # bumping job.stage. Watchdog retry would spawn a duplicate
+        # process_audio thread on the same output dir — undefined behavior.
+        if (job.metadata or {}).get('post_sep_daemon'):
+            continue
+
         snapshot = _job_snapshots.get(job_id)
 
         if snapshot is None:

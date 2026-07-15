@@ -9,6 +9,7 @@ from flask import Blueprint, jsonify, send_file
 
 from models.job import get_job
 from middleware.validation import validate_job_id as _validate_job_id
+from auth.middleware import auth_required, authorize_job_access, forbidden_response
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ tabs_bp = Blueprint("tabs", __name__)
 
 
 @tabs_bp.route('/api/find-tabs/<job_id>', methods=['GET'])
+@auth_required(optional=True)
 def find_tabs(job_id):
     """Find matching tabs on Songsterr and Ultimate Guitar for a job"""
     if not _validate_job_id(job_id):
@@ -23,6 +25,8 @@ def find_tabs(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     title = job.metadata.get('title', '') if job.metadata else ''
     artist = job.metadata.get('artist', '') if job.metadata else ''
@@ -79,6 +83,7 @@ def find_tabs(job_id):
 
 
 @tabs_bp.route('/api/download-pro-tabs/<job_id>', methods=['POST'])
+@auth_required(optional=True)
 def download_pro_tabs(job_id):
     """Download professional tabs from Songsterr for this job."""
     if not _validate_job_id(job_id):
@@ -86,6 +91,8 @@ def download_pro_tabs(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     title = job.metadata.get('title', '') if job.metadata else ''
     artist = job.metadata.get('artist', '') if job.metadata else ''
@@ -164,6 +171,7 @@ def download_pro_tabs(job_id):
 
 
 @tabs_bp.route('/api/download/<job_id>/pro_tabs/<filename>', methods=['GET'])
+@auth_required(optional=True)
 def download_pro_tab_file(job_id, filename):
     """Download a professional tab file (GP5)"""
     if not _validate_job_id(job_id):
@@ -173,6 +181,8 @@ def download_pro_tab_file(job_id, filename):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     if not hasattr(job, 'pro_tabs') or not job.pro_tabs:
         return jsonify({'error': 'No professional tabs available'}), 404

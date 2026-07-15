@@ -261,11 +261,13 @@ def _filter_by_chords(notes: List, chord_progression: list,
     if not chord_progression or not notes:
         return notes
 
-    try:
-        from essentia_chord_detector import chord_to_pitch_classes, get_chord_at_time
-    except ImportError:
-        logger.debug("essentia_chord_detector not available for chord filtering")
-        return notes
+    # essentia_chord_detector archived 2026-05-13 — chord-aware filtering disabled.
+    # If reintroduced later, the helpers chord_to_pitch_classes and get_chord_at_time
+    # need a replacement (probably in processing/chord_detector_lab.py).
+    logger.debug("chord-aware filtering disabled (essentia_chord_detector archived)")
+    return notes
+    # Unreachable but kept for documentation of the prior contract:
+    # from <module> import chord_to_pitch_classes, get_chord_at_time
 
     # Precompute velocity threshold
     velocities = [n.velocity for n in notes]

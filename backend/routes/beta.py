@@ -8,6 +8,7 @@ import os
 import json
 import logging
 import secrets
+import hmac
 from pathlib import Path
 from datetime import datetime
 
@@ -25,7 +26,7 @@ beta_bp = Blueprint("beta", __name__)
 BETA_CODES_FILE = Path(__file__).parent.parent / 'beta_codes.json'
 
 # Master admin key for generating codes (set via env var or use default for dev)
-BETA_ADMIN_KEY = os.environ.get('BETA_ADMIN_KEY', 'stemscribe-beta-admin-2026')
+BETA_ADMIN_KEY = os.environ.get('BETA_ADMIN_KEY')  # fail CLOSED: unset -> all admin calls rejected (was hardcoded default)
 
 
 def _load_codes():
@@ -55,7 +56,7 @@ def generate_beta_codes():
     data = request.get_json(silent=True) or {}
 
     admin_key = data.get('admin_key', '')
-    if admin_key != BETA_ADMIN_KEY:
+    if not BETA_ADMIN_KEY or not admin_key or not hmac.compare_digest(str(admin_key), str(BETA_ADMIN_KEY)):
         return jsonify({'error': 'Unauthorized'}), 401
 
     count = min(int(data.get('count', 5)), 50)
@@ -198,7 +199,7 @@ def beta_stats():
     Query param: admin_key
     """
     admin_key = request.args.get('admin_key', '')
-    if admin_key != BETA_ADMIN_KEY:
+    if not BETA_ADMIN_KEY or not admin_key or not hmac.compare_digest(str(admin_key), str(BETA_ADMIN_KEY)):
         return jsonify({'error': 'Unauthorized'}), 401
 
     codes = _load_codes()

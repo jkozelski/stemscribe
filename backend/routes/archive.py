@@ -220,6 +220,34 @@ def archive_process_track():
     # Newer clients send the already-cleaned display title; fall back to filename
     raw_name = (data.get('title') or '').strip() or filename or identifier or 'Archive.org track'
     display_name = _clean_archive_title(raw_name)
+    artist = (data.get('artist') or '').strip()
+    # Server-side rescue: taper filenames like gd1987-11-15d1t04 carry no song
+    # name, and older clients don't send title/artist — ask archive.org for the
+    # track list (title) and show creator (artist).
+    _needs_title = (display_name == raw_name or
+                    re.match(r'^[a-z]{1,4}\d{2,4}[-_.]', display_name, re.IGNORECASE) or
+                    # CamelCase band prefixes fused to dates slip the cleaner
+                    # ("DeerTick2009-06-16d1t08" -> "Deer Tick2009-06-16d1t08",
+                    # cold-run finding 7/5) — any date/track residue means the
+                    # name is still a filename, ask archive.org for the title
+                    re.search(r'\d{2,4}[-_.]\d{2}[-_.]\d{2}|d\d+t\d+|s\d+t\d+', display_name, re.IGNORECASE))
+    if identifier and (_needs_title or not artist):
+        try:
+            _show_info = get_show_info(identifier)
+            if _needs_title and filename:
+                for _t in (_show_info.get('tracks') or []):
+                    _tf = _t.get('filename') if isinstance(_t, dict) else getattr(_t, 'filename', None)
+                    if _tf == filename:
+                        _tt = _t.get('title') if isinstance(_t, dict) else getattr(_t, 'title', '')
+                        if _tt:
+                            display_name = _clean_archive_title(_tt)
+                        break
+            if not artist:
+                _sh = _show_info.get('show') or {}
+                artist = ((_sh.get('creator') if isinstance(_sh, dict)
+                           else getattr(_sh, 'creator', '')) or '').strip()
+        except Exception as _look_err:
+            logger.warning(f"Archive title/artist lookup failed (non-fatal): {_look_err}")
     job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
     # Stamp the logged-in owner so the job SAVES to their library (archive/URL
     # downloads were orphaned with user_id=None → processed fine but never showed
@@ -233,7 +261,6 @@ def archive_process_track():
     job.metadata['archive_identifier'] = identifier
     if filename:
         job.metadata['archive_filename'] = filename
-    artist = (data.get('artist') or '').strip()
     if artist:
         job.metadata['artist'] = artist
     # Keep the cleaned title — the downloader must not stomp it with the raw filename

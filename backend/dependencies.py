@@ -190,8 +190,11 @@ except ImportError as e:
     MODEL_MANAGER_AVAILABLE = False
     logger.warning(f"Model manager not available: {e}")
 
-# Chord detection (V8 Transformer preferred — 93.6% accuracy, 337 classes including jazz voicings)
-# V8 > V10 (BTC) because V8 has more chord classes (337 vs 170) and higher accuracy
+# Chord detection. V3.1 architecture uses ACE + Jiang + stem-aware via
+# processing/detector_router.py, gated behind USE_ACE_ROUTER_DETECTOR=true.
+# The legacy V8 Transformer remains the default when the V3 flag is off,
+# matching the May 6 baseline. V10/V7/basic fallbacks archived 2026-05-13
+# per docs/v3-agent-D-cleanup-deploy-2026-05-13.md — V8 and V10 only.
 try:
     from chord_detector_v8 import ChordDetector, detect_chords
     CHORD_DETECTOR_AVAILABLE = True
@@ -203,22 +206,10 @@ except ImportError:
         CHORD_DETECTOR_AVAILABLE = True
         CHORD_DETECTOR_VERSION = 'v10'
         logger.info("Chord detector V10 available (BTC fine-tuned, 170 classes)")
-    except ImportError:
-        try:
-            from chord_detector_v7 import ChordDetector, detect_chords
-            CHORD_DETECTOR_AVAILABLE = True
-            CHORD_DETECTOR_VERSION = 'v7'
-            logger.info("Chord detector V7 available (25 classes)")
-        except ImportError:
-            try:
-                from chord_detector import ChordDetector, detect_chords  # noqa: F401
-                CHORD_DETECTOR_AVAILABLE = True
-                CHORD_DETECTOR_VERSION = 'basic'
-                logger.info("Basic chord detector available (template matching)")
-            except ImportError as e:
-                CHORD_DETECTOR_AVAILABLE = False
-                CHORD_DETECTOR_VERSION = None
-                logger.warning(f"Chord detector not available: {e}")
+    except ImportError as e:
+        CHORD_DETECTOR_AVAILABLE = False
+        CHORD_DETECTOR_VERSION = None
+        logger.warning(f"Chord detector not available: {e}")
 
 # Chord theory engine (scale suggestions, Beato-style chord-over-bass analysis)
 try:

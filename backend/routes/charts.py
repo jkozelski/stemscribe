@@ -116,7 +116,7 @@ def update_chart(chart_id):
         return jsonify({'error': 'body too large'}), 413
 
     row = query_one(
-        "SELECT id, title, song_key FROM chart_library WHERE id = %s AND user_id = %s",
+        "SELECT id, title, song_key, body FROM chart_library WHERE id = %s AND user_id = %s",
         (chart_id, str(user.id)),
     )
     if not row:
@@ -127,6 +127,18 @@ def update_chart(chart_id):
     from db import get_db
     with get_db() as conn:
         with conn.cursor() as cur:
+            # Community data bank (#42): every correction is history, not an
+            # overwrite — the future consensus layer is built on this trail.
+            # Serving ACROSS users stays OFF until the legal package clears.
+            cur.execute(
+                "INSERT INTO chart_edit_history "
+                "(chart_id, user_id, body_before, body_after, song_key_before, "
+                " song_key_after, source_job, attested) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (chart_id, str(user.id), row['body'], body, row['song_key'],
+                 song_key, (data.get('refresh_job') or None),
+                 bool(data.get('attested'))),
+            )
             cur.execute(
                 "UPDATE chart_library SET body = %s, song_key = %s, updated_at = NOW() "
                 "WHERE id = %s AND user_id = %s",

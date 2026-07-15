@@ -163,13 +163,15 @@ def _pickup_seconds(grid):
     return min(3.0, max(1.0, b)) if b else 2.0
 
 
-def compute_section_times(sections, stream, grid=None):
+def compute_section_times(sections, stream, grid=None, song_end=None):
     """Monotonically match each section's anchor phrase in the word stream.
 
     Returns a list (same order/length as sections) of report dicts:
       {name, start, method, score, matched_words}
     plus private keys (_idx, _t, _cut) used by the appliers.
     method: 'matched' | 'matched(line2)' | 'interpolated' | 'appended'
+    song_end (seconds) spreads trailing unmatched sections across the rest
+    of the recording instead of bunching them at 8s intervals.
     """
     pickup = _pickup_seconds(grid)
     bar = _bar_seconds(grid) or 2.0
@@ -203,11 +205,11 @@ def compute_section_times(sections, stream, grid=None):
                 cursor = idx + len(anchor)
         res.append(entry)
 
-    _finalize_starts(res, sections, stream, pickup)
+    _finalize_starts(res, sections, stream, pickup, song_end=song_end)
     return res
 
 
-def _finalize_starts(res, sections, stream, pickup):
+def _finalize_starts(res, sections, stream, pickup, song_end=None):
     """Fill 'start' for every section: matched ones get first-word-minus-
     pickup; unmatched ones interpolate between neighbors (Solo case) or
     append after the last match. Enforces strictly-increasing starts and
@@ -250,12 +252,24 @@ def _finalize_starts(res, sections, stream, pickup):
             step = max(0.5, (hi - lo) / len(gap))
             for k, i in enumerate(gap):
                 res[i]['start'] = lo + step * k
-        # Trailing unmatched sections append after the last match's vocals.
+        # Trailing unmatched sections: spread evenly across the REMAINING
+        # recording (last match's vocal end -> song end) rather than
+        # bunching at 8s intervals — Shakedown's final Verse/Solo/Verse
+        # packed into 40s of a 12-minute jam before this (7/5).
         last = matched_is[-1]
-        t0 = end_est(last)
-        for k, i in enumerate(range(last + 1, n)):
-            res[i]['start'] = t0 + 1.0 + 8.0 * k
-            res[i]['method'] = 'appended'
+        trailing = list(range(last + 1, n))
+        if trailing:
+            t0 = end_est(last) + 1.0
+            if song_end and song_end > t0 + 8.0 * len(trailing):
+                # Equal shares of [t0, song_end): first starts at t0.
+                step = (song_end - t0) / len(trailing)
+                for k, i in enumerate(trailing):
+                    res[i]['start'] = t0 + step * k
+                    res[i]['method'] = 'appended'
+            else:
+                for k, i in enumerate(trailing):
+                    res[i]['start'] = t0 + 8.0 * k
+                    res[i]['method'] = 'appended'
     else:
         for k, r in enumerate(res):
             r['start'] = 8.0 * k
@@ -276,6 +290,26 @@ def _finalize_starts(res, sections, stream, pickup):
         cut = max(prev_cut + 0.25, cut)
         r['_cut'] = round(cut, 3)
         prev_cut = cut
+
+
+def _estimate_song_end(word_ts, grid):
+    """Best estimate of the recording's length: the tempo grid's full bar
+    span (covers instrumental outros) or the last sung word, whichever is
+    later. None when neither is available."""
+    cands = []
+    if word_ts:
+        try:
+            cands.append(max(float(w.get('end', 0.0)) for w in word_ts))
+        except (TypeError, ValueError):
+            pass
+    b = _bar_seconds(grid)
+    try:
+        bc = int((grid or {}).get('bar_count') or 0)
+        if b and bc:
+            cands.append(b * bc)
+    except (TypeError, ValueError):
+        pass
+    return max(cands) if cands else None
 
 
 def _words_between(word_ts, t0, t1):
@@ -302,7 +336,8 @@ def align_rendered_chart(chart, word_ts, grid=None):
 
     sections = chart.get('sections') or []
     stream = _build_stream(word_ts)
-    res = compute_section_times(sections, stream, grid=grid)
+    res = compute_section_times(sections, stream, grid=grid,
+                                song_end=_estimate_song_end(word_ts, grid))
 
     lyric_secs = [s for s in sections if _section_anchor(s)]
     matched = [r for r in res if r['_t'] is not None]
@@ -418,7 +453,8 @@ def align_snapped_chart(chart, library_info, word_ts, grid=None):
         return {'sections_aligned': False, 'reason': 'library chart has no sections'}
 
     stream = _build_stream(word_ts)
-    res = compute_section_times(lib_secs, stream, grid=grid)
+    res = compute_section_times(lib_secs, stream, grid=grid,
+                                song_end=_estimate_song_end(word_ts, grid))
     lyric_secs = [s for s in lib_secs if _section_anchor(s)]
     matched = [r for r in res if r['_t'] is not None]
     # Higher bar than the render path: we are about to REPLACE the

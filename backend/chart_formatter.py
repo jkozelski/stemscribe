@@ -51,14 +51,141 @@ LINE_GAP_THRESHOLD = 0.4
 # Minimum gap (seconds) between lyric lines to consider a section break
 SECTION_GAP_THRESHOLD = 4.0
 
-# Maximum words per lyric line (prevents overly long lines)
-MAX_WORDS_PER_LINE = 12
+# Safety cap on words per line. Lines break at sung PAUSES (LINE_GAP_THRESHOLD);
+# this only fires for run-ons with no clear pause, and even then we split at the
+# widest internal gap — never at an arbitrary word count (which chopped phrases
+# mid-sentence, e.g. "...real | close").
+MAX_WORDS_PER_LINE = 24
 
 # Minimum words per lyric line (prevents tiny fragments — but set low to respect natural phrasing)
 MIN_WORDS_PER_LINE = 2
 
 # How close (seconds) a chord must be to a word to be placed above it
 CHORD_SNAP_TOLERANCE = 0.8
+
+
+# ---------------------------------------------------------------------------
+# Capo suggestion
+# ---------------------------------------------------------------------------
+
+_CAPO_NOTE_INDEX = {
+    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
+    'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11,
+}
+_CAPO_INDEX_NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+# Open-position-friendly chord shapes for standard tuning, scored by how
+# guitar-friendly they are. 1.0 = pure open, 0.7 = open w/ extra finger,
+# 0.4 = barre but common. Anything not in this map scores 0 (barre/awkward).
+_EASY_OPEN_SHAPES = {
+    'C': 1.0, 'D': 1.0, 'E': 1.0, 'G': 1.0, 'A': 1.0,
+    'Am': 1.0, 'Dm': 1.0, 'Em': 1.0,
+    'C7': 0.7, 'D7': 0.7, 'E7': 0.7, 'G7': 0.7, 'A7': 0.7,
+    'Am7': 0.7, 'Dm7': 0.7, 'Em7': 0.7,
+    'Cmaj7': 0.7, 'Dmaj7': 0.7, 'Gmaj7': 0.7, 'Amaj7': 0.7, 'Fmaj7': 0.5,
+    'Csus4': 0.7, 'Dsus4': 0.7, 'Asus4': 0.7, 'Esus4': 0.7,
+    'Asus2': 0.7, 'Dsus2': 0.7, 'Esus2': 0.7,
+    'Cadd9': 0.7, 'Dadd9': 0.7, 'Gadd9': 0.7,
+    'F': 0.4, 'B7': 0.6,
+}
+
+# Marker tokens that show up in chord positions but aren't real chords
+_NON_CHORD_TOKENS = ('//', '////', '/', '|', 'N.C.', 'NC', '')
+
+
+def _parse_chord(chord: str):
+    """Parse 'F#m7' → ('F#', 'm7'). Returns (None, None) for non-chords or junk."""
+    if not chord:
+        return None, None
+    chord = chord.strip()
+    if chord in _NON_CHORD_TOKENS or chord.startswith('//'):
+        return None, None
+    # Strip slash-bass for capo math (the *family* of the chord drives shape)
+    base = chord.split('/', 1)[0]
+    if not base:
+        return None, None
+    if len(base) >= 2 and base[1] in '#b':
+        root, quality = base[:2], base[2:]
+    else:
+        root, quality = base[:1], base[1:]
+    if root not in _CAPO_NOTE_INDEX:
+        return None, None
+    return root, quality
+
+
+def _transpose_chord_down(chord: str, semitones: int) -> str:
+    """Return what shape the player would FINGER if they played `chord` with a
+    capo at the given fret. e.g. _transpose_chord_down('F', 3) -> 'D'.
+    Preserves quality suffix (m7, sus4, maj7, /bass). No-op for non-chords."""
+    root, quality = _parse_chord(chord)
+    if root is None:
+        return chord
+    new_idx = (_CAPO_NOTE_INDEX[root] - semitones) % 12
+    new_root = _CAPO_INDEX_NOTE[new_idx]
+    # Preserve any slash-bass spelling, also transposed
+    if '/' in chord:
+        bass = chord.split('/', 1)[1]
+        bass_root, bass_q = _parse_chord(bass)
+        if bass_root is not None:
+            new_bass_idx = (_CAPO_NOTE_INDEX[bass_root] - semitones) % 12
+            return new_root + quality + '/' + _CAPO_INDEX_NOTE[new_bass_idx] + bass_q
+    return new_root + quality
+
+
+def _shape_score(chord_name: str) -> float:
+    return _EASY_OPEN_SHAPES.get(chord_name, 0.0)
+
+
+def suggest_capo(chord_usage: Dict[str, int]) -> Tuple[int, Dict[str, str]]:
+    """Pick the best capo position 0-11 for a guitar-friendly rendering.
+
+    Args:
+        chord_usage: {chord_name: weight} — weight is bar-count or use-count.
+
+    Returns:
+        (capo_position, mapping). mapping is {original_chord: capo_shape_chord}
+        when capo > 0, else empty dict. Returns (0, {}) if no capo gives a
+        meaningful improvement over playing the chords as-spelled.
+    """
+    # Filter out junk tokens
+    real_usage = {c: n for c, n in chord_usage.items()
+                  if _parse_chord(c)[0] is not None and n > 0}
+    if not real_usage:
+        return 0, {}
+    total_weight = sum(real_usage.values())
+
+    def _score_capo(capo: int) -> Tuple[float, Dict[str, str]]:
+        score = 0.0
+        mapping = {}
+        for chord, weight in real_usage.items():
+            shape = _transpose_chord_down(chord, capo)
+            mapping[chord] = shape
+            score += _shape_score(shape) * weight
+        return score / total_weight, mapping
+
+    base_score, _ = _score_capo(0)
+
+    best_capo = 0
+    best_score = base_score
+    best_mapping: Dict[str, str] = {}
+    for capo in range(1, 8):  # capos beyond 7 are uncommon and shrink the neck too much
+        score, mapping = _score_capo(capo)
+        # Soft penalty: prefer lower capo on near-ties (1% per fret)
+        adjusted = score - capo * 0.01
+        if adjusted > best_score + 0.001:
+            best_score = adjusted
+            best_capo = capo
+            best_mapping = mapping
+
+    if best_capo == 0:
+        return 0, {}
+    # Require a meaningful win over no-capo and a decent absolute floor —
+    # otherwise we'd push pop songs already in C/G into pointless capos.
+    if (best_score - base_score) < 0.15:
+        return 0, {}
+    if best_score < 0.45:
+        return 0, {}
+    return best_capo, best_mapping
 
 
 # ---------------------------------------------------------------------------
@@ -170,61 +297,53 @@ def format_chart(
     #   1. bass_roots + detector quality (most reliable — bass pitch anchors the root)
     #   2. detector-only quantized to bars (when no bass stem / grid)
     #   3. raw detector events (when no grid at all)
-    if grid and bass_roots:
+    # 2026-05-06: when USE_LIBROSA_DETECTOR is on, bypass bass-root anchoring +
+    # family-aware smoothing + maj7 promotion. All three were tuned for the legacy
+    # noisy stem-aware detector. Applied to librosa's already-clean per-beat output
+    # they collapse the chord vocabulary too aggressively (Hells Bells went from
+    # 15 unique chords standalone → 6 through the pipeline). Quantize-to-bars from
+    # detector events directly, skipping the cleanup passes.
+    # 2026-05-26: V3_DETECTOR=ace_router (ACE+Jiang neural) also produces clean
+    # per-bar output — the smooth_qualities pass craters it the same way it
+    # cratered librosa (oracle rq 0.833 → 0.075 in earlier testing). Extend the
+    # clean-detector branch to include V3.1 so we can flip to the better detector
+    # without re-engaging the smoothing landmine.
+    _use_librosa = os.environ.get('USE_LIBROSA_DETECTOR', '').lower() in ('1', 'true', 'yes')
+    _v3_detector = (os.environ.get('V3_DETECTOR', '') or '').lower()
+    _use_clean_detector = _use_librosa or _v3_detector == 'ace_router'
+    if _use_clean_detector and grid:
+        bar_grid = _quantize_chords_to_bars(chords, grid)
+        _det_label = 'ace_router' if _v3_detector == 'ace_router' else 'librosa'
+        logger.info(
+            f"chart_formatter: {_det_label}-mode bar grid (no smoothing/promotion) "
+            f"({len(bar_grid)} bars, key={key})"
+        )
+    elif grid and bass_roots:
         from processing.bass_root_extraction import (
             combine_with_detector_quality, smooth_qualities, promote_diatonic_maj7,
         )
         bar_grid = combine_with_detector_quality(bass_roots, chords, grid)
-        # ------------------------------------------------------------------
-        # LANDMINE DISARM (2026-05-19, flag-gated, default = exact prod path)
-        #
-        # `smooth_qualities` + `promote_diatonic_maj7` were tuned for the
-        # legacy NOISY stem-aware detector, whose per-bar quality labels
-        # flicker and need majority-vote collapsing. Applied to an already
-        # CLEAN per-bar detector (ACE / Jiang), the same passes destroy
-        # signal: forensic measurement showed oracle-quality input degrading
-        # 0.833 -> 0.075 composite once routed through smooth_qualities.
-        #
-        # When CHART_FORMATTER_DISARM_SMOOTHING is truthy we keep the useful
-        # bass-anchored bar grid from combine_with_detector_quality but skip
-        # the two destructive cleanup passes (and the key re-detect, whose
-        # sole purpose is to feed maj7 promotion). The flag is OFF by default
-        # so production behavior is byte-identical unless explicitly opted in
-        # — intended for clean detectors (V3.1 ACE/Jiang router) only.
-        # ------------------------------------------------------------------
-        _disarm = os.environ.get(
-            'CHART_FORMATTER_DISARM_SMOOTHING', ''
-        ).strip().lower() in ('1', 'true', 'yes', 'on')
-        if _disarm:
-            smoothed_count = 0
-            promoted_count = 0
-            logger.info(
-                f"chart_formatter: bar grid built from bass+detector "
-                f"(DISARMED: smoothing/promotion skipped, "
-                f"{len(bar_grid)} bars, key={key})"
-            )
-        else:
-            bar_grid = smooth_qualities(bar_grid)
-            # Re-detect key from the smoothed bar_grid before maj7 promotion.
-            # The raw chord_events feed detect_key_from_chords with mostly plain
-            # 'maj' qualities (the detector emits triads; family-aware promotion
-            # to dom7/9 happens INSIDE smooth_qualities). The static-dominant
-            # heuristic in detect_key_from_chords needs the dom-quality labels
-            # to fire — so we re-detect here, after smoothing.
-            key = _redetect_key_from_bargrid(bar_grid, fallback=key)
-            # Key-aware maj7 promotion: when a song is in a major key, the
-            # detector tends to label I and IV chords as A9/D9 (dom7) when
-            # the song actually uses Amaj7/Dmaj7. Fix only fires for major
-            # keys, only on I/IV degrees, and only if the song doesn't look
-            # like a 12-bar blues (V also dom-7).
-            bar_grid = promote_diatonic_maj7(bar_grid, key)
-            smoothed_count = sum(1 for b in bar_grid if "smoothed" in (b.get("source") or ""))
-            promoted_count = sum(1 for b in bar_grid if "maj7promoted" in (b.get("source") or ""))
-            logger.info(
-                f"chart_formatter: bar grid built from bass+detector "
-                f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
-                f"{promoted_count} maj7-promoted, key={key})"
-            )
+        bar_grid = smooth_qualities(bar_grid)
+        # Re-detect key from the smoothed bar_grid before maj7 promotion.
+        # The raw chord_events feed detect_key_from_chords with mostly plain
+        # 'maj' qualities (the detector emits triads; family-aware promotion
+        # to dom7/9 happens INSIDE smooth_qualities). The static-dominant
+        # heuristic in detect_key_from_chords needs the dom-quality labels
+        # to fire — so we re-detect here, after smoothing.
+        key = _redetect_key_from_bargrid(bar_grid, fallback=key)
+        # Key-aware maj7 promotion: when a song is in a major key, the
+        # detector tends to label I and IV chords as A9/D9 (dom7) when
+        # the song actually uses Amaj7/Dmaj7. Fix only fires for major
+        # keys, only on I/IV degrees, and only if the song doesn't look
+        # like a 12-bar blues (V also dom-7).
+        bar_grid = promote_diatonic_maj7(bar_grid, key)
+        smoothed_count = sum(1 for b in bar_grid if "smoothed" in (b.get("source") or ""))
+        promoted_count = sum(1 for b in bar_grid if "maj7promoted" in (b.get("source") or ""))
+        logger.info(
+            f"chart_formatter: bar grid built from bass+detector "
+            f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
+            f"{promoted_count} maj7-promoted, key={key})"
+        )
     elif grid:
         bar_grid = _quantize_chords_to_bars(chords, grid)
         logger.info(f"chart_formatter: bar grid built from detector-only ({len(bar_grid)} bars)")
@@ -340,10 +459,32 @@ def format_chart(
         except Exception as e:
             logger.warning(f"Second phrase-boundary snap failed: {e}")
 
-        try:
-            _rebuild_sections_as_4bar_chunks(raw_sections, bar_grid, words)
-        except Exception as e:
-            logger.warning(f"4-bar chunk rebuild failed, keeping prior layout: {e}")
+        # UG_STYLE_LAYOUT=true switches the rendering path for VOCAL sections:
+        # instead of the Nashville-style 4-bar slash-notation chunks, keep
+        # the upstream UG-style chord-over-word output from
+        # `_rebuild_section_chords_from_bar_grid` + `_place_chords_on_words`,
+        # which positions chord names directly above the syllable where the
+        # chord changes.
+        # INSTRUMENTAL sections always go through the 4-bar rebuild — without
+        # it they have no segments + null lyrics and the frontend renderer
+        # has no content to display.
+        _ug_style = os.environ.get("UG_STYLE_LAYOUT", "").lower() in ("1", "true", "yes")
+        if _ug_style:
+            instrumental_only = [s for s in raw_sections if not s.has_lyrics]
+            if instrumental_only:
+                try:
+                    _rebuild_sections_as_4bar_chunks(instrumental_only, bar_grid, words)
+                except Exception as e:
+                    logger.warning(f"4-bar chunk rebuild (instrumental-only) failed: {e}")
+            logger.info(
+                f"chart_formatter: UG_STYLE_LAYOUT enabled — vocal sections keep "
+                f"UG layout, {len(instrumental_only)} instrumental sections got slash-chunks"
+            )
+        else:
+            try:
+                _rebuild_sections_as_4bar_chunks(raw_sections, bar_grid, words)
+            except Exception as e:
+                logger.warning(f"4-bar chunk rebuild failed, keeping prior layout: {e}")
         # Rebuild may have changed has_lyrics (e.g. Whisper phantom words land
         # inside a previously-instrumental window); re-run the relabel so a
         # section that just gained real lyrics drops its Solo/Drum-Break name.
@@ -359,14 +500,28 @@ def format_chart(
         # final chunk is just the tail chord.
         raw_sections = _merge_adjacent_sections_with_same_name(raw_sections)
 
-    # Step 7: Collect unique chords used
+    # Step 7: Collect unique chords used.
+    # Pull from bar_grid (post-promotion view) when available so the user-visible
+    # chord vocabulary matches what's rendered per-bar. Falls back to raw chord_events
+    # when bar_grid wasn't built (no grid / no bass stem).
+    # Pre-2026-05-06 this iterated `chords` (raw events) which under-counted by ~18
+    # points vs bar_grid because family-aware promotion in smooth_qualities + maj7
+    # promotion creates chord variants (Bmin7→Bmin9, A→Amaj7) that aren't in the
+    # raw event stream. Sourcing chords_used from bar_grid surfaces those variants.
     chords_used = []
     seen = set()
-    for c in chords:
-        ch = c["chord"]
-        if ch not in seen:
-            seen.add(ch)
-            chords_used.append(ch)
+    if bar_grid:
+        for b in bar_grid:
+            ch = b.get("chord")
+            if ch and ch not in seen:
+                seen.add(ch)
+                chords_used.append(ch)
+    else:
+        for c in chords:
+            ch = c["chord"]
+            if ch not in seen:
+                seen.add(ch)
+                chords_used.append(ch)
 
     # Step 7b: Strip internal keys now that all chord-placement passes are done.
     for sec in raw_sections:
@@ -385,11 +540,35 @@ def format_chart(
 
     # bar_grid was computed up top so it could drive chord placement; include
     # it in the output for any renderer that wants the per-bar chord list.
+
+    # Capo suggestion: only run if caller didn't pre-set capo. Weight by bar
+    # usage so songs in {F,Bb,C,Fm} (sounds like Tom Petty F) become "Capo 3:
+    # D, G, A, Dm" — way friendlier for the guitar persona.
+    capo_shape_map: Dict[str, str] = {}
+    if capo == 0:
+        usage_weights: Dict[str, int] = {}
+        for b in (bar_grid or []):
+            ch = (b.get("chord") or "").strip()
+            if ch:
+                usage_weights[ch] = usage_weights.get(ch, 0) + 1
+        if not usage_weights:
+            for c in (chords_used or []):
+                usage_weights[c] = usage_weights.get(c, 0) + 1
+        try:
+            suggested_capo, mapping = suggest_capo(usage_weights)
+            if suggested_capo > 0:
+                capo = suggested_capo
+                capo_shape_map = mapping
+                logger.info(f"[capo] suggested capo {capo} → {mapping}")
+        except Exception as e:
+            logger.warning(f"[capo] suggest_capo failed: {e}")
+
     return {
         "title": title,
         "artist": artist,
         "key": key,
         "capo": capo,
+        "capo_shape_map": capo_shape_map,
         "source": "StemScriber AI",
         "chords_used": chords_used,
         "sections": sections_out,
@@ -423,12 +602,20 @@ def _redetect_key_from_bargrid(bar_grid: List[Dict], fallback: Optional[str]) ->
         return fallback or 'C'
     events = []
     for b in bar_grid:
-        root = b.get('root') or b.get('detector_root')
+        # Prefer bass_root — it's the authoritative root signal from bass-stem
+        # extraction. The legacy 'root' key never existed on bar_grid emissions
+        # (see bass_root_extraction.py:242-252); falling through to detector_root
+        # fed the noisy polyphonic signal into K-K and produced wrong keys
+        # (e.g. Black Cow detected as D instead of A).
+        root = b.get('bass_root') or b.get('root') or b.get('detector_root')
         chord = b.get('chord') or ''
         quality = b.get('detector_quality')
-        # Pull quality from the chord label if not explicitly stored
+        # Pull quality from the chord label if not explicitly stored.
+        # Guard against accidentals ('#'/'b') being mis-extracted as quality
+        # when chord uses a sharp/flat root the picked root doesn't include.
         if not quality and root and chord.startswith(root):
-            quality = chord[len(root):] or 'maj'
+            tail = chord[len(root):]
+            quality = tail if tail and tail[0] not in '#b' else 'maj'
         if not root or not quality:
             continue
         st = b.get('start_time', 0.0)
@@ -508,16 +695,65 @@ def _quantize_chords_to_bars(
         downbeats[-1] + (downbeats[-1] - downbeats[-2])
     )
 
+    # Backward extrapolation: librosa's beat tracker often loses the beat in
+    # soft acoustic intros/verses (Free Fallin's first 30s, etc.) and only
+    # locks on once the full band enters. If we have chord events before the
+    # first detected downbeat, synthesize phantom downbeats backward at the
+    # song's tempo period so verse-1 chords aren't dropped silently.
+    first_chord_time = min((c["time"] for c in chords), default=downbeats[0])
+    if first_chord_time + 0.5 < downbeats[0]:
+        period = downbeats[1] - downbeats[0]
+        if period > 0.1:
+            t = downbeats[0] - period
+            extra: List[float] = []
+            while t >= max(0.0, first_chord_time - 0.5):
+                extra.append(t)
+                t -= period
+            if extra:
+                downbeats = sorted(extra) + list(downbeats)
+                logger.info(
+                    f"_quantize_chords_to_bars: extrapolated {len(extra)} bars backward "
+                    f"({downbeats[0]:.2f}s..{extra[-1] + period:.2f}s) to cover prelude chords "
+                    f"(first chord at {first_chord_time:.2f}s, original first downbeat at {downbeats[len(extra)]:.2f}s)"
+                )
+
+    # Top-K aggregation config (mirrors chord_detector_librosa). When chord
+    # events carry a `candidates` list (librosa path only), we sum each
+    # candidate's score across all beats overlapping the bar — weighted by
+    # overlap duration — and re-sort/re-clip per bar. Output is stashed under
+    # source_meta.top_k for the re-ranker corrector. Detectors that don't
+    # emit `candidates` leave source_meta absent and downstream is unchanged.
+    import os as _os_topk
+    topk_k = max(1, int(_os_topk.environ.get("ANTHROPIC_CORRECTION_RERANKER_K") or "4"))
+
     for i, start in enumerate(downbeats):
         end = downbeats[i + 1] if i + 1 < len(downbeats) else song_end
         # Accumulate overlap per chord within this bar
         overlaps: Dict[str, float] = {}
+        # Accumulate weighted top-K candidate scores within this bar.
+        # cand_acc maps chord_name -> {"score": float, "root": str, "quality": str}.
+        cand_acc: Dict[str, Dict] = {}
         for c in chords:
             c_start = c["time"]
             c_end = c_start + c.get("duration", 1.0)
             overlap = max(0.0, min(end, c_end) - max(start, c_start))
             if overlap > 0:
                 overlaps[c["chord"]] = overlaps.get(c["chord"], 0.0) + overlap
+                # Aggregate candidates from this beat, weighted by overlap.
+                cands = c.get("candidates") or []
+                for cd in cands:
+                    name = cd.get("chord")
+                    if not name:
+                        continue
+                    s = float(cd.get("score", 0.0)) * overlap
+                    if name in cand_acc:
+                        cand_acc[name]["score"] += s
+                    else:
+                        cand_acc[name] = {
+                            "score": s,
+                            "root": cd.get("root", ""),
+                            "quality": cd.get("quality", ""),
+                        }
         if overlaps:
             chord = max(overlaps.items(), key=lambda kv: kv[1])[0]
         elif bars:
@@ -525,12 +761,33 @@ def _quantize_chords_to_bars(
             chord = bars[-1]["chord"]
         else:
             continue  # nothing yet, skip
-        bars.append({
+        bar_entry = {
             "bar": i + 1,
             "chord": chord,
             "start_time": round(start, 3),
             "end_time": round(end, 3),
-        })
+        }
+        if cand_acc:
+            # Sort by accumulated weighted score, keep top-K, normalize the
+            # scores into 0..1-ish range (divide by bar duration so scores are
+            # comparable to the original per-beat cosine values).
+            bar_duration = max(0.001, end - start)
+            ranked = sorted(
+                cand_acc.items(),
+                key=lambda kv: kv[1]["score"],
+                reverse=True,
+            )[:topk_k]
+            top_k_out = [
+                {
+                    "chord": name,
+                    "score": round(info["score"] / bar_duration, 4),
+                    "root": info["root"],
+                    "quality": info["quality"],
+                }
+                for name, info in ranked
+            ]
+            bar_entry["source_meta"] = {"top_k": top_k_out}
+        bars.append(bar_entry)
     return bars
 
 
@@ -1616,7 +1873,13 @@ def _consolidate_chord_events(
 # ---------------------------------------------------------------------------
 
 def _split_into_lines(words: List[Dict]) -> List[_LyricLine]:
-    """Split word timestamps into natural lyric lines based on timing gaps."""
+    """Split word timestamps into natural lyric lines at sung pauses.
+
+    A line ends where the singer pauses (a gap >= LINE_GAP_THRESHOLD). The
+    MAX_WORDS_PER_LINE cap is a safety net for run-on passages with no clear
+    pause — and when it fires we break at the WIDEST internal gap, so we never
+    chop a phrase mid-sentence at an arbitrary word count.
+    """
     if not words:
         return []
 
@@ -1625,22 +1888,33 @@ def _split_into_lines(words: List[Dict]) -> List[_LyricLine]:
 
     for i in range(1, len(words)):
         gap = words[i]["start"] - words[i - 1]["end"]
-        word_count = len(current_words)
+        prev_txt = (words[i - 1].get("word") or "").strip()
+        ends_sentence = prev_txt[-1:] in (".", "!", "?") if prev_txt else False
 
-        # Split on timing gap or max word count
-        should_split = (
-            gap >= LINE_GAP_THRESHOLD
-            or word_count >= MAX_WORDS_PER_LINE
-        )
-
-        # Hard break at max words regardless of MIN_WORDS_PER_LINE
-        force_split = word_count >= MAX_WORDS_PER_LINE
-
-        if force_split or (should_split and word_count >= MIN_WORDS_PER_LINE):
+        # Break at a real sung pause OR right after a sentence-ending word, so a
+        # pickup word ("...come home. | I don't care") starts the next line
+        # instead of dangling at the end of this one.
+        if (gap >= LINE_GAP_THRESHOLD or ends_sentence) and len(current_words) >= MIN_WORDS_PER_LINE:
             lines.append(_LyricLine(words=current_words))
             current_words = [words[i]]
-        else:
-            current_words.append(words[i])
+            continue
+
+        current_words.append(words[i])
+
+        # Safety net: a run-on line with no pause. Break at the widest internal
+        # gap (the most natural breath) rather than an arbitrary word count.
+        if len(current_words) >= MAX_WORDS_PER_LINE:
+            best_k, best_gap = None, -1.0
+            for k in range(MIN_WORDS_PER_LINE, len(current_words) - MIN_WORDS_PER_LINE + 1):
+                g = current_words[k]["start"] - current_words[k - 1]["end"]
+                if g > best_gap:
+                    best_gap, best_k = g, k
+            if best_k:
+                lines.append(_LyricLine(words=current_words[:best_k]))
+                current_words = current_words[best_k:]
+            else:
+                lines.append(_LyricLine(words=current_words))
+                current_words = []
 
     # Don't lose the last line
     if current_words:
@@ -2118,6 +2392,17 @@ def _label_sections(sections: List[_Section]):
     ranked = pattern_counts.most_common()
 
     if not ranked:
+        for s in vocal_sections:
+            s.name = "Verse"
+        return
+
+    # Through-composed / jazz songs (Aja, Black Cow, etc.) have no repeating
+    # chord patterns — every vocal section has a unique progression. The
+    # default Bridge-labeling heuristic mislabels these as "Bridge 1, Bridge 2,
+    # Bridge 3..." when they're really just "Verse 1, Verse 2, Verse 3..."
+    # If the most-common pattern only appears ONCE (no real repetition), label
+    # every vocal section as Verse and let downstream numbering sort them out.
+    if ranked[0][1] == 1:
         for s in vocal_sections:
             s.name = "Verse"
         return

@@ -33,8 +33,14 @@ def init_jwt(app):
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=access_expires)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(seconds=refresh_expires)
 
-    # Store refresh tokens in HTTP-only cookies
-    app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
+    # Store refresh tokens in HTTP-only cookies.
+    # query_string is included so the iOS Capacitor app can authenticate audio
+    # stream / download URLs — HTMLAudioElement (and <a download>) cannot send
+    # custom headers, and Capacitor's capacitor://localhost origin can't share
+    # cookies with stemscriber.com. Token is appended only on iOS in
+    # js/auth.js's Capacitor block; web continues to use the Authorization header.
+    app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies', 'query_string']
+    app.config['JWT_QUERY_STRING_NAME'] = 'token'
     app.config['JWT_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
     app.config['JWT_COOKIE_CSRF_PROTECT'] = True
     app.config['JWT_COOKIE_SAMESITE'] = 'Lax'

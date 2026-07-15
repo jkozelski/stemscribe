@@ -17,7 +17,7 @@ import glob
 from flask import Blueprint, request, jsonify, Response, g
 from models.job import get_job, OUTPUT_DIR
 from middleware.validation import validate_job_id
-from auth.middleware import auth_required
+from auth.middleware import auth_required, authorize_job_access, forbidden_response
 
 logger = logging.getLogger(__name__)
 
@@ -375,6 +375,7 @@ def generate_chord_sheet(song_id):
 
 
 @chord_sheet_bp.route("/api/chord-sheet/job/<job_id>", methods=["GET"])
+@auth_required(optional=True)
 def generate_chord_sheet_from_job(job_id):
     """Generate a chord sheet from a StemScriber job's own chord detection (BTC v10)."""
     if not validate_job_id(job_id):
@@ -382,6 +383,8 @@ def generate_chord_sheet_from_job(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({"error": "Job not found"}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     # Prefer the pre-built chord_chart.json which has sections with lyrics
     from models.job import OUTPUT_DIR
@@ -961,6 +964,7 @@ def _build_plain_text_sheet(chord_events, synced_lyrics, title, artist, key, tem
 # ============ EXPORT ENDPOINTS ============
 
 @chord_sheet_bp.route("/api/chord-sheet/job/<job_id>/chordpro", methods=["GET"])
+@auth_required(optional=True)
 def export_chordpro(job_id):
     """Export chord sheet as ChordPro (.cho) file for OnSong compatibility."""
     info, err = _get_job_info(job_id)
@@ -968,6 +972,8 @@ def export_chordpro(job_id):
         return jsonify({"error": err}), 404
 
     job = info["job"]
+    if not authorize_job_access(job):
+        return forbidden_response()
     chord_events = info["chord_events"]
     title = info["title"]
     artist = info["artist"]
@@ -997,6 +1003,7 @@ def export_chordpro(job_id):
 
 
 @chord_sheet_bp.route("/api/chord-sheet/job/<job_id>/text", methods=["GET"])
+@auth_required(optional=True)
 def export_text(job_id):
     """Export chord sheet as plain text (UG-style chords above lyrics)."""
     info, err = _get_job_info(job_id)
@@ -1004,6 +1011,8 @@ def export_text(job_id):
         return jsonify({"error": err}), 404
 
     job = info["job"]
+    if not authorize_job_access(job):
+        return forbidden_response()
     chord_events = info["chord_events"]
     title = info["title"]
     artist = info["artist"]
@@ -1152,3 +1161,97 @@ def import_chart(job_id):
     )
 
     return jsonify({"status": "ok", "chart": chart})
+
+
+# ============================================================
+# Cover-art upload — lets users override the auto-detected art
+# (MusicBrainz lookups miss / mismatch some songs; this gives
+# the user a manual lever). Served back via the existing
+# GET /api/download/<job_id>/thumbnail endpoint.
+# ============================================================
+
+@chord_sheet_bp.route("/api/cover/<job_id>", methods=["POST"])
+@auth_required
+def upload_cover(job_id):
+    """Upload a custom album-art image. Stored at outputs/<job_id>/thumbnail.png
+    and pointed at by job.metadata.thumbnail."""
+    import os as _os
+    import tempfile
+    import time
+    from werkzeug.utils import secure_filename
+    from processing.cover_import import (
+        validate_cover_image,
+        install_cover,
+        ALLOWED_COVER_EXTS,
+        MAX_COVER_BYTES,
+    )
+
+    if not validate_job_id(job_id):
+        return jsonify({"error": "Invalid job ID"}), 400
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+
+    user = getattr(g, "current_user", None)
+    if not user:
+        return jsonify({"error": "Authentication required"}), 401
+    uid = str(user.id)
+    if job.user_id is not None and job.user_id != uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    f = request.files["file"]
+    if not f or not f.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    name = secure_filename(f.filename)
+    ext = _os.path.splitext(name)[1].lower()
+    if ext not in ALLOWED_COVER_EXTS:
+        return jsonify({
+            "error": f"Unsupported image type: {ext or '(none)'}. Allowed: .jpg, .png, .webp, .gif"
+        }), 415
+
+    blob = f.read(MAX_COVER_BYTES + 1)
+    if len(blob) > MAX_COVER_BYTES:
+        return jsonify({"error": "Image too large (max 5 MB)"}), 413
+
+    tmp_fd, tmp_path = tempfile.mkstemp(suffix=ext)
+    try:
+        with _os.fdopen(tmp_fd, "wb") as out:
+            out.write(blob)
+        result = validate_cover_image(tmp_path)
+        if not result.get("ok"):
+            return jsonify({"error": result.get("error", "Invalid image")}), 422
+        out_dir = OUTPUT_DIR / job_id
+        install_cover(tmp_path, out_dir)
+    finally:
+        try:
+            _os.unlink(tmp_path)
+        except OSError:
+            pass
+
+    # Point job.metadata.thumbnail at the served URL with a cache-bust so
+    # the library/practice card refreshes immediately. _thumb_url in
+    # library.py passes through anything starting with '/' as-is.
+    cache_bust = int(time.time())
+    new_thumb_url = f"/api/download/{job_id}/thumbnail?v={cache_bust}"
+    meta = getattr(job, "metadata", None) or {}
+    meta["thumbnail"] = new_thumb_url
+    meta["cover_source"] = "user-uploaded"
+    job.metadata = meta
+
+    from models.job import save_job_to_disk
+    save_job_to_disk(job)
+
+    logger.info(
+        f"Custom cover uploaded for {job_id} by user {uid} "
+        f"({result['meta']['width']}x{result['meta']['height']} {result['meta']['format']})"
+    )
+
+    return jsonify({
+        "status": "ok",
+        "thumbnail": new_thumb_url,
+        "meta": result["meta"],
+    })

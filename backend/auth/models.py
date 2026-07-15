@@ -109,12 +109,7 @@ def update_user_plan(user_id: str, plan: str, stripe_customer_id: str = None,
 
 
 def set_user_plan(user_id: str, plan: str):
-    """Set ONLY the plan column, leaving stripe_* IDs untouched.
-
-    Used by the RevenueCat (Apple IAP) webhook: Apple purchases have no Stripe
-    customer/subscription IDs, so we must not null out a user's existing Stripe
-    linkage when their plan is set via Apple. Plan is unified across both stores.
-    """
+    """Set ONLY the plan column, leaving stripe_* IDs untouched (RevenueCat/Apple IAP)."""
     execute(
         "UPDATE users SET plan = %s, updated_at = NOW() WHERE id = %s",
         (plan, user_id),

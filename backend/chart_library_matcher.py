@@ -173,6 +173,12 @@ def _measure_sounding_key(stem_paths):
         best = int(_np.argmax(scores))
         logger.info(f"Independent key measurement: {_SHARP_NAMES[best]} "
                     f"(r={scores[best]:.3f}, runner-up r={sorted(scores)[-2]:.3f})")
+        # Confidence gate (Shakedown 7/5: r=0.473 transposed Jeff's G chart
+        # to C): a weak measurement is NO measurement — the owner's chart key
+        # beats a coin-flip chroma read.
+        if scores[best] < 0.55:
+            logger.info(f"Key measurement too weak (r={scores[best]:.3f} < 0.55) — unmeasured")
+            return None
         return best
     except Exception as e:
         logger.warning(f"Independent key measurement failed (non-fatal): {e}")

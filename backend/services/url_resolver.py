@@ -47,23 +47,48 @@ def validate_url_no_ssrf(url: str) -> bool:
     return True
 
 
-# Supported URL patterns (direct download via yt-dlp)
+# Supported URL patterns (direct download via yt-dlp).
+#
+# Per the 2026-04-30 v1.1 legal posture review: YouTube and other
+# major-label-mixed UGC platforms (Dailymotion, Mixcloud) are EXCLUDED here
+# to avoid the MP3.com / Napster / ReDigi plaintiff theory. Artist-controlled
+# platforms — where the artist chose to publish on a platform that allows
+# free download/streaming — are kept. Users who want to use audio from
+# excluded platforms can capture it themselves on their own machine and
+# upload the resulting file via the regular file-upload flow (where the
+# rights warranty in ToS §4.3 applies). See docs/legal-faq.md.
 URL_PATTERNS = [
-    r'(youtube\.com|youtu\.be)',
     r'soundcloud\.com',
     r'bandcamp\.com',
-    r'vimeo\.com',
-    r'dailymotion\.com',
-    r'mixcloud\.com',
+    r'reverbnation\.com',
     r'audiomack\.com',
     r'archive\.org/(details|download)',  # Internet Archive Live Music
+    r'vimeo\.com',  # User-uploaded video; lower volume than YouTube, retained for now
 ]
+
+# Patterns that are explicitly REJECTED with a guidance message rather than
+# the generic "unsupported URL" error. Helps users find the right path.
+EXCLUDED_URL_PATTERNS = {
+    'youtube': r'(youtube\.com|youtu\.be)',
+    'dailymotion': r'dailymotion\.com',
+    'mixcloud': r'mixcloud\.com',
+}
 
 # Streaming service patterns (need special handling)
 STREAMING_PATTERNS = {
     'spotify': r'open\.spotify\.com/(track|album|playlist)/([a-zA-Z0-9]+)',
     'apple_music': r'music\.apple\.com/.+/album/.+/(\d+)',
 }
+
+
+def is_excluded_url(url):
+    """Check if URL is from a platform we deliberately don't accept.
+    Returns the platform name if matched, else None.
+    """
+    for platform, pattern in EXCLUDED_URL_PATTERNS.items():
+        if re.search(pattern, url, re.IGNORECASE):
+            return platform
+    return None
 
 
 def is_supported_url(url):
