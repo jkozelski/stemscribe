@@ -108,11 +108,11 @@ window.StemScriber = window.StemScriber || {};
 
             try {
                 // If already connected, offer to disconnect instead
-                var statusResp = await fetch(SS.API_BASE + '/drive/status', { credentials: 'include' });
+                var statusResp = await fetch(SS.API_BASE + '/drive/status', { headers: SS.authHeaders() });
                 var statusData = await statusResp.json();
                 if (statusData.connected) {
                     if (confirm('Disconnect Google Drive (' + (statusData.email || 'connected') + ')?')) {
-                        await fetch(SS.API_BASE + '/drive/disconnect', { method: 'POST', credentials: 'include' });
+                        await fetch(SS.API_BASE + '/drive/disconnect', { method: 'POST', headers: SS.authHeaders() });
                         SS.showToast('Disconnected from Google Drive');
                         SS.checkDriveStatus();
                     } else {
@@ -123,7 +123,7 @@ window.StemScriber = window.StemScriber || {};
                 }
 
                 // Start OAuth flow
-                var response = await fetch(SS.API_BASE + '/drive/auth', { credentials: 'include' });
+                var response = await fetch(SS.API_BASE + '/drive/auth', { headers: SS.authHeaders() });
                 var data = await response.json();
                 if (data.auth_url) {
                     // Redirect to Google
@@ -216,7 +216,7 @@ window.StemScriber = window.StemScriber || {};
         var statsRow = document.getElementById('driveStatsRow');
 
         try {
-            var response = await fetch(SS.API_BASE + '/drive/status', { credentials: 'include' });
+            var response = await fetch(SS.API_BASE + '/drive/status', { headers: SS.authHeaders() });
             var data = await response.json();
 
             if (data.connected) {
@@ -246,10 +246,10 @@ window.StemScriber = window.StemScriber || {};
 
         try {
             // Check connection; if not connected, kick off OAuth
-            var statusResp = await fetch(SS.API_BASE + '/drive/status', { credentials: 'include' });
+            var statusResp = await fetch(SS.API_BASE + '/drive/status', { headers: SS.authHeaders() });
             var statusData = await statusResp.json();
             if (!statusData.connected) {
-                var authResp = await fetch(SS.API_BASE + '/drive/auth', { credentials: 'include' });
+                var authResp = await fetch(SS.API_BASE + '/drive/auth', { headers: SS.authHeaders() });
                 var authData = await authResp.json();
                 if (authData.auth_url) {
                     // Save intent so we can auto-export after return
@@ -264,8 +264,7 @@ window.StemScriber = window.StemScriber || {};
 
             var resp = await fetch(SS.API_BASE + '/drive/export', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                headers: Object.assign({ 'Content-Type': 'application/json' }, SS.authHeaders()),
                 body: JSON.stringify({ job_id: jobId }),
             });
             var data = await resp.json();
@@ -317,12 +316,51 @@ window.StemScriber = window.StemScriber || {};
         }
     };
 
+    // Sort preference is persisted in localStorage so the user's last choice
+    // sticks across visits. Default 'recent' matches the "just-uploaded — where
+    // is it?" expectation; 'az' is the toggle for users with bigger libraries.
+    SS.getLibrarySort = function() {
+        try { return localStorage.getItem('ss_library_sort') || 'recent'; }
+        catch(e) { return 'recent'; }
+    };
+    SS.setLibrarySort = function(mode) {
+        try { localStorage.setItem('ss_library_sort', mode); } catch(e) {}
+    };
+
+    SS.renderLibrarySortToggle = function(container) {
+        // Idempotent — re-renders if it already exists so toggle state stays accurate.
+        // The toggle is inserted as a SIBLING of `container` (via parentNode.insertBefore),
+        // so we look for the existing one in the PARENT — not inside container, which would
+        // never find it and would stack a new row on every render (the "click adds a row" bug).
+        var existing = container.parentNode && container.parentNode.querySelector('.library-sort-toggle');
+        if (existing) existing.remove();
+        var mode = SS.getLibrarySort();
+        var wrap = document.createElement('div');
+        wrap.className = 'library-sort-toggle';
+        wrap.style.cssText = 'display:flex;gap:.4rem;align-items:center;margin:0 0 .75rem 0;font-size:.85rem;color:#888;';
+        wrap.innerHTML =
+          '<span>Sort:</span>' +
+          '<button data-sort="recent" class="lst-btn" style="padding:.25rem .65rem;border-radius:6px;border:1px solid #444;background:' + (mode === 'recent' ? '#d56b1f' : 'transparent') + ';color:' + (mode === 'recent' ? '#fff' : '#bbb') + ';cursor:pointer;font:inherit;">Recent</button>' +
+          '<button data-sort="az" class="lst-btn"     style="padding:.25rem .65rem;border-radius:6px;border:1px solid #444;background:' + (mode === 'az'     ? '#d56b1f' : 'transparent') + ';color:' + (mode === 'az'     ? '#fff' : '#bbb') + ';cursor:pointer;font:inherit;">A–Z</button>';
+        wrap.querySelectorAll('.lst-btn').forEach(function(btn) {
+            btn.onclick = function() {
+                var newMode = btn.getAttribute('data-sort');
+                if (newMode === SS.getLibrarySort()) return;
+                SS.setLibrarySort(newMode);
+                SS.loadLibrary();
+            };
+        });
+        container.parentNode.insertBefore(wrap, container);
+    };
+
     SS.loadLibrary = async function() {
         var libraryList = document.getElementById('libraryList');
         libraryList.innerHTML = '<div class="library-loading">Loading library...</div>';
+        SS.renderLibrarySortToggle(libraryList);
 
         try {
-            var response = await fetch(SS.API_BASE + '/library', { headers: SS.authHeaders() });
+            var sortMode = SS.getLibrarySort();
+            var response = await fetch(SS.API_BASE + '/library?sort=' + encodeURIComponent(sortMode), { headers: SS.authHeaders() });
             var data = await response.json();
 
             if (data.library && data.library.length > 0) {
@@ -377,25 +415,12 @@ window.StemScriber = window.StemScriber || {};
         }
     };
 
-    SS.loadFromLibrary = async function(jobId) {
+    SS.loadFromLibrary = function(jobId) {
         SS.closeLibraryPanel();
-        SS.showToast('Loading from library...');
-
-        try {
-            var response = await fetch(SS.API_BASE + '/status/' + jobId);
-            var job = await response.json();
-
-            if (job.status === 'completed') {
-                SS.currentJobId = jobId;
-                SS.showResults(job);
-                SS.showToast('\u2713 Loaded: ' + (job.metadata?.title || 'Track'));
-            } else {
-                SS.showToast('Job not ready', 'error');
-            }
-        } catch (error) {
-            console.error('Failed to load from library:', error);
-            SS.showToast('Failed to load track', 'error');
-        }
+        // Go straight to practice mode \u2014 that's what the user actually wants
+        // when they tap a library item. The mixer-on-index view layered the
+        // selected song below the demo card + drop zone, which read as broken.
+        window.location.href = 'practice.html?job=' + encodeURIComponent(jobId);
     };
 
     SS.deleteFromLibrary = async function(jobId) {

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>StemScriber ✦ Fretboard Visualizer</title>
     <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@300;400;500;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -65,11 +65,13 @@
 
         /* Navigation */
         .nav-bar {
-            position: relative;
+            position: sticky;           /* keep Home/back reachable at all times */
+            top: 0;
             z-index: 10;
             background: rgba(19, 19, 26, 0.95);
             border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+            /* Pad below the iPhone status bar / notch so the nav isn't cut off. */
+            padding: calc(1rem + env(safe-area-inset-top)) 2rem 1rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -342,12 +344,31 @@
             color: var(--text-dim);
         }
 
-        /* Controls section */
+        /* Controls section — single flex row, centered, even gaps */
         .controls-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            align-items: center;
+            justify-content: center;
             margin-top: 1.5rem;
+        }
+        .controls-section .btn-primary {
+            flex: 0 0 auto;
+            min-width: 140px;
+        }
+        .controls-section .ctrl-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 0 0 auto;
+        }
+        .controls-section .ctrl-group .control-label {
+            margin: 0;
+            white-space: nowrap;
+        }
+        .controls-section .spacer {
+            flex: 1 1 auto;
         }
 
         .control-item {
@@ -421,7 +442,7 @@
             }
 
             .nav-bar {
-                padding: 0.75rem 1rem;
+                padding: calc(0.75rem + env(safe-area-inset-top)) 1rem 0.75rem;
             }
 
             .nav-brand {
@@ -440,13 +461,14 @@
     <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
     <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
     <script src="js/analytics.js"></script>
+    <script src="https://unpkg.com/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="nav-bar">
-        <a href="/" class="nav-brand"><span style="display:inline-flex;align-items:flex-end;gap:2px;height:18px;margin-right:6px;vertical-align:middle"><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:45%;animation:wbp 0.8s ease-in-out infinite alternate"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:85%;animation:wbp 0.8s ease-in-out infinite alternate 0.15s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:100%;animation:wbp 0.8s ease-in-out infinite alternate 0.05s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:70%;animation:wbp 0.8s ease-in-out infinite alternate 0.2s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:40%;animation:wbp 0.8s ease-in-out infinite alternate 0.1s"></span></span>StemScriber</a>
+        <a href="index.html" class="nav-brand"><span style="display:inline-flex;align-items:flex-end;gap:2px;height:18px;margin-right:6px;vertical-align:middle"><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:45%;animation:wbp 0.8s ease-in-out infinite alternate"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:85%;animation:wbp 0.8s ease-in-out infinite alternate 0.15s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:100%;animation:wbp 0.8s ease-in-out infinite alternate 0.05s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:70%;animation:wbp 0.8s ease-in-out infinite alternate 0.2s"></span><span style="width:3px;border-radius:2px 2px 0 0;background:linear-gradient(to top,var(--orange),var(--pink));height:40%;animation:wbp 0.8s ease-in-out infinite alternate 0.1s"></span></span>StemScriber</a>
         <ul class="nav-links">
-            <li><a href="/">Home</a></li>
+            <li><a href="#" onclick="event.preventDefault(); if (history.length > 1) { history.back(); } else { location.href='/app'; }">&larr; Back</a></li>
             <li><a href="/tuner.html">Tuner</a></li>
             <li><a href="/fretboard.html" style="color: var(--orange);">Fretboard</a></li>
         </ul>
@@ -581,6 +603,38 @@
                     </label>
                 </div>
             </div>
+
+            <!-- Tone -->
+            <div class="control-panel">
+                <label class="control-label">Tone</label>
+                <div class="select-group">
+                    <select id="toneSelect">
+                        <optgroup label="Real instruments (sampled)">
+                            <option value="sf:acoustic_grand_piano" selected>Grand Piano</option>
+                            <option value="sf:acoustic_guitar_nylon">Acoustic Guitar (nylon)</option>
+                            <option value="sf:acoustic_guitar_steel">Acoustic Guitar (steel)</option>
+                            <option value="sf:electric_guitar_clean">Electric Guitar (clean)</option>
+                            <option value="sf:electric_guitar_jazz">Electric Guitar (jazz)</option>
+                            <option value="sf:electric_bass_finger">Electric Bass</option>
+                            <option value="sf:violin">Violin</option>
+                            <option value="sf:cello">Cello</option>
+                            <option value="sf:flute">Flute</option>
+                            <option value="sf:trumpet">Trumpet</option>
+                            <option value="sf:tenor_sax">Tenor Sax</option>
+                            <option value="sf:vibraphone">Vibraphone</option>
+                            <option value="sf:church_organ">Organ</option>
+                        </optgroup>
+                        <optgroup label="Synth">
+                            <option value="mellow">Mellow (triangle)</option>
+                            <option value="piano">Piano-ish (synth)</option>
+                            <option value="pluck">Pluck</option>
+                            <option value="pure">Pure (sine)</option>
+                            <option value="bright">Bright (saw)</option>
+                            <option value="chip">8-bit</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- Fretboard section -->
@@ -594,23 +648,44 @@
 
             <!-- Controls -->
             <div class="controls-section">
-                <button class="btn btn-primary" id="playScaleBtn">▶ Play Scale</button>
+                <button class="btn btn-primary" id="playScaleBtn" style="min-width: 200px; font-size: 1.05rem; padding: 0.9rem 1.5rem;">▶ Play Scale</button>
                 <button class="btn" id="stopPlayBtn" style="display: none;">⏹ Stop</button>
-                
-                <label class="toggle-label" style="margin: 0; justify-content: flex-start;">
-                    <input type="checkbox" id="droneToggle">
-                    <span class="toggle-switch"></span>
-                    <span>Drone (Root)</span>
-                </label>
 
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <span class="control-label" style="margin: 0; min-width: 60px;">Metronome</span>
-                    <div class="slider-container" style="flex: 1;">
-                        <input type="range" id="bpmSlider" min="40" max="220" value="120">
-                        <span class="slider-value" id="bpmValue">120</span>
-                    </div>
+                <div class="ctrl-group">
+                    <label class="toggle-label" style="margin: 0;">
+                        <input type="checkbox" id="droneToggle">
+                        <span class="toggle-switch"></span>
+                        <span>Drone (Root)</span>
+                    </label>
                 </div>
-                <button class="btn btn-primary" id="metronomeBtn">♩ Start</button>
+
+                <div class="ctrl-group">
+                    <span class="control-label">Octaves</span>
+                    <select id="octavesSelect" class="select" style="min-width: 64px;">
+                        <option value="1" selected>1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+
+                <div class="ctrl-group">
+                    <span class="control-label">Subdivision</span>
+                    <select id="subdivisionSelect" class="select" style="min-width: 108px;">
+                        <option value="1" selected>♩ 1/4</option>
+                        <option value="2">♪ 1/8</option>
+                        <option value="3">♪♪♪ Triplet</option>
+                        <option value="4">♬ 1/16</option>
+                    </select>
+                </div>
+
+                <div class="ctrl-group" style="min-width: 300px;">
+                    <span class="control-label">Tempo</span>
+                    <input type="range" id="bpmSlider" min="40" max="280" value="120" style="flex: 1; min-width: 140px;">
+                    <span class="slider-value" id="bpmValue" style="min-width: 56px; text-align: right;">120 BPM</span>
+                </div>
+
+                <button class="btn btn-primary" id="metronomeBtn" style="min-width: 200px; font-size: 1.05rem; padding: 0.9rem 1.5rem;">♩ Start Metronome</button>
             </div>
         </div>
     </div>
@@ -764,8 +839,25 @@
             isPlaying: false,
             droneOscillator: null,
             metronomeRunning: false,
-            bpm: 120
+            bpm: 120,
+            octaves: 1,
+            subdivision: 1, // notes per beat: 1=quarter, 2=eighth, 3=triplet, 4=sixteenth
+            tone: 'sf:acoustic_grand_piano'
         };
+
+        // Sampled-instrument cache: name → loaded Soundfont instrument
+        const _sfInstruments = {};
+        let _sfLoading = null;
+        function _loadInstrument(name) {
+            if (_sfInstruments[name]) return Promise.resolve(_sfInstruments[name]);
+            if (!window.Soundfont) return Promise.reject(new Error('Soundfont lib not loaded'));
+            return Soundfont.instrument(audioContext, name, { soundfont: 'MusyngKite', format: 'mp3' })
+                .then(inst => { _sfInstruments[name] = inst; return inst; });
+        }
+        function midiToNoteName(midi) {
+            const NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+            return NAMES[midi % 12] + (Math.floor(midi / 12) - 1);
+        }
 
         function getNoteIndex(noteName) {
             return NOTES.indexOf(noteName);
@@ -815,19 +907,69 @@
         }
 
         function playNote(midiNote, duration = 0.5) {
+            // Sampled instrument path (Soundfont)
+            if (state.tone && state.tone.startsWith('sf:')) {
+                const sfName = state.tone.slice(3);
+                const inst = _sfInstruments[sfName];
+                if (inst) {
+                    inst.play(midiToNoteName(midiNote), audioContext.currentTime, { duration, gain: 1.2 });
+                    return;
+                }
+                // Not loaded — kick off load, queue this note to play when ready
+                _loadInstrument(sfName).then(loadedInst => {
+                    loadedInst.play(midiToNoteName(midiNote), audioContext.currentTime + 0.01, { duration, gain: 1.2 });
+                }).catch(err => console.warn('soundfont play failed:', err.message));
+                return;
+            }
+            const freq = midiToFrequency(midiNote);
+            const t0 = audioContext.currentTime;
+            const TONES = {
+                mellow: {type: 'triangle', peak: 0.35, attack: 0.005, decay: duration},
+                piano:  {type: 'triangle', peak: 0.5,  attack: 0.002, decay: Math.max(0.6, duration), addSine: 0.15},
+                pluck:  {type: 'sawtooth', peak: 0.45, attack: 0.001, decay: Math.min(0.35, duration), lowpass: freq * 4},
+                pure:   {type: 'sine',     peak: 0.4,  attack: 0.01,  decay: duration},
+                bright: {type: 'sawtooth', peak: 0.28, attack: 0.005, decay: duration, lowpass: 2500},
+                chip:   {type: 'square',   peak: 0.22, attack: 0.001, decay: duration},
+            };
+            const t = TONES[state.tone] || TONES.mellow;
+            const totalDur = Math.max(t.decay + 0.05, duration + 0.05);
+
             const osc = audioContext.createOscillator();
             const gain = audioContext.createGain();
-            osc.connect(gain);
+            let lastNode = osc;
+            osc.frequency.value = freq;
+            osc.type = t.type;
+            // Optional lowpass for warmth/pluck shaping
+            if (t.lowpass) {
+                const lpf = audioContext.createBiquadFilter();
+                lpf.type = 'lowpass';
+                lpf.frequency.value = t.lowpass;
+                lpf.Q.value = 0.7;
+                lastNode.connect(lpf);
+                lastNode = lpf;
+            }
+            lastNode.connect(gain);
             gain.connect(audioContext.destination);
+            gain.gain.setValueAtTime(0.001, t0);
+            gain.gain.exponentialRampToValueAtTime(t.peak, t0 + t.attack);
+            gain.gain.exponentialRampToValueAtTime(0.001, t0 + t.decay);
+            osc.start(t0);
+            osc.stop(t0 + totalDur);
 
-            osc.frequency.value = midiToFrequency(midiNote);
-            osc.type = 'triangle';
-
-            gain.gain.setValueAtTime(0.35, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
-            osc.start(audioContext.currentTime);
-            osc.stop(audioContext.currentTime + duration);
+            // Optional sine sub-layer for fuller body (piano-ish)
+            if (t.addSine) {
+                const o2 = audioContext.createOscillator();
+                const g2 = audioContext.createGain();
+                o2.type = 'sine';
+                o2.frequency.value = freq;
+                o2.connect(g2);
+                g2.connect(audioContext.destination);
+                g2.gain.setValueAtTime(0.001, t0);
+                g2.gain.exponentialRampToValueAtTime(t.addSine, t0 + t.attack);
+                g2.gain.exponentialRampToValueAtTime(0.001, t0 + t.decay);
+                o2.start(t0);
+                o2.stop(t0 + totalDur);
+            }
         }
 
         function startDrone() {
@@ -865,24 +1007,52 @@
 
             const scaleNotes = getScaleNotes();
             const tuningMidi = getTuningMidi();
-            const midiSet = new Set();
 
-            // Collect all scale notes on the fretboard as MIDI values
-            for (let s = 0; s < tuningMidi.length; s++) {
-                for (let fret = state.capo; fret <= 22; fret++) {
-                    const midi = tuningMidi[s] + fret;
-                    const noteIndex = midi % 12;
-                    if (scaleNotes.includes(noteIndex)) midiSet.add(midi);
-                }
+            // If a CAGED shape is selected, restrict to that shape's window of the neck and non-muted strings
+            let cagedTransposed = null;
+            let rangeMin = state.capo, rangeMax = 22;
+            if (state.cagedShape !== 'all') {
+                cagedTransposed = getTransposedShape(state.cagedShape);
+                rangeMin = Math.max(state.capo, cagedTransposed.minFret - 1);
+                rangeMax = cagedTransposed.maxFret + 2;
             }
 
-            const sorted = [...midiSet].sort((a, b) => a - b);
-            // Play one octave ascending from the lowest root
+            // Collect (midi, s, fret) for every scale-tone position visible under the current shape
+            const positions = [];
+            for (let s = 0; s < tuningMidi.length; s++) {
+                if (cagedTransposed && cagedTransposed.chordFrets[s] === -1) continue; // muted string
+                for (let fret = rangeMin; fret <= rangeMax; fret++) {
+                    const midi = tuningMidi[s] + fret;
+                    if (scaleNotes.includes(midi % 12)) positions.push({midi, s, fret});
+                }
+            }
+            // Sort: ascending MIDI; for ties prefer LOWER string (s=0 is low E) so the path climbs naturally
+            positions.sort((a, b) => a.midi - b.midi || a.s - b.s);
+
+            // Find one octave starting at the lowest root
             const keyIndex = getNoteIndex(state.key);
-            const oneOctave = sorted.filter(m => m % 12 === keyIndex);
-            const startMidi = oneOctave[0] || sorted[0];
-            const endMidi = startMidi + 12;
-            const toPlay = sorted.filter(m => m >= startMidi && m <= endMidi);
+            const lowestRoot = positions.find(p => p.midi % 12 === keyIndex);
+            if (!lowestRoot) {
+                state.isPlaying = false;
+                document.getElementById('playScaleBtn').style.display = 'block';
+                document.getElementById('stopPlayBtn').style.display = 'none';
+                return;
+            }
+            const startMidi = lowestRoot.midi;
+            const endMidi = startMidi + 12 * state.octaves;
+            // Dedupe by MIDI keeping the FIRST occurrence (which after our sort = lowest string position)
+            const seen = new Set();
+            const upPositions = positions.filter(p => {
+                if (p.midi < startMidi || p.midi > endMidi) return false;
+                if (seen.has(p.midi)) return false;
+                seen.add(p.midi); return true;
+            });
+            // Descending = up reversed, drop top so it doesn't double
+            const downPositions = upPositions.slice(0, -1).reverse();
+            const toPlay = upPositions.concat(downPositions);
+
+            // Resume audio. Tempo is read FRESH on each tick so slider moves take effect mid-playback.
+            if (audioContext.state === 'suspended') audioContext.resume();
 
             let index = 0;
             function playNext() {
@@ -892,37 +1062,76 @@
                     document.getElementById('stopPlayBtn').style.display = 'none';
                     return;
                 }
-                playNote(toPlay[index], 0.4);
+                // Read tempo FRESH each note so dragging the BPM slider mid-playback works.
+                // noteMs = ms per beat / notes-per-beat (subdivision)
+                const noteMs = Math.max(40, (60 / state.bpm) * 1000 / state.subdivision);
+                const noteSec = noteMs / 1000;
+                const pos = toPlay[index];
+                playNote(pos.midi, noteSec);
+                // Audible click is OFF by default during scale — hit "Start Metronome" if you want it.
+                // Light up ONLY the single dot at this specific string+fret. Strong visual:
+                // boost size, swap fill to a hot color, big glow halo. Hold for most of the note.
+                const dot = document.querySelector(
+                    '#fretboard circle.note-dot[data-string="' + pos.s + '"][data-fret="' + pos.fret + '"]'
+                );
+                if (dot) {
+                    const origR = dot.getAttribute('r');
+                    const origFill = dot.getAttribute('fill');
+                    const origOpacity = dot.getAttribute('opacity');
+                    dot.setAttribute('r', Math.max(16, +origR + 4));
+                    dot.setAttribute('fill', '#ffe14d');
+                    dot.setAttribute('opacity', 1);
+                    dot.style.filter = 'drop-shadow(0 0 14px #ff7b54) drop-shadow(0 0 6px #fff)';
+                    const holdMs = Math.max(80, noteMs - 30);
+                    setTimeout(() => {
+                        dot.setAttribute('r', origR);
+                        dot.setAttribute('fill', origFill);
+                        if (origOpacity != null) dot.setAttribute('opacity', origOpacity);
+                        dot.style.filter = '';
+                    }, holdMs);
+                }
                 index++;
-                setTimeout(playNext, 400);
+                setTimeout(playNext, noteMs);
             }
             playNext();
         }
 
         function metronomeClick() {
+            // Loud, sharp click: louder peak + a hint of bottom from a sine
             const osc = audioContext.createOscillator();
+            const sine = audioContext.createOscillator();
             const gain = audioContext.createGain();
             osc.connect(gain);
+            sine.connect(gain);
             gain.connect(audioContext.destination);
-            osc.frequency.value = 800;
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0, audioContext.currentTime + 0.05);
+            osc.frequency.value = 1200;
+            osc.type = 'square';
+            sine.frequency.value = 600;
+            sine.type = 'sine';
+            gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.9, audioContext.currentTime + 0.005);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.12);
             osc.start(audioContext.currentTime);
-            osc.stop(audioContext.currentTime + 0.05);
+            sine.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.13);
+            sine.stop(audioContext.currentTime + 0.13);
         }
 
         function startMetronome() {
             if (state.metronomeRunning) return;
+            // Resume audio context first so the first click is actually audible
+            if (audioContext.state === 'suspended') audioContext.resume();
             state.metronomeRunning = true;
-            document.getElementById('metronomeBtn').textContent = '⏹ Stop';
+            document.getElementById('metronomeBtn').textContent = '⏹ Stop Metronome';
             function tick() {
                 if (!state.metronomeRunning) {
-                    document.getElementById('metronomeBtn').textContent = '♩ Start';
+                    document.getElementById('metronomeBtn').textContent = '♩ Start Metronome';
                     return;
                 }
                 metronomeClick();
-                setTimeout(tick, (60 / state.bpm) * 1000);
+                // Tick at the subdivision rate so it stays in phase with the scale
+                const intervalMs = Math.max(40, (60 / state.bpm) * 1000 / state.subdivision);
+                setTimeout(tick, intervalMs);
             }
             tick();
         }
@@ -948,8 +1157,13 @@
             // Uniform fret spacing
             const fretSpacing = 48;
             const totalWidth = startX + nutWidth + fretSpacing * fretCount + 20;
+            const svgHeight = startY + totalFretboardHeight + 50;
             svg.setAttribute('width', totalWidth);
-            svg.setAttribute('height', startY + totalFretboardHeight + 50);
+            svg.setAttribute('height', svgHeight);
+            // A viewBox lets the SVG scale to fit narrow (phone) widths instead of
+            // being clipped — without it, max-width:100% just crops the neck.
+            svg.setAttribute('viewBox', '0 0 ' + totalWidth + ' ' + svgHeight);
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
             function fretX(fret) {
                 if (fret === 0) return startX;
@@ -1125,6 +1339,9 @@
                     circle.setAttribute('fill', color);
                     circle.setAttribute('opacity', opacity);
                     circle.setAttribute('class', 'note-dot');
+                    circle.setAttribute('data-midi', midi);
+                    circle.setAttribute('data-string', s);
+                    circle.setAttribute('data-fret', fret);
                     circle.style.cursor = 'pointer';
 
                     circle.addEventListener('click', () => {
@@ -1135,19 +1352,41 @@
                     svg.appendChild(circle);
 
                     if (state.showNoteLabels || state.showIntervals) {
-                        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                        label.setAttribute('x', cx);
-                        label.setAttribute('y', y + 4);
-                        label.setAttribute('text-anchor', 'middle');
-                        label.setAttribute('class', 'note-label');
-                        label.setAttribute('fill', '#000');
-                        label.setAttribute('opacity', opacity);
-                        if (state.showIntervals) {
-                            label.textContent = INTERVALS[(noteIndex - keyIndex + 12) % 12] || '';
+                        const noteName = NOTES[noteIndex];
+                        const degree = INTERVALS[(noteIndex - keyIndex + 12) % 12] || '';
+                        if (state.showNoteLabels && state.showIntervals) {
+                            // Both: two stacked lines, smaller font, note on top, degree below
+                            const top = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            top.setAttribute('x', cx);
+                            top.setAttribute('y', y);
+                            top.setAttribute('text-anchor', 'middle');
+                            top.setAttribute('class', 'note-label');
+                            top.setAttribute('fill', '#000');
+                            top.setAttribute('opacity', opacity);
+                            top.setAttribute('font-size', '7px');
+                            top.textContent = noteName;
+                            svg.appendChild(top);
+                            const bot = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            bot.setAttribute('x', cx);
+                            bot.setAttribute('y', y + 8);
+                            bot.setAttribute('text-anchor', 'middle');
+                            bot.setAttribute('class', 'note-label');
+                            bot.setAttribute('fill', '#000');
+                            bot.setAttribute('opacity', opacity);
+                            bot.setAttribute('font-size', '7px');
+                            bot.textContent = degree;
+                            svg.appendChild(bot);
                         } else {
-                            label.textContent = NOTES[noteIndex];
+                            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            label.setAttribute('x', cx);
+                            label.setAttribute('y', y + 4);
+                            label.setAttribute('text-anchor', 'middle');
+                            label.setAttribute('class', 'note-label');
+                            label.setAttribute('fill', '#000');
+                            label.setAttribute('opacity', opacity);
+                            label.textContent = state.showIntervals ? degree : noteName;
+                            svg.appendChild(label);
                         }
-                        svg.appendChild(label);
                     }
                 }
             }
@@ -1188,6 +1427,9 @@
                     circle.setAttribute('r', 13);
                     circle.setAttribute('fill', isRoot ? COLORS.root : '#ffffff');
                     circle.setAttribute('class', 'note-dot');
+                    circle.setAttribute('data-midi', midi);
+                    circle.setAttribute('data-string', s);
+                    circle.setAttribute('data-fret', fret);
                     circle.style.cursor = 'pointer';
 
                     circle.addEventListener('click', () => {
@@ -1306,9 +1548,39 @@
             else stopDrone();
         });
 
+        document.getElementById('octavesSelect').addEventListener('change', (e) => {
+            state.octaves = parseInt(e.target.value);
+        });
+
+        document.getElementById('subdivisionSelect').addEventListener('change', (e) => {
+            state.subdivision = parseInt(e.target.value);
+        });
+
+        document.getElementById('toneSelect').addEventListener('change', (e) => {
+            state.tone = e.target.value;
+            if (state.tone.startsWith('sf:')) {
+                if (audioContext.state === 'suspended') audioContext.resume();
+                _loadInstrument(state.tone.slice(3)).catch(err => console.warn('soundfont load failed', err));
+            }
+        });
+
+        // Preload the default instrument on first user gesture (audio unlock)
+        document.addEventListener('click', () => {
+            if (state.tone && state.tone.startsWith('sf:') && !_sfInstruments[state.tone.slice(3)]) {
+                _loadInstrument(state.tone.slice(3)).catch(() => {});
+            }
+        }, { once: true });
+
         document.getElementById('bpmSlider').addEventListener('input', (e) => {
             state.bpm = parseInt(e.target.value);
-            document.getElementById('bpmValue').textContent = state.bpm;
+            document.getElementById('bpmValue').textContent = state.bpm + ' BPM';
+            // Auto-start the scale on first slider move so the user immediately hears the tempo change
+            if (!state.isPlaying) {
+                // Resume audio context (slider input counts as user gesture)
+                if (audioContext.state === 'suspended') audioContext.resume();
+                playScale();
+            }
+            // If already playing, mid-flight noteMs is recalculated each tick — no restart needed.
         });
 
         document.getElementById('metronomeBtn').addEventListener('click', () => {

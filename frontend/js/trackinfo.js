@@ -261,22 +261,11 @@ window.StemScriber = window.StemScriber || {};
     };
 
     SS.updateStemLabels = function(playerMapping) {
-        if (!playerMapping) return;
-
-        var stemCards = document.querySelectorAll('.stem-card');
-        stemCards.forEach(function(card) {
-            var stemName = card.dataset.stem;
-            if (stemName && playerMapping[stemName]) {
-                var labelEl = card.querySelector('.stem-name');
-                if (labelEl) {
-                    if (!labelEl.dataset.originalName) {
-                        labelEl.dataset.originalName = labelEl.textContent;
-                    }
-                    var pName = playerMapping[stemName];
-                    labelEl.innerHTML = SS.escapeHtml(pName) + ' <span class="stem-original">(' + SS.escapeHtml(stemName) + ')</span>';
-                }
-            }
-        });
+        // Intentionally a no-op: channel-strip labels stay the uniform
+        // instrument names set in results.js. Personnel (playerMapping) used
+        // to be stamped over the label here, which broke board uniformity.
+        // Personnel still appears in the track-info panel + tooltips.
+        return;
     };
 
     SS.autoFetchPlayerNames = async function() {

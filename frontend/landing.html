@@ -3,22 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // Defensively clear any leftover service worker + cache from older deploys.
+    // Prevents stale homepage links (e.g. old demo job IDs) from sticking after we ship new content.
+    if ('caches' in window) {
+        caches.keys().then(function(names) { names.forEach(function(n) { caches.delete(n); }); });
+    }
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) {
+                if (r.active && r.active.scriptURL && r.active.scriptURL.indexOf('/pwa-sw.js') !== -1) return;
+                r.unregister();
+            });
+        });
+    }
+    </script>
     <meta name="robots" content="noindex, nofollow">
     <title>StemScriber — Tear The Sound Apart</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#ff7b54">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="StemScriber">
     <link rel="apple-touch-icon" href="/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
-    <meta name="description" content="Upload any song. Get separated stems, a professional chord chart with diagrams, and a built-in practice mode. Stems + chord chart + practice in one upload.">
+    <meta name="description" content="Upload any song. Get separated stems, a built-in practice mode, and an editable chord chart — paste your own from Ultimate Guitar or use ours as a starting point. Stem separation + practice in one upload.">
+    <link rel="canonical" href="https://stemscriber.com/">
     <meta property="og:title" content="StemScriber — Tear The Sound Apart">
-    <meta property="og:description" content="Upload any song. Get stems, a chord chart, and a practice mode.">
+    <meta property="og:description" content="Upload any song. Get stems, a practice mode, and an editable chord chart you can paste your own version into.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://stemscriber.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta property="og:url" content="https://stemscriber.com/">
+    <meta property="og:site_name" content="StemScriber">
+    <meta property="og:image" content="https://stemscriber.com/images/og-image.png">
+    <meta property="og:image:alt" content="StemScriber — tear any song into individual stems and chord charts">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@stemscriber">
+    <meta name="twitter:title" content="StemScriber — Tear The Sound Apart">
+    <meta name="twitter:description" content="Upload any song. Get stems, a practice mode, and an editable chord chart you can paste your own version into.">
+    <meta name="twitter:image" content="https://stemscriber.com/images/og-image.png">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "StemScriber",
+      "url": "https://stemscriber.com/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web Browser",
+      "description": "Upload any song. StemScriber separates it into individual stems (vocals, guitar, bass, drums, piano, other) and auto-generates an editable chord chart you can play along to.",
+      "image": "https://stemscriber.com/images/og-image.png",
+      "offers": [
+        {"@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD"},
+        {"@type": "Offer", "name": "Pro Annual", "price": "89", "priceCurrency": "USD"},
+        {"@type": "Offer", "name": "Pro Monthly", "price": "10", "priceCurrency": "USD"},
+        {"@type": "Offer", "name": "Lifetime Founder", "price": "199", "priceCurrency": "USD"}
+      ],
+      "publisher": {
+        "@type": "Organization",
+        "name": "StemScriber",
+        "url": "https://stemscriber.com/",
+        "logo": "https://stemscriber.com/images/logomark.png",
+        "sameAs": [
+          "https://www.facebook.com/stemscriber/",
+          "https://www.instagram.com/stemscriber/",
+          "https://x.com/stemscriber/",
+          "https://www.tiktok.com/@stemscriber/",
+          "https://www.youtube.com/@stemscriber/"
+        ]
+      }
+    }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/landing.css">
     <link rel="stylesheet" href="css/auth.css">
@@ -28,6 +84,49 @@
     <script src="js/analytics.js"></script>
 </head>
 <body class="landing-body">
+
+    <!-- In-app-browser escape banner: webviews (Instagram/FB/Messenger/TikTok/etc.)
+         break external links + target=_blank. Can't force-open the system browser
+         from inside a webview, so we detect it and give a clear escape + copy-link. -->
+    <script>
+    (function(){
+      try {
+        if (localStorage.getItem('ss-inapp-dismissed') === '1') return;
+        var ua = navigator.userAgent || '';
+        var apps = [
+          [/Instagram/i,'Instagram'], [/FBAN|FBAV|FB_IAB|FB4A/i,'Facebook'],
+          [/Messenger/i,'Messenger'], [/BytedanceWebview|musical_ly|TikTok|Bytedance/i,'TikTok'],
+          [/Twitter/i,'X'], [/Snapchat/i,'Snapchat'], [/LinkedInApp/i,'LinkedIn'],
+          [/Pinterest/i,'Pinterest'], [/Line\//i,'Line'], [/; wv\)/i,'an in-app browser']
+        ];
+        var hit = null;
+        for (var i=0;i<apps.length;i++){ if(apps[i][0].test(ua)){ hit=apps[i][1]; break; } }
+        if (!hit) return;
+        var bar = document.createElement('div');
+        bar.id = 'ssInAppBar';
+        bar.style.cssText = 'position:relative;z-index:99999;background:linear-gradient(90deg,#ff7b54,#ff6b9d);color:#0d0d12;font-family:\'Space Grotesk\',-apple-system,sans-serif;font-size:.9rem;line-height:1.4;padding:.7rem 2.4rem .7rem 1rem;text-align:center;font-weight:600;';
+        bar.innerHTML = "You're in " + hit + "'s in-app browser — some links won't work here. " +
+          "<button id='ssCopyLink' style=\"background:#0d0d12;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-weight:700;cursor:pointer;margin-left:6px;font-size:.85rem;\">Copy link</button> " +
+          "<span style=\"display:block;font-weight:500;font-size:.78rem;opacity:.85;margin-top:3px;\">then paste it in Safari or Chrome for the full experience</span>" +
+          "<button id='ssInAppX' aria-label='Dismiss' style=\"position:absolute;right:.5rem;top:.5rem;background:transparent;border:none;color:#0d0d12;font-size:1.1rem;font-weight:700;cursor:pointer;line-height:1;\">×</button>";
+        document.body.insertBefore(bar, document.body.firstChild);
+        document.getElementById('ssCopyLink').addEventListener('click', function(){
+          var url = window.location.href, btn = this;
+          function done(){ btn.textContent='Copied ✓'; setTimeout(function(){btn.textContent='Copy link';},2000); }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(done).catch(function(){ prompt('Copy this link:', url); });
+          } else {
+            var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select();
+            try{ document.execCommand('copy'); done(); }catch(e){ prompt('Copy this link:', url); }
+            document.body.removeChild(t);
+          }
+        });
+        document.getElementById('ssInAppX').addEventListener('click', function(){
+          bar.remove(); try{ localStorage.setItem('ss-inapp-dismissed','1'); }catch(e){}
+        });
+      } catch(e) {}
+    })();
+    </script>
 
     <!-- Background -->
     <div class="landing-bg">
@@ -66,16 +165,17 @@
                         <div class="auth-profile-plan plan-free">Free</div>
                     </div>
                     <div class="auth-menu-divider"></div>
-                    <a href="/app" class="auth-menu-item">My Library</a>
+                    <a href="/app" class="auth-menu-item">Open App</a>
+                    <a href="/app#library" class="auth-menu-item">My Library</a>
+                    <a href="#pricing" class="auth-menu-item">Upgrade to Pro</a>
                     <div class="auth-beta-input-row">
-                        <input type="text" class="auth-beta-input" placeholder="STEM-XXXX-XXXX" maxlength="14">
+                        <input type="text" class="auth-beta-input" placeholder="Enter invite code" maxlength="50">
                         <button class="auth-beta-submit" onclick="StemScriber.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
                     </div>
                     <div class="auth-menu-divider"></div>
                     <button class="auth-menu-item danger" onclick="logout()">Sign Out</button>
                 </div>
             </div>
-            <a href="/app" class="nav-cta">Launch App</a>
         </div>
     </nav>
 
@@ -88,36 +188,95 @@
             Apart
         </h1>
         <p class="hero-subtitle">
-            Upload any song. Hear every part. Learn every chord.
+            Drop in a song and start playing it tonight — play along to the real recording, slowed, looped, with a chord chart to follow.
         </p>
         <p class="hero-sub2">
-            The only platform that separates stems, detects chords, and gives you practice tools — all in one upload.
+            Hear it. Slow it. Loop it. Play it.
         </p>
 
         <!-- Stem separation animation -->
         <div class="stem-demo" aria-hidden="true">
-            <div class="stem-demo-label">Full Mix</div>
             <div class="stem-track stem-mix">
+                <div class="stem-id"><span class="stem-src-tag">MP3</span><span class="stem-label">Your song</span></div>
                 <div class="stem-waveform"></div>
             </div>
             <div class="stem-arrow">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5v14m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div class="stem-tracks-split">
-                <div class="stem-track stem-vocals"><span class="stem-label">Vocals</span><div class="stem-waveform"></div></div>
-                <div class="stem-track stem-guitar"><span class="stem-label">Guitar</span><div class="stem-waveform"></div></div>
-                <div class="stem-track stem-bass"><span class="stem-label">Bass</span><div class="stem-waveform"></div></div>
-                <div class="stem-track stem-drums"><span class="stem-label">Drums</span><div class="stem-waveform"></div></div>
-                <div class="stem-track stem-piano"><span class="stem-label">Piano</span><div class="stem-waveform"></div></div>
-                <div class="stem-track stem-other"><span class="stem-label">Other</span><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-vocals"><div class="stem-id"><img src="/images/inst-mic.png" class="stem-label-icon" alt=""><span class="stem-label">Vocals</span></div><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-guitar"><div class="stem-id"><img src="/images/inst-guitar.png" class="stem-label-icon" alt=""><span class="stem-label">Guitar</span></div><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-bass"><div class="stem-id"><img src="/images/inst-bass.png" class="stem-label-icon" alt=""><span class="stem-label">Bass</span></div><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-drums"><div class="stem-id"><img src="/images/inst-drums.png" class="stem-label-icon" alt=""><span class="stem-label">Drums</span></div><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-piano"><div class="stem-id"><img src="/images/inst-piano.png" class="stem-label-icon" alt=""><span class="stem-label">Piano</span></div><div class="stem-waveform"></div></div>
+                <div class="stem-track stem-other"><div class="stem-id"><img src="/images/inst-other.png" class="stem-label-icon" alt=""><span class="stem-label">Other</span></div><div class="stem-waveform"></div></div>
             </div>
+            <style>
+                /* Label is a SOLID fixed-width column on the left. The waveform
+                   physically starts AFTER it (left:116px) so they never blend. */
+                .stem-demo .stem-track{position:relative;overflow:hidden;border-radius:12px}
+                .stem-demo .stem-id{position:absolute;left:0;top:0;bottom:0;width:132px;z-index:3;
+                    display:flex;align-items:center;gap:.5rem;padding:0 .8rem;overflow:hidden;
+                    background:#14141c;border-right:1px solid rgba(255,255,255,.10);
+                    border-radius:0 14px 14px 0}
+                .stem-demo .stem-waveform{left:132px}   /* wave begins past the label column */
+                .stem-demo .stem-label-icon{width:24px;height:24px;object-fit:contain;
+                    flex-shrink:0;display:block}
+                .stem-demo .stem-piano .stem-label-icon{width:24px;height:24px}
+                .stem-demo .stem-other .stem-label-icon{width:21px;height:21px}
+                .stem-demo .stem-track .stem-label{position:static;left:auto;
+                    font-size:.7rem;font-weight:600;color:#e8ddd6;white-space:nowrap;
+                    text-transform:none;letter-spacing:0}
+                /* the source-file tag on the Full-Mix row */
+                .stem-src-tag{font-family:'Space Grotesk',sans-serif;font-weight:800;
+                    font-size:.62rem;letter-spacing:.05em;color:#0d0d12;
+                    background:linear-gradient(135deg,#ff7b54,#ff6b9d);
+                    padding:.18rem .42rem;border-radius:4px;flex-shrink:0}
+            </style>
         </div>
 
         <div class="hero-cta-group">
             <a href="/app" class="btn-primary">&#10022; Try It Free</a>
             <a href="#how-it-works" class="btn-secondary" onclick="event.preventDefault();document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'});">See How It Works</a>
         </div>
-        <p class="hero-note">3 free songs per month. No credit card required.</p>
+        <p class="hero-note">5 free songs per month. No credit card required.</p>
+    </section>
+
+    <!-- Featured Demo: The Time Comes -->
+    <section class="landing-section featured-demo" id="featured-demo">
+        <div class="section-label">Featured Demo</div>
+        <h2 class="section-title">Try it on a real song.</h2>
+        <p class="section-subtitle">"The Time Comes" by Kozelski — full chord chart, separated stems, practice mode. Already processed and ready to play with.</p>
+        <div class="demo-card">
+            <a href="practice.html?job=d9e3368e-b8f8-45fe-a7e9-1b0df9a66285&amp;_v=demo" class="demo-cover-link">
+                <img src="images/time-comes-cover-600.jpg" alt="Kozelski — Collector album cover" class="demo-cover">
+            </a>
+            <div class="demo-meta">
+                <div class="demo-track-title">The Time Comes</div>
+                <div class="demo-track-artist">Kozelski · <em>Collector</em> · 2020</div>
+                <div class="demo-track-key">Key of F#m · 8 chords · pre-chorus, chorus, piano + guitar solos</div>
+                <a href="practice.html?job=d9e3368e-b8f8-45fe-a7e9-1b0df9a66285&amp;_v=demo" class="btn-primary demo-btn">▶ Open in practice mode</a>
+                <p class="demo-note">An original song from the founder's band. Chord chart, separated stems, and full practice mode — try every feature on a real recording.</p>
+            </div>
+        </div>
+        <style>
+            .featured-demo{padding-top:1rem}
+            .demo-card{display:grid;grid-template-columns:280px 1fr;gap:2.2rem;align-items:center;max-width:880px;margin:1.5rem auto 0;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:1.6rem;text-align:left}
+            .demo-cover-link{display:block;border:none}
+            .demo-cover{width:100%;height:auto;border-radius:10px;display:block;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+            .demo-meta{display:flex;flex-direction:column;gap:.55rem}
+            .demo-track-title{font-family:'Righteous',cursive;font-size:1.85rem;letter-spacing:.5px;color:var(--text);line-height:1.05}
+            .demo-track-artist{font-family:'Fraunces',serif;font-style:italic;font-size:1.05rem;color:var(--text-dim)}
+            .demo-track-key{font-family:'Space Grotesk',sans-serif;font-size:.82rem;color:var(--text-dim);letter-spacing:.04em;text-transform:uppercase;margin-top:.35rem}
+            .demo-btn{align-self:flex-start;margin-top:1rem;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;padding:.85rem 1.6rem;border-radius:12px;font-family:'Righteous',cursive;font-size:.95rem;letter-spacing:.5px}
+            .demo-note{font-size:.78rem;color:var(--text-dim);margin-top:.6rem;font-style:italic;line-height:1.5}
+            @media (max-width: 720px){
+                .demo-card{grid-template-columns:1fr;gap:1.4rem;padding:1.3rem}
+                .demo-cover{max-width:300px;margin:0 auto}
+                .demo-meta{align-items:center;text-align:center}
+                .demo-btn{align-self:center}
+            }
+        </style>
     </section>
 
     <!-- How It Works -->
@@ -125,77 +284,281 @@
         <div class="section-label">How It Works</div>
         <h2 class="section-title">Three Steps. Any Song.</h2>
         <p class="section-subtitle">
-            From a recording to a playable chord chart in minutes. No manual transcription, no guesswork.
+            From a recording to a playable chord chart in minutes — auto-built from the audio, editable when you want it exact.
         </p>
-        <div class="steps-grid">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <div class="step-icon"><img src="icons/custom/features/48/step-upload.png" width="36" height="36" style="border-radius:6px;"></div>
-                <div class="step-title">Drop Your Track</div>
-                <div class="step-desc">Upload any audio file — MP3, WAV, FLAC, M4A. Got a song? We'll split it into every instrument.</div>
+        <div class="hiw-flow">
+            <div class="hiw-step">
+                <div class="hiw-node">
+                    <span class="hiw-mp3">MP3</span>
+                    <span class="hiw-num">1</span>
+                </div>
+                <div class="hiw-title">Drop your track</div>
+                <div class="hiw-desc">Any audio file — MP3, WAV, FLAC, M4A. Drag it in. That's the whole setup.</div>
             </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <div class="step-icon"><img src="icons/custom/features/48/step-separate.png" width="36" height="36" style="border-radius:6px;"></div>
-                <div class="step-title">Separates &amp; Charts</div>
-                <div class="step-desc">StemScriber isolates 6 stems (vocals, guitar, bass, drums, piano, other) and generates a professional chord chart with diagrams, lyrics, and timing.</div>
+            <div class="hiw-line" aria-hidden="true"><i></i></div>
+            <div class="hiw-step">
+                <div class="hiw-node">
+                    <span class="hiw-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    <span class="hiw-num">2</span>
+                </div>
+                <div class="hiw-title">We split &amp; chart it</div>
+                <div class="hiw-desc">6 isolated stems plus an editable, bar-aligned chord chart — auto-detected, or paste your own from Ultimate Guitar.</div>
             </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <div class="step-icon"><img src="icons/custom/features/48/step-practice.png" width="36" height="36" style="border-radius:6px;"></div>
-                <div class="step-title">Play, Practice, Download</div>
-                <div class="step-desc">Mix stems, slow things down, loop tricky sections, and learn from a chord chart that auto-scrolls with the song.</div>
+            <div class="hiw-line" aria-hidden="true"><i></i></div>
+            <div class="hiw-step">
+                <div class="hiw-node">
+                    <span class="hiw-stems">
+                        <img src="/images/inst-guitar.png" alt="">
+                        <img src="/images/inst-mic.png" alt="">
+                        <img src="/images/inst-bass.png" alt="">
+                        <img src="/images/inst-drums.png" alt="">
+                    </span>
+                    <span class="hiw-num">3</span>
+                </div>
+                <div class="hiw-title">Play &amp; practice</div>
+                <div class="hiw-desc">Mix stems, slow it down, loop tricky parts, and the chart auto-scrolls while you play.</div>
             </div>
         </div>
 
+        <style>
+            .hiw-flow{display:flex;align-items:flex-start;justify-content:center;gap:0;max-width:980px;margin:3rem auto 0}
+            .hiw-step{flex:0 0 240px;text-align:center;animation:hiwIn .6s ease both}
+            .hiw-step:nth-child(1){animation-delay:.05s}
+            .hiw-step:nth-child(3){animation-delay:.25s}
+            .hiw-step:nth-child(5){animation-delay:.45s}
+            @keyframes hiwIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+            .hiw-node{position:relative;width:120px;height:120px;margin:0 auto 1.4rem;border-radius:50%;
+                display:flex;align-items:center;justify-content:center;
+                background:linear-gradient(150deg,rgba(255,123,84,.18),rgba(255,107,157,.12));
+                border:1.5px solid rgba(255,123,84,.45);
+                box-shadow:0 0 40px rgba(255,123,84,.18);
+                animation:hiwPulse 3.4s ease-in-out infinite}
+            .hiw-step:nth-child(3) .hiw-node{animation-delay:.5s}
+            .hiw-step:nth-child(5) .hiw-node{animation-delay:1s}
+            @keyframes hiwPulse{0%,100%{box-shadow:0 0 32px rgba(255,123,84,.15)}50%{box-shadow:0 0 58px rgba(255,123,84,.32)}}
+            .hiw-emoji{font-size:3rem;line-height:1}
+            /* Node 1: an MP3 file that drops in, on a loop */
+            .hiw-mp3{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.04em;
+                color:#0d0d12;background:linear-gradient(135deg,#ff7b54,#ff6b9d);
+                padding:.55rem .8rem;border-radius:8px 8px 8px 2px;
+                box-shadow:0 8px 18px rgba(0,0,0,.35);
+                animation:hiwDrop 2.4s cubic-bezier(.5,0,.5,1) infinite}
+            @keyframes hiwDrop{
+                0%{transform:translateY(-46px);opacity:0}
+                22%{transform:translateY(0);opacity:1}
+                33%{transform:translateY(-7px)}
+                42%{transform:translateY(0)}
+                80%{transform:translateY(0);opacity:1}
+                100%{transform:translateY(-46px);opacity:0}}
+            /* Node 2: a real horizontal audio waveform — bars mirrored around a
+               centerline with natural low-freq (bass) swells, gently animating.
+               Looks like a clip in a DAW, not an equalizer. */
+            .hiw-wave{display:flex;align-items:center;justify-content:center;gap:2px;
+                width:74px;height:56px}
+            .hiw-wave i{width:2px;border-radius:1px;display:block;
+                transform-origin:center;background:#ff6b9d;
+                animation:hiwWv 2.4s ease-in-out infinite alternate}
+            /* bass-style envelope: smooth large swells, symmetric around center */
+            .hiw-wave i:nth-child(1){height:14%}  .hiw-wave i:nth-child(2){height:26%}
+            .hiw-wave i:nth-child(3){height:44%}  .hiw-wave i:nth-child(4){height:66%}
+            .hiw-wave i:nth-child(5){height:84%}  .hiw-wave i:nth-child(6){height:94%}
+            .hiw-wave i:nth-child(7){height:88%}  .hiw-wave i:nth-child(8){height:70%}
+            .hiw-wave i:nth-child(9){height:50%}  .hiw-wave i:nth-child(10){height:34%}
+            .hiw-wave i:nth-child(11){height:46%} .hiw-wave i:nth-child(12){height:68%}
+            .hiw-wave i:nth-child(13){height:90%} .hiw-wave i:nth-child(14){height:100%}
+            .hiw-wave i:nth-child(15){height:86%} .hiw-wave i:nth-child(16){height:62%}
+            .hiw-wave i:nth-child(17){height:42%} .hiw-wave i:nth-child(18){height:56%}
+            .hiw-wave i:nth-child(19){height:38%} .hiw-wave i:nth-child(20){height:24%}
+            .hiw-wave i:nth-child(21){height:16%} .hiw-wave i:nth-child(22){height:10%}
+            /* stem colors across the wave (it IS the split happening) */
+            .hiw-wave i:nth-child(6n+1){background:#ff6b9d}
+            .hiw-wave i:nth-child(6n+2){background:#61afef}
+            .hiw-wave i:nth-child(6n+3){background:#ff7b54}
+            .hiw-wave i:nth-child(6n+4){background:#e5c07b}
+            .hiw-wave i:nth-child(6n+5){background:#98c379}
+            .hiw-wave i:nth-child(6n){background:#c678dd}
+            /* gentle phase offset so the envelope breathes left→right */
+            .hiw-wave i:nth-child(2n){animation-delay:.3s}
+            .hiw-wave i:nth-child(3n){animation-delay:.6s}
+            .hiw-wave i:nth-child(5n){animation-delay:.9s}
+            @keyframes hiwWv{0%{transform:scaleY(.55)}100%{transform:scaleY(1)}}
+            /* Node 3: instrument icons appearing one after another, forever.
+               Sized well inside the 120px circle with clear margin so no icon
+               (incl. the wide drum kit) clips against the ring. */
+            .hiw-node:has(.hiw-stems){overflow:visible}
+            .hiw-stems{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+            .hiw-stems img{position:absolute;width:60px;height:60px;
+                object-fit:contain;opacity:0;
+                animation:hiwStem 6s ease-in-out infinite}
+            .hiw-stems img:nth-child(1){animation-delay:0s}
+            .hiw-stems img:nth-child(2){animation-delay:1.5s}
+            .hiw-stems img:nth-child(3){animation-delay:3s}
+            .hiw-stems img:nth-child(4){animation-delay:4.5s}
+            @keyframes hiwStem{
+                0%{opacity:0;transform:scale(.6)}
+                5%{opacity:1;transform:scale(1)}
+                20%{opacity:1;transform:scale(1)}
+                25%{opacity:0;transform:scale(.6)}
+                100%{opacity:0}}
+            .hiw-num{position:absolute;top:-8px;right:-8px;width:36px;height:36px;border-radius:50%;
+                background:linear-gradient(135deg,#ff7b54,#ff6b9d);color:#0d0d12;
+                font-family:'Righteous',cursive;font-size:1.25rem;
+                display:flex;align-items:center;justify-content:center;
+                box-shadow:0 4px 12px rgba(255,123,84,.4)}
+            .hiw-title{font-family:'Righteous',cursive;font-size:1.35rem;color:#fff;margin-bottom:.6rem}
+            .hiw-desc{font-size:1rem;line-height:1.55;color:#cbbdb6;max-width:230px;margin:0 auto}
+            /* Animated flowing connector line */
+            .hiw-line{flex:1 1 60px;height:2px;margin-top:60px;min-width:40px;
+                background:rgba(255,255,255,.1);position:relative;overflow:hidden;border-radius:2px}
+            .hiw-line i{position:absolute;inset:0;
+                background:linear-gradient(90deg,transparent,#ff7b54,#ff6b9d,transparent);
+                animation:hiwFlow 2.4s linear infinite}
+            @keyframes hiwFlow{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+            @media(max-width:760px){
+                .hiw-flow{flex-direction:column;align-items:center;gap:0}
+                .hiw-step{flex:0 0 auto}
+                .hiw-line{flex:0 0 48px;width:2px;height:48px;margin:.4rem 0}
+                .hiw-line i{background:linear-gradient(180deg,transparent,#ff7b54,#ff6b9d,transparent);animation:hiwFlowV 2.4s linear infinite}
+                @keyframes hiwFlowV{from{transform:translateY(-100%)}to{transform:translateY(100%)}}
+            }
+        </style>
     </section>
 
     <!-- Features -->
-    <section class="landing-section" id="features">
-        <div class="section-label">Features</div>
-        <h2 class="section-title">Everything You Need to Learn Any Song</h2>
-        <p class="section-subtitle">
-            The only platform that combines stem separation, chord charting, and practice tools in one pipeline.
+    <!-- Capability fan-out (replaces price-comparison: no prices, no competitor names,
+         deliberately NOT price-box visual language so it never collides with Pick Your Plan) -->
+    <section class="landing-section cap-section" id="features">
+        <div class="section-label">What You Get</div>
+        <h2 class="section-title">Hear Every Part. Play the Whole Song.</h2>
+        <p class="section-subtitle" style="margin-left:auto;margin-right:auto;">
+            Drop in any song — walk away with every part, every chord, and a place to actually practice it.
         </p>
-        <div class="features-grid">
+
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+            <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ff7b54"/><stop offset="1" stop-color="#ff6b9d"/>
+            </linearGradient></defs></svg>
+
+        <div class="cap-bento">
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="url(#capGrad)">
+                        <rect x="3" y="4" width="18" height="4" rx="2"/>
+                        <rect x="3" y="10" width="11" height="4" rx="2" opacity=".42"/>
+                        <rect x="3" y="16" width="18" height="4" rx="2"/></svg>
+                </div>
+                <h3 class="cap-h">Every part, isolated</h3>
+                <p class="cap-p">Vocals, guitar, bass, drums, keys — solo or mute any stem.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="url(#capGrad)">
+                        <rect x="3" y="18.6" width="18" height="2.8" rx="1.4" opacity=".42"/>
+                        <rect x="4.4" y="10" width="3.6" height="7.4" rx="1.4"/>
+                        <rect x="10.2" y="5" width="3.6" height="12.4" rx="1.4"/>
+                        <rect x="16" y="12" width="3.6" height="5.4" rx="1.4"/></svg>
+                </div>
+                <h3 class="cap-h">Chords, bar-aligned</h3>
+                <p class="cap-p">Auto-detected and mapped to the timeline — gets you close fast, edit anytime.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="url(#capGrad)">
+                        <path d="M12 3a9 9 0 1 0 9 9 1.6 1.6 0 0 0-3.2 0 5.8 5.8 0 1 1-5.8-5.8A1.6 1.6 0 0 0 12 3Z" opacity=".42"/>
+                        <path d="M12.9 12.4 8.6 8.9a1 1 0 0 0-1.4 1.4l3.5 4.3a1.6 1.6 0 1 0 2.2-2.2Z"/></svg>
+                </div>
+                <h3 class="cap-h">Slow it down to learn it</h3>
+                <p class="cap-p">25–200% speed so you can catch every note.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M5.5 9.5a7 7 0 0 1 12-2.6" stroke="url(#capGrad)" stroke-width="2.8" stroke-linecap="round"/>
+                        <path d="M18.5 14.5a7 7 0 0 1-12 2.6" stroke="url(#capGrad)" stroke-width="2.8" stroke-linecap="round"/>
+                        <path d="M18.6 3.2 19 8l-4.7-.6Z" fill="url(#capGrad)"/>
+                        <path d="M5.4 20.8 5 16l4.7.6Z" fill="url(#capGrad)"/></svg>
+                </div>
+                <h3 class="cap-h">Loop the hard section</h3>
+                <p class="cap-p">Loop a section and drill the part until it sticks.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="url(#capGrad)">
+                        <rect x="5.5" y="2.5" width="13" height="19" rx="3" opacity=".42"/>
+                        <rect x="8.5" y="6.5" width="7" height="2" rx="1"/>
+                        <rect x="8.5" y="10" width="7" height="2" rx="1"/>
+                        <path d="M12 21.5 8 17h2.6v-2.4h2.8V17H16Z"/></svg>
+                </div>
+                <h3 class="cap-h">Auto-scroll while you play</h3>
+                <p class="cap-p">The chart keeps pace so your hands never leave the instrument.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="url(#capGrad)">
+                        <rect x="5" y="2.5" width="14" height="19" rx="3" opacity=".42"/>
+                        <rect x="5" y="7.4" width="14" height="2" /><rect x="5" y="12.6" width="14" height="2"/><rect x="5" y="17.8" width="14" height="2"/>
+                        <circle cx="12" cy="5" r="2.4"/></svg>
+                </div>
+                <h3 class="cap-h">Tuner + fretboard built in</h3>
+                <p class="cap-p">Tune up and see chord shapes — built right in.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="2.6" fill="url(#capGrad)"/>
+                        <path d="M7.8 7.8a6 6 0 0 0 0 8.4" stroke="url(#capGrad)" stroke-width="2.4" stroke-linecap="round"/>
+                        <path d="M16.2 16.2a6 6 0 0 0 0-8.4" stroke="url(#capGrad)" stroke-width="2.4" stroke-linecap="round"/>
+                        <path d="M5 5a9.9 9.9 0 0 0 0 14" stroke="url(#capGrad)" stroke-width="2.4" stroke-linecap="round" opacity=".42"/>
+                        <path d="M19 19a9.9 9.9 0 0 0 0-14" stroke="url(#capGrad)" stroke-width="2.4" stroke-linecap="round" opacity=".42"/></svg>
+                </div>
+                <h3 class="cap-h">Pull from the live archive</h3>
+                <p class="cap-p">Drop in a live show straight from the Internet Archive and learn it.</p>
+            </div>
+            <div class="cap-card">
+                <div class="cap-ico">
+                    <svg viewBox="0 0 24 24" fill="url(#capGrad)">
+                        <path d="M11 3h2v8.4h3L12 16.4 8 11.4h3Z"/>
+                        <rect x="3.5" y="18" width="17" height="2.7" rx="1.35" opacity=".42"/></svg>
+                </div>
+                <h3 class="cap-h">Take it with you</h3>
+                <p class="cap-p">Export the chord chart, MP3 stems, and a Guitar Pro starter file.</p>
+            </div>
         </div>
+
+        <p class="cap-kicker">One song in. Everything you need to actually play it out.</p>
+
+        <style>
+            .cap-section{padding-bottom:5rem}
+            .cap-bento{max-width:1180px;margin:3rem auto 0;display:grid;
+                grid-template-columns:repeat(4,1fr);gap:1.1rem}
+            .cap-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);
+                border-radius:20px;padding:2rem 1.6rem;text-align:left;
+                animation:capIn .55s ease both;transition:border-color .25s,transform .25s}
+            .cap-card:hover{border-color:rgba(255,123,84,.45);transform:translateY(-3px)}
+            .cap-card:hover .cap-ico{background:linear-gradient(135deg,rgba(255,123,84,.28),rgba(255,107,157,.28));border-color:rgba(255,123,84,.55)}
+            .cap-card:nth-child(1){animation-delay:.04s}.cap-card:nth-child(2){animation-delay:.1s}
+            .cap-card:nth-child(3){animation-delay:.16s}.cap-card:nth-child(4){animation-delay:.22s}
+            .cap-card:nth-child(5){animation-delay:.28s}.cap-card:nth-child(6){animation-delay:.34s}
+            .cap-card:nth-child(7){animation-delay:.4s}.cap-card:nth-child(8){animation-delay:.46s}
+            @keyframes capIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+            .cap-ico{width:64px;height:64px;margin-bottom:1.25rem;border-radius:16px;
+                display:flex;align-items:center;justify-content:center;
+                background:linear-gradient(135deg,rgba(255,123,84,.15),rgba(255,107,157,.15));
+                border:1px solid rgba(255,123,84,.26);transition:background .25s,border-color .25s}
+            .cap-ico svg{width:34px;height:34px;display:block}
+            .cap-h{font-family:'Space Grotesk',sans-serif;font-weight:700;
+                font-size:1.22rem;color:#fff;margin:0 0 .5rem;letter-spacing:-.01em}
+            .cap-p{font-size:.97rem;line-height:1.5;color:#a8a8b0;margin:0}
+            .cap-kicker{text-align:center;color:#cfcfd6;font-size:1.05rem;
+                font-weight:600;margin:3rem auto 0;max-width:560px}
+            @media(max-width:920px){.cap-bento{grid-template-columns:repeat(2,1fr)}}
+            @media(max-width:600px){
+              .cap-bento{grid-template-columns:1fr;max-width:420px}
+              .cap-card{padding:1.6rem 1.4rem}
+            }
+        </style>
     </section>
 
-    <!-- Comparison -->
-    <section class="landing-section comparison-section">
-        <div class="section-label">Why StemScriber</div>
-        <h2 class="section-title">Stop Paying for Two Tools</h2>
-        <p class="section-subtitle" style="margin-left:auto;margin-right:auto;">
-            Every competitor does EITHER stem separation OR chord detection. StemScriber does both.
-        </p>
-        <div class="comparison-cards">
-            <div class="compare-card them">
-                <div class="compare-label them-label">Without StemScriber</div>
-                <div class="compare-price">$21.98<span class="price-amount"><span class="period">/mo</span></span></div>
-                <div class="compare-price-note">Moises Pro + Chordify Premium</div>
-                <ul class="compare-list">
-                    <li><span class="check">&#10003;</span> Stem separation (Moises)</li>
-                    <li><span class="cross">&#10007;</span> No chord chart in the same place</li>
-                    <li><span class="check">&#10003;</span> Chord detection (Chordify)</li>
-                    <li><span class="cross">&#10007;</span> No integrated practice mode</li>
-                    <li><span class="cross">&#10007;</span> Two subscriptions, two workflows</li>
-                </ul>
-            </div>
-            <div class="compare-vs">vs</div>
-            <div class="compare-card us">
-                <div class="compare-label us-label">StemScriber Pro</div>
-                <div class="compare-price">$10<span class="price-amount"><span class="period">/mo</span></span></div>
-                <div class="compare-price-note">Everything in one upload</div>
-                <ul class="compare-list">
-                    <li><span class="check">&#10003;</span> 6-stem separation</li>
-                    <li><span class="check">&#10003;</span> Professional chord chart with diagrams &amp; lyrics</li>
-                    <li><span class="check">&#10003;</span> Auto-scroll + measure highlight during playback</li>
-                    <li><span class="check">&#10003;</span> Practice mode: mute, solo, speed, loop</li>
-                    <li><span class="check">&#10003;</span> One upload, one pipeline, done</li>
-                </ul>
-            </div>
-        </div>
-    </section>
 
     <!-- Pricing -->
     <section class="landing-section pricing-section" id="pricing">
@@ -211,9 +574,9 @@
                 <div class="price-amount"><span class="dollar">$</span>0</div>
                 <div class="price-desc">Get started, no card needed</div>
                 <ul class="price-features">
-                    <li><span class="check">&#10003;</span> 3 songs per month</li>
+                    <li><span class="check">&#10003;</span> 5 songs per month</li>
                     <li><span class="check">&#10003;</span> 6-stem separation</li>
-                    <li><span class="check">&#10003;</span> Professional chord chart</li>
+                    <li><span class="check">&#10003;</span> Editable chord chart (paste your own anytime)</li>
                     <li><span class="check">&#10003;</span> Practice mode (speed + looping)</li>
                 </ul>
                 <a href="/app" class="price-cta secondary">Start Free</a>
@@ -222,37 +585,66 @@
             <div class="price-card featured">
                 <div class="price-tier">Pro</div>
                 <div class="price-amount"><span class="dollar">$</span>10<span class="period">/mo</span></div>
-                <div class="price-period">or $100/yr</div>
+                <div class="price-period">or $89/yr (save $31)</div>
                 <div class="price-desc">For musicians who want more</div>
                 <ul class="price-features">
-                    <li><span class="check">&#10003;</span> 25 songs per month</li>
+                    <li><span class="check">&#10003;</span> 30 songs per month</li>
                     <li><span class="check">&#10003;</span> Everything in Free</li>
                     <li><span class="check">&#10003;</span> Key analysis + transpose + ♭/♯ toggle</li>
                     <li><span class="check">&#10003;</span> Chord chart export (PDF + ChordPro)</li>
                     <li><span class="check">&#10003;</span> Priority processing</li>
                 </ul>
-                <a href="/app" class="price-cta primary">Go Pro</a>
+                <a href="#" onclick="startProCheckout(event, 'annual')" class="price-cta primary">Go Pro &mdash; $89/yr</a>
+                <a href="#" onclick="startProCheckout(event, 'monthly')" class="price-cta secondary" style="margin-top:0.5rem;">or $10/mo</a>
             </div>
-            <!-- Premium -->
+            <!-- Lifetime Founder -->
             <div class="price-card">
-                <div class="price-tier">Premium</div>
-                <div class="price-amount"><span class="dollar">$</span>20<span class="period">/mo</span></div>
-                <div class="price-period">or $200/yr</div>
-                <div class="price-desc">The full pipeline, unlimited</div>
+                <div class="price-tier">Lifetime Founder</div>
+                <div class="price-amount"><span class="dollar">$</span>199</div>
+                <div class="price-period">one-time &middot; first 100 only</div>
+                <div class="price-desc">Pay once. Founding-customer credit forever.</div>
                 <ul class="price-features">
-                    <li><span class="check">&#10003;</span> Unlimited songs</li>
-                    <li><span class="check">&#10003;</span> Everything in Pro</li>
-                    <li><span class="check">&#10003;</span> Multi-instrument transcription</li>
-                    <li><span class="check">&#10003;</span> Ensemble separation mode</li>
-                    <li><span class="check">&#10003;</span> API access (coming soon)</li>
-                    <li><span class="check">&#10003;</span> Google Drive auto-save</li>
+                    <li><span class="check">&#10003;</span> Lifetime Pro access &mdash; never billed again</li>
+                    <li><span class="check">&#10003;</span> Everything in Pro, 50 songs per month</li>
+                    <li><span class="check">&#10003;</span> Founding-customer badge in your profile</li>
+                    <li><span class="check">&#10003;</span> First-look on every new feature</li>
+                    <li><span class="check">&#10003;</span> Limited to first 100 customers</li>
                 </ul>
-                <a href="/app" class="price-cta secondary">Get Premium</a>
+                <a href="#" onclick="startLifetimeCheckout(event)" class="price-cta secondary">Claim Lifetime</a>
             </div>
         </div>
     </section>
 
     <!-- Beta section removed — open access now -->
+
+    <!-- Newsletter signup -->
+    <section class="newsletter-section" id="newsletter">
+        <div class="newsletter-inner">
+            <h2 class="newsletter-title">Get launch updates</h2>
+            <p class="newsletter-sub">Notes from the build, demo song drops, and a heads-up the day StemScriber goes public.</p>
+            <form action="https://stemscriber.beehiiv.com/subscribe" method="GET" target="_blank" class="newsletter-form" onsubmit="if(window.plausible){plausible('Newsletter Signup');}">
+                <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
+                <button type="submit">Notify me</button>
+            </form>
+            <p class="newsletter-fineprint">No spam. Unsubscribe anytime. <a href="/privacy.html">Privacy policy</a>.</p>
+        </div>
+    </section>
+
+    <style>
+        .newsletter-section{padding:4rem 1.5rem;background:linear-gradient(180deg,rgba(255,123,84,.04) 0%,rgba(255,123,84,.10) 100%);border-top:1px solid rgba(255,123,84,.15);border-bottom:1px solid rgba(255,123,84,.15)}
+        .newsletter-inner{max-width:640px;margin:0 auto;text-align:center}
+        .newsletter-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,2.75rem);letter-spacing:.02em;margin:0 0 .75rem;color:#fff}
+        .newsletter-sub{color:rgba(255,255,255,.72);font-size:1.05rem;line-height:1.5;margin:0 0 1.75rem}
+        .newsletter-form{display:flex;gap:.5rem;max-width:480px;margin:0 auto;flex-wrap:wrap;align-items:center}
+        .newsletter-form input[type=email]{flex:1 1 240px;height:52px;min-height:52px;max-height:52px;padding:0 1rem;font-size:1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.18);border-radius:8px;color:#fff;outline:none;transition:border-color .15s,background .15s;box-sizing:border-box;-webkit-appearance:none;appearance:none}
+        .newsletter-form input[type=email]::placeholder{color:rgba(255,255,255,.42)}
+        .newsletter-form input[type=email]:focus{border-color:#ff7b54;background:rgba(255,255,255,.06)}
+        .newsletter-form button{height:52px;padding:0 1.5rem;font-size:1rem;font-weight:600;background:#ff7b54;color:#fff;border:none;border-radius:8px;cursor:pointer;transition:background .15s,transform .15s;box-sizing:border-box}
+        .newsletter-form button:hover{background:#ff8a66;transform:translateY(-1px)}
+        .newsletter-fineprint{margin:1.25rem 0 0;font-size:.85rem;color:rgba(255,255,255,.5)}
+        .newsletter-fineprint a{color:rgba(255,255,255,.72);text-decoration:underline}
+        @media(max-width:480px){.newsletter-form{flex-direction:column}.newsletter-form input,.newsletter-form button{width:100%}}
+    </style>
 
     <!-- Footer -->
     <footer class="landing-footer">
@@ -274,8 +666,7 @@
             <div class="footer-col">
                 <div class="footer-col-title">Help</div>
                 <a href="/help.html">Help Center</a>
-                <a href="mailto:support@stemscriber.com">Contact us</a>
-                <a href="tel:+18447915323">(844) 791-5323</a>
+                <a href="/contact.html">Contact us</a>
             </div>
             <div class="footer-col">
                 <div class="footer-col-title">Legal</div>
@@ -287,10 +678,11 @@
             </div>
             <div class="footer-col">
                 <div class="footer-col-title">Connect</div>
-                <a href="https://www.facebook.com/profile.php?id=61582164772137" target="_blank" rel="noopener">Facebook</a>
-                <a href="https://www.instagram.com/stemscriber" target="_blank" rel="noopener">Instagram</a>
-                <a href="https://x.com/stemscriber" target="_blank" rel="noopener">X</a>
-                <a href="https://www.tiktok.com/@stemscriber" target="_blank" rel="noopener">TikTok</a>
+                <a href="https://www.facebook.com/stemscriber/" target="_blank" rel="noopener">Facebook</a>
+                <a href="https://www.instagram.com/stemscriber/" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://x.com/stemscriber/" target="_blank" rel="noopener">X</a>
+                <a href="https://www.tiktok.com/@stemscriber/" target="_blank" rel="noopener">TikTok</a>
+                <a href="https://www.youtube.com/@stemscriber/" target="_blank" rel="noopener">YouTube</a>
             </div>
         </div>
         <div class="footer-bottom">
@@ -300,6 +692,7 @@
 
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/web-magic-link.js"></script>
     <script>
         // Initialize auth
         StemScriber.initAuth();
@@ -349,39 +742,41 @@
                 var t = i / total;
                 var r1 = pseudo(i * 1.7);
                 var r2 = pseudo(i * 3.3);
-                switch (pattern) {
-                    case 'full':
-                        return 0.35 + 0.55 * Math.abs(Math.sin(t * 18) * 0.6 + Math.sin(t * 41) * 0.4) + 0.1 * r1;
-                    case 'vocal':
-                        // Singing — phrases of activity separated by gaps
-                        var phrase = Math.sin(t * 6);
-                        var base = phrase > 0.2 ? 0.4 + 0.5 * Math.abs(Math.sin(t * 25 + r1 * 3)) : 0.1 * r2;
-                        return base;
-                    case 'sustained':
-                        // Guitar — steady with some strumming variation
-                        return 0.4 + 0.35 * Math.abs(Math.sin(t * 9)) + 0.2 * r1;
-                    case 'bass':
-                        // Bass — tall but fewer peaks, heartbeat feel
-                        var beat = Math.abs(Math.sin(t * 5));
-                        return 0.3 + 0.65 * Math.pow(beat, 0.6);
-                    case 'drums':
-                        // Drums — spiky transients with quiet gaps
-                        return r1 > 0.72 ? 0.55 + 0.45 * r2 : 0.08 + 0.12 * r1;
-                    case 'piano':
-                        // Piano — mix of sustains and strikes
-                        var strike = r1 > 0.85 ? 0.7 : 0;
-                        return 0.25 + 0.35 * Math.abs(Math.sin(t * 11)) + strike;
-                    case 'other':
-                        // Other — low amplitude varied
-                        return 0.2 + 0.35 * Math.abs(Math.sin(t * 7) * Math.cos(t * 13)) + 0.1 * r1;
+                // Real audio clips are mostly quiet (hugging the centerline) with
+                // bursts of activity. `gate` is a soft phrase envelope that opens
+                // for clusters of samples and closes to near-silence between them.
+                // A real playing track: a CONTINUOUS dense body (never silent for
+                // long), with a slow loud/quiet envelope and fast hairy detail.
+                // Mirrored top/bottom is handled by the renderer (up & down from
+                // the centerline) — this just returns the envelope magnitude.
+                function env(speed) {                       // slow dynamics 0.45..1
+                    var e = Math.sin(t * speed) * 0.5 + Math.sin(t * speed * 1.7 + 0.9) * 0.3
+                          + Math.sin(t * speed * 0.43 + 2.1) * 0.2;
+                    return 0.45 + 0.55 * ((e + 1) / 2);
                 }
-                return 0.5;
+                function hair(freq) {                       // dense per-sample texture 0.55..1
+                    return 0.55 + 0.45 * Math.abs(Math.sin(t * freq + r1 * 6) * 0.6
+                                                  + Math.sin(t * freq * 2.7) * 0.4);
+                }
+                var base, e, h, peak;
+                switch (pattern) {
+                    case 'full':      base = .62; e = env(5);   h = hair(160); break;
+                    case 'vocal':     base = .55; e = env(6.5); h = hair(150); break;
+                    case 'sustained': base = .58; e = env(5.5); h = hair(135); break;
+                    case 'bass':      base = .60; e = env(4);   h = hair(70);  break; // smoother, fuller
+                    case 'drums':     base = .50; e = env(7);   h = hair(210); break; // spikier
+                    case 'piano':     base = .54; e = env(5);   h = hair(120); break;
+                    case 'other':     base = .48; e = env(6);   h = hair(100); break;
+                    default:          base = .55; e = 1; h = 1;
+                }
+                // occasional tall transient (drum hit / accent)
+                peak = pseudo(i * 4.7) > 0.94 ? 1.35 : 1;
+                return 0.05 + base * e * h * peak;
             }
 
             var SVG_NS = 'http://www.w3.org/2000/svg';
-            var barCount = 90;
-            var barWidth = 3;
-            var barGap = 2;
+            var sampleCount = 300;   // very dense — fine jagged hair like a Logic clip
+            var stepX = 3;           // px between samples in viewBox units
 
             document.querySelectorAll('.stem-track').forEach(function(track) {
                 var stemClass = null;
@@ -394,34 +789,140 @@
                 var waveform = track.querySelector('.stem-waveform');
                 if (!waveform) return;
 
-                var totalWidth = barCount * (barWidth + barGap);
+                var totalWidth = sampleCount * stepX;
+                var mid = 20, maxAmp = 17;   // mirror around centerline y=20
                 var svg = document.createElementNS(SVG_NS, 'svg');
                 svg.setAttribute('viewBox', '0 0 ' + (totalWidth * 2) + ' 40');
                 svg.setAttribute('preserveAspectRatio', 'none');
 
-                // Render bars twice for seamless loop
-                for (var cycle = 0; cycle < 2; cycle++) {
-                    for (var i = 0; i < barCount; i++) {
-                        var amp = Math.max(0.08, Math.min(1, amplitude(config.pattern, i, barCount)));
-                        var h = amp * 34;
-                        var y = (40 - h) / 2;
-                        var x = cycle * totalWidth + i * (barWidth + barGap);
-                        var rect = document.createElementNS(SVG_NS, 'rect');
-                        rect.setAttribute('x', x);
-                        rect.setAttribute('y', y);
-                        rect.setAttribute('width', barWidth);
-                        rect.setAttribute('height', h);
-                        rect.setAttribute('rx', 1);
-                        rect.setAttribute('fill', config.color);
-                        svg.appendChild(rect);
+                // Sample the per-stem amplitude curve twice for a seamless scroll loop,
+                // then build ONE filled mirrored polygon — the dense, organic look of a
+                // real DAW audio clip (not spaced equalizer bars).
+                var top = [], bottom = [];
+                for (var c = 0; c < 2; c++) {
+                    for (var i = 0; i < sampleCount; i++) {
+                        var amp = amplitude(config.pattern, i, sampleCount);
+                        // Dense sample-to-sample hair so the continuous body reads
+                        // as a real audio mass (not a smooth ribbon).
+                        amp *= 0.58 + 0.42 * pseudo(i * 9.17 + 1.3);
+                        amp = Math.max(0.05, Math.min(1, amp));
+                        var x = (c * totalWidth + i * stepX).toFixed(1);
+                        var dy = amp * maxAmp;            // keep numeric — toFixed() string broke `mid + dy` (concat → flat bottom)
+                        top.push(x + ',' + (mid - dy).toFixed(1));
+                        bottom.push(x + ',' + (mid + dy).toFixed(1));
                     }
                 }
+                bottom.reverse();
+                var path = document.createElementNS(SVG_NS, 'path');
+                path.setAttribute('d', 'M' + top.join('L') + 'L' + bottom.join('L') + 'Z');
+                path.setAttribute('fill', config.color);
+                svg.appendChild(path);
+
+                // Faint centerline — subtle DAW cue, no Apple/Avid chrome
+                var center = document.createElementNS(SVG_NS, 'line');
+                center.setAttribute('x1', 0); center.setAttribute('y1', mid);
+                center.setAttribute('x2', totalWidth * 2); center.setAttribute('y2', mid);
+                center.setAttribute('stroke', config.color);
+                center.setAttribute('stroke-opacity', '0.72');
+                center.setAttribute('stroke-width', '1.0');
+                svg.appendChild(center);
 
                 waveform.innerHTML = '';
                 waveform.appendChild(svg);
             });
         })();
 
+        // ===========================================================
+        // Claim Lifetime Founder — calls /billing/create-checkout-session
+        // and redirects to Stripe Checkout. Requires auth (JWT in localStorage).
+        // ===========================================================
+        async function startLifetimeCheckout(ev) {
+            if (ev) ev.preventDefault();
+            var token = localStorage.getItem('stemscribe_access_token')
+                     || localStorage.getItem('access_token')
+                     || sessionStorage.getItem('access_token');
+            if (!token) {
+                // Stash intent so auth.js auto-resumes checkout after Google sign-in
+                sessionStorage.setItem('pending_checkout', 'lifetime');
+                if (window.triggerGoogleSignIn) window.triggerGoogleSignIn();
+                return;
+            }
+            try {
+                var r = await fetch('/billing/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                    },
+                    body: JSON.stringify({ plan: 'lifetime' }),
+                });
+                var data = await r.json();
+                if (r.ok && data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else if (r.status === 410) {
+                    alert('Lifetime Founder is sold out — all 100 seats claimed.');
+                } else if (r.status === 401) {
+                    alert('Your sign-in expired. Please sign in again.');
+                    window.location.href = '/app#signin';
+                } else {
+                    alert('Could not start checkout: ' + (data.error || 'unknown error'));
+                }
+            } catch (e) {
+                alert('Network error starting checkout: ' + e.message);
+            }
+        }
+        window.startLifetimeCheckout = startLifetimeCheckout;
+
+        // ===========================================================
+        // Go Pro — annual checkout (matches the $89/yr displayed price)
+        // ===========================================================
+        async function startProCheckout(ev, interval) {
+            if (ev) ev.preventDefault();
+            interval = (interval === 'monthly') ? 'monthly' : 'annual';
+            var token = localStorage.getItem('stemscribe_access_token')
+                     || localStorage.getItem('access_token')
+                     || sessionStorage.getItem('access_token');
+            if (!token) {
+                sessionStorage.setItem('pending_checkout', 'pro_' + interval);
+                if (window.triggerGoogleSignIn) window.triggerGoogleSignIn();
+                return;
+            }
+            try {
+                var r = await fetch('/billing/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                    },
+                    body: JSON.stringify({ plan: 'pro', interval: interval }),
+                });
+                var data = await r.json();
+                if (r.ok && data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else if (r.status === 401) {
+                    alert('Your sign-in expired. Please sign in again.');
+                    window.location.href = '/app#signin';
+                } else if (r.status === 409) {
+                    alert("You're already on the Pro plan.");
+                } else {
+                    alert('Could not start checkout: ' + (data.error || 'unknown error'));
+                }
+            } catch (e) {
+                alert('Network error starting checkout: ' + e.message);
+            }
+        }
+        window.startProCheckout = startProCheckout;
+    </script>
+    <script>
+        // PWA service worker — same /pwa-sw.js as the app shell. Lets users
+        // "Add to Home Screen" from the marketing page and launch fullscreen.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/pwa-sw.js', { scope: '/' }).catch(function(err) {
+                    console.warn('PWA SW registration failed:', err && err.message);
+                });
+            });
+        }
     </script>
 </body>
 </html>

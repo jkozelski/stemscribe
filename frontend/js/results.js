@@ -7,6 +7,20 @@ window.StemScriber = window.StemScriber || {};
     SS.showResults = function(job) {
         document.getElementById('processingSection').classList.remove('active');
         document.getElementById('resultsSection').classList.add('active');
+        // Hide the marketing hero ("Tear The Sound Apart" / "Stem Separation & Practice Tools")
+        // once results are showing — otherwise it stacks above "Stems Ready" and reads as
+        // redundant marketing the user has already converted on. (#75)
+        var hero = document.querySelector('section.hero');
+        if (hero) hero.style.display = 'none';
+        // Also hide the featured-demo card and the upload drop-zone — once a song
+        // is loaded from the library, "try the demo" and "drag a song" are noise.
+        var demoCard = document.getElementById('featured-demo-app');
+        if (demoCard) demoCard.style.display = 'none';
+        var uploadSection = document.getElementById('uploadSection');
+        if (uploadSection) uploadSection.style.display = 'none';
+        // Scroll the song to the top of the page so it lands where the user
+        // expects after tapping a library item.
+        try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
         SS.currentJob = job;
         SS.currentJobId = job.job_id; // FIXED: always set so openPracticeMode has the ID
 
@@ -134,10 +148,11 @@ window.StemScriber = window.StemScriber || {};
             card.dataset.stem = name;
             card.style.setProperty('--stem-color', cfg.color);
 
-            var playerName = window.currentPlayerMapping?.[name];
-            var displayLabel = playerName
-                ? SS.escapeHtml(playerName) + ' <span class="stem-original">(' + SS.escapeHtml(name) + ')</span>'
-                : SS.escapeHtml(cfg.label || name);
+            // Channel strip label = INSTRUMENT name only (uniform board).
+            // Per-song personnel (player_mapping) intentionally NOT used here —
+            // it made every strip a different size; it still surfaces in the
+            // track-info panel/tooltips which read currentPlayerMapping directly.
+            var displayLabel = SS.escapeHtml(cfg.label || name.replace(/_/g, ' ').toUpperCase());
 
             card.innerHTML =
                 (isCascaded ? '<div class="cascade-badge">\u{1F9E0}</div>' : '') +

@@ -1,0 +1,555 @@
+[
+  {
+    "Object ID": "ap-8GIHAKXmIGN0ISR3gi4YVv",
+    "Description": "stemscribe-chart-formatter",
+    "Environment": "main",
+    "Interval Start": "2026-04-16T00:00:00",
+    "Cost": "0.63611981"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-01T00:00:00",
+    "Cost": "0.23549848"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-02T00:00:00",
+    "Cost": "0.16635413"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.00570851"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-05T00:00:00",
+    "Cost": "0.06605669"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-12T00:00:00",
+    "Cost": "1.10031712"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.21774078"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "0.34661313"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-15T00:00:00",
+    "Cost": "2.15836481"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-16T00:00:00",
+    "Cost": "1.05443674"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-18T00:00:00",
+    "Cost": "0.11963892"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-20T00:00:00",
+    "Cost": "0.06537742"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-22T00:00:00",
+    "Cost": "0.38778971"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-23T00:00:00",
+    "Cost": "2.55417646"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-24T00:00:00",
+    "Cost": "1.05147270"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-25T00:00:00",
+    "Cost": "2.01181287"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-26T00:00:00",
+    "Cost": "0.07856043"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-27T00:00:00",
+    "Cost": "0.14891191"
+  },
+  {
+    "Object ID": "ap-k27bJolENPSOyYMHLjg4mW",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-28T00:00:00",
+    "Cost": "0.03966583"
+  },
+  {
+    "Object ID": "ap-0yNv0MxMjb3vtEINb6UD9n",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-16T00:00:00",
+    "Cost": "0.00158724"
+  },
+  {
+    "Object ID": "ap-1WtHKN16ivVoExo1b5hq7b",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.12211696"
+  },
+  {
+    "Object ID": "ap-2DuUQpPa6O7vzWBOdmGi69",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.14897919"
+  },
+  {
+    "Object ID": "ap-3qNTZPNKZvCPt2ybipa5EI",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "14.50890356"
+  },
+  {
+    "Object ID": "ap-49J6fGmUSkm8xUlTMbZV4T",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "14.47559203"
+  },
+  {
+    "Object ID": "ap-4JIPPXGVg3mFrgu5b9Pvbf",
+    "Description": "recall-adapter-download",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "0.00000384"
+  },
+  {
+    "Object ID": "ap-4fm5p4IC8zfLyCEmJetgNR",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-16T00:00:00",
+    "Cost": "16.89415883"
+  },
+  {
+    "Object ID": "ap-4x5sldjjeO1MzM0gEJ93Aa",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.04670965"
+  },
+  {
+    "Object ID": "ap-71Yo3uDDtAJdjQQyANTZ1O",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-05T00:00:00",
+    "Cost": "0.03269062"
+  },
+  {
+    "Object ID": "ap-7Lb1wVROOvyaQE2RcCoA7B",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "5.88382531"
+  },
+  {
+    "Object ID": "ap-7qw6oxTZoxStREes2sCuKi",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00241936"
+  },
+  {
+    "Object ID": "ap-886ZidGSkZc8EugXZrEplT",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "12.56603953"
+  },
+  {
+    "Object ID": "ap-886ZidGSkZc8EugXZrEplT",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "2.20321936"
+  },
+  {
+    "Object ID": "ap-8isO0I5g4GYhxS2BQn7gLk",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.37818430"
+  },
+  {
+    "Object ID": "ap-98BzMtYOHb0gYKsstwrmWo",
+    "Description": "stemscribe-chart-formatter",
+    "Environment": "main",
+    "Interval Start": "2026-04-16T00:00:00",
+    "Cost": "0.05812679"
+  },
+  {
+    "Object ID": "ap-A826iJzhoTmQO0voqiwtYD",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.03230291"
+  },
+  {
+    "Object ID": "ap-An81qYL6AFzRL4IilqKaWL",
+    "Description": "formatter-adapter-download",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00009767"
+  },
+  {
+    "Object ID": "ap-DHIkAsHByIBJ28Ec7IVECP",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.00006049"
+  },
+  {
+    "Object ID": "ap-F41AdgIbKu2SSE7PWbs74r",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00459946"
+  },
+  {
+    "Object ID": "ap-FirIEvbnJW6WVuNzaDFm8K",
+    "Description": "bass-transcription-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "12.94689938"
+  },
+  {
+    "Object ID": "ap-FirIEvbnJW6WVuNzaDFm8K",
+    "Description": "bass-transcription-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-12T00:00:00",
+    "Cost": "6.20710353"
+  },
+  {
+    "Object ID": "ap-GrfxMDSyhPuPAzfjCtgYFa",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "5.81208229"
+  },
+  {
+    "Object ID": "ap-IXyvfFoYPsMbnhRkjhxo18",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00133123"
+  },
+  {
+    "Object ID": "ap-Id4WSzxpsPegC7AzlVdQR1",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00175704"
+  },
+  {
+    "Object ID": "ap-KILxUITZWXLPebtQHfqGXd",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "2.19937739"
+  },
+  {
+    "Object ID": "ap-Lqh0plyqWy5wFNEXzjPsRc",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.02669517"
+  },
+  {
+    "Object ID": "ap-P32GnLYquldFFYGt4E4PkQ",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.00212735"
+  },
+  {
+    "Object ID": "ap-PiFDzIh1oumXMSHcRpFUTT",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00004351"
+  },
+  {
+    "Object ID": "ap-Q7kon2zT9TWWjZfdU2kCdK",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.04488067"
+  },
+  {
+    "Object ID": "ap-R8gJLdQgUU6xpW4Pc5eqNB",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "2.41955635"
+  },
+  {
+    "Object ID": "ap-S1X76kJP4ABNJ26dsBywyB",
+    "Description": "promote-checkpoint",
+    "Environment": "main",
+    "Interval Start": "2026-04-16T00:00:00",
+    "Cost": "0.00001320"
+  },
+  {
+    "Object ID": "ap-TYR6pNe4pf75gB2LTIyCp0",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.04004314"
+  },
+  {
+    "Object ID": "ap-WT9Wh2b5bjJQpVjedW5ftK",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.00212882"
+  },
+  {
+    "Object ID": "ap-X81YNfbfFdJz3UmlaXwqfZ",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.00210292"
+  },
+  {
+    "Object ID": "ap-YNzJL0OrEORz4NG0Mwfule",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.00491624"
+  },
+  {
+    "Object ID": "ap-ZtIEVkgJ2jXg3foRBzySl9",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.05725499"
+  },
+  {
+    "Object ID": "ap-cCPNqIk15NP1STwcD6FVAy",
+    "Description": "bass-transcription-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.00089575"
+  },
+  {
+    "Object ID": "ap-cXWSfbNKJKh6xWMZQKtRg8",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.05404240"
+  },
+  {
+    "Object ID": "ap-crteYAKNyXjUwAdkB9mPei",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "8.04121378"
+  },
+  {
+    "Object ID": "ap-crteYAKNyXjUwAdkB9mPei",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "9.62228690"
+  },
+  {
+    "Object ID": "ap-dUknopHn8LHGMfhlhtwe9y",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00233348"
+  },
+  {
+    "Object ID": "ap-dhoGcyN7rWbtBYGs4KhfWR",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.00309556"
+  },
+  {
+    "Object ID": "ap-eiz832RVH9MaZVQBeUIzkl",
+    "Description": "formatter-adapter-download",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "0.00007469"
+  },
+  {
+    "Object ID": "ap-gXKdEW3V78Hk1i762agJPf",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00000384"
+  },
+  {
+    "Object ID": "ap-i8SM5QSPuBnGxM1SkAqbBt",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.06553916"
+  },
+  {
+    "Object ID": "ap-j7qf90MFAMLlF8KQ5oVmLF",
+    "Description": "btc-finetune",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.45545799"
+  },
+  {
+    "Object ID": "ap-jYGwI4P9xgEUgl2olIDdqJ",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "9.98292441"
+  },
+  {
+    "Object ID": "ap-lDnwXflFElDeFwPjtajwnf",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.00282273"
+  },
+  {
+    "Object ID": "ap-lNF5GhIkfT8hr64EqbNUUm",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "14.49506653"
+  },
+  {
+    "Object ID": "ap-nZHbBFr2uPBNA148CWMjDJ",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.03257920"
+  },
+  {
+    "Object ID": "ap-ncbwBRWAIFVA8ge0gAa2eE",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "12.32329242"
+  },
+  {
+    "Object ID": "ap-pGZbcyoWOfi1h1uBM6L3yr",
+    "Description": "trimplexx-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "0.00207462"
+  },
+  {
+    "Object ID": "ap-pV4o1SxsE7uc3kaQrzTeo0",
+    "Description": "stemscribe-separator",
+    "Environment": "main",
+    "Interval Start": "2026-04-04T00:00:00",
+    "Cost": "0.00283710"
+  },
+  {
+    "Object ID": "ap-pvdeI7IvuxbZ4SDQLpGw8U",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "0.00241018"
+  },
+  {
+    "Object ID": "ap-pziTrXrf6wsNtrO8XEqyTP",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.14429586"
+  },
+  {
+    "Object ID": "ap-xALFPFnq8dF5id6w85sCY7",
+    "Description": "stemscribe-guitar-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.21525937"
+  },
+  {
+    "Object ID": "ap-xwrOwHGHCSnklNmVlibyTz",
+    "Description": "stemscribe-chart-formatter-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-13T00:00:00",
+    "Cost": "13.39069331"
+  },
+  {
+    "Object ID": "ap-yfh77W19YN8aRubMLlEcax",
+    "Description": "btc-finetune",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.00409243"
+  },
+  {
+    "Object ID": "ap-zTs08Y9PTus1mFtG5jm3AG",
+    "Description": "stemscribe-chart-recall-train",
+    "Environment": "main",
+    "Interval Start": "2026-04-14T00:00:00",
+    "Cost": "6.43963827"
+  },
+  {
+    "Object ID": "ap-zmPNLIQCbYnlImfMxj5HWO",
+    "Description": "bass-transcription-training",
+    "Environment": "main",
+    "Interval Start": "2026-04-11T00:00:00",
+    "Cost": "0.07285824"
+  }
+]

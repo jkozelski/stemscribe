@@ -993,6 +993,9 @@
 .landing-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     padding: 3rem 2rem 1.5rem;
+    /* Sit above the animated background orbs so footer links are tappable. */
+    position: relative;
+    z-index: 2;
 }
 
 .footer-grid {
@@ -1084,11 +1087,15 @@
 }
 
 @media (max-width: 500px) {
+    /* Keep two columns on phones so the footer isn't a long single stack. */
     .footer-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem 1.25rem;
     }
     .footer-brand-block {
+        grid-column: 1 / -1;
         flex-direction: row;
+        align-items: center;
     }
 }
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>StemScriber — Chromatic Tuner</title>
     <link rel="shortcut icon" href="/images/favicon.ico">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
@@ -43,7 +43,8 @@
         .header {
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
-            padding: 0.75rem 1.5rem;
+            /* Clear the iPhone status bar / Dynamic Island via the safe-area inset. */
+            padding: calc(0.75rem + env(safe-area-inset-top)) 1.5rem 0.75rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -81,6 +82,17 @@
             transition: all 0.2s;
         }
         .nav-links a:hover { color: var(--text); background: var(--bg-card2); }
+
+        /* Mobile: the three header items (logo / title / nav) overlap with
+           space-between on a narrow screen. Let it wrap: logo + nav on the top
+           row, the "Chromatic Tuner" title drops to its own line below. */
+        @media (max-width: 600px) {
+            .header { flex-wrap: wrap; padding: calc(0.6rem + env(safe-area-inset-top)) 0.9rem 0.6rem; gap: 0.35rem 0.6rem; }
+            .logo-text { font-size: 1.1rem; }
+            .nav-links { margin-left: auto; }
+            .nav-links a { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+            .page-title { order: 3; width: 100%; font-size: 0.85rem; }
+        }
 
         /* ── Main ── */
         .main {
@@ -347,13 +359,13 @@
 <body>
 
 <header class="header">
-    <a href="/" class="logo">
+    <a href="index.html" class="logo">
         <span class="waveform-icon" aria-hidden="true"><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span>
         <span class="logo-text">StemScriber</span>
     </a>
     <span class="page-title">Chromatic Tuner</span>
     <nav class="nav-links">
-        <a href="/">Home</a>
+        <a href="#" onclick="event.preventDefault(); if (history.length > 1) { history.back(); } else { location.href='index.html'; }">&larr; Back</a>
         <a href="practice.html">Practice</a>
         <a href="fretboard.html">Fretboard</a>
     </nav>
@@ -526,6 +538,10 @@ function detectPitch(buf, sampleRate) {
         if (corr[i] > maxVal) { maxVal = corr[i]; maxPos = i; }
     }
     if (maxPos === -1 || maxVal < 0.01) return -1;
+    // Clarity gate: reject frames where the periodic peak is weak relative to the
+    // signal's total energy (pluck-attack transients, finger noise). These are the
+    // frames that make the detected note jump around.
+    if (corr[0] > 0 && (maxVal / corr[0]) < 0.4) return -1;
 
     let x1 = maxPos - 1, x2 = maxPos, x3 = maxPos + 1;
     if (x1 < 0) x1 = 0;
@@ -539,14 +555,46 @@ function detectPitch(buf, sampleRate) {
     return freq;
 }
 
-// ── Smoothing ──
+// ── Stabilization: median filter + note hysteresis ──
+// A plucked string's pitch is steady; the jitter comes from detection noise and
+// octave glitches. Median-filter the raw frequency to kill single-frame outliers,
+// then HOLD the displayed note until a different note shows up consistently for
+// several frames — so it locks onto the string instead of bouncing around.
 let smoothedFreq = -1;
-const FREQ_SMOOTH = 0.4;
+const FREQ_SMOOTH = 0.25;            // gentle EMA for the cents needle while on a note
+const _freqHistory = [];
+const MEDIAN_WINDOW = 5;
+let _lockedMidi = -1;
+let _candMidi = -1;
+let _candCount = 0;
+const NOTE_SWITCH_FRAMES = 4;        // a new note must persist this many frames to switch
 
-function smoothFreq(raw) {
+function _midiOf(freq) { return Math.round(69 + 12 * Math.log2(freq / 440)); }
+
+function resetStabilizer() {
+    smoothedFreq = -1; _freqHistory.length = 0;
+    _lockedMidi = -1; _candMidi = -1; _candCount = 0;
+}
+
+function stabilizeFreq(raw) {
     if (raw < 0) return smoothedFreq;
-    if (smoothedFreq < 0) { smoothedFreq = raw; return raw; }
-    smoothedFreq = smoothedFreq * (1 - FREQ_SMOOTH) + raw * FREQ_SMOOTH;
+    _freqHistory.push(raw);
+    if (_freqHistory.length > MEDIAN_WINDOW) _freqHistory.shift();
+    const med = _freqHistory.slice().sort(function (a, b) { return a - b; })[_freqHistory.length >> 1];
+    const midi = _midiOf(med);
+
+    if (_lockedMidi < 0) {                       // first acquisition
+        _lockedMidi = midi; _candMidi = midi; _candCount = 0; smoothedFreq = med;
+    } else if (midi === _lockedMidi) {            // same note — smooth the cents needle
+        _candCount = 0;
+        smoothedFreq = smoothedFreq * (1 - FREQ_SMOOTH) + med * FREQ_SMOOTH;
+    } else {                                      // different note — require persistence
+        if (midi === _candMidi) { _candCount++; } else { _candMidi = midi; _candCount = 1; }
+        if (_candCount >= NOTE_SWITCH_FRAMES) {   // confirmed — switch to the new note
+            _lockedMidi = midi; _candCount = 0; smoothedFreq = med;
+        }
+        // otherwise keep showing the locked note steadily (no needle jump)
+    }
     return smoothedFreq;
 }
 
@@ -700,12 +748,12 @@ function loop() {
     if (rawFreq < 0) {
         silenceCount++;
         if (silenceCount > SILENCE_THRESHOLD) {
-            smoothedFreq = -1;
+            resetStabilizer();
             updateUI(-1);
         }
     } else {
         silenceCount = 0;
-        var freq = smoothFreq(rawFreq);
+        var freq = stabilizeFreq(rawFreq);
         updateUI(freq);
     }
 }
@@ -722,8 +770,19 @@ async function startTuner() {
     setStatus('Requesting microphone...', false);
 
     try {
+        // iOS (WebKit): the practice player sets navigator.audioSession.type to
+        // 'playback', which is INCOMPATIBLE with mic capture — getUserMedia then
+        // throws InvalidStateError before iOS can even prompt. Switch to a
+        // record-capable category first. (Safe no-op where the API is absent.)
+        try {
+            if ('audioSession' in navigator) navigator.audioSession.type = 'play-and-record';
+        } catch (e) { /* non-fatal */ }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new DOMException('navigator.mediaDevices is unavailable in this webview', 'MediaDevicesUnavailable');
+        }
         mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false, latency: 0 },
+            audio: { echoCancellation: false, autoGainControl: false, noiseSuppression: false },
             video: false,
         });
     } catch (err) {
@@ -748,7 +807,7 @@ async function startTuner() {
 
     isRunning = true;
     silenceCount = 0;
-    smoothedFreq = -1;
+    resetStabilizer();
 
     startBtn.textContent = 'Stop';
     startBtn.classList.add('stop');
@@ -773,7 +832,12 @@ function stopTuner() {
 // ── Error handling ──
 function handleMicError(err) {
     var msg = 'Could not access microphone.';
-    if (err.name === 'NotAllowedError') msg = 'Microphone permission denied. Allow access in browser settings.';
+    if (err.name === 'NotAllowedError') {
+        var inApp = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        msg = inApp
+            ? 'Microphone access is off. Open iOS Settings → StemScriber → Microphone and turn it on, then come back and tap Start.'
+            : 'Microphone permission denied. Allow access in your browser site settings.';
+    }
     else if (err.name === 'NotFoundError') msg = 'No microphone found. Connect one and try again.';
     else if (err.name === 'NotReadableError') msg = 'Microphone in use by another app.';
     showError(msg);

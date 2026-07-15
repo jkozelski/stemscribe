@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -92,27 +92,6 @@
         .song-title { font-family: 'Righteous', cursive; font-size: 1.1rem; }
         .song-artist { font-size: 0.8rem; color: var(--text-dim); }
 
-        /* Album art — snug in the top-left of the lead sheet left column */
-        .lead-sheet-album-art {
-            display: block;
-            width: 64px;
-            height: 64px;
-            border-radius: 6px;
-            object-fit: cover;
-            background: rgba(0,0,0,0.04);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
-        }
-        .lead-sheet-album-label {
-            font-family: 'Libre Baskerville', 'Georgia', serif;
-            font-size: 0.7rem;
-            color: #6a6458;
-            font-style: italic;
-            margin-top: 0.35rem;
-            max-width: 100px;
-            line-height: 1.2;
-            word-wrap: break-word;
-        }
-
         .header-actions {
             display: flex;
             align-items: center;
@@ -141,12 +120,6 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
-
-        /* Unified header-button icon style (Lucide-style stroke icons).
-           Brand PNG icons (library/practice/settings) are TODO from Kevin —
-           drop them in here when ready by swapping <svg.header-icon> for <img>. */
-        .header-btn { display: inline-flex; align-items: center; gap: 0.4rem; }
-        .header-icon { width: 18px; height: 18px; flex-shrink: 0; }
 
         /* ── Main Layout ── */
         .main {
@@ -189,12 +162,9 @@
         .transport-row {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
             margin-bottom: 0.75rem;
-            flex-wrap: wrap;   /* fix 2026-05-31: keep time-display visible when share+loop btns added the row would overflow */
-            row-gap: 0.5rem;
         }
-        .transport-row .time-display { margin-left: auto; }   /* push time to the right of whatever buttons fit */
 
         .play-btn {
             width: 44px;
@@ -267,56 +237,6 @@
 
         .loop-region.active {
             display: block;
-        }
-
-        /* Loop-region drag handles (appear when loop is active). */
-        .loop-handle {
-            position: absolute;
-            top: -6px;
-            width: 14px;
-            height: calc(100% + 12px);
-            background: var(--teal, #56b6c2);
-            border-radius: 3px;
-            cursor: ew-resize;
-            pointer-events: auto;
-            opacity: 0.95;
-            z-index: 2;
-        }
-        .loop-handle::before {
-            content: '';
-            position: absolute;
-            left: 50%; top: 50%;
-            transform: translate(-50%, -50%);
-            width: 2px; height: 60%;
-            background: rgba(255,255,255,0.7);
-            border-radius: 1px;
-        }
-        .loop-handle-a { left: -7px; }
-        .loop-handle-b { right: -7px; }
-        .loop-handle:hover, .loop-handle:active { opacity: 1; transform: scaleX(1.2); }
-
-        /* Loop mode pill button states */
-        .loop-mode-btn { transition: background 0.15s, color 0.15s; }
-        .loop-mode-btn.mode-arming {
-            background: var(--orange, #ff7b54);
-            color: #fff;
-            box-shadow: 0 0 0 2px rgba(255,123,84,0.35);
-        }
-        .loop-mode-btn.mode-active {
-            background: var(--teal, #56b6c2);
-            color: #fff;
-        }
-        /* When timeline is in loop-set mode, hint the cursor */
-        .timeline.loop-set-mode { cursor: crosshair; }
-        .timeline.loop-set-mode::after {
-            content: 'Tap to set loop point';
-            position: absolute;
-            top: -22px; left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
-            color: var(--orange, #ff7b54);
-            white-space: nowrap;
-            pointer-events: none;
         }
 
         /* Tempo */
@@ -482,16 +402,7 @@
            are wider than the mic) can't shove each row's name/slider/M/S out of
            alignment. Every row's content now starts at the same x. */
         .stem-icon { font-size: 1.2rem; display: flex; align-items: center; justify-content: center; width: 34px; min-width: 34px; flex-shrink: 0; }
-        /* Tint all stem mixer icons to brand orange (#ff7b54) — matches play button */
-        .stem-icon img {
-            filter: brightness(0) saturate(100%) invert(56%) sepia(85%) saturate(1820%) hue-rotate(335deg) brightness(101%) contrast(101%);
-        }
-        /* min-width:0 lets the name shrink inside flex; overflow/ellipsis keeps
-           it on one line and stops it from pushing slider+M/S off the edge. */
-        .stem-name { font-size: 0.8rem; font-weight: 600; text-transform: capitalize; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        /* Lock slider + M/S so the row never sacrifices them when space is tight. */
-        .stem-vol, .mix-btn { flex-shrink: 0; }
+        .stem-name { font-size: 0.8rem; font-weight: 600; text-transform: capitalize; flex: 1; }
 
         .stem-vol {
             width: 50px;
@@ -799,31 +710,9 @@
         /* ── Responsive: Tablet (768px) ── */
         @media (max-width: 768px) {
             .header {
-                /* Reserve a top row for logo (left) + account (right), and clear the
-                   iPhone status bar / Dynamic Island via the safe-area inset. */
-                padding: calc(env(safe-area-inset-top) + 3.25rem) 0.75rem 0.5rem;
+                padding: 0.5rem 0.75rem;
                 flex-wrap: wrap;
                 gap: 0.5rem;
-                position: relative;
-            }
-
-            /* Pin the logo top-left and the account/sign-in top-right — below the
-               notch — instead of letting the account button wrap into the middle. */
-            .header > .logo {
-                position: absolute;
-                top: calc(env(safe-area-inset-top) + 0.6rem);
-                left: 0.75rem;
-            }
-            .header .auth-profile-dropdown,
-            .header .auth-signin-btn {
-                position: absolute;
-                top: calc(env(safe-area-inset-top) + 0.6rem);
-                right: 0.75rem;
-                z-index: 30;
-            }
-            .header .auth-profile-menu {
-                right: 0;
-                left: auto;
             }
 
             .song-info {
@@ -1078,8 +967,7 @@
 
             .header-actions {
                 width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
+                justify-content: flex-end;
             }
 
             .header-btn {
@@ -1460,18 +1348,14 @@
         /* View Toggle (Tab vs Chords) */
         .view-toggle {
             display: none;
-            gap: 0.5rem;
+            gap: 0;
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
             padding: 0.4rem 1rem;
             align-items: center;
-            flex-wrap: wrap;       /* fix 2026-05-31: stop CHORD CHART / TRANSPOSE / Keys from overlapping at narrow panel widths */
-            row-gap: 0.4rem;
         }
 
         .view-toggle.visible { display: flex; }
-        /* When the toolbar wraps, drop the inline margin-lefts so the rows align flush */
-        .view-toggle > * { margin-left: 0 !important; }
 
         .view-toggle-label {
             font-size: 0.7rem;
@@ -1773,65 +1657,6 @@
             padding-bottom: 1.4rem;
             border-bottom: 1px solid #d4cfc2;
         }
-        /* Mobile: stack the 3-column grid vertically so the right-column
-           Edit/Print/Key block can't get pushed off-screen, and tighten the
-           lead-sheet's own padding so the title has the full viewport width
-           to breathe instead of being squeezed by 3.5rem side padding. */
-        @media (max-width: 680px) {
-            .lead-sheet {
-                padding: 1.5rem 1rem !important;
-            }
-            .lead-sheet-header {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-                text-align: center;
-                margin-bottom: 1.5rem;
-                padding-bottom: 1rem;
-            }
-            .lead-sheet-header-left,
-            .lead-sheet-header-center,
-            .lead-sheet-meta {
-                justify-self: center;
-                text-align: center !important;
-            }
-            .lead-sheet-meta {
-                line-height: 1.4 !important;
-            }
-            .lead-sheet-meta .no-print {
-                justify-content: center !important;
-                margin-top: 0.5rem !important;
-                gap: 0.5rem !important;
-            }
-            /* Lighter, more print-publication-style Edit/Print buttons on mobile.
-               The default inline styles use #2a2a35 dark which clashes with the
-               cream paper background — override to a subtle cream-on-cream with
-               a thin border, matching the lead-sheet's classical music typography. */
-            .lead-sheet-meta button {
-                background: #fefcf8 !important;
-                color: #4a4438 !important;
-                border: 1px solid #c4bdac !important;
-                font-family: 'Libre Baskerville', 'Georgia', serif !important;
-                font-size: 0.78rem !important;
-                padding: 0.35rem 0.9rem !important;
-                font-style: normal !important;
-                letter-spacing: 0.02em !important;
-            }
-            .lead-sheet-album-art {
-                margin: 0 auto;
-                width: 56px;
-                height: 56px;
-            }
-            .lead-sheet-title {
-                font-size: 1.35rem !important;
-                line-height: 1.2 !important;
-                margin-bottom: 0.2rem !important;
-                letter-spacing: 0.01em !important;
-            }
-            .lead-sheet-artist {
-                font-size: 0.8rem !important;
-            }
-        }
-        .lead-sheet-header-left { align-self: start; }
         .lead-sheet-header-left { font-size: 0.75rem; color: #8a8578; font-style: italic; letter-spacing: 0.05em; }
         .lead-sheet-header-center { text-align: center; }
         .lead-sheet-title {
@@ -2474,26 +2299,6 @@
             #pianoPanel { padding: 0.75rem 0.5rem 1rem; }
             #pianoPanel svg { max-width: 100%; height: auto; }
         }
-
-        /* Confidence-tiered chord rendering — sophisticated musicians punish overclaiming. */
-        .chord-confident { /* full strength — no override needed */ }
-        .chord-medium {
-            opacity: 0.72;
-            font-style: italic;
-        }
-        .chord-uncertain {
-            opacity: 0.5;
-            color: #8a8578;
-            font-style: italic;
-        }
-        /* "?" suffix only in flex/inline chord contexts (lead-sheet, edit pills).
-           Suppressed inside .gig-chord-row to keep the monospace slash-row aligned. */
-        .cs-chord.chord-uncertain::after,
-        .chord-uncertain.chord-pill::after { content: '?'; margin-left: 1px; opacity: 0.7; }
-        .gig-chord-row .chord-uncertain::after { content: ''; }
-        @media print {
-            .chord-medium, .chord-uncertain { opacity: 1 !important; font-style: italic !important; color: #555 !important; }
-        }
     </style>
     <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
     <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
@@ -2516,15 +2321,15 @@
         </div>
 
         <div class="header-actions">
-            <a href="index.html" class="header-btn header-btn-back" aria-label="Back to upload"><svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>Back</a>
-            <a href="tuner.html" class="header-btn"><svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg>Tuner</a>
-            <a href="fretboard.html" class="header-btn"><svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1"/><line x1="8" y1="6" x2="8" y2="14"/><line x1="13" y1="6" x2="13" y2="14"/><line x1="18" y1="6" x2="18" y2="14"/></svg>Scales</a>
-            <button class="header-btn" id="useMyChartBtn" title="Import a chord chart and/or lyrics from Ultimate Guitar, Songsterr, your own PDFs, or anywhere else"><svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import Charts &amp; Lyrics</button>
-            <button class="header-btn" id="uploadCoverBtn" title="Upload a custom album art image for this song"><svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>My Cover</button>
             <button class="header-btn" id="exportPDF" style="display:none;" title="Export as PDF">📄 PDF</button>
             <button class="header-btn" id="printNotation" style="display:none;" title="Print">🖨 Print</button>
             <button class="header-btn" id="downloadMusicXML" style="display:none;" title="Download MusicXML">📜 XML</button>
             <button class="header-btn" id="downloadGP" style="display:none;" title="Download Guitar Pro"><img src="icons/custom/32/guitar-vintage.png" width="16" height="16" style="vertical-align:middle; border-radius:2px;"> GP</button>
+            <a href="tuner.html" class="header-btn"><img src="icons/custom/32/guitar-vintage.png" width="18" height="18" style="vertical-align:middle; margin-right:0.35rem; border-radius:3px;"> Tuner</a>
+            <a href="fretboard.html" class="header-btn"><img src="icons/custom/32/piano-vintage.png" width="18" height="18" style="vertical-align:middle; margin-right:0.35rem; border-radius:3px;"> Scales</a>
+            <button class="header-btn" id="useMyChartBtn" title="Paste your own chord chart from Ultimate Guitar, Songsterr, or anywhere else">📋 My Chart</button>
+            <button class="header-btn" id="reportIssueBtn" title="Report a chord-chart issue with this song"><img src="icons/custom/features/48/feature-chords.png" width="18" height="18" style="vertical-align:middle; margin-right:0.35rem; border-radius:3px; filter: hue-rotate(180deg) saturate(0.4);"> Report</button>
+            <a href="index.html" class="header-btn"><span style="display:inline-block; width:18px; text-align:center; vertical-align:middle; margin-right:0.35rem;">←</span> Back</a>
             <!-- Auth: Sign-In Button -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
                 <svg class="auth-google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -2564,7 +2369,6 @@
                     <button class="transport-btn" id="skipBackBtn" title="Back 5s">⏪</button>
                     <button class="play-btn" id="playBtn" title="Play/Pause">▶</button>
                     <button class="transport-btn" id="skipFwdBtn" title="Forward 5s">⏩</button>
-                    <button class="transport-btn loop-mode-btn" id="loopModeBtn" title="Loop a section">🔁</button>
                     <div class="time-display">
                         <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
                     </div>
@@ -2587,6 +2391,9 @@
                     <button class="tempo-preset active" data-tempo="100">100%</button>
                     <button class="tempo-preset" data-tempo="150">150%</button>
                     <button class="tempo-preset" data-tempo="200">200%</button>
+                </div>
+                <div class="tempo-note" style="font-size:11px;opacity:.6;margin-top:6px;line-height:1.3;">
+                    On mobile, slowing a song also lowers its pitch (a mobile-browser limit). Full pitch-lock works on desktop.
                 </div>
             </div>
 
@@ -2636,7 +2443,6 @@
                 </div>
                 <button id="flatSharpBtn" onclick="toggleFlats()" style="margin-left:1rem; padding:0.35rem 0.6rem; background:var(--bg-dark); border:1px solid var(--border); border-radius:6px; color:var(--text); cursor:pointer; font-family:inherit; font-size:0.85rem;" title="Toggle sharps/flats">Use ♭</button>
                 <button id="pianoToggleBtn" class="piano-toggle-btn" onclick="togglePianoPanel()" title="Piano chord visualizer">Keys</button>
-                <button id="shareBtn" class="share-btn-pill" title="Share this practice setup with a student" style="margin-left:auto; padding:0.35rem 0.75rem; background:var(--orange); color:#fff; border:none; border-radius:6px; cursor:pointer; font-family:inherit; font-size:0.85rem; font-weight:600; display:inline-flex; align-items:center; gap:0.35rem;">📤 Share</button>
             </div>
 
             <div class="notation-display">
@@ -2755,57 +2561,9 @@
 
         // iOS silent switch bypass — removed in favor of enhanced version below
 
-        const API_BASE = (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())
-            ? 'https://stemscriber.com/api'
-            : (window.location.port === '' || window.location.port === '80' || window.location.port === '443')
-                ? window.location.origin + '/api'
-                : window.location.protocol + '//' + window.location.hostname + ':5555/api';
-
-        // 2026-05-31: Global /api/* fetch hook. Does TWO things:
-        //  (1) When the page is signed in (localStorage has access_token),
-        //      inject Authorization: Bearer <token> so per-job routes see
-        //      the user as owner. Without this the post-audit authz fix
-        //      treats every fetch as anonymous → 403 "Forbidden" on owner's
-        //      own songs.
-        //  (2) When the page is opened via a share link (?share=<token>),
-        //      forward the token on every /api/* fetch so anonymous viewers
-        //      pass authorize_job_access.
-        (function() {
-            try {
-                var _shareToken = new URLSearchParams(window.location.search).get('share');
-                var _origFetch = window.fetch.bind(window);
-                window.fetch = function(input, init) {
-                    try {
-                        var url = typeof input === 'string' ? input : (input && input.url);
-                        if (url && /\/api\//.test(url)) {
-                            // (1) Auth header injection
-                            var token = null;
-                            try { token = localStorage.getItem('access_token'); } catch (e) {}
-                            if (token) {
-                                init = init || {};
-                                var hdrs = new Headers(init.headers || {});
-                                if (!hdrs.has('Authorization')) {
-                                    hdrs.set('Authorization', 'Bearer ' + token);
-                                    init.headers = hdrs;
-                                }
-                            }
-                            // (2) Share token forwarding
-                            if (_shareToken && !/[?&]share=/.test(url)) {
-                                var sep = url.indexOf('?') >= 0 ? '&' : '?';
-                                var newUrl = url + sep + 'share=' + encodeURIComponent(_shareToken);
-                                if (typeof input === 'string') {
-                                    input = newUrl;
-                                } else if (input && input.url) {
-                                    input = new Request(newUrl, input);
-                                }
-                            }
-                        }
-                    } catch (e) {}
-                    return _origFetch(input, init);
-                };
-                console.log('[api-hook] auth-header + share-token injection live');
-            } catch (e) { console.warn('api-hook failed:', e); }
-        })();
+        const API_BASE = (window.location.port === '' || window.location.port === '80' || window.location.port === '443')
+            ? window.location.origin + '/api'
+            : window.location.protocol + '//' + window.location.hostname + ':5555/api';
 
         // ── State ──
         let currentJob = null;
@@ -3885,90 +3643,6 @@
             }
         }
 
-        // ── Mobile audio engine (2026-05-28) ──
-        // iOS Safari crashes decoding 8 stems into Web Audio (memory ceiling).
-        // On mobile we play ONE pre-mixed master.mp3 via a native <audio> element
-        // instead. This class duck-types the StemAudioEngine interface so the
-        // transport layer (togglePlayback / seekTo / setPlaybackRate / the RAF
-        // progress loop) works unchanged. Stem mute/solo is desktop-only.
-        var IS_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-            || (('ontouchstart' in window) && window.matchMedia && window.matchMedia('(max-width: 820px)').matches);
-
-        function MobileAudioEngine() {
-            this.ctx = null;          // no Web Audio context on this path
-            this.stems = {};
-            this._offset = 0;
-            this.isPlaying = false;
-            this._rate = 1.0;
-            this._loaded = false;
-            this._el = null;          // the <audio> element
-        }
-        MobileAudioEngine.prototype.init = function() {
-            // Native <audio> needs no AudioContext gesture-unlock; play() in the
-            // click handler is enough. No-op, present for interface parity.
-        };
-        MobileAudioEngine.prototype.loadMaster = function(url, onReady, onError) {
-            var self = this;
-            var el = document.getElementById('mobileMasterAudio');
-            if (!el) {
-                el = document.createElement('audio');
-                el.id = 'mobileMasterAudio';
-                el.preload = 'auto';
-                el.style.display = 'none';
-                document.body.appendChild(el);
-            }
-            this._el = el;
-            el.src = url;
-            el.playbackRate = this._rate;
-            var done = false;
-            el.addEventListener('loadedmetadata', function() {
-                if (done) return; done = true;
-                self._loaded = true;
-                if (onReady) onReady();
-            });
-            el.addEventListener('error', function() {
-                if (done) return; done = true;
-                if (onError) onError(el.error || new Error('master audio load failed'));
-            });
-            el.load();
-        };
-        MobileAudioEngine.prototype.loadStem = function(name, url, onReady) {
-            // Interface parity no-op — mobile never loads individual stems.
-            if (onReady) onReady(null);
-        };
-        MobileAudioEngine.prototype.hasLoadedStems = function() { return this._loaded; };
-        MobileAudioEngine.prototype.play = function() {
-            if (!this._el) return Promise.resolve();
-            this._el.playbackRate = this._rate;
-            this.isPlaying = true;
-            var p = this._el.play();
-            return (p && p.then) ? p : Promise.resolve();
-        };
-        MobileAudioEngine.prototype.pause = function() {
-            if (this._el) this._el.pause();
-            this.isPlaying = false;
-        };
-        MobileAudioEngine.prototype.seek = function(t) {
-            if (this._el) { try { this._el.currentTime = Math.max(0, t); } catch (e) {} }
-        };
-        MobileAudioEngine.prototype.getCurrentTime = function() {
-            return this._el ? this._el.currentTime : 0;
-        };
-        MobileAudioEngine.prototype.getDuration = function() {
-            return (this._el && isFinite(this._el.duration)) ? this._el.duration : 0;
-        };
-        MobileAudioEngine.prototype.setPlaybackRate = function(r) {
-            this._rate = r;
-            if (this._el) this._el.playbackRate = r;
-        };
-        MobileAudioEngine.prototype.setEffectiveVolume = function() { /* single track — no per-stem mix */ };
-        MobileAudioEngine.prototype.setLoop = function() { /* loop AB not supported on mobile master path */ };
-        MobileAudioEngine.prototype.dispose = function() {
-            if (this._el) { try { this._el.pause(); this._el.removeAttribute('src'); this._el.load(); } catch (e) {} }
-            this.isPlaying = false; this._loaded = false;
-        };
-        MobileAudioEngine.prototype.debug = function() { return { mobile: true, loaded: this._loaded, rate: this._rate }; };
-
         var audioEngine = new StemAudioEngine();
 
         // ── Audio Debug Mode ──
@@ -4043,16 +3717,16 @@
         const stemIconBase = '/images/';
         const stemIconStyle = 'height:26px;width:auto;max-width:28px;object-fit:contain;vertical-align:middle;';
         const stemConfig = {
-            vocals:         { icon: '<img src="' + stemIconBase + 'inst-mic.png" style="' + stemIconStyle + '">',         color: '#ff6b9d' },
-            vocals_lead:    { icon: '<img src="' + stemIconBase + 'inst-mic.png" style="' + stemIconStyle + '">',         color: '#ff6b9d' },
-            vocals_backing: { icon: '<img src="' + stemIconBase + 'inst-mic.png" style="' + stemIconStyle + '">',         color: '#c678dd' },
-            drums:          { icon: '<img src="' + stemIconBase + 'inst-drums.png" style="' + stemIconStyle + '">',       color: '#e5c07b' },
-            bass:           { icon: '<img src="' + stemIconBase + 'inst-bass.png" style="' + stemIconStyle + '">',        color: '#ff7b54' },
-            guitar:         { icon: '<img src="' + stemIconBase + 'inst-guitar.png" style="' + stemIconStyle + '">',      color: '#61afef' },
-            guitar_lead:    { icon: '<img src="' + stemIconBase + 'inst-guitar.png" style="' + stemIconStyle + '">',      color: '#61afef' },
-            guitar_rhythm:  { icon: '<img src="' + stemIconBase + 'inst-eguitar.png" style="' + stemIconStyle + '">',     color: '#5a9bd4' },
-            piano:          { icon: '<img src="' + stemIconBase + 'inst-piano.png" style="' + stemIconStyle + '">',       color: '#98c379' },
-            other:          { icon: '<img src="' + stemIconBase + 'inst-other.png" style="' + stemIconStyle + '">',       color: '#c678dd' }
+            vocals:         { icon: '<img src="' + stemIconBase + 'icon-mic.png" style="' + stemIconStyle + '">',         color: '#ff6b9d' },
+            vocals_lead:    { icon: '<img src="' + stemIconBase + 'icon-mic.png" style="' + stemIconStyle + '">',         color: '#ff6b9d' },
+            vocals_backing: { icon: '<img src="' + stemIconBase + 'icon-mic.png" style="' + stemIconStyle + '">',         color: '#c678dd' },
+            drums:          { icon: '<img src="' + stemIconBase + 'icon-drums.png" style="' + stemIconStyle + '">',       color: '#e5c07b' },
+            bass:           { icon: '<img src="' + stemIconBase + 'icon-bass.png" style="' + stemIconStyle + '">',        color: '#ff7b54' },
+            guitar:         { icon: '<img src="' + stemIconBase + 'icon-guitar.png" style="' + stemIconStyle + '">',      color: '#61afef' },
+            guitar_lead:    { icon: '<img src="' + stemIconBase + 'icon-guitar.png" style="' + stemIconStyle + '">',      color: '#61afef' },
+            guitar_rhythm:  { icon: '<img src="' + stemIconBase + 'icon-guitar-tele.png" style="' + stemIconStyle + '">', color: '#5a9bd4' },
+            piano:          { icon: '<img src="' + stemIconBase + 'icon-piano.png" style="' + stemIconStyle + '">',       color: '#98c379' },
+            other:          { icon: '<img src="' + stemIconBase + 'icon-vinyl.png" style="' + stemIconStyle + '">',       color: '#c678dd' }
         };
 
         // Helper: get total ticks from AlphaTab score
@@ -4074,13 +3748,7 @@
             const section = document.getElementById('librarySection');
             if (!section) return;
             try {
-                // Send the JWT so the server returns THIS user's library, not
-                // the anonymous (demo-only) view. Same auth-header lesson as
-                // the upload.js fix on 2026-05-22.
-                const _ah = (window.StemScriber && window.StemScriber.authHeaders) ? window.StemScriber.authHeaders() : {};
-                // Shared sort preference with /app library (localStorage key 'ss_library_sort').
-                const sortMode = (function() { try { return localStorage.getItem('ss_library_sort') || 'recent'; } catch(e) { return 'recent'; } })();
-                const resp = await fetch(API_BASE + '/library?sort=' + encodeURIComponent(sortMode), { headers: _ah });
+                const resp = await fetch(API_BASE + '/library');
                 const data = await resp.json();
                 if (!data.library || data.library.length === 0) {
                     // Empty library + no ?job= param → show a real CTA instead of the
@@ -4103,13 +3771,7 @@
                     section.style.display = 'block';
                     return;
                 }
-                const heading = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">' +
-                    '<div style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff7b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Your Library</div>' +
-                    '<div style="display:flex; gap:0.3rem; font-size:0.75rem;">' +
-                        '<button onclick="try{localStorage.setItem(\'ss_library_sort\',\'recent\');}catch(e){} loadLibrary();" style="padding:0.2rem 0.55rem; border-radius:5px; border:1px solid var(--border); background:' + (sortMode === 'recent' ? 'var(--orange)' : 'transparent') + '; color:' + (sortMode === 'recent' ? '#111' : 'var(--text-dim)') + '; cursor:pointer; font:inherit;">Recent</button>' +
-                        '<button onclick="try{localStorage.setItem(\'ss_library_sort\',\'az\');}catch(e){} loadLibrary();"     style="padding:0.2rem 0.55rem; border-radius:5px; border:1px solid var(--border); background:' + (sortMode === 'az'     ? 'var(--orange)' : 'transparent') + '; color:' + (sortMode === 'az'     ? '#111' : 'var(--text-dim)') + '; cursor:pointer; font:inherit;">A&ndash;Z</button>' +
-                    '</div>' +
-                    '</div>';
+                const heading = '<div style="color:var(--text-dim); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;"><img src="/images/icons/library.png" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;border-radius:3px;"> Your Library</div>';
                 const cards = data.library.map(function(song) {
                     const dur = song.duration ? Math.floor(song.duration / 60) + ':' + String(Math.floor(song.duration % 60)).padStart(2, '0') : '';
                     const badges = [];
@@ -4148,10 +3810,6 @@
                 if (jobId) {
                     await loadJob(jobId, stemParam);
                 } else {
-                    // No song loaded: reveal the empty-state panel so the user
-                    // can pick from their library, search Songsterr, or upload.
-                    var _at = document.getElementById('alphaTab');
-                    if (_at) _at.style.display = 'block';
                     loadLibrary();
                 }
             } catch (e) {
@@ -4227,14 +3885,6 @@
 
                     // ---- mouse ----
                     timeline.addEventListener('mousedown', function(e) {
-                        // Don't grab a handle drag with the timeline-scrub gesture.
-                        if (e.target && e.target.classList && e.target.classList.contains('loop-handle')) return;
-                        // In loop-set mode the click sets a loop point, NOT a scrub.
-                        if (window._isLoopSetMode && window._isLoopSetMode()) {
-                            e.preventDefault();
-                            window._maybeHandleLoopClick(e.clientX);
-                            return;
-                        }
                         e.preventDefault();
                         window._scrubbing = true;
                         _scrubLastSeek = 0;
@@ -4251,30 +3901,21 @@
                     // Bare click (keyboard / no-drag) still jumps.
                     timeline.addEventListener('click', function(e) {
                         if (window._scrubbing) return; // mousedown path already handled it
-                        if (window._isLoopSetMode && window._isLoopSetMode()) return; // handled in mousedown
                         seekTo(e);
                     });
 
                     // ---- touch ----
                     timeline.addEventListener('touchstart', function(e) {
-                        if (e.target && e.target.classList && e.target.classList.contains('loop-handle')) return;
-                        if (window._isLoopSetMode && window._isLoopSetMode()) {
-                            e.preventDefault();
-                            if (e.touches[0]) window._maybeHandleLoopClick(e.touches[0].clientX);
-                            return;
-                        }
                         e.preventDefault();
                         window._scrubbing = true;
                         _scrubLastSeek = 0;
                         if (e.touches[0]) scrubClientX(e.touches[0].clientX);
                     }, { passive: false });
                     timeline.addEventListener('touchmove', function(e) {
-                        if (window._isLoopSetMode && window._isLoopSetMode()) return;
                         e.preventDefault();
                         if (e.touches[0]) scrubClientX(e.touches[0].clientX);
                     }, { passive: false });
                     timeline.addEventListener('touchend', function(e) {
-                        if (window._isLoopSetMode && window._isLoopSetMode()) return;
                         e.preventDefault();
                         scrubEnd();
                     }, { passive: false });
@@ -4347,7 +3988,7 @@
                 console.error('Keyboard shortcuts setup failed:', e);
             }
 
-            // A-B Loop button controls (legacy hidden buttons + keyboard shortcuts)
+            // A-B Loop button controls
             try {
                 safeClick('setLoopA', () => setLoopPoint('start'));
                 safeClick('setLoopB', () => setLoopPoint('end'));
@@ -4356,19 +3997,6 @@
             } catch (e) {
                 console.error('Loop controls setup failed:', e);
             }
-
-            // 2026-05-30: single-button loop-set mode (click timeline to set A then B,
-            // drag handles on the bracket to adjust, persists per-job).
-            try {
-                safeClick('loopModeBtn', toggleLoopMode);
-                _updateLoopModeUI();
-            } catch (e) { console.error('Loop mode btn setup failed:', e); }
-
-            // 2026-05-31: Share-with-student. Tap → mint a share token + build
-            // a URL that encodes current practice config (tempo, mute, loop) → copy/share.
-            try {
-                safeClick('shareBtn', shareCurrentPracticeSetup);
-            } catch (e) { console.error('Share btn setup failed:', e); }
 
             // ALWAYS start the timeline update loop — uses rAF for smooth updates
             (function timelineLoop() {
@@ -4437,8 +4065,6 @@
                 if (songTitleEl) songTitleEl.textContent = cleanTitle(job.metadata?.title || 'Unknown Track');
                 var songArtistEl = document.getElementById('songArtist');
                 if (songArtistEl) songArtistEl.textContent = job.metadata?.artist || '';
-                window.SS_currentSong = window.SS_currentSong || {};
-                window.SS_currentSong.thumbnail = job.metadata?.thumbnail || '';
 
                 loadStemAudio(job);
                 buildStemTabs(job, requestedStem);
@@ -4577,19 +4203,10 @@
             // creates the context for decoding, and init() is called in togglePlayback().
 
             const stemOrder = ['vocals', 'vocals_lead', 'vocals_backing', 'guitar', 'guitar_lead', 'guitar_rhythm', 'bass', 'drums', 'piano', 'other'];
-            // Drop the redundant combined stem when its splits exist — otherwise
-            // playing all 8 tracks plays the same vocal (or guitar) THREE times
-            // (combined + lead + backing), which sums to ~2× the energy and
-            // phases from slight time/spectral differences between the splits.
-            const _allNames = Object.keys(job.stems);
-            const _hideVocals = _allNames.includes('vocals_lead') && _allNames.includes('vocals_backing');
-            const _hideGuitar = _allNames.includes('guitar_lead') && _allNames.includes('guitar_rhythm');
-            const sorted = Object.entries(job.stems)
-                .filter(([name]) => !((_hideVocals && name === 'vocals') || (_hideGuitar && name === 'guitar')))
-                .sort((a, b) =>
-                    (stemOrder.indexOf(a[0]) === -1 ? 99 : stemOrder.indexOf(a[0])) -
-                    (stemOrder.indexOf(b[0]) === -1 ? 99 : stemOrder.indexOf(b[0]))
-                );
+            const sorted = Object.entries(job.stems).sort((a, b) =>
+                (stemOrder.indexOf(a[0]) === -1 ? 99 : stemOrder.indexOf(a[0])) -
+                (stemOrder.indexOf(b[0]) === -1 ? 99 : stemOrder.indexOf(b[0]))
+            );
 
             stemsTotal = sorted.length;
 
@@ -4600,19 +4217,11 @@
             progressDiv.textContent = 'Loading stems... 0/' + stemsTotal;
             container.appendChild(progressDiv);
 
-            // Short single-word labels for the split stems so they don't wrap
-            // to two lines in the narrow mixer column (which squeezes the
-            // slider + clips the M/S buttons).
-            const stemLabels = { 'vocals_lead': 'Lead', 'vocals_backing': 'Backing', 'guitar_lead': 'Lead Gtr', 'guitar_rhythm': 'Rhy Gtr' };
             sorted.forEach(([name, path]) => {
                 const clean = name.replace(/^Other_/i, '').toLowerCase();
-                const display = stemLabels[clean] || clean.replace(/_/g, ' ');
+                const display = clean.replace(/_/g, ' ');
                 const cfg = stemConfig[clean] || { icon: '♫', color: '#888' };
-                // On mobile, request the downsampled (22kHz mono) stem variant so
-                // all 8 fit in iOS Web Audio memory without crashing. Desktop gets
-                // full-quality. Server generates the mobile variant on first request.
-                const stemUrl = API_BASE + '/download/' + job.job_id + '/stem/' + name
-                    + (IS_MOBILE ? '?q=mobile' : '');
+                const stemUrl = API_BASE + '/download/' + job.job_id + '/stem/' + name;
 
                 const ch = document.createElement('div');
                 ch.className = 'stem-ch';
@@ -4640,10 +4249,6 @@
                         duration = audioEngine.getDuration();
                         var ttEl = document.getElementById('totalTime');
                         if (ttEl) ttEl.textContent = formatTime(duration);
-                        // Now that we know the song length, restore any saved loop region for this job.
-                        try { if (typeof _restoreLoopIfAny === 'function') _restoreLoopIfAny(); } catch (e) {}
-                        // Apply shared-link practice params if this page was opened via a share URL.
-                        try { if (typeof _applySharedPracticeParams === 'function') _applySharedPracticeParams(); } catch (e) {}
                     }
                     updateStemLoadProgress();
                 }, function(err) {
@@ -4661,20 +4266,6 @@
 
         function updateStemLoadProgress() {
             var el = document.getElementById('stemLoadProgress');
-            // Update play button visual state — dim until all stems are buffered
-            var playBtn = document.getElementById('playBtn');
-            if (playBtn) {
-                var allLoaded = stemsTotal > 0 && (stemsReady + stemsFailed) >= stemsTotal && stemsFailed === 0;
-                if (allLoaded) {
-                    playBtn.style.opacity = '';
-                    playBtn.style.cursor = '';
-                    playBtn.title = 'Play / Pause';
-                } else if (stemsTotal > 0) {
-                    playBtn.style.opacity = '0.55';
-                    playBtn.style.cursor = 'progress';
-                    playBtn.title = 'Buffering ' + stemsReady + '/' + stemsTotal + ' stems — please wait';
-                }
-            }
             if (!el) return;
             if (stemsReady + stemsFailed >= stemsTotal) {
                 if (stemsFailed > 0) {
@@ -4733,17 +4324,6 @@
             audioEngine.setPlaybackRate(playbackRate);
         }
 
-        // Returns {ready, total, allLoaded} for the current stems.
-        function _stemReadinessSnapshot() {
-            var keys = Object.keys(stemAudios);
-            var ready = 0;
-            for (var i = 0; i < keys.length; i++) {
-                if (stemAudios[keys[i]] && stemAudios[keys[i]].ready) ready++;
-            }
-            return { ready: ready, total: keys.length, allLoaded: keys.length > 0 && ready === keys.length };
-        }
-        window._stemReadinessSnapshot = _stemReadinessSnapshot;
-
         function togglePlayback() {
             var btn = document.getElementById('playBtn');
             if (isPlaying) {
@@ -4754,17 +4334,6 @@
                 // Check if stems exist at all
                 if (Object.keys(stemAudios).length === 0) {
                     showToast('No stems loaded');
-                    return;
-                }
-
-                // Block playback until ALL stems are buffered. Without this, iOS
-                // Safari starts the AudioContext while some stems still have
-                // partial buffers, which causes audible scratchiness and tempo
-                // drift between stems (the synchronized mixer falls out of phase
-                // when one source is still loading from network).
-                var snap = _stemReadinessSnapshot();
-                if (!snap.allLoaded) {
-                    showToast('Buffering — ' + snap.ready + ' of ' + snap.total + ' stems ready. Please wait a moment.');
                     return;
                 }
 
@@ -4882,384 +4451,6 @@
             showToast('Loop cleared');
             updateLoopRegion();
             updateLoopUI();
-            _persistLoop();
-        }
-
-        // ===== Click-to-set loop region (2026-05-30) =====
-        // Single mode toggle (🔁 button) flips the timeline into loop-set mode.
-        // In that mode: tap1=A, tap2=B+activate. Out of mode: clicks seek normally.
-        // Drag handles on the bracket let you adjust after the fact.
-        // Persisted per-job to localStorage.
-        var _loopSetMode = 'idle'; // 'idle' | 'awaiting-a' | 'awaiting-b'
-
-        function _currentJobIdForLoop() {
-            try { return new URLSearchParams(window.location.search).get('job') || null; }
-            catch (e) { return null; }
-        }
-        function _loopStorageKey() {
-            var j = _currentJobIdForLoop();
-            return j ? ('ss_loop_' + j) : null;
-        }
-        function _persistLoop() {
-            try {
-                var k = _loopStorageKey();
-                if (!k) return;
-                if (loopEnabled && loopStart < loopEnd) {
-                    localStorage.setItem(k, JSON.stringify({ s: loopStart, e: loopEnd }));
-                } else {
-                    localStorage.removeItem(k);
-                }
-            } catch (e) {}
-        }
-        function _restoreLoopIfAny() {
-            try {
-                var k = _loopStorageKey();
-                if (!k || !duration) return;
-                var raw = localStorage.getItem(k);
-                if (!raw) return;
-                var d = JSON.parse(raw);
-                if (typeof d.s === 'number' && typeof d.e === 'number'
-                    && d.s >= 0 && d.e > d.s && d.e <= duration + 0.5) {
-                    loopStart = d.s; loopEnd = d.e; loopEnabled = true;
-                    updateLoopRegion();
-                    updateLoopUI();
-                    _ensureLoopHandles();
-                }
-            } catch (e) {}
-        }
-        // Make restore reachable from the timeline initialization (called once duration is known).
-        window._restoreLoopIfAny = _restoreLoopIfAny;
-
-        function _timelineXToTime(clientX) {
-            var tl = document.getElementById('timeline');
-            if (!tl || !duration) return 0;
-            var r = tl.getBoundingClientRect();
-            var pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-            return pct * duration;
-        }
-
-        function _setLoopPointAt(seconds, which) {
-            if (which === 'start') {
-                loopStart = seconds;
-                showToast('Loop A: ' + formatTime(loopStart));
-            } else {
-                loopEnd = seconds;
-                if (loopEnd > loopStart) loopEnabled = true;
-                showToast('Loop B: ' + formatTime(loopEnd));
-            }
-            updateLoopRegion();
-            updateLoopUI();
-            _persistLoop();
-            _ensureLoopHandles();
-        }
-
-        function _updateLoopModeUI() {
-            var btn = document.getElementById('loopModeBtn');
-            var tl = document.getElementById('timeline');
-            var loopActive = loopEnabled && loopStart < loopEnd;
-            if (btn) {
-                btn.classList.toggle('mode-arming', _loopSetMode !== 'idle');
-                btn.classList.toggle('mode-active', loopActive && _loopSetMode === 'idle');
-            }
-            if (tl) tl.classList.toggle('loop-set-mode', _loopSetMode !== 'idle');
-        }
-
-        function toggleLoopMode() {
-            var loopActive = loopEnabled && loopStart < loopEnd;
-            if (loopActive && _loopSetMode === 'idle') {
-                // Active loop → tap clears it.
-                clearLoop();
-                _updateLoopModeUI();
-                return;
-            }
-            if (_loopSetMode !== 'idle') {
-                // Already arming → cancel.
-                _loopSetMode = 'idle';
-                showToast('Loop set cancelled');
-                _updateLoopModeUI();
-                return;
-            }
-            // No active loop, idle → arm to set A.
-            loopStart = 0; loopEnd = 0; loopEnabled = false;
-            updateLoopRegion();
-            updateLoopUI();
-            _loopSetMode = 'awaiting-a';
-            showToast('Tap timeline to set loop start');
-            _updateLoopModeUI();
-        }
-
-        // Called from timeline click/touch handlers when in loop-set mode.
-        // Returns true if it consumed the event (caller should not seek).
-        function _maybeHandleLoopClick(clientX) {
-            if (_loopSetMode === 'idle') return false;
-            var t = _timelineXToTime(clientX);
-            if (_loopSetMode === 'awaiting-a') {
-                _setLoopPointAt(t, 'start');
-                _loopSetMode = 'awaiting-b';
-                showToast('Tap timeline to set loop end');
-                _updateLoopModeUI();
-                return true;
-            }
-            if (_loopSetMode === 'awaiting-b') {
-                _setLoopPointAt(t, 'end');
-                _loopSetMode = 'idle';
-                _updateLoopModeUI();
-                return true;
-            }
-            return false;
-        }
-        window._maybeHandleLoopClick = _maybeHandleLoopClick;
-        window._isLoopSetMode = function() { return _loopSetMode !== 'idle'; };
-
-        // ===== Share-with-student (2026-05-31) =====
-        // Capture the teacher's current practice setup (tempo / muted stems /
-        // loop region) → mint a share token → build a URL the student can
-        // open to land in the exact same configuration. The signed URL grants
-        // a small number of anonymous viewers (default 3, set server-side);
-        // beyond that, viewers see a sign-up wall.
-
-        function _currentTempoPct() {
-            try {
-                var v = parseFloat(document.getElementById('tempoValue').textContent);
-                if (!isNaN(v)) return Math.round(v);
-            } catch (e) {}
-            try {
-                var rate = audioEngine && audioEngine.getPlaybackRate ? audioEngine.getPlaybackRate() : 1;
-                return Math.round(rate * 100);
-            } catch (e) {}
-            return 100;
-        }
-
-        function _currentMutedStems() {
-            var out = [];
-            try {
-                if (audioEngine && audioEngine.stems) {
-                    Object.keys(audioEngine.stems).forEach(function(name) {
-                        if (audioEngine.stems[name] && audioEngine.stems[name].muted) out.push(name);
-                    });
-                }
-            } catch (e) {}
-            return out;
-        }
-
-        async function shareCurrentPracticeSetup() {
-            var jid = null;
-            try { jid = new URLSearchParams(window.location.search).get('job'); } catch (e) {}
-            if (!jid) { showToast('Open a song first'); return; }
-
-            var ah = (window.StemScriber && window.StemScriber.authHeaders) ? window.StemScriber.authHeaders() : {};
-            if (!ah.Authorization) {
-                showToast('Sign in to share this song');
-                if (window.StemScriber && window.StemScriber.triggerGoogleSignIn) window.StemScriber.triggerGoogleSignIn();
-                return;
-            }
-
-            var btn = document.getElementById('shareBtn');
-            if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
-            try {
-                var res = await fetch('/api/jobs/' + encodeURIComponent(jid) + '/share', {
-                    method: 'POST',
-                    headers: Object.assign({ 'Content-Type': 'application/json' }, ah),
-                    body: JSON.stringify({})
-                });
-                if (!res.ok) {
-                    var msg = 'Could not create share link';
-                    try { var b = await res.json(); if (b.error) msg = b.error; } catch (e) {}
-                    showToast(msg);
-                    return;
-                }
-                var data = await res.json();
-                var token = data.token;
-                var params = new URLSearchParams();
-                params.set('job', jid);
-                params.set('share', token);
-                params.set('t', String(_currentTempoPct()));
-                var muted = _currentMutedStems();
-                if (muted.length) params.set('mute', muted.join(','));
-                if (loopEnabled && loopStart < loopEnd) {
-                    params.set('loopA', loopStart.toFixed(2));
-                    params.set('loopB', loopEnd.toFixed(2));
-                }
-                var url = window.location.origin + '/practice.html?' + params.toString();
-
-                // Open a visible share dialog with the URL + Copy button + (where available)
-                // a Native Share button. Was silent clipboard before — Jeff (correctly)
-                // pointed out users couldn't tell anything had happened, and there was
-                // no fallback "I just want to paste it manually."
-                _openShareDialog(url);
-            } catch (err) {
-                console.error('Share failed:', err);
-                showToast('Share failed — try again');
-            } finally {
-                if (btn) { btn.disabled = false; btn.textContent = '📤'; }
-            }
-        }
-
-        // Visible share dialog — shows the URL in a text field so the teacher
-        // can review/copy it, with a big Copy button (and Native Share on mobile).
-        function _openShareDialog(url) {
-            var existing = document.getElementById('shareDialogOverlay');
-            if (existing) existing.remove();
-            var ov = document.createElement('div');
-            ov.id = 'shareDialogOverlay';
-            ov.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:10001; padding:1rem;';
-            ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
-            var card = document.createElement('div');
-            card.style.cssText = 'background:#1a1a22; color:#fff; border:1px solid #333; border-radius:14px; padding:1.5rem 1.5rem 1.25rem; max-width:520px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.5);';
-            var hasNativeShare = !!(navigator.share);
-            card.innerHTML =
-                '<div style="font-family:Outfit,sans-serif; font-size:1.15rem; margin-bottom:0.35rem;">Share this practice setup</div>' +
-                '<div style="color:#999; font-size:0.85rem; margin-bottom:1rem; line-height:1.45;">' +
-                  'Send this link to a student. They\'ll land on the song with your tempo, muted stems, and loop already applied. ' +
-                  'Up to 3 anonymous viewers; beyond that, students sign up free.' +
-                '</div>' +
-                '<input id="shareDialogUrl" type="text" readonly value="' + url.replace(/"/g, '&quot;') + '" ' +
-                  'style="width:100%; padding:0.6rem 0.7rem; background:#0d0d12; border:1px solid #333; border-radius:8px; color:#ddd; font-family:monospace; font-size:0.82rem; box-sizing:border-box; outline:none;" />' +
-                '<div style="display:flex; gap:0.5rem; margin-top:0.9rem; flex-wrap:wrap;">' +
-                  '<button id="shareDialogCopy" style="flex:1; min-width:140px; padding:0.7rem; background:#ff7b54; color:#fff; border:0; border-radius:8px; font-weight:600; font-size:0.95rem; cursor:pointer;">📋 Copy link</button>' +
-                  (hasNativeShare
-                    ? '<button id="shareDialogNative" style="flex:1; min-width:120px; padding:0.7rem; background:#2a2a35; color:#fff; border:1px solid #444; border-radius:8px; font-size:0.95rem; cursor:pointer;">Share via…</button>'
-                    : '') +
-                '</div>' +
-                '<div style="text-align:center; margin-top:0.85rem;">' +
-                  '<span id="shareDialogClose" style="color:#888; font-size:0.85rem; cursor:pointer;">Close</span>' +
-                '</div>';
-            ov.appendChild(card);
-            document.body.appendChild(ov);
-
-            var input = card.querySelector('#shareDialogUrl');
-            // Pre-select so user can just hit Cmd-C if they prefer
-            try { input.focus(); input.select(); } catch (e) {}
-
-            card.querySelector('#shareDialogCopy').addEventListener('click', async function() {
-                var btn = this;
-                try {
-                    await navigator.clipboard.writeText(url);
-                    btn.textContent = '✓ Copied!';
-                    btn.style.background = '#3fbf6b';
-                    setTimeout(function() { btn.textContent = '📋 Copy link'; btn.style.background = '#ff7b54'; }, 1800);
-                } catch (e) {
-                    // Fallback for older browsers / non-secure contexts
-                    try {
-                        input.select();
-                        document.execCommand('copy');
-                        btn.textContent = '✓ Copied!';
-                        btn.style.background = '#3fbf6b';
-                        setTimeout(function() { btn.textContent = '📋 Copy link'; btn.style.background = '#ff7b54'; }, 1800);
-                    } catch (e2) {
-                        btn.textContent = 'Select the link above + ⌘C';
-                        btn.style.background = '#666';
-                    }
-                }
-            });
-
-            if (hasNativeShare) {
-                card.querySelector('#shareDialogNative').addEventListener('click', async function() {
-                    try {
-                        await navigator.share({
-                            title: 'StemScriber practice setup',
-                            text: 'Open this to practice with the same setup:',
-                            url: url
-                        });
-                    } catch (e) { /* user cancelled or share failed — no-op */ }
-                });
-            }
-
-            card.querySelector('#shareDialogClose').addEventListener('click', function() { ov.remove(); });
-        }
-
-        // Apply tempo / mute / loop from URL params (used when opening a shared link).
-        // Called from loadStemAudio once the audio engine is ready + duration is known.
-        function _applySharedPracticeParams() {
-            try {
-                var params = new URLSearchParams(window.location.search);
-                // Tempo
-                var t = parseInt(params.get('t') || '', 10);
-                if (!isNaN(t) && t >= 25 && t <= 200) {
-                    try {
-                        var slider = document.getElementById('tempoSlider');
-                        if (slider) {
-                            slider.value = String(t);
-                            slider.dispatchEvent(new Event('input', { bubbles: true }));
-                            slider.dispatchEvent(new Event('change', { bubbles: true }));
-                        } else if (audioEngine && audioEngine.setPlaybackRate) {
-                            audioEngine.setPlaybackRate(t / 100);
-                            var lbl = document.getElementById('tempoValue');
-                            if (lbl) lbl.textContent = t + '%';
-                        }
-                    } catch (e) {}
-                }
-                // Mute
-                var muteList = (params.get('mute') || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-                if (muteList.length && audioEngine && audioEngine.setMuted) {
-                    muteList.forEach(function(name) {
-                        try { audioEngine.setMuted(name, true); } catch (e) {}
-                        // Reflect in UI mute button if present
-                        try {
-                            var btn = document.querySelector('[data-stem-mute="' + name + '"]');
-                            if (btn) btn.classList.add('active');
-                        } catch (e) {}
-                    });
-                }
-                // Loop
-                var la = parseFloat(params.get('loopA') || '');
-                var lb = parseFloat(params.get('loopB') || '');
-                if (!isNaN(la) && !isNaN(lb) && lb > la) {
-                    loopStart = la;
-                    loopEnd = lb;
-                    loopEnabled = true;
-                    updateLoopRegion();
-                    updateLoopUI();
-                    _ensureLoopHandles();
-                }
-            } catch (e) { console.warn('Apply shared params failed:', e); }
-        }
-        window._applySharedPracticeParams = _applySharedPracticeParams;
-
-        function _ensureLoopHandles() {
-            var region = document.getElementById('loopRegion');
-            if (!region) return;
-            if (region.querySelector('.loop-handle-a')) return; // already wired
-            var hA = document.createElement('div'); hA.className = 'loop-handle loop-handle-a';
-            var hB = document.createElement('div'); hB.className = 'loop-handle loop-handle-b';
-            region.appendChild(hA);
-            region.appendChild(hB);
-            _wireLoopHandle(hA, 'start');
-            _wireLoopHandle(hB, 'end');
-        }
-        function _wireLoopHandle(el, which) {
-            var dragging = false;
-            function move(x) {
-                var t = _timelineXToTime(x);
-                if (which === 'start') {
-                    if (t < loopEnd - 0.05) { loopStart = Math.max(0, t); updateLoopRegion(); }
-                } else {
-                    if (t > loopStart + 0.05) { loopEnd = Math.min(duration || t, t); updateLoopRegion(); }
-                }
-            }
-            function up() {
-                if (!dragging) return;
-                dragging = false;
-                document.removeEventListener('mousemove', mm);
-                document.removeEventListener('mouseup', up);
-                document.removeEventListener('touchmove', tm);
-                document.removeEventListener('touchend', up);
-                _persistLoop();
-            }
-            function mm(e) { e.preventDefault(); move(e.clientX); }
-            function tm(e) { if (e.touches[0]) { e.preventDefault(); move(e.touches[0].clientX); } }
-            el.addEventListener('mousedown', function(e) {
-                e.stopPropagation(); e.preventDefault();
-                dragging = true;
-                document.addEventListener('mousemove', mm);
-                document.addEventListener('mouseup', up);
-            });
-            el.addEventListener('touchstart', function(e) {
-                e.stopPropagation(); e.preventDefault();
-                dragging = true;
-                document.addEventListener('touchmove', tm, { passive: false });
-                document.addEventListener('touchend', up);
-            }, { passive: false });
         }
 
         function updateLoopRegion() {
@@ -5832,11 +5023,7 @@
             var s = (stem || '').toLowerCase().split('_')[0];
             var isTab = (s === 'guitar' || s === 'bass');
             tabBtn.textContent = isTab ? 'Tab' : 'Sheet Music';
-            // Only show the "Chords" toggle when there's actually a second view to switch
-            // to (the Tab button). Tab view is cut for launch, so a lone "Chords" button
-            // just sits redundantly on top of the chord chart — hide it in that case.
-            var tabAvailable = tabBtn.style.display !== 'none';
-            chordsBtn.style.display = (!tabAvailable || s === 'drums') ? 'none' : '';
+            chordsBtn.style.display = (s === 'drums') ? 'none' : '';
         }
 
         // ── View Toggle (Tab vs Chords) ──
@@ -6103,33 +5290,13 @@
             }
             // === END NUCLEAR FIX ===
             chordChart.classList.add('visible');
-
-            // Detect whether the detector emits calibrated per-chord confidence
-            // (V1 librosa: varies 0.45-0.95) or uniform values (V3.1 ACE+Jiang:
-            // everything is 1.0, making the tier opacity rendering meaningless).
-            // When uniform, we skip per-chord fading AND change the header copy
-            // so we don't promise an "uncertain chords are faded" treatment that
-            // the user will never see. Per [[feedback_accuracy_honesty]].
-            var _firstConf = null, _hasConfVar = false;
-            if (Array.isArray(aiChords)) {
-                for (var _ci = 0; _ci < aiChords.length; _ci++) {
-                    var _ccc = aiChords[_ci];
-                    var _cf = (_ccc && typeof _ccc.confidence === 'number') ? _ccc.confidence : null;
-                    if (_cf === null) continue;
-                    if (_firstConf === null) { _firstConf = _cf; continue; }
-                    if (Math.abs(_cf - _firstConf) > 0.01) { _hasConfVar = true; break; }
-                }
-            }
-
             var html = '<div style="padding:1.5rem;">';
             html += '<div style="font-family:Righteous,cursive; font-size:1.2rem; margin-bottom:0.5rem;">' + (title || 'Detected Chords') + '</div>';
             html += '<div style="color:var(--text-dim); font-size:0.8rem; margin-bottom:1rem;">';
             if (songsterrFallback) {
                 html += 'Chords (detected) &bull; Use Tab view for full notation';
-            } else if (_hasConfVar) {
-                html += 'AI-detected chord chart &mdash; faded chords are uncertain. Trust your ear on those.';
             } else {
-                html += 'AI-detected chord chart &mdash; always trust your ear over what&rsquo;s printed.';
+                html += 'AI-Detected Chords';
             }
             if (detectedKey) html += ' &bull; Key: ' + detectedKey;
             html += '</div>';
@@ -6189,20 +5356,8 @@
                     var timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
                     html += '<div style="background:var(--bg-dark); border:1px solid var(--border); border-radius:4px; padding:0.5rem; cursor:pointer; min-height:2.5rem; display:flex; flex-direction:column; justify-content:center;" onclick="seekToTime(' + bar.start.toFixed(1) + ')" title="' + timeStr + '">';
                     bar.chords.forEach(function(c, ci) {
-                        // Three-tier confidence rendering — only when the detector emits
-                        // varied confidence values (V1 librosa). V3.1 ACE+Jiang emits
-                        // uniform 1.0 for every chord, so per-chord opacity becomes
-                        // dead code (all "high confidence"). When uniform, render every
-                        // chord identically and skip the misleading tooltip.
-                        var conf = c.confidence || 0;
-                        var opacity, fontStyle, marker, confLabel;
-                        if (!_hasConfVar) {
-                            opacity = '1'; fontStyle = 'normal'; marker = '';
-                            confLabel = '';
-                        } else if (conf >= 0.75) { opacity = '1';    fontStyle = 'normal'; marker = ''; confLabel = (conf * 100).toFixed(0) + '% confidence'; }
-                        else if (conf >= 0.5)    { opacity = '0.7';  fontStyle = 'italic'; marker = ''; confLabel = (conf * 100).toFixed(0) + '% confidence'; }
-                        else                     { opacity = '0.45'; fontStyle = 'italic'; marker = '?'; confLabel = (conf * 100).toFixed(0) + '% confidence'; }
-                        html += '<span style="color:var(--yellow); font-family:Righteous,cursive; font-size:1rem; opacity:' + opacity + '; font-style:' + fontStyle + ';" title="' + confLabel + '">' + c.chord + marker + '</span>';
+                        var opacity = c.confidence > 0.7 ? '1' : '0.6';
+                        html += '<span style="color:var(--yellow); font-family:Righteous,cursive; font-size:1rem; opacity:' + opacity + ';">' + c.chord + '</span>';
                         if (ci < bar.chords.length - 1) html += ' ';
                     });
                     html += '<span style="color:var(--text-dim); font-size:0.6rem; display:block; margin-top:2px;">' + timeStr + '</span>';
@@ -7653,46 +6808,6 @@
                 { shape: 'E', pattern: [0,2,2,0,2,0],   rootSemi: 4 },
                 { shape: 'A', pattern: [-1,0,2,2,1,2],  rootSemi: 9 },
                 { shape: 'D', pattern: [-1,-1,0,2,0,1], rootSemi: 2 }
-            ],
-            // ── Jazz / advanced qualities added 2026-05-26 ──
-            // Each template is the OPEN-position fingering for its named root; the
-            // generator shifts every non-muted fret by (target_root - rootSemi) mod 12.
-            // Coverage philosophy: 3 CAGED positions (E + A + D, or E + A + C) each —
-            // enough for any root to land on a reasonable shape after shifting.
-            'mmaj7': [
-                { shape: 'E', pattern: [0,2,1,0,0,0],   rootSemi: 4 },  // Em(Maj7) — E B D# G B E
-                { shape: 'A', pattern: [-1,0,2,1,1,0],  rootSemi: 9 },  // Am(Maj7) — A E G# C E
-                { shape: 'D', pattern: [-1,-1,0,2,2,1], rootSemi: 2 }   // Dm(Maj7) — D A C# F
-            ],
-            'aug': [
-                { shape: 'E', pattern: [0,3,2,1,1,0],   rootSemi: 4 },  // E+ — E C E G# C E
-                { shape: 'A', pattern: [-1,0,3,2,2,1],  rootSemi: 9 },  // A+ — A F A C# F
-                { shape: 'D', pattern: [-1,-1,0,3,3,2], rootSemi: 2 }   // D+ — D Bb D F#
-            ],
-            '9': [
-                { shape: 'E', pattern: [0,2,0,1,0,2],   rootSemi: 4 },  // E9 — E B D G# B F#
-                { shape: 'A', pattern: [-1,0,2,4,2,3],  rootSemi: 9 },  // A9 — A E B C# G
-                { shape: 'C', pattern: [-1,3,2,3,3,0],  rootSemi: 0 }   // C9 — C E Bb D E
-            ],
-            'maj9': [
-                { shape: 'E', pattern: [0,2,1,1,0,2],   rootSemi: 4 },  // Emaj9 — E B D# G# B F#
-                { shape: 'A', pattern: [-1,0,2,1,2,0],  rootSemi: 9 },  // Amaj9 — A E G# B E
-                { shape: 'C', pattern: [-1,3,2,4,3,0],  rootSemi: 0 }   // Cmaj9 — C E B D E
-            ],
-            'm9': [
-                { shape: 'E', pattern: [0,2,0,0,0,2],   rootSemi: 4 },  // Em9 — E B D G B F#
-                { shape: 'A', pattern: [-1,0,2,0,1,2],  rootSemi: 9 },  // Am9 — A E G C B
-                { shape: 'D', pattern: [-1,-1,0,2,1,0], rootSemi: 2 }   // Dm9 — D A C E
-            ],
-            'add9': [
-                { shape: 'C', pattern: [-1,3,2,0,3,0],  rootSemi: 0 },  // Cadd9 — C E G D E
-                { shape: 'G', pattern: [3,2,0,2,3,3],   rootSemi: 7 },  // Gadd9 — G B D A D G
-                { shape: 'D', pattern: [-1,-1,0,2,3,0], rootSemi: 2 }   // Dadd9 — D A D E
-            ],
-            '7sus4': [
-                { shape: 'E', pattern: [0,2,0,2,0,0],   rootSemi: 4 },  // E7sus4 — E B D A B E
-                { shape: 'A', pattern: [-1,0,2,0,3,0],  rootSemi: 9 },  // A7sus4 — A E G D E
-                { shape: 'D', pattern: [-1,-1,0,2,1,3], rootSemi: 2 }   // D7sus4 — D A C G
             ]
         };
 
@@ -7719,37 +6834,30 @@
             'hdim7':'m7b5',
             '6':    '6',
             'm6':   'm6',
-            // Jazz/advanced qualities — direct templates added 2026-05-26
-            'mmaj7':   'mmaj7',
-            'mMaj7':   'mmaj7',
-            'minmaj7': 'mmaj7',
-            'mM7':     'mmaj7',
-            '9':       '9',
-            'maj9':    'maj9',
-            'M9':      'maj9',
-            'm9':      'm9',
-            'min9':    'm9',
-            'add9':    'add9',
-            'add2':    'add9',     // add2 = add9 same chord (one octave)
-            '7sus4':   '7sus4',
-            'sus7':    '7sus4',
-            'aug':     'aug',
-            '+':       'aug',
-            // Still-approximated extensions (no dedicated templates yet)
-            '11':      '9',
-            'm11':     'm9',
-            '13':      '9',
-            'm13':     'm9',
-            'maj13':   'maj9',
-            'madd9':   'm9',       // close enough
+            // Extended chords fall back to their 7th-family voicings
+            '9':       '7',
+            'maj9':    'maj7',
+            'M9':      'maj7',
+            'm9':      'm7',
+            'min9':    'm7',
+            '11':      '7',
+            'm11':     'm7',
+            '13':      '7',
+            'm13':     'm7',
+            'maj13':   'maj7',
+            'add9':    'maj',
+            'madd9':   'min',
+            '7sus4':   'sus4',
             '7sus2':   'sus2',
-            '9sus4':   '7sus4',
+            '9sus4':   'sus4',
             '7b9':     '7',
             '7#9':     '7',
             '7+9':     '7',
             '7b5':     '7',
-            '7#5':     'aug',      // 7#5 is closer to aug than to plain 7
-            'aug7':    'aug',
+            '7#5':     '7',
+            'aug7':    '7',
+            'aug':     'maj',
+            '+':       'maj',
             '6/9':     '6',
             'm6/9':    'm6',
             '5':       'maj'
@@ -7819,19 +6927,11 @@
             var seen = {};
             function add(v) {
                 if (!v || !v.frets) return;
-                var played = v.frets.filter(function(f) { return f > 0; });
-                // Skip "empty" voicings (no fretted notes — just open strings
-                // and/or muted strings). They are musically valid for chords
-                // like Em7 ([0,-1,0,0,0,-1]) but visually they render as a
-                // blank fretboard with no orange dots, which confuses learners.
-                // Em7 still has the proper [0,2,0,0,0,0] shape available; this
-                // just stops the bogus all-open voicing from winning the
-                // lowest-minFret sort and becoming the default-shown diagram.
-                if (played.length === 0) return;
                 var key = v.frets.join(',');
                 if (seen[key]) return;
                 seen[key] = true;
-                v.minFret = Math.min.apply(null, played);
+                var played = v.frets.filter(function(f) { return f > 0; });
+                v.minFret = played.length ? Math.min.apply(null, played) : 0;
                 v.barres = v.barres || _detectBarres(v.frets);
                 out.push(v);
             }
@@ -7986,8 +7086,7 @@
             var jsName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
             var counter = multi ? ' <span style="color:#888; font-size:0.6rem; font-weight:400;">' + (idx + 1) + '/' + voicings.length + '</span>' : '';
-            var displayName = (typeof formatChordForDisplay === 'function') ? formatChordForDisplay(name) : name;
-            var html = '<div style="font-family:\'Fira Code\',monospace; font-size:0.8rem; font-weight:600; color:var(--yellow); margin-bottom:2px;">' + displayName + counter + '</div>';
+            var html = '<div style="font-family:\'Fira Code\',monospace; font-size:0.8rem; font-weight:600; color:var(--yellow); margin-bottom:2px;">' + name + counter + '</div>';
             html += _renderChordDiagramSvg(cur.frets, cur.barres);
             if (multi) {
                 html += '<div class="cv-controls no-print" style="display:flex; gap:6px; margin-top:3px; line-height:1;">'
@@ -8330,29 +7429,8 @@
             chordChart.innerHTML = html;
         }
 
-        // Track the view the user was in BEFORE entering edit mode, so we can
-        // restore it on Done. Lead-sheet (classical) view has no inline edit
-        // affordances — its renderer ignores manualChordEditMode entirely. Edit
-        // mode must run in the gig-chart view where chord/lyric rows are
-        // click-to-edit. (Bug 2026-05-26: imported PDFs landed in lead-sheet
-        // view, so the Edit button visibly did nothing.)
-        var _editPreviousViewMode = null;
         function toggleManualChordEdit() {
             manualChordEditMode = !manualChordEditMode;
-            if (manualChordEditMode) {
-                // Entering edit — switch to gig-chart if needed, remember to restore
-                if (chartViewMode === 'leadsheet') {
-                    _editPreviousViewMode = chartViewMode;
-                    chartViewMode = 'gigchart';
-                }
-            } else {
-                // Exiting edit — restore previous view (or leave as gigchart if user
-                // changed it themselves in between)
-                if (_editPreviousViewMode && chartViewMode === 'gigchart') {
-                    chartViewMode = _editPreviousViewMode;
-                }
-                _editPreviousViewMode = null;
-            }
             if (currentManualChart) renderManualChordChart(currentManualChart);
         }
         // Expose on window for inline onclick handlers — without this, mobile browsers
@@ -8401,7 +7479,7 @@
         // ===========================================================
 
         // Chord token regex: A-G with optional b/#, optional quality, optional digits, optional /bass
-        var _CHORD_RE = /^[A-G][b#]?(mMaj|mmaj|maj|min|m(?!aj)|sus|aug|dim|add)?\d{0,2}(\/[A-G][b#]?)?$/i;
+        var _CHORD_RE = /^[A-G][b#]?(maj|min|m(?!aj)|sus|aug|dim|add)?\d{0,2}(\/[A-G][b#]?)?$/i;
         var _SECTION_HINTS = /^\s*(\[[^\]]+\]|(intro|verse|chorus|bridge|outro|solo|pre[- ]?chorus|hook|interlude|coda|tag|refrain|breakdown|instrumental)(\s*\d+)?\s*:?\s*)\s*$/i;
 
         function _looksLikeChordLine(line) {
@@ -8523,30 +7601,24 @@
             overlay.className = 'chord-modal-overlay';
             overlay.innerHTML =
                 '<div class="chord-modal" style="max-width:640px; width:90vw;">' +
-                '<label style="font-weight:600; font-size:1.1rem; margin-bottom:0.25rem;">Import charts &amp; lyrics</label>' +
-                '<div style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1rem; line-height:1.4;">' +
-                '  Upload or paste a chord chart, lyrics-only sheet, or both. Sections (Verse / Chorus) auto-detect.' +
+                '<label style="font-weight:600; font-size:1rem; margin-bottom:0.25rem;">Import a chord chart</label>' +
+                '<div style="font-size:0.8rem; color:var(--text-dim); margin-bottom:0.8rem; line-height:1.4;">' +
+                '  Upload a chart file or paste text from Ultimate Guitar, Songsterr, etc. ' +
+                '  Section headers (Verse, Chorus) auto-detect. Chord lines go above their lyric lines.' +
                 '</div>' +
-                // Primary: file picker as a big drop-zone style button
-                '<button class="chord-pick-file" type="button" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; width:100%; padding:1.5rem 1rem; background:rgba(255,123,84,0.08); color:var(--text); border:2px dashed rgba(255,123,84,0.5); border-radius:10px; cursor:pointer; font-size:0.95rem; font-weight:600; transition:background 0.15s;" onmouseover="this.style.background=\'rgba(255,123,84,0.14)\'" onmouseout="this.style.background=\'rgba(255,123,84,0.08)\'">' +
-                '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff7b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
-                '<span>Choose a chart file…</span>' +
-                '<span style="font-size:0.75rem; color:var(--text-dim); font-weight:400;">PDF, TXT, ChordPro, or Guitar Pro — max 5 MB</span>' +
-                '</button>' +
-                '<input type="file" class="chord-file-input" accept=".pdf,.txt,.text,.chordpro,.pro,.crd,application/pdf,text/plain" style="display:none;">' +
-                // Divider
-                '<div style="display:flex; align-items:center; gap:0.8rem; margin:1.2rem 0 0.6rem;">' +
-                '<div style="flex:1; height:1px; background:var(--border);"></div>' +
-                '<span style="font-size:0.7rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em;">or paste text</span>' +
-                '<div style="flex:1; height:1px; background:var(--border);"></div>' +
+                '<div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.8rem;">' +
+                '<button class="chord-pick-file" type="button" style="padding:0.5rem 0.9rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:0.85rem;">📁 Choose a file…</button>' +
+                '<span style="font-size:0.75rem; color:var(--text-dim);">.txt, .chordpro, .pro, .crd</span>' +
+                '<input type="file" class="chord-file-input" accept=".txt,.text,.chordpro,.pro,.crd,text/plain" style="display:none;">' +
                 '</div>' +
-                '<textarea id="importChartText" rows="8" style="width:100%; font-family:Fira Code,monospace; font-size:0.85rem; line-height:1.5; padding:0.6rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px; resize:vertical;" placeholder="[Verse]&#10;C       G       Am      F&#10;Lyric line one goes here&#10;&#10;[Chorus]&#10;C       G       F&#10;Lyric line two goes here"></textarea>' +
-                '<div style="font-size:0.72rem; color:var(--text-dim); margin-top:0.5rem; line-height:1.4;">' +
-                '  By using this you confirm you have the right to use this chart.' +
+                '<div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.06em;">…or paste below</div>' +
+                '<textarea id="importChartText" rows="14" style="width:100%; font-family:Fira Code,monospace; font-size:0.85rem; line-height:1.5; padding:0.6rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px; resize:vertical;" placeholder="Example format:&#10;&#10;[Verse]&#10;C       G       Am      F&#10;Lyric line one goes here&#10;C       G       F&#10;Lyric line two goes here"></textarea>' +
+                '<div style="font-size:0.72rem; color:var(--text-dim); margin-top:0.4rem; line-height:1.4;">' +
+                '  Saved to your device only. By using this you confirm you have the right to use this chart.' +
                 '</div>' +
-                '<div class="chord-modal-btns" style="margin-top:0.9rem;">' +
+                '<div class="chord-modal-btns" style="margin-top:0.8rem;">' +
                 '<button class="chord-cancel">Cancel</button>' +
-                '<button class="chord-ok">Use Pasted Text</button>' +
+                '<button class="chord-ok">Use My Chart</button>' +
                 '</div></div>';
             document.body.appendChild(overlay);
             var ta = overlay.querySelector('textarea');
@@ -8557,58 +7629,24 @@
             overlay.querySelector('.chord-cancel').onclick = close;
             overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
 
-            // File picker → upload to backend → parsed chart saved to job
+            // File picker → read text → into textarea
             var fileInput = overlay.querySelector('.chord-file-input');
-            var pickBtn = overlay.querySelector('.chord-pick-file');
-            pickBtn.onclick = function() { fileInput.click(); };
+            overlay.querySelector('.chord-pick-file').onclick = function() { fileInput.click(); };
             fileInput.addEventListener('change', function(e) {
                 var f = e.target.files && e.target.files[0];
                 if (!f) return;
-                if (f.size > 5 * 1024 * 1024) {
-                    alert('That file is over 5 MB. Chord charts are usually under 1 MB — please pick a smaller file.');
+                if (f.size > 500 * 1024) {
+                    alert('That file is over 500KB — chord charts are usually under 50KB. If this is a PDF or image, paste the text directly for now.');
                     return;
                 }
-                var jobId = (currentJob && currentJob.job_id) ? currentJob.job_id : null;
-                if (!jobId) { alert('Open a song first.'); return; }
-                var origLabel = pickBtn.textContent;
-                pickBtn.disabled = true;
-                pickBtn.textContent = 'Reading ' + f.name + '…';
-                var fd = new FormData();
-                fd.append('file', f, f.name);
-                var ah = (window.StemScriber && window.StemScriber.authHeaders) ? window.StemScriber.authHeaders() : {};
-                fetch(API_BASE + '/import-chart/' + encodeURIComponent(jobId), {
-                    method: 'POST',
-                    body: fd,
-                    headers: ah,
-                }).then(function(resp) {
-                    return resp.json().then(function(data) { return { ok: resp.ok, status: resp.status, data: data }; });
-                }).then(function(r) {
-                    if (!r.ok) {
-                        var msg = (r.data && r.data.error) ? r.data.error : ('Upload failed (' + r.status + ')');
-                        alert(msg);
-                        pickBtn.disabled = false;
-                        pickBtn.textContent = origLabel;
-                        fileInput.value = '';
-                        return;
-                    }
-                    var chart = r.data && r.data.chart;
-                    if (!chart || !chart.sections || chart.sections.length === 0) {
-                        alert('No chord/lyric lines were found in that file.');
-                        pickBtn.disabled = false;
-                        pickBtn.textContent = origLabel;
-                        fileInput.value = '';
-                        return;
-                    }
-                    currentManualChart = chart;
-                    try { _savePersonalEdits(); } catch (_e) {}
-                    try { renderManualChordChart(chart); } catch (_e) {}
-                    close();
-                }).catch(function(err) {
-                    alert('Upload error: ' + (err && err.message ? err.message : err));
-                    pickBtn.disabled = false;
-                    pickBtn.textContent = origLabel;
-                    fileInput.value = '';
-                });
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    ta.value = (ev.target.result || '').toString();
+                };
+                reader.onerror = function() {
+                    alert('Could not read that file.');
+                };
+                reader.readAsText(f);
             });
             overlay.querySelector('.chord-ok').onclick = function() {
                 var text = ta.value.trim();
@@ -8637,64 +7675,6 @@
                 renderManualChordChart(currentManualChart);
             });
         }
-
-        // Display-format a chord name for the visible UI. Keeps the internal name
-        // as-is for lookups, but rewrites jazz-style minor-major chords from the
-        // OCR/parser form "Emmaj7"/"EmMaj7" → standard "Em(Maj7)" notation.
-        // Applied to chord-diagram labels, chord rows in lead sheet, gig-chart pills,
-        // anywhere a chord name is rendered to the page.
-        function formatChordForDisplay(name) {
-            if (!name) return name;
-            // Em(Maj7) / Em(maj9) etc — root[#b]?m + (m|M)aj + digits
-            return name.replace(/^([A-G][#b]?m)(?:m|M)aj(\d+)?(.*)$/, function(_, root, ext, rest) {
-                return root + '(Maj' + (ext || '7') + ')' + (rest || '');
-            });
-        }
-        window.formatChordForDisplay = formatChordForDisplay;
-
-        // Per-chord-token edit. Replaces just ONE chord in a line's chord string,
-        // preserving spacing/position of the others. Pass empty string to delete it.
-        function editManualChordToken(sectionIdx, lineIdx, tokenIdx, currentName) {
-            showChordInput('Edit chord — leave blank to delete', currentName, function(val) {
-                var line = currentManualChart.sections[sectionIdx].lines[lineIdx];
-                var tokens = _parseChordsFromString(line.chords || '');
-                if (tokenIdx >= tokens.length) return;
-                var t = tokens[tokenIdx];
-                var newName = (val || '').trim();
-                var orig = line.chords || '';
-                line.chords = orig.substring(0, t.charPos) + newName + orig.substring(t.charPos + t.name.length);
-                // Collapse double-spaces after deletion
-                if (!newName) line.chords = line.chords.replace(/  +/g, ' ').replace(/^\s+|\s+$/g, '');
-                // ALSO update segments + chord_beats — out-of-edit mode renders
-                // from these, so without this the edit reverts the moment you
-                // exit edit mode (Fm→F flipping back to Fm was this bug).
-                if (Array.isArray(line.segments) && tokenIdx < line.segments.length) {
-                    if (newName) line.segments[tokenIdx].chord = newName;
-                    else line.segments.splice(tokenIdx, 1);
-                }
-                if (Array.isArray(line.chord_beats) && tokenIdx < line.chord_beats.length) {
-                    if (newName) line.chord_beats[tokenIdx].name = newName;
-                    else line.chord_beats.splice(tokenIdx, 1);
-                }
-                _savePersonalEdits();
-                renderManualChordChart(currentManualChart);
-            });
-        }
-
-        // Append a new chord to the end of a line's chord string.
-        function addManualChordToken(sectionIdx, lineIdx) {
-            showChordInput('New chord (e.g. Cm7, F#, G/B)', '', function(val) {
-                var newName = (val || '').trim();
-                if (!newName) return;
-                var line = currentManualChart.sections[sectionIdx].lines[lineIdx];
-                var existing = (line.chords || '').replace(/\s+$/, '');
-                line.chords = existing ? (existing + '   ' + newName) : newName;
-                _savePersonalEdits();
-                renderManualChordChart(currentManualChart);
-            });
-        }
-        window.editManualChordToken = editManualChordToken;
-        window.addManualChordToken = addManualChordToken;
 
         function editManualLyric(sectionIdx, lineIdx, lyricText) {
             showChordInput('Edit lyrics (saved to your device only)', lyricText, function(val) {
@@ -8755,7 +7735,7 @@
             if (!chordStr) return [];
             var results = [];
             // Match chord names and record their character position
-            var re = /([A-G][#b]?(?:mMaj|mmaj|m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?)/g;
+            var re = /([A-G][#b]?(?:m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?)/g;
             var m;
             while ((m = re.exec(chordStr)) !== null) {
                 results.push({ name: m[1], charPos: m.index });
@@ -9012,86 +7992,13 @@
         }
 
         // ─── Lead Sheet renderer (classic music-publishing style) ───
-        // --- Confidence helpers for the trust layer ---
-        // V3.1 ACE detector emits unnormalized chroma-match scores on chord_progression
-        // (range observed 0.93–1.57 on the demo, NOT 0–1), so we derive a 0–1 confidence
-        // from the top-k candidate margin: (top - second) / top. A wide gap means the
-        // detector was decisive; a tiny gap (~1–5%) means it almost picked the runner-up.
-        // chord_chart.json segments don't carry per-segment confidence, so we time-join
-        // each segment to its overlapping chord_progression events.
-        function _eventConfidence(c) {
-            if (c && c.candidates && c.candidates.length >= 2) {
-                var top = c.candidates[0].score || 0;
-                var second = c.candidates[1].score || 0;
-                if (top <= 0) return 0;
-                var margin = (top - second) / top;
-                // V3.1 observed margins on real audio: 0–20%. Map 0% → 0, 10% → 1.0.
-                return Math.max(0, Math.min(1, margin / 0.10));
-            }
-            if (c && typeof c.confidence === 'number') {
-                // Legacy V1 path: confidence already in 0–1.
-                return Math.max(0, Math.min(1, c.confidence));
-            }
-            return null;
-        }
-        function _segmentConfidence(seg) {
-            var job = (typeof currentJob !== 'undefined' && currentJob) ? currentJob : (window.currentJob || null);
-            if (!job || !job.chord_progression || !job.chord_progression.length) return null;
-            var t0 = (typeof seg.start === 'number') ? seg.start
-                   : (typeof seg.time === 'number') ? seg.time : null;
-            if (t0 === null) return null;
-            var t1 = (typeof seg.end === 'number') ? seg.end
-                   : t0 + (seg.duration || 0);
-            if (t1 <= t0) t1 = t0 + 0.1;
-            var totalDur = 0, weighted = 0;
-            var prog = job.chord_progression;
-            for (var i = 0; i < prog.length; i++) {
-                var conf = _eventConfidence(prog[i]);
-                if (conf === null) continue;
-                var et = prog[i].time || 0;
-                var ee = et + (prog[i].duration || 0);
-                var ov = Math.min(t1, ee) - Math.max(t0, et);
-                if (ov > 0) {
-                    weighted += conf * ov;
-                    totalDur += ov;
-                }
-            }
-            if (totalDur > 0) return weighted / totalDur;
-            // Fallback: nearest event by time
-            var bestI = -1, bestDt = Infinity;
-            for (var j = 0; j < prog.length; j++) {
-                var dt = Math.abs((prog[j].time || 0) - t0);
-                if (dt < bestDt) { bestDt = dt; bestI = j; }
-            }
-            if (bestI >= 0) return _eventConfidence(prog[bestI]);
-            return null;
-        }
-        function _confTier(c) {
-            if (c === null || c === undefined) return null;
-            if (c >= 0.50) return 'confident';   // ~5%+ margin top-vs-2nd
-            if (c >= 0.20) return 'medium';      // ~2–5% margin
-            return 'uncertain';                  // <2% margin
-        }
-        function _confLabel(c) {
-            if (c === null || c === undefined) return '';
-            return (c * 100).toFixed(0) + '% confidence';
-        }
-
         function renderLeadSheet(rawData) {
             var data = applyCapoShapesForDisplay(rawData);
             var html = '<div class="lead-sheet">';
 
-            // Album art — snug in the top-LEFT corner of the lead sheet
-            var _job = (typeof currentJob !== 'undefined' && currentJob) ? currentJob : (window.currentJob || {});
-            var _md = _job.metadata || {};
-            var _albumThumb = _md.thumbnail || (window.SS_currentSong && window.SS_currentSong.thumbnail) || '/images/icon-vinyl.png';
-            // Header — 3-column layout: album art | title | metadata
+            // Header — 3-column layout like classical sheet music (credits | title | metadata)
             html += '<div class="lead-sheet-header">';
-            html += '<div class="lead-sheet-header-left">';
-            html += '<img id="song-cover" class="lead-sheet-album-art no-print" src="' + _albumThumb + '" alt="" data-job-thumb="' + (_job.job_id || _job.id || '') + '" onerror="this.onerror=null;this.src=\'/images/icon-vinyl.png\';">';
-            var _albumName = _md.album || '';
-            if (_albumName) html += '<div class="lead-sheet-album-label">' + _albumName + '</div>';
-            html += '</div>';
+            html += '<div class="lead-sheet-header-left"></div>';
             html += '<div class="lead-sheet-header-center">';
             html += '<div class="lead-sheet-title">' + (data.title || 'Untitled') + '</div>';
             html += '<div class="lead-sheet-artist">' + (data.artist || '') + '</div>';
@@ -9126,11 +8033,7 @@
                             var t0 = (typeof seg.start === 'number') ? seg.start : '';
                             var t1 = (typeof seg.end   === 'number') ? seg.end   : '';
                             html += '<span class="cs-seg" data-start="' + t0 + '" data-end="' + t1 + '">';
-                            var _segConf = _segmentConfidence(seg);
-                            var _tier = _confTier(_segConf);
-                            html += '<span class="cs-chord' + (_tier ? ' chord-' + _tier : '') + '"'
-                                  + (_tier ? ' title="' + _confLabel(_segConf) + '"' : '')
-                                  + '>' + chordName + '</span>';
+                            html += '<span class="cs-chord">' + chordName + '</span>';
                             var segWordObjs = seg.words || [];
                             if (segWordObjs.length > 0) {
                                 html += '<span class="cs-words">';
@@ -9196,11 +8099,6 @@
                 html += '</div>';
             });
 
-            // Accuracy disclaimer — applies to both lead-sheet and gig-chart views.
-            // Sets expectations so users know lyrics + chords are an aid, not authoritative.
-            html += '<div class="chart-disclaimer" style="margin-top:2rem; padding-top:1rem; border-top:1px solid #d4cfc2; font-size:0.72rem; color:#8a8578; font-style:italic; text-align:center; line-height:1.5;">';
-            html += 'Lyrics and chords are approximations — not the official release. Trust your ear if anything sounds off.';
-            html += '</div>';
             html += '</div>';
             return html;
         }
@@ -9221,7 +8119,7 @@
                 (data.sections || []).forEach(function(s) {
                     (s.lines || []).forEach(function(l) {
                         if (l.chords) {
-                            var m = l.chords.match(/[A-G][#b]?(?:mMaj|mmaj|m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?/g);
+                            var m = l.chords.match(/[A-G][#b]?(?:m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?/g);
                             if (m) m.forEach(function(c) {
                                 c = c.trim();
                                 if (c && c !== 'N.C.' && c !== 'N.C') {
@@ -9279,12 +8177,6 @@
             html += '</div>';
             html += '</div>';
 
-            // Expectation contract — shown BEFORE the chords so a wrong chord reads
-            // as "a guide being a guide," not "this app lied to me." Points the user
-            // at the Edit affordance. The #1 reputation-risk mitigation per the
-            // May-19 research (confidently-wrong + felt-lied-to = trashed app).
-            html += '<div class="no-print" style="margin:0.25rem 0 1rem; padding:0.55rem 0.8rem; background:rgba(255,123,84,0.10); border-left:3px solid var(--orange); border-radius:5px; color:var(--text-dim); font-size:0.82rem; line-height:1.45;">AI-generated guide &mdash; a fast starting point, not gospel. Trust your ear, and tap <strong>Edit Chords</strong> to fix anything that&rsquo;s off.</div>';
-
             // Sections
             data.sections.forEach(function(section, si) {
                 html += '<div class="gig-section">';
@@ -9340,30 +8232,9 @@
 
                         // Layer 1: Chord names
                         if (manualChordEditMode) {
-                            // Per-chord pills row — each chord is individually clickable to edit
-                            var _pillsHtml = '<div class="gig-chord-row" style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">';
-                            // Pair pills with line.segments by index so confidence tier matches
-                            var _segArr = (line && line.segments) ? line.segments : [];
-                            parsedChords.forEach(function(pc, ti) {
-                                var _disp = (typeof formatChordForDisplay === 'function') ? formatChordForDisplay(pc.name) : pc.name;
-                                var _conf = (_segArr[ti]) ? _segmentConfidence(_segArr[ti]) : null;
-                                var _tier = _confTier(_conf);
-                                var _tierAttr = _tier ? (' chord-pill chord-' + _tier) : ' chord-pill';
-                                var _tierTitle = _tier ? (' — ' + _confLabel(_conf)) : '';
-                                _pillsHtml += '<button type="button" class="' + _tierAttr.trim() + '" onclick="editManualChordToken(' + si + ',' + li + ',' + ti + ',' + JSON.stringify(pc.name).replace(/"/g, '&quot;') + ')" style="padding:3px 9px; background:#2a2a35; color:var(--orange); border:1px solid var(--orange); border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Click to edit this chord' + _tierTitle + '">' + _disp + '</button>';
-                            });
-                            _pillsHtml += '<button type="button" onclick="addManualChordToken(' + si + ',' + li + ')" style="padding:3px 9px; background:transparent; color:#888; border:1px dashed #666; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Add a chord to this line">+</button>';
-                            _pillsHtml += '</div>';
-                            html += _pillsHtml;
+                            html += '<div class="gig-chord-row" style="cursor:pointer; text-decoration:underline dotted #aaa;" onclick="editManualChord(' + si + ',' + li + ',' + JSON.stringify(line.chords).replace(/"/g, '&quot;') + ')" title="Click to edit chords">' + notation.chordRow + '</div>';
                         } else {
-                            // Display laid-out chord row, but rewrite chord-name TEXT for jazz notation
-                            var displayChordRow = notation.chordRow;
-                            if (typeof formatChordForDisplay === 'function') {
-                                displayChordRow = displayChordRow.replace(/([A-G][#b]?m)(?:m|M)aj(\d+)?/g, function(_, root, ext) {
-                                    return root + '(Maj' + (ext || '7') + ')';
-                                });
-                            }
-                            html += '<div class="gig-chord-row">' + displayChordRow + '</div>';
+                            html += '<div class="gig-chord-row">' + notation.chordRow + '</div>';
                         }
 
                         // Layer 2: Slash notation with bar lines
@@ -9406,10 +8277,6 @@
                 html += '</div>';
             });
 
-            // Accuracy disclaimer (gig-chart view)
-            html += '<div class="chart-disclaimer" style="margin-top:1.5rem; padding-top:0.8rem; border-top:1px solid rgba(255,255,255,0.1); font-size:0.72rem; color:rgba(255,255,255,0.5); font-style:italic; text-align:center; line-height:1.5;">';
-            html += 'Lyrics and chords are approximations &mdash; not the official release. Trust your ear if anything sounds off.';
-            html += '</div>';
             html += '</div>';
             chordChart.innerHTML = html;
 
@@ -9420,7 +8287,7 @@
             data.sections.forEach(function(s) {
                 s.lines.forEach(function(l) {
                     if (l.chords) {
-                        var matches = l.chords.match(/[A-G][#b]?(?:mMaj|mmaj|m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?/g);
+                        var matches = l.chords.match(/[A-G][#b]?(?:m(?:aj)?|maj|dim|aug|sus|add)?[0-9]*(?:[#b][0-9]+)?(?:sus[24])?(?:add[0-9]+)?(?:\/[A-G][#b]?)?/g);
                         if (matches) {
                             matches.forEach(function(c) {
                                 c = c.trim();
@@ -10473,7 +9340,7 @@
         });
 
         document.getElementById('reportIssueBtn')?.addEventListener('click', () => {
-            var jobId = (typeof (window.currentJobId || new URLSearchParams(location.search).get('job')) === 'string') ? (window.currentJobId || new URLSearchParams(location.search).get('job')) : '';
+            var jobId = (typeof window.currentJobId === 'string') ? window.currentJobId : '';
             if (!jobId) {
                 var url = window.location.href;
                 var match = url.match(/[?&]job=([^&#]+)/);
@@ -10699,13 +9566,6 @@
                 if (btn) btn.classList.add('active');
                 initPiano();
                 updatePianoFromPlayback();
-                // 2026-05-31: scroll into view — panel was buried below the
-                // chord chart, so clicking Keys appeared to do nothing.
-                try {
-                    setTimeout(function() {
-                        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 50);
-                } catch (e) { panel.scrollIntoView(); }
             } else {
                 panel.style.display = 'none';
                 if (btn) btn.classList.remove('active');
@@ -10983,96 +9843,6 @@
                 b.addEventListener('click', function() { applyRate(parseInt(b.dataset.tempo, 10) / 100); });
             });
         });
-    </script>
-
-    <!-- Custom album-art upload modal (shipped 2026-05-25) -->
-    <div id="uploadCoverModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.75); align-items:center; justify-content:center;">
-        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:1.5rem; max-width:480px; width:92%; max-height:90vh; overflow-y:auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <h2 style="font-family:Righteous,cursive; margin:0; font-size:1.4rem;">Upload album art</h2>
-                <button type="button" id="uploadCoverClose" style="background:none; border:none; color:var(--text-dim); font-size:1.8rem; line-height:1; cursor:pointer; padding:0 0.4rem;">&times;</button>
-            </div>
-            <div id="uploadCoverPreviewWrap" style="text-align:center; margin-bottom:1rem;">
-                <img id="uploadCoverPreview" alt="Current cover" style="max-width:160px; max-height:160px; border-radius:8px; border:1px solid var(--border);" onerror="this.style.display='none';">
-                <div style="font-size:0.8rem; color:var(--text-dim); margin-top:0.4rem;">Current cover</div>
-            </div>
-            <div style="border:2px dashed var(--border); border-radius:10px; padding:1.25rem; text-align:center;">
-                <div style="color:var(--text-dim); font-size:0.85rem; margin-bottom:0.85rem;">JPG, PNG, WebP, or GIF &mdash; 5 MB max. Will be resized to 800px and saved as PNG.</div>
-                <input type="file" id="uploadCoverFile" accept=".jpg,.jpeg,.png,.webp,.gif,image/*" style="display:none;">
-                <button type="button" class="header-btn" onclick="document.getElementById('uploadCoverFile').click();">Choose image&hellip;</button>
-                <div id="uploadCoverStatus" style="margin-top:0.75rem; min-height:1.2em; color:var(--text-dim); font-size:0.85rem;"></div>
-            </div>
-            <p style="color:var(--text-dim); font-size:0.78rem; margin-top:1rem; margin-bottom:0;">Your custom art replaces the auto-detected cover for this song everywhere it shows.</p>
-        </div>
-    </div>
-    <script>
-        (function () {
-            var btn = document.getElementById('uploadCoverBtn');
-            var modal = document.getElementById('uploadCoverModal');
-            var closeBtn = document.getElementById('uploadCoverClose');
-            var fileInput = document.getElementById('uploadCoverFile');
-            var status = document.getElementById('uploadCoverStatus');
-            var preview = document.getElementById('uploadCoverPreview');
-            if (!btn || !modal || !fileInput) return;
-
-            function show() {
-                if (!(window.currentJobId || new URLSearchParams(location.search).get('job'))) {
-                    alert('Load a song first, then upload a cover for it.');
-                    return;
-                }
-                status.textContent = '';
-                // Try to show the current cover as preview
-                var existing = (window.SS_currentSong && window.SS_currentSong.thumbnail) ||
-                               document.querySelector('.library-item-thumb, #song-cover')?.src || '';
-                if (existing) {
-                    preview.src = existing;
-                    preview.style.display = '';
-                } else {
-                    preview.style.display = 'none';
-                }
-                modal.style.display = 'flex';
-            }
-            function hide() { modal.style.display = 'none'; }
-
-            btn.addEventListener('click', show);
-            closeBtn.addEventListener('click', hide);
-            modal.addEventListener('click', function (e) { if (e.target === modal) hide(); });
-
-            fileInput.addEventListener('change', async function () {
-                var f = this.files && this.files[0];
-                if (!f) return;
-                if (!(window.currentJobId || new URLSearchParams(location.search).get('job'))) { status.textContent = 'No song loaded.'; return; }
-                status.textContent = 'Uploading ' + f.name + '…';
-                var fd = new FormData();
-                fd.append('file', f);
-                var ah = (window.StemScriber && window.StemScriber.authHeaders)
-                    ? window.StemScriber.authHeaders() : {};
-                try {
-                    var resp = await fetch(API_BASE + '/cover/' + encodeURIComponent((window.currentJobId || new URLSearchParams(location.search).get('job'))), {
-                        method: 'POST', body: fd, headers: ah,
-                    });
-                    var data = await resp.json();
-                    if (!resp.ok) {
-                        status.textContent = data.error || ('Upload failed (' + resp.status + ')');
-                        fileInput.value = '';
-                        return;
-                    }
-                    status.textContent = 'Saved. Refreshing…';
-                    var newUrl = data.thumbnail + (data.thumbnail.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
-                    // Refresh any visible thumbnails on the page
-                    document.querySelectorAll('.library-item-thumb, #song-cover, [data-job-thumb="' + (window.currentJobId || new URLSearchParams(location.search).get('job')) + '"]').forEach(function (el) {
-                        if (el.tagName === 'IMG') el.src = newUrl;
-                    });
-                    if (window.SS_currentSong) window.SS_currentSong.thumbnail = newUrl;
-                    preview.src = newUrl;
-                    setTimeout(hide, 700);
-                    fileInput.value = '';
-                } catch (e) {
-                    status.textContent = 'Upload error: ' + (e && e.message ? e.message : e);
-                    fileInput.value = '';
-                }
-            });
-        })();
     </script>
 </body>
 </html>

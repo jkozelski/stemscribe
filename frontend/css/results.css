@@ -612,6 +612,8 @@
     transition: all 0.2s;
     position: relative;
     min-height: 460px;
+    min-width: 0;        /* don't let a long child inflate the 1fr grid track */
+    overflow: hidden;    /* uniform strip width regardless of content */
 }
 
 .stem-card:first-child {
@@ -689,6 +691,12 @@
     color: #2a2520;
     margin-bottom: 0.5rem;
     text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    white-space: nowrap;          /* one line, never wrap the board out of shape */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 1.1rem;
+    line-height: 1.1rem;
+    max-width: 100%;
 }
 
 .stem-original {

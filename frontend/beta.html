@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="canonical" href="https://stemscriber.com/beta.html">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>StemScriber — Beta Access</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ff7b54">
@@ -32,7 +32,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            padding: calc(2rem + env(safe-area-inset-top)) 2rem calc(2rem + env(safe-area-inset-bottom));
+            box-sizing: border-box;
         }
 
         .beta-card {
@@ -222,7 +223,7 @@
         <p class="subtitle">Enter your invite code to unlock StemScriber</p>
 
         <div class="input-group">
-            <input type="text" id="codeInput" placeholder="STEM-XXXX-XXXX" maxlength="14" autofocus>
+            <input type="text" id="codeInput" placeholder="STEM-XXXX-XXXX or your name" maxlength="30" autofocus autocapitalize="characters" autocorrect="off" spellcheck="false">
         </div>
         <div class="input-group">
             <input type="text" id="nameInput" class="name-input" placeholder="Your name (optional)">
@@ -247,20 +248,30 @@
     <p class="footer-text">Don't have a code? <a href="mailto:stemscriber@gmail.com">Request access</a></p>
 
     <script>
-        var API_BASE = (window.location.port === '' || window.location.port === '80' || window.location.port === '443')
-            ? window.location.origin + '/api'
-            : window.location.protocol + '//' + window.location.hostname + ':5555/api';
+        var API_BASE;
+        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+            API_BASE = 'https://stemscriber.com/api';
+        } else if (window.location.port === '' || window.location.port === '80' || window.location.port === '443') {
+            API_BASE = window.location.origin + '/api';
+        } else {
+            API_BASE = window.location.protocol + '//' + window.location.hostname + ':5555/api';
+        }
 
-        // Auto-format code input
+        // Auto-format code input — only dash STEM-style structured codes, leave names alone
         document.getElementById('codeInput').addEventListener('input', function(e) {
             var val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            if (val.length > 4 && val.indexOf('-') < 0) {
-                val = val.slice(0, 4) + '-' + val.slice(4);
+            var isStructured = val.indexOf('STEM') === 0 || /\d/.test(val);
+            if (isStructured) {
+                if (val.length > 4 && val.indexOf('-') < 0) {
+                    val = val.slice(0, 4) + '-' + val.slice(4);
+                }
+                if (val.length > 9 && val.lastIndexOf('-') < 5) {
+                    val = val.slice(0, 9) + '-' + val.slice(9);
+                }
+                e.target.value = val.slice(0, 14);
+            } else {
+                e.target.value = val.slice(0, 30);
             }
-            if (val.length > 9 && val.lastIndexOf('-') < 5) {
-                val = val.slice(0, 9) + '-' + val.slice(9);
-            }
-            e.target.value = val.slice(0, 14);
         });
 
         // Enter key to submit

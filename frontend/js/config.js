@@ -4,10 +4,16 @@ window.StemScriber = window.StemScriber || {};
 (function(SS) {
     'use strict';
 
-    // API endpoint
-    SS.API_BASE = (window.location.port === '' || window.location.port === '80' || window.location.port === '443')
-        ? window.location.origin + '/api'
-        : window.location.protocol + '//' + window.location.hostname + ':5555/api';
+    // API endpoint.
+    // Capacitor native app: must hit prod (window.location.origin is capacitor://localhost
+    // and that scheme is the local bundle, not the backend). Web: derive from current URL.
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        SS.API_BASE = 'https://stemscriber.com/api';
+    } else if (window.location.port === '' || window.location.port === '80' || window.location.port === '443') {
+        SS.API_BASE = window.location.origin + '/api';
+    } else {
+        SS.API_BASE = window.location.protocol + '//' + window.location.hostname + ':5555/api';
+    }
 
     // Global state
     SS.currentMode = 'file';

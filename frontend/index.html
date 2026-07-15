@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Native app opens directly to the home hub (Demo / Practice / Library /
+         Settings + splitter) below — no redirect to the marketing landing page.
+         The landing page stays reachable from menu links for those who want it. -->
+
     <script>
     // Nuke ALL service worker caches and unregister SW
     if ('caches' in window) {
@@ -12,15 +16,20 @@
     }
     if (navigator.serviceWorker) {
         navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
+            regs.forEach(function(r) {
+                // Skip the PWA service worker — nuke only stale legacy SWs.
+                if (r.active && r.active.scriptURL && r.active.scriptURL.indexOf('/pwa-sw.js') !== -1) return;
+                r.unregister();
+            });
         });
     }
     </script>
     <meta name="robots" content="noindex, nofollow">
     <title>StemScriber — Tear The Sound Apart</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#ff7b54">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="StemScriber">
     <link rel="shortcut icon" href="/images/favicon.ico">
@@ -29,6 +38,19 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <meta name="description" content="Upload any song and separate it into stems. Practice with a professional chord chart, tuner, and fretboard visualizer.">
+    <link rel="canonical" href="https://stemscriber.com/app">
+    <meta property="og:title" content="StemScriber — Upload, Separate, Practice">
+    <meta property="og:description" content="Upload any song and separate it into stems. Practice with a professional chord chart, tuner, and fretboard visualizer.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://stemscriber.com/app">
+    <meta property="og:site_name" content="StemScriber">
+    <meta property="og:image" content="https://stemscriber.com/images/og-image.png">
+    <meta property="og:image:alt" content="StemScriber — tear any song into individual stems and chord charts">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@stemscriber">
+    <meta name="twitter:title" content="StemScriber — Upload, Separate, Practice">
+    <meta name="twitter:description" content="Upload any song and separate it into stems. Practice with a professional chord chart, tuner, and fretboard visualizer.">
+    <meta name="twitter:image" content="https://stemscriber.com/images/og-image.png">
     <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
@@ -43,9 +65,84 @@
     <script async src="https://plausible.io/js/pa-ZgGzozfqbO8kTuG7PmIsw.js"></script>
     <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
     <script src="js/analytics.js"></script>
+    <style>
+        /* Header menu items are hidden for logged-out visitors (they dead-end
+           before sign-in). auth.js reveals them once SS.currentUser is set.
+           Logged-out users see only the logo + Sign In; Demo is still available
+           as the prominent body card so nothing is lost. */
+        .nav-authed-only { display: none !important; }
+        body.is-authed .nav-authed-only { display: inline-flex !important; }
+    </style>
 </head>
 <body>
-<!-- Beta gate disabled — open access for testing -->
+<script>
+(function(){
+  try {
+    if (localStorage.getItem('ss-inapp-dismissed') === '1') return;
+    var ua = navigator.userAgent || '';
+    var apps = [
+      [/Instagram/i,'Instagram'], [/FBAN|FBAV|FB_IAB|FB4A/i,'Facebook'],
+      [/Messenger/i,'Messenger'], [/BytedanceWebview|musical_ly|TikTok|Bytedance/i,'TikTok'],
+      [/Twitter/i,'X'], [/Snapchat/i,'Snapchat'], [/LinkedInApp/i,'LinkedIn'],
+      [/Pinterest/i,'Pinterest'], [/Line\//i,'Line'], [/; wv\)/i,'an in-app browser']
+    ];
+    var hit = null;
+    for (var i=0;i<apps.length;i++){ if(apps[i][0].test(ua)){ hit=apps[i][1]; break; } }
+    if (!hit) return;
+    var bar = document.createElement('div');
+    bar.id = 'ssInAppBar';
+    bar.style.cssText = 'position:relative;z-index:99999;background:linear-gradient(90deg,#ff7b54,#ff6b9d);color:#0d0d12;font-family:\'Space Grotesk\',-apple-system,sans-serif;font-size:.9rem;line-height:1.4;padding:.7rem 2.4rem .7rem 1rem;text-align:center;font-weight:600;';
+    bar.innerHTML = "You're in " + hit + "'s in-app browser — some links won't work here. " +
+      "<button id='ssCopyLink' style=\"background:#0d0d12;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-weight:700;cursor:pointer;margin-left:6px;font-size:.85rem;\">Copy link</button> " +
+      "<span style=\"display:block;font-weight:500;font-size:.78rem;opacity:.85;margin-top:3px;\">then paste it in Safari or Chrome for the full experience</span>" +
+      "<button id='ssInAppX' aria-label='Dismiss' style=\"position:absolute;right:.5rem;top:.5rem;background:transparent;border:none;color:#0d0d12;font-size:1.1rem;font-weight:700;cursor:pointer;line-height:1;\">×</button>";
+    document.body.insertBefore(bar, document.body.firstChild);
+    document.getElementById('ssCopyLink').addEventListener('click', function(){
+      var url = window.location.href, btn = this;
+      function done(){ btn.textContent='Copied ✓'; setTimeout(function(){btn.textContent='Copy link';},2000); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(function(){ prompt('Copy this link:', url); });
+      } else {
+        var t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select();
+        try{ document.execCommand('copy'); done(); }catch(e){ prompt('Copy this link:', url); }
+        document.body.removeChild(t);
+      }
+    });
+    document.getElementById('ssInAppX').addEventListener('click', function(){
+      bar.remove(); try{ localStorage.setItem('ss-inapp-dismissed','1'); }catch(e){}
+    });
+  } catch(e) {}
+})();
+</script>
+<!-- Beta gate (re-enabled 2026-05-02 for June 20 soft launch). Landing page
+     and /practice.html are PUBLIC so the Time Comes demo + marketing surfaces
+     work for visitors. The /app upload surface (this page) requires a valid
+     beta code in localStorage. The redeemed code is checked client-side; the
+     server still validates on each upload via auth-required middleware. -->
+<script>
+(function() {
+    try {
+        // Admin bypass — founder/owner accounts skip the gate.
+        // Set when an admin email signs in (auth.js _maybeSetAdminBypass).
+        if (localStorage.getItem('stemscribe-admin') === '1') return;
+        // Paid plan bypass — Pro / Premium / Lifetime customers shouldn't see the
+        // beta gate. Set on success.html after /billing/status confirms upgrade.
+        var paidPlan = localStorage.getItem('stemscribe-paid-plan');
+        if (paidPlan === 'pro' || paidPlan === 'premium' || paidPlan === 'lifetime') return;
+        // Any valid redeemed code (beta / lifetime / pro / premium) passes the gate.
+        // Earlier check rejected lifetime-comped users (RUSTY-COLE-BACKSTAGE etc.)
+        // because it only matched plan === 'beta', loop-bouncing them back to /beta.html.
+        var raw = localStorage.getItem('stemscribe-beta');
+        if (raw) {
+            var b = JSON.parse(raw);
+            if (b && b.code && b.plan) return;
+        }
+    } catch (e) {}
+    // No valid beta entry — bounce to gate page, preserving any return URL
+    var here = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.replace('/beta.html?return=' + here);
+})();
+</script>
 
     <div class="psych-bg">
         <div class="orb orb-1"></div>
@@ -61,10 +158,19 @@
         </div>
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
         <nav class="nav-links" id="navLinks">
-            <a href="practice.html" class="library-btn" style="text-decoration: none;"><img src="/images/icons/practice.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Practice</a>
-            <button class="library-btn" id="libraryBtn"><img src="/images/icons/library.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Library</button>
-            <button class="settings-btn" id="settingsBtn"><img src="/images/icons/settings.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Settings</button>
-            <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode">🌙</button>
+            <!-- Tuner + Fretboard live in the menu; Demo/Practice/Library/Settings are the
+                 big tiles on the page, so they're not duplicated here. -->
+            <a href="tuner.html" class="library-btn nav-authed-only" style="text-decoration: none;" title="Chromatic tuner">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle; margin-right:6px;"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg>Tuner</a>
+            <a href="fretboard.html" class="library-btn nav-authed-only" style="text-decoration: none;" title="Fretboard & scales">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle; margin-right:6px;"><rect x="3" y="6" width="18" height="12" rx="1"/><line x1="8" y1="6" x2="8" y2="14"/><line x1="13" y1="6" x2="13" y2="14"/><line x1="18" y1="6" x2="18" y2="14"/></svg>Fretboard</a>
+            <!-- Kept in DOM (hidden) so the Library/Settings home tiles can trigger their panels. -->
+            <button class="library-btn nav-authed-only" id="libraryBtn" style="display:none !important;" aria-hidden="true" tabindex="-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle; margin-right:6px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Library</button>
+            <button class="settings-btn nav-authed-only" id="settingsBtn" style="display:none !important;" aria-hidden="true" tabindex="-1">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle; margin-right:6px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+            <button class="theme-toggle-btn nav-authed-only" id="themeToggleBtn" title="Toggle light/dark mode">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle; margin-right:6px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span class="theme-toggle-label">Theme</span></button>
             <!-- Auth: Sign-In Button -->
             <button class="auth-signin-btn" onclick="triggerGoogleSignIn()">
                 <svg class="auth-google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -85,8 +191,9 @@
                     </div>
                     <div class="auth-menu-divider"></div>
                     <a href="/app" class="auth-menu-item">My Library</a>
+                    <a href="/landing.html#pricing" class="auth-menu-item">Upgrade to Pro</a>
                     <div class="auth-beta-input-row">
-                        <input type="text" class="auth-beta-input" placeholder="STEM-XXXX-XXXX" maxlength="14">
+                        <input type="text" class="auth-beta-input" placeholder="Enter invite code" maxlength="50">
                         <button class="auth-beta-submit" onclick="StemScriber.redeemBetaCode(this.previousElementSibling.value)">Redeem</button>
                     </div>
                     <div class="auth-menu-divider"></div>
@@ -211,7 +318,7 @@
 
             <div class="status-card" style="margin-top: 0.5rem; padding: 0.75rem;">
                 <div style="font-size: 0.75rem; color: var(--text-dim);">
-                    <strong style="color: var(--psych-green);">💡 Default:</strong> Off for fastest processing (~3-5 min). Enable to get a chord chart with diagrams &amp; lyrics.
+                    <strong style="color: var(--psych-green);">💡 Default:</strong> Off for fastest processing (~3-5 min). Enable to get a chord chart with diagrams and section markers.
                 </div>
             </div>
         </div>
@@ -243,7 +350,7 @@
     <div class="library-overlay" id="libraryOverlay"></div>
     <div class="library-panel" id="libraryPanel">
         <div class="library-header">
-            <h3><img src="/images/icons/library.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px;border-radius:4px;"> Your Library</h3>
+            <h3><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff7b54" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="vertical-align:middle; margin-right:6px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Your Library</h3>
             <button class="close-library" id="closeLibrary">×</button>
         </div>
         <div class="library-content">
@@ -260,10 +367,64 @@
     </div>
 
     <div class="container">
-        <section class="hero">
-            <span class="hero-label">Stem Separation & Practice Tools</span>
-            <h1>Tear The <span class="highlight">Sound</span> Apart</h1>
-            <p>Upload any song and split it into individual stems. Practice with a professional chord chart, a built-in tuner, and a fretboard visualizer.</p>
+        <!-- Home hub: four big buttons to pick from, splitter below.
+             Replaces the marketing hero + demo card inside the app. -->
+        <section class="home-hub" id="homeHub">
+            <div class="hub-grid">
+                <a class="hub-tile" href="practice.html?job=d9e3368e-b8f8-45fe-a7e9-1b0df9a66285&amp;_v=demo" aria-label="Open the demo song">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><polygon points="6,4 20,12 6,20" fill="currentColor" stroke="none"/></svg>
+                    <span class="hub-label">Demo</span>
+                </a>
+                <a class="hub-tile" href="practice.html" aria-label="Open practice mode">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                    <span class="hub-label">Practice</span>
+                </a>
+                <button class="hub-tile" type="button" onclick="var b=document.getElementById('libraryBtn'); if(b) b.click();" aria-label="Open your library">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span class="hub-label">Library</span>
+                </button>
+                <button class="hub-tile" type="button" onclick="var b=document.getElementById('settingsBtn'); if(b) b.click();" aria-label="Open settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span class="hub-label">Settings</span>
+                </button>
+            </div>
+            <style>
+                .home-hub { margin: 1.5rem auto 1.75rem; }
+                .hub-grid {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 0.9rem;
+                    max-width: 520px;
+                    margin: 0 auto;
+                }
+                .hub-tile {
+                    display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    gap: 0.7rem;
+                    min-height: 132px;
+                    padding: 1.4rem 1rem;
+                    background: rgba(255,255,255,0.035);
+                    border: 1px solid rgba(255,255,255,0.09);
+                    border-radius: 18px;
+                    color: var(--text, #f0f0f0);
+                    text-decoration: none;
+                    cursor: pointer;
+                    font-family: 'Space Grotesk', sans-serif;
+                    transition: transform .12s ease, border-color .12s ease, background .12s ease;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .hub-tile:hover, .hub-tile:active {
+                    transform: translateY(-2px);
+                    border-color: rgba(255,123,84,0.6);
+                    background: rgba(255,123,84,0.09);
+                }
+                .hub-tile svg { width: 46px; height: 46px; color: var(--orange, #ff7b54); }
+                .hub-label { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.01em; }
+                /* Hide the hub once a song is processing — keep focus on the result. */
+                body:has(#processingSection.active) #homeHub { display: none; }
+                @media (min-width: 720px) {
+                    .hub-grid { grid-template-columns: repeat(4, 1fr); max-width: 760px; }
+                }
+            </style>
         </section>
 
         <section class="upload-section" id="uploadSection">
@@ -289,33 +450,83 @@
             </label>
 
             <!-- Browse Files — label triggers file input natively, no JS needed -->
-            <div style="margin-top: 1.25rem; display: flex; justify-content: center; position: relative; z-index: 10;">
+            <div id="browseFilesRow" style="margin-top: 1.25rem; display: flex; justify-content: center; position: relative; z-index: 10;">
                 <label for="fileInput" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--psych-orange), var(--psych-pink)); border: none; border-radius: 12px; color: #fff; cursor: pointer; font-family: 'Righteous', cursive; font-size: 1rem; letter-spacing: 0.5px; box-shadow: 0 4px 20px rgba(255,123,84,0.3); transition: all 0.2s;">
                     📁 Browse Files
                 </label>
             </div>
 
-            <!-- Honest expectations — chord detection accuracy by genre -->
-            <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-dim); text-align: center; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-                <strong style="color: var(--text);">Works best</strong> on pop, rock, R&amp;B, funk, soul, and jazz with clear chord changes.
-                <br>
-                <strong style="color: var(--text);">Trickier</strong> with heavy metal, dense classical, ambient, or solo-instrument tracks.
-            </div>
+            <!-- File-flow ancillary content. Hidden when user switches to Live
+                 Music mode so the page doesn't stack file-flow + archive-search
+                 in the same viewport. Toggled by upload.js mode handler. -->
+            <div id="fileFlowExtras">
 
-            <!-- Where to find music — each is a real link to the actual service -->
-            <div style="margin-top: 1.25rem; font-size: 0.82rem; color: var(--text-dim); line-height: 2; text-align: center; max-width: 500px; margin-left: auto; margin-right: auto;">
-                <div style="color: var(--text); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Need a file? Check these spots:</div>
-                <div style="text-align: left; max-width: 440px; margin: 0 auto; line-height: 2;">
-                    🍎 <strong>Music app</strong> (Mac) — right-click any song → Show in Finder<br>
-                    💿 <strong>iTunes purchases</strong> — already on your computer as MP3/AAC files<br>
-                    🎵 <strong>Bandcamp</strong> — re-download anything you've bought<br>
-                    📂 <strong>Cloud storage</strong> — check Google Drive, iCloud, or Dropbox for audio files<br>
-                    🛒 <strong>Amazon purchases</strong> — open Amazon Music app → My Music → download
+                <!-- Genre-fit hint, condensed to one line -->
+                <div style="margin-top: 1.4rem; font-size: 0.78rem; color: var(--text-dim); text-align: center; max-width: 520px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                    <strong style="color: var(--text);">Works best</strong> on pop / rock / R&amp;B / funk / soul / jazz with clear chord changes.
                 </div>
-                <div style="margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-dim); font-style: italic;">Any MP3, WAV, FLAC, or M4A file you own will work.</div>
-            </div>
 
-            <!-- URL input removed -->
+                <!-- Quick-source hints — collapsed to <details> so the page breathes.
+                     Click "Where to find a file" to expand. -->
+                <details style="margin: 1.25rem auto 0; max-width: 500px; font-size: 0.82rem; color: var(--text-dim); text-align: center;">
+                    <summary style="cursor: pointer; color: var(--text); font-size: 0.82rem; font-weight: 600; list-style: none; padding: 0.4rem 0;">Where to find a file ↓</summary>
+                    <div style="text-align: left; max-width: 440px; margin: 0.5rem auto 0; line-height: 1.9;">
+                        🍎 <strong>Music app</strong> (Mac) — right-click any song → Show in Finder<br>
+                        💿 <strong>iTunes purchases</strong> — already on your computer as MP3/AAC<br>
+                        🎵 <strong>Bandcamp</strong> — re-download anything you've bought<br>
+                        📂 <strong>Cloud storage</strong> — Google Drive, iCloud, or Dropbox<br>
+                        🛒 <strong>Amazon Music</strong> → My Music → download
+                    </div>
+                </details>
+
+                <!-- URL-paste fallback — secondary path for artist-controlled platforms.
+                     File upload is primary; this is the "no file?" courtesy. Per the
+                     v1.1 legal posture (2026-04-30): YouTube/Dailymotion/Mixcloud are
+                     deliberately NOT supported here to avoid the MP3.com plaintiff theory.
+                     Artist-controlled platforms (Bandcamp, ReverbNation, etc.) where the
+                     artist chose to publish for free download/streaming are kept.
+                     Users who want to use audio from excluded platforms can capture
+                     it themselves and upload the file. See docs/legal-faq.md. -->
+                <div class="youtube-fallback" id="youtubeFallback">
+                    <div class="yt-divider"><span>or</span></div>
+                    <div class="yt-fallback-title">Don't have the file? Paste a link from an artist-friendly platform.</div>
+                    <div class="yt-fallback-form">
+                        <input type="url" id="ytUrlInput" placeholder="bandcamp.com / reverbnation.com / soundcloud.com / ..." autocomplete="off" spellcheck="false">
+                        <button id="ytSubmitBtn" type="button">Get Chords</button>
+                    </div>
+                    <div class="yt-fallback-note"><a href="/audio-capture-help.html" style="color:var(--psych-orange,#ff7b54);text-decoration:underline">Other sources →</a></div>
+                </div>
+
+            </div><!-- /#fileFlowExtras -->
+            <style>
+                .youtube-fallback{max-width:520px;margin:1.75rem auto 0;padding-top:1.5rem;border-top:1px dashed rgba(255,255,255,.08);text-align:center}
+                .yt-divider{position:relative;height:0;margin:-1.75rem 0 1.25rem;display:flex;align-items:center;justify-content:center}
+                .yt-divider span{background:var(--bg,#0d0d12);color:var(--text-dim);padding:0 .85rem;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif}
+                .yt-fallback-title{font-family:'Fraunces','Times New Roman',serif;font-style:italic;font-size:1rem;color:var(--text);margin-bottom:.85rem;letter-spacing:-.01em}
+                .yt-fallback-form{display:flex;gap:.5rem;max-width:480px;margin:0 auto}
+                .yt-fallback-form input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.7rem .9rem;color:var(--text);font-size:.9rem;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .15s}
+                .yt-fallback-form input:focus{border-color:var(--psych-orange,#ff7b54)}
+                .yt-fallback-form button{background:rgba(255,123,84,.15);border:1px solid rgba(255,123,84,.4);color:var(--psych-orange,#ff7b54);border-radius:8px;padding:.7rem 1.1rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;letter-spacing:.02em;transition:all .15s}
+                .yt-fallback-form button:hover{background:rgba(255,123,84,.25);border-color:var(--psych-orange,#ff7b54)}
+                .yt-fallback-form button:disabled{opacity:.5;cursor:not-allowed}
+                .yt-fallback-note{margin-top:.7rem;font-size:.72rem;color:var(--text-dim);font-style:italic}
+                /* Attestation modal */
+                .yt-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem}
+                .yt-modal.active{display:flex}
+                .yt-modal-card{background:#15151c;border:1px solid rgba(255,255,255,.08);border-radius:14px;max-width:480px;width:100%;padding:1.75rem 1.75rem 1.5rem;color:var(--text)}
+                .yt-modal-card h3{font-family:'Righteous',cursive;font-size:1.4rem;margin:0 0 .85rem;letter-spacing:.5px}
+                .yt-modal-card p{font-size:.9rem;line-height:1.55;margin:0 0 .9rem;color:var(--text-dim)}
+                .yt-modal-card ul{font-size:.85rem;line-height:1.6;margin:0 0 1rem;padding-left:1.1rem;color:var(--text-dim)}
+                .yt-modal-card ul li{margin-bottom:.35rem}
+                .yt-modal-attest{display:flex;align-items:flex-start;gap:.6rem;background:rgba(255,123,84,.06);border:1px solid rgba(255,123,84,.2);border-radius:8px;padding:.85rem;margin-bottom:1.2rem;cursor:pointer;font-size:.85rem;line-height:1.45;color:var(--text)}
+                .yt-modal-attest input{margin-top:.15rem;flex-shrink:0}
+                .yt-modal-actions{display:flex;gap:.65rem;justify-content:flex-end}
+                .yt-modal-actions button{padding:.65rem 1.2rem;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;border:1px solid transparent;transition:all .15s}
+                .yt-modal-cancel{background:transparent;border-color:rgba(255,255,255,.15);color:var(--text-dim)}
+                .yt-modal-cancel:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
+                .yt-modal-confirm{background:linear-gradient(135deg,var(--psych-orange,#ff7b54),var(--psych-pink,#ff6b9d));color:#fff;border:none}
+                .yt-modal-confirm:disabled{opacity:.4;cursor:not-allowed}
+            </style>
 
             <!-- Archive.org Live Music Browser -->
             <div class="archive-section" id="archiveSection">
@@ -357,6 +568,12 @@
                 <div class="vinyl-label">♫</div>
             </div>
             <div class="stage-text" id="stageText">Tuning up...</div>
+            <!-- "Chord chart ready" early-access banner (Phase 3, 2026-05-11).
+                 Hidden until the chord_chart.json file is written; user can jump
+                 straight into Practice mode while MIDI/MusicXML/GP finish. -->
+            <a id="earlyChartBanner" href="#" style="display:none; margin:1rem auto; padding:0.75rem 1.25rem; max-width:480px; background:linear-gradient(135deg,#ff7b54,#ff6b9d); color:#0d0d12; border-radius:10px; text-decoration:none; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.95rem; box-shadow:0 4px 20px rgba(255,123,84,0.25); text-align:center;">
+                <span style="font-size:1.1rem;">✓</span> Chord chart ready — view in Practice mode now (stems & tabs still generating)
+            </a>
             <div class="progress-container">
                 <!-- City Skyline - Cross Country Tour -->
                 <div class="city-skyline">
@@ -588,7 +805,7 @@
                 <div class="progress-text" id="progressText">0%</div>
                 <div class="progress-label">The Tour Bus is rollin'...</div>
             </div>
-            <div class="stage-subtitle">This might take a few minutes. Sit tight.</div>
+            <div class="stage-subtitle">Usually 2-3 minutes for a 4-minute song.</div>
         </section>
 
         <section class="results-section" id="resultsSection">
@@ -722,7 +939,7 @@
 
             <div class="practice-cta">
                 <p style="margin-bottom: 1rem; color: var(--text-dim);">Ready to learn this track?</p>
-                <button class="practice-btn" id="practiceBtn" onclick="var jid = (window.StemScriber && (StemScriber.currentJobId || (StemScriber.currentJob && StemScriber.currentJob.job_id))); window.open('practice.html' + (jid ? '?job=' + jid : ''), '_blank');">
+                <button class="practice-btn" id="practiceBtn" onclick="var jid = (window.StemScriber && (StemScriber.currentJobId || (StemScriber.currentJob && StemScriber.currentJob.job_id))); var url = 'practice.html' + (jid ? '?job=' + jid : ''); var isCap = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform(); if (isCap) { window.location.href = url; } else { window.open(url, '_blank') || (window.location.href = url); }">
                     <img src="/images/icons/practice.png" style="width:20px;height:20px;vertical-align:middle;margin-right:4px;border-radius:4px;"> Open Practice Mode
                 </button>
                 <button class="practice-btn" id="downloadZipBtn" onclick="StemScriber.downloadStemsZip()" style="margin-left: 1rem; background: linear-gradient(135deg, #ff7b54, #ffcc47); color: #0d0d12;">
@@ -776,7 +993,7 @@
     </div>
 
     <style>
-        .site-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 3rem 2rem 1.5rem; margin-top: 3rem; }
+        .site-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 3rem 2rem 1.5rem; margin-top: 3rem; position: relative; z-index: 2; }
         .site-footer .footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr; gap: 2.5rem; align-items: start; }
         .site-footer .footer-brand-block { display: flex; flex-direction: column; gap: 0.5rem; }
         .site-footer .footer-brand { display: flex; align-items: center; gap: 0.5rem; }
@@ -789,7 +1006,7 @@
         .site-footer .footer-col a:hover { color: var(--text); }
         .site-footer .footer-bottom { max-width: 1100px; margin: 2.5rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.04); font-size: 0.75rem; color: var(--text-dim); text-align: center; }
         @media (max-width: 900px) { .site-footer .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem 1.5rem; } .site-footer .footer-brand-block { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 1rem; } .site-footer .footer-tagline { margin: 0; } }
-        @media (max-width: 500px) { .site-footer .footer-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 500px) { .site-footer .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem 1.25rem; } .site-footer .footer-brand-block { grid-column: 1 / -1; flex-direction: row; align-items: center; } }
     </style>
     <footer class="site-footer">
         <div class="footer-grid">
@@ -798,7 +1015,6 @@
                     <img src="/images/logomark.png" alt="StemScriber logo" width="28" height="28">
                     <span class="logo-text">StemScriber</span>
                 </div>
-                <p class="footer-tagline">Tear The Sound Apart</p>
             </div>
             <div class="footer-col">
                 <div class="footer-col-title">Product</div>
@@ -810,8 +1026,7 @@
             <div class="footer-col">
                 <div class="footer-col-title">Help</div>
                 <a href="/help.html">Help Center</a>
-                <a href="mailto:support@stemscriber.com">Contact us</a>
-                <a href="tel:+18447915323">(844) 791-5323</a>
+                <a href="/contact.html">Contact us</a>
             </div>
             <div class="footer-col">
                 <div class="footer-col-title">Legal</div>
@@ -823,16 +1038,146 @@
             </div>
             <div class="footer-col">
                 <div class="footer-col-title">Connect</div>
-                <a href="https://www.facebook.com/profile.php?id=61582164772137" target="_blank" rel="noopener">Facebook</a>
-                <a href="https://www.instagram.com/stemscriber" target="_blank" rel="noopener">Instagram</a>
-                <a href="https://x.com/stemscriber" target="_blank" rel="noopener">X</a>
-                <a href="https://www.tiktok.com/@stemscriber" target="_blank" rel="noopener">TikTok</a>
+                <a href="https://www.facebook.com/stemscriber/" target="_blank" rel="noopener">Facebook</a>
+                <a href="https://www.instagram.com/stemscriber/" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://x.com/stemscriber/" target="_blank" rel="noopener">X</a>
+                <a href="https://www.tiktok.com/@stemscriber/" target="_blank" rel="noopener">TikTok</a>
+                <a href="https://www.youtube.com/@stemscriber/" target="_blank" rel="noopener">YouTube</a>
             </div>
         </div>
         <div class="footer-bottom">
             &copy; 2026 StemScriber
         </div>
     </footer>
+
+    <!-- YouTube attestation modal -->
+    <div class="yt-modal" id="ytModal" role="dialog" aria-modal="true" aria-labelledby="ytModalTitle">
+        <div class="yt-modal-card">
+            <h3 id="ytModalTitle">Confirm rights</h3>
+            <p>Before we process this link, please confirm:</p>
+            <ul>
+                <li>You have the right to use this audio (you own it, it's licensed to you, or it's public domain)</li>
+                <li>StemScriber processes per-user only — we don't store or republish the audio</li>
+                <li>You're responsible for any copyright issues with the source material</li>
+            </ul>
+            <label class="yt-modal-attest">
+                <input type="checkbox" id="ytAttestCheck">
+                <span>I confirm I have the right to use this content for personal music learning.</span>
+            </label>
+            <div class="yt-modal-actions">
+                <button type="button" class="yt-modal-cancel" id="ytModalCancel">Cancel</button>
+                <button type="button" class="yt-modal-confirm" id="ytModalConfirm" disabled>Get Chords</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan / rate limit modal — shown when /api/upload returns 429 -->
+    <div class="yt-modal" id="limitModal" role="dialog" aria-modal="true" aria-labelledby="limitModalTitle">
+        <div class="yt-modal-card">
+            <h3 id="limitModalTitle">You've hit your monthly limit</h3>
+            <p id="limitModalBody">You've used your monthly song allowance on the current plan.</p>
+            <div class="yt-modal-actions">
+                <button type="button" class="yt-modal-cancel" id="limitModalClose">Close</button>
+                <a id="limitModalUpgrade" href="/landing.html#pricing" class="yt-modal-confirm" style="text-decoration:none;display:inline-block;text-align:center;">Upgrade plan</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube fallback handler -->
+    <script>
+    (function(){
+        // Accepted platforms for the URL-paste fallback. YouTube/Dailymotion/Mixcloud
+        // are excluded — backend rejects them too with a guidance message.
+        var URL_ACCEPT_RE = /^https?:\/\/([\w-]+\.)*(bandcamp\.com|reverbnation\.com|soundcloud\.com|audiomack\.com|archive\.org|vimeo\.com)\//i;
+        var URL_REJECT_RE = /^https?:\/\/([\w-]+\.)*(youtube\.com|youtu\.be|dailymotion\.com|mixcloud\.com)\//i;
+        var input = document.getElementById('ytUrlInput');
+        var submit = document.getElementById('ytSubmitBtn');
+        var modal = document.getElementById('ytModal');
+        var attestCheck = document.getElementById('ytAttestCheck');
+        var modalCancel = document.getElementById('ytModalCancel');
+        var modalConfirm = document.getElementById('ytModalConfirm');
+        if (!input || !submit || !modal) return;
+        function openModal(){
+            attestCheck.checked = false;
+            modalConfirm.disabled = true;
+            modal.classList.add('active');
+        }
+        function closeModal(){ modal.classList.remove('active'); }
+        attestCheck.addEventListener('change', function(){ modalConfirm.disabled = !attestCheck.checked; });
+        modalCancel.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+        function validateAndOpen(){
+            var url = (input.value || '').trim();
+            if (!url) { input.focus(); return; }
+            if (URL_REJECT_RE.test(url)) {
+                if (confirm("YouTube and similar platforms aren't supported here. If you have the right to use this audio, you can capture it on your own device and upload the file. Open the help page?")) {
+                    window.location.href = '/audio-capture-help.html';
+                }
+                return;
+            }
+            if (!URL_ACCEPT_RE.test(url)) {
+                alert('Please paste a link from Bandcamp, ReverbNation, SoundCloud, Audiomack, Internet Archive, or Vimeo. For other sources, capture the audio yourself and upload the file.');
+                input.focus();
+                return;
+            }
+            openModal();
+        }
+        submit.addEventListener('click', validateAndOpen);
+        input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); validateAndOpen(); } });
+        modalConfirm.addEventListener('click', function(){
+            if (!attestCheck.checked) return;
+            var url = (input.value || '').trim();
+            modalConfirm.disabled = true;
+            modalConfirm.textContent = 'Submitting...';
+            fetch('/api/url', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({
+                    url: url,
+                    attestation_at: new Date().toISOString(),
+                    attestation_type: 'youtube_user_rights_confirmation',
+                    skills: ['stems','chords','practice']
+                })
+            }).then(function(r){ return r.json().then(function(j){ return {ok: r.ok, body: j}; }); })
+            .then(function(res){
+                if (!res.ok) {
+                    var err = (res.body && res.body.error) || 'Submission failed.';
+                    // If the error suggests yt-dlp failed on the specific video,
+                    // route the user to the fallback help page (manual capture instructions).
+                    var ytdlpFailure = /youtube|yt-dlp|unavailable|video|format|extract|download failed/i.test(err);
+                    if (ytdlpFailure) {
+                        if (confirm(err + "\n\nWe can't pull this specific video right now. Open the help page with manual-capture instructions?")) {
+                            window.location.href = '/audio-capture-help.html';
+                            return;
+                        }
+                    } else {
+                        alert(err);
+                    }
+                    modalConfirm.disabled = false;
+                    modalConfirm.textContent = 'Get Chords';
+                    return;
+                }
+                closeModal();
+                if (res.body && res.body.job_id) {
+                    if (typeof window.handleJobStarted === 'function') {
+                        window.handleJobStarted(res.body.job_id, res.body.filename || 'YouTube');
+                    } else {
+                        window.location.href = '/?job=' + encodeURIComponent(res.body.job_id);
+                    }
+                } else {
+                    alert('Submission failed. Please try again.');
+                    modalConfirm.disabled = false;
+                    modalConfirm.textContent = 'Get Chords';
+                }
+            }).catch(function(){
+                alert('Network error. Try again.');
+                modalConfirm.disabled = false;
+                modalConfirm.textContent = 'Get Chords';
+            });
+        });
+    })();
+    </script>
 
     <!-- Wavesurfer.js CDN + Regions plugin (for A-B looping) -->
     <script src="https://unpkg.com/wavesurfer.js@7"></script>
@@ -897,12 +1242,14 @@
     <!-- StemScriber JS Modules -->
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/web-magic-link.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/mixer.js"></script>
     <script src="js/progress.js"></script>
     <script src="js/results.js"></script>
     <script src="js/trackinfo.js"></script>
     <script src="js/archive.js"></script>
+        <script src="js/upload-options-modal.js"></script>
     <script src="js/upload.js"></script>
     <script src="js/panels.js"></script>
     <script src="js/waveform.js"></script>
@@ -910,14 +1257,45 @@
     <script src="js/theme.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // Register service worker for PWA
+        // Register PWA service worker (scoped to /). The nuke code at the top
+        // of <body> skips /pwa-sw.js so this registration survives page loads.
+        // Cache strategy is conservative — no HTML, no /api/*, no auth-bearing
+        // requests — so it cannot recreate the stale-JS issue that disabled the
+        // previous SW. See /pwa-sw.js for details.
         if ('serviceWorker' in navigator) {
-            /* SW disabled — cache was causing stale JS issues */
-            // navigator.serviceWorker.register('/sw.js').catch(function(err) {
-            //     console.log('SW registration skipped:', err.message);
-            // });
-            void(0);
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/pwa-sw.js', { scope: '/' }).catch(function(err) {
+                    console.warn('PWA SW registration failed:', err && err.message);
+                });
+            });
         }
     </script>
+    <div id="uploadOptionsModal" class="upload-options-modal" role="dialog" aria-modal="true" aria-labelledby="uploadOptionsTitle" aria-hidden="true">
+        <div class="upload-options-backdrop"></div>
+        <div class="upload-options-content">
+            <h2 id="uploadOptionsTitle" class="upload-options-title">What do you want from this song?</h2>
+            <p class="upload-options-subtitle">Pick a path — you can always re-process later.</p>
+            <span id="uploadOptionsFileName" class="upload-options-filename" aria-live="polite"></span>
+
+            <div class="upload-options-cards" role="radiogroup" aria-label="Processing options">
+                <div class="upload-option-card" data-choice="stems_only" role="radio" tabindex="0" aria-checked="true">
+                    <div class="upload-option-icon">🎚️</div>
+                    <div class="upload-option-title">Just split into stems</div>
+                    <div class="upload-option-desc">Faster, free-tier friendly. Vocals, drums, bass &amp; more — isolated.</div>
+                </div>
+                <div class="upload-option-card" data-choice="full" role="radio" tabindex="0" aria-checked="false">
+                    <div class="upload-option-icon">🎸</div>
+                    <div class="upload-option-title">Stems + chord chart</div>
+                    <div class="upload-option-desc">The full practice room. Adds chord detection (+5–10 min).</div>
+                </div>
+            </div>
+
+            <div class="upload-options-actions">
+                <button id="uploadOptionsCancelBtn" class="upload-options-cancel" type="button">Cancel</button>
+                <button id="uploadOptionsProcessBtn" class="upload-options-process" type="button" disabled>Process</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

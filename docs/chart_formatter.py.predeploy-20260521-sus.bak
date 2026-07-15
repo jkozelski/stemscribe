@@ -1,0 +1,2957 @@
+"""
+Chart Formatter — transforms raw chord detection + Whisper word timestamps
+into clean, Ultimate-Guitar-style chord charts.
+
+Takes:
+  - Chord events: [{"time": float, "duration": float, "chord": str, ...}, ...]
+  - Word timestamps: [{"word": str, "start": float, "end": float}, ...]
+
+Produces:
+  - Chord library JSON format matching ~/stemscribe/backend/chord_library/ schema:
+    {
+      "title": str,
+      "artist": str,
+      "key": str,
+      "capo": int,
+      "source": "StemScriber AI",
+      "chords_used": [str, ...],
+      "sections": [
+        {"name": str, "lines": [{"chords": str, "lyrics": str|null}, ...]}
+      ]
+    }
+
+Section detection uses:
+  - Lyric gaps (>3s pause = new section)
+  - Chord progression fingerprinting (repeated patterns = same section type)
+  - Chord density changes (instrumental vs vocal sections)
+  - Repeated section labeling (Verse 1, Verse 2, etc.)
+
+Usage:
+    from chart_formatter import format_chart
+    chart = format_chart(chord_events, word_timestamps, title="My Song", artist="My Band", key="Am")
+"""
+
+import json
+import logging
+import os
+import re
+from typing import List, Dict, Optional, Tuple
+from collections import Counter
+from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+# Minimum gap (seconds) between words to split into separate lyric lines
+LINE_GAP_THRESHOLD = 0.4
+
+# Minimum gap (seconds) between lyric lines to consider a section break
+SECTION_GAP_THRESHOLD = 4.0
+
+# Maximum words per lyric line (prevents overly long lines)
+MAX_WORDS_PER_LINE = 12
+
+# Minimum words per lyric line (prevents tiny fragments — but set low to respect natural phrasing)
+MIN_WORDS_PER_LINE = 2
+
+# How close (seconds) a chord must be to a word to be placed above it
+CHORD_SNAP_TOLERANCE = 0.8
+
+
+# ---------------------------------------------------------------------------
+# Capo suggestion
+# ---------------------------------------------------------------------------
+
+_CAPO_NOTE_INDEX = {
+    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
+    'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11,
+}
+_CAPO_INDEX_NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+# Open-position-friendly chord shapes for standard tuning, scored by how
+# guitar-friendly they are. 1.0 = pure open, 0.7 = open w/ extra finger,
+# 0.4 = barre but common. Anything not in this map scores 0 (barre/awkward).
+_EASY_OPEN_SHAPES = {
+    'C': 1.0, 'D': 1.0, 'E': 1.0, 'G': 1.0, 'A': 1.0,
+    'Am': 1.0, 'Dm': 1.0, 'Em': 1.0,
+    'C7': 0.7, 'D7': 0.7, 'E7': 0.7, 'G7': 0.7, 'A7': 0.7,
+    'Am7': 0.7, 'Dm7': 0.7, 'Em7': 0.7,
+    'Cmaj7': 0.7, 'Dmaj7': 0.7, 'Gmaj7': 0.7, 'Amaj7': 0.7, 'Fmaj7': 0.5,
+    'Csus4': 0.7, 'Dsus4': 0.7, 'Asus4': 0.7, 'Esus4': 0.7,
+    'Asus2': 0.7, 'Dsus2': 0.7, 'Esus2': 0.7,
+    'Cadd9': 0.7, 'Dadd9': 0.7, 'Gadd9': 0.7,
+    'F': 0.4, 'B7': 0.6,
+}
+
+# Marker tokens that show up in chord positions but aren't real chords
+_NON_CHORD_TOKENS = ('//', '////', '/', '|', 'N.C.', 'NC', '')
+
+
+def _parse_chord(chord: str):
+    """Parse 'F#m7' → ('F#', 'm7'). Returns (None, None) for non-chords or junk."""
+    if not chord:
+        return None, None
+    chord = chord.strip()
+    if chord in _NON_CHORD_TOKENS or chord.startswith('//'):
+        return None, None
+    # Strip slash-bass for capo math (the *family* of the chord drives shape)
+    base = chord.split('/', 1)[0]
+    if not base:
+        return None, None
+    if len(base) >= 2 and base[1] in '#b':
+        root, quality = base[:2], base[2:]
+    else:
+        root, quality = base[:1], base[1:]
+    if root not in _CAPO_NOTE_INDEX:
+        return None, None
+    return root, quality
+
+
+def _transpose_chord_down(chord: str, semitones: int) -> str:
+    """Return what shape the player would FINGER if they played `chord` with a
+    capo at the given fret. e.g. _transpose_chord_down('F', 3) -> 'D'.
+    Preserves quality suffix (m7, sus4, maj7, /bass). No-op for non-chords."""
+    root, quality = _parse_chord(chord)
+    if root is None:
+        return chord
+    new_idx = (_CAPO_NOTE_INDEX[root] - semitones) % 12
+    new_root = _CAPO_INDEX_NOTE[new_idx]
+    # Preserve any slash-bass spelling, also transposed
+    if '/' in chord:
+        bass = chord.split('/', 1)[1]
+        bass_root, bass_q = _parse_chord(bass)
+        if bass_root is not None:
+            new_bass_idx = (_CAPO_NOTE_INDEX[bass_root] - semitones) % 12
+            return new_root + quality + '/' + _CAPO_INDEX_NOTE[new_bass_idx] + bass_q
+    return new_root + quality
+
+
+def _shape_score(chord_name: str) -> float:
+    return _EASY_OPEN_SHAPES.get(chord_name, 0.0)
+
+
+def suggest_capo(chord_usage: Dict[str, int]) -> Tuple[int, Dict[str, str]]:
+    """Pick the best capo position 0-11 for a guitar-friendly rendering.
+
+    Args:
+        chord_usage: {chord_name: weight} — weight is bar-count or use-count.
+
+    Returns:
+        (capo_position, mapping). mapping is {original_chord: capo_shape_chord}
+        when capo > 0, else empty dict. Returns (0, {}) if no capo gives a
+        meaningful improvement over playing the chords as-spelled.
+    """
+    # Filter out junk tokens
+    real_usage = {c: n for c, n in chord_usage.items()
+                  if _parse_chord(c)[0] is not None and n > 0}
+    if not real_usage:
+        return 0, {}
+    total_weight = sum(real_usage.values())
+
+    def _score_capo(capo: int) -> Tuple[float, Dict[str, str]]:
+        score = 0.0
+        mapping = {}
+        for chord, weight in real_usage.items():
+            shape = _transpose_chord_down(chord, capo)
+            mapping[chord] = shape
+            score += _shape_score(shape) * weight
+        return score / total_weight, mapping
+
+    base_score, _ = _score_capo(0)
+
+    best_capo = 0
+    best_score = base_score
+    best_mapping: Dict[str, str] = {}
+    for capo in range(1, 8):  # capos beyond 7 are uncommon and shrink the neck too much
+        score, mapping = _score_capo(capo)
+        # Soft penalty: prefer lower capo on near-ties (1% per fret)
+        adjusted = score - capo * 0.01
+        if adjusted > best_score + 0.001:
+            best_score = adjusted
+            best_capo = capo
+            best_mapping = mapping
+
+    if best_capo == 0:
+        return 0, {}
+    # Require a meaningful win over no-capo and a decent absolute floor —
+    # otherwise we'd push pop songs already in C/G into pointless capos.
+    if (best_score - base_score) < 0.15:
+        return 0, {}
+    if best_score < 0.45:
+        return 0, {}
+    return best_capo, best_mapping
+
+
+# ---------------------------------------------------------------------------
+# Data structures
+# ---------------------------------------------------------------------------
+
+@dataclass
+class _LyricLine:
+    """A single line of lyrics with timing."""
+    words: List[Dict]          # [{"word": str, "start": float, "end": float}]
+    start_time: float = 0.0
+    end_time: float = 0.0
+    text: str = ""
+
+    def __post_init__(self):
+        if self.words:
+            self.start_time = self.words[0]["start"]
+            self.end_time = self.words[-1]["end"]
+            self.text = " ".join(w["word"] for w in self.words)
+
+
+@dataclass
+class _Section:
+    """A song section (Verse, Chorus, etc.)."""
+    name: str
+    lines: List[dict] = field(default_factory=list)  # [{"chords": str, "lyrics": str|null}]
+    chord_pattern: str = ""     # fingerprint for section matching
+    start_time: float = 0.0
+    end_time: float = 0.0
+    has_lyrics: bool = True
+
+
+# ---------------------------------------------------------------------------
+# Main entry point
+# ---------------------------------------------------------------------------
+
+def format_chart(
+    chord_events: List[Dict],
+    word_timestamps: List[Dict],
+    title: str = "Unknown",
+    artist: str = "Unknown",
+    key: str = "Unknown",
+    capo: int = 0,
+    stem_paths: Optional[Dict[str, str]] = None,
+    grid: Optional[Dict] = None,
+    bass_roots: Optional[List[Dict]] = None,
+) -> Dict:
+    """
+    Format raw chord detection + Whisper word timestamps into a clean chord chart.
+
+    Args:
+        chord_events: List of {"time": float, "duration": float, "chord": str, ...}
+                      (output from chord_detector_v10.detect_chords)
+        word_timestamps: List of {"word": str, "start": float, "end": float}
+                         (output from word_timestamps.get_word_timestamps)
+        title: Song title
+        artist: Artist name
+        key: Detected key (e.g. "Am", "C", "F#m")
+        capo: Capo position
+        stem_paths: Optional dict of {stem_name: file_path}. When provided, instrumental
+                    sections are labeled by the loudest non-vocal stem (e.g. "Piano Solo").
+
+    Returns:
+        Dict in chord library JSON format
+    """
+    if not chord_events:
+        logger.warning("No chord events provided")
+        return _empty_chart(title, artist, key, capo)
+
+    # Sort inputs by time
+    chords = sorted(chord_events, key=lambda c: c["time"])
+    words = sorted(word_timestamps, key=lambda w: w["start"]) if word_timestamps else []
+
+    # Filter out 'N' (no chord) events
+    chords = [c for c in chords if c.get("chord", "N") != "N"]
+
+    if not chords:
+        logger.warning("All chord events were 'N' (no chord)")
+        return _empty_chart(title, artist, key, capo)
+
+    # Step 1a: Consolidate chord events — drop transient outliers and merge adjacent duplicates.
+    # Without this, real verse loops like Cm-Gm-Dm-Am get polluted with one-off Gsus2/Baug/D#
+    # events that are detector noise, and the formatter shows 20 chord labels per section
+    # instead of the 4-chord vamp.
+    before_count = len(chords)
+    chords = _consolidate_chord_events(chords)
+    logger.info(f"Consolidated chord events: {before_count} -> {len(chords)}")
+
+    # Step 1: Split words into lyric lines
+    lyric_lines = _split_into_lines(words)
+    logger.info(f"Split {len(words)} words into {len(lyric_lines)} lyric lines")
+
+    # Step 2: Identify instrumental regions (before lyrics, between sections, after lyrics)
+    song_end = max(c["time"] + c.get("duration", 1.0) for c in chords)
+
+    # Step 3: Build raw sections from lyric gaps and instrumental regions
+    raw_sections = _build_raw_sections(lyric_lines, chords, song_end)
+    logger.info(f"Built {len(raw_sections)} raw sections")
+
+    # Step 3b: Pickup anacrusis correction. Vocalists often enter on the LAST chord
+    # of a loop (e.g. Am, the 4th chord of Cm-Gm-Dm-Am) rather than the downbeat.
+    # The lyric-gap section builder sees the first vocal note and labels THAT the
+    # start of the verse — so the verse displays starting on Am when it should
+    # start on Cm one bar later. Shift section starts forward to the loop downbeat
+    # and move the pickup lyric(s) back to the preceding section.
+    _align_sections_to_loop_downbeat(raw_sections, chords)
+
+    # Bar-aligned chord grid. Preference order:
+    #   1. bass_roots + detector quality (most reliable — bass pitch anchors the root)
+    #   2. detector-only quantized to bars (when no bass stem / grid)
+    #   3. raw detector events (when no grid at all)
+    # 2026-05-06: when USE_LIBROSA_DETECTOR is on, bypass bass-root anchoring +
+    # family-aware smoothing + maj7 promotion. All three were tuned for the legacy
+    # noisy stem-aware detector. Applied to librosa's already-clean per-beat output
+    # they collapse the chord vocabulary too aggressively (Hells Bells went from
+    # 15 unique chords standalone → 6 through the pipeline). Quantize-to-bars from
+    # detector events directly, skipping the cleanup passes.
+    _use_librosa = os.environ.get('USE_LIBROSA_DETECTOR', '').lower() in ('1', 'true', 'yes')
+    if _use_librosa and grid:
+        bar_grid = _quantize_chords_to_bars(chords, grid)
+        logger.info(
+            f"chart_formatter: librosa-mode bar grid (no smoothing/promotion) "
+            f"({len(bar_grid)} bars, key={key})"
+        )
+    elif grid and bass_roots:
+        from processing.bass_root_extraction import (
+            combine_with_detector_quality, smooth_qualities, promote_diatonic_maj7,
+        )
+        bar_grid = combine_with_detector_quality(bass_roots, chords, grid)
+        bar_grid = smooth_qualities(bar_grid)
+        # Re-detect key from the smoothed bar_grid before maj7 promotion.
+        # The raw chord_events feed detect_key_from_chords with mostly plain
+        # 'maj' qualities (the detector emits triads; family-aware promotion
+        # to dom7/9 happens INSIDE smooth_qualities). The static-dominant
+        # heuristic in detect_key_from_chords needs the dom-quality labels
+        # to fire — so we re-detect here, after smoothing.
+        key = _redetect_key_from_bargrid(bar_grid, fallback=key)
+        # Key-aware maj7 promotion: when a song is in a major key, the
+        # detector tends to label I and IV chords as A9/D9 (dom7) when
+        # the song actually uses Amaj7/Dmaj7. Fix only fires for major
+        # keys, only on I/IV degrees, and only if the song doesn't look
+        # like a 12-bar blues (V also dom-7).
+        bar_grid = promote_diatonic_maj7(bar_grid, key)
+        smoothed_count = sum(1 for b in bar_grid if "smoothed" in (b.get("source") or ""))
+        promoted_count = sum(1 for b in bar_grid if "maj7promoted" in (b.get("source") or ""))
+        logger.info(
+            f"chart_formatter: bar grid built from bass+detector "
+            f"({len(bar_grid)} bars, {smoothed_count} quality-smoothed, "
+            f"{promoted_count} maj7-promoted, key={key})"
+        )
+    elif grid:
+        bar_grid = _quantize_chords_to_bars(chords, grid)
+        logger.info(f"chart_formatter: bar grid built from detector-only ({len(bar_grid)} bars)")
+    else:
+        bar_grid = []
+
+    placement_chords = _bar_grid_to_chord_events(bar_grid) if bar_grid else chords
+
+    # Step 4: Assign chords to lines within each section
+    for section in raw_sections:
+        _assign_chords_to_section(section, placement_chords)
+
+    # Step 4b: Re-anchor rendered chord strings to bar_grid order. Without this
+    # step, vocal sections that enter on a pickup bar render their chords in
+    # vocal-onset order (e.g. "Alright" verse starting on Am instead of Cm),
+    # because _assign_chords_to_section walks lyric lines and the lyric onset
+    # trails the bar downbeat. The bar_grid already reflects the true
+    # bass-anchored downbeat sequence, so we replay it over each section's
+    # existing lyric lines. Runs only when bar_grid is populated.
+    if bar_grid:
+        try:
+            _rebuild_section_chords_from_bar_grid(raw_sections, bar_grid)
+        except Exception as e:
+            logger.warning(f"bar-grid section rebuild failed, keeping vocal-aligned chords: {e}")
+
+    # Step 5: Detect section types (Verse, Chorus, Bridge, etc.)
+    _label_sections(raw_sections)
+
+    # Step 6: Detect and label repeated sections
+    _number_repeated_sections(raw_sections)
+
+    # Step 6b: If stem audio is available, detect instrumental subsections hidden
+    # inside vocal sections (Whisper often phantom-labels lyrics during a solo).
+    # Then rename generic Solo/Interlude sections with the dominant instrument.
+    if stem_paths:
+        try:
+            raw_sections = _split_vocal_tail_into_solo(raw_sections, stem_paths)
+            _label_solo_instruments(raw_sections, stem_paths)
+        except Exception as e:
+            logger.warning(f"Solo-instrument labeling failed, keeping generic names: {e}")
+
+    # Step 6c: If any section still carries lyric text under a Drum Break /
+    # Bass Solo / Drum Solo / Guitar Solo / Piano Solo / Keys Solo name (a
+    # Whisper phantom-lyric artefact), relabel it so a lyrical section never
+    # reads as a "solo" to the musician.
+    _rename_solo_sections_with_lyrics(raw_sections)
+
+    # Step 6d: Collapse each section into the 4-bar slash-notation chord/lyric
+    # chunk layout. Each section becomes one or more lines of:
+    #   - chords: up to 4 chord slots where each slot is "<chord> ////"
+    #     (chord name + four beat slashes for a 4/4 bar), producing the
+    #     Nashville / lead-sheet idiom
+    #     "Cm  ////  Gm  ////  Dm  ////  Am  ////".
+    #   - lyrics: concatenation of all Whisper words whose start timestamp
+    #     falls inside the chunk's 4-bar time window.
+    # Section boundaries are honored: a chunk never spans two sections, so the
+    # final chunk of a section may be shorter than 4 bars (partial chunks OK
+    # at boundaries — we emit only the bars present, no rest-padding).
+    if bar_grid:
+        # Step 6c.5: Snap non-first section starts FORWARD to the nearest
+        # phrase downbeat so sections line up to the 4-bar vamp rather than
+        # to the vocal pickup bar. Without this, a verse that enters on a
+        # pickup bar (bar 3 = Dm of a Cm-Gm-Dm-Am vamp) would read as if the
+        # verse progression starts on Dm, which is musically wrong. Bars
+        # absorbed into the previous section preserve their pickup lyrics
+        # under the previous section's final chunk.
+        try:
+            _snap_sections_to_phrase_boundaries(raw_sections, bar_grid)
+        except Exception as e:
+            logger.warning(f"Phrase-boundary snap failed, keeping prior boundaries: {e}")
+
+        # Step 6c.6: Split sections dominated by a repeated lyric hook into
+        # "Pre-Verse" (hook portion) + the unique-content portion. The
+        # stem-RMS labeler groups a song's opening 30 bars of "I need your
+        # love" hook with the subsequent story verse into a single Verse
+        # section, which makes the chart misrepresent the actual song
+        # structure. Detect phrases that repeat enough to dominate a section
+        # and split them out.
+        try:
+            raw_sections = _split_sections_by_lyric_hook(
+                raw_sections, bar_grid, words,
+            )
+        except Exception as e:
+            logger.warning(f"Hook-based section split failed, keeping prior sections: {e}")
+
+        # Step 6c.6b: For sections that are nearly entirely a single repeated
+        # hook phrase (e.g. "I need your love" sung 20+ times) — too uniform
+        # to split — relabel them as "Pre-Verse" so a musician's mental model
+        # is right. Two adjacent Verse-labeled sections that are both the
+        # same repeating hook shouldn't read as "Verse 1" and "Verse 2".
+        try:
+            _relabel_hook_dominated_sections(raw_sections, words)
+        except Exception as e:
+            logger.warning(f"Hook-dominated relabel failed: {e}")
+
+        # Step 6c.6c: After Pre-Verse relabeling, the section immediately
+        # after the final Pre-Verse (or the final Pre-Verse 2 if chained) is
+        # almost certainly the real first Verse of the song — its lyrics
+        # are unique storytelling content, not the hook. The stem-RMS
+        # labeler often names it "Chorus" because it's a different lyric
+        # block on the same chord progression as the Pre-Verse. Rename it
+        # to "Verse 1" so the sequence reads Pre-Verse → Verse 1 the way a
+        # musician would understand the song.
+        try:
+            _rename_post_preverse_to_verse(raw_sections)
+        except Exception as e:
+            logger.warning(f"Post-preverse Verse rename failed: {e}")
+
+        # Step 6c.7: Re-snap any newly-created section boundaries to phrase
+        # downbeats so the split point aligns to the vamp.
+        try:
+            _snap_sections_to_phrase_boundaries(raw_sections, bar_grid)
+        except Exception as e:
+            logger.warning(f"Second phrase-boundary snap failed: {e}")
+
+        # UG_STYLE_LAYOUT=true switches the rendering path for VOCAL sections:
+        # instead of the Nashville-style 4-bar slash-notation chunks, keep
+        # the upstream UG-style chord-over-word output from
+        # `_rebuild_section_chords_from_bar_grid` + `_place_chords_on_words`,
+        # which positions chord names directly above the syllable where the
+        # chord changes.
+        # INSTRUMENTAL sections always go through the 4-bar rebuild — without
+        # it they have no segments + null lyrics and the frontend renderer
+        # has no content to display.
+        _ug_style = os.environ.get("UG_STYLE_LAYOUT", "").lower() in ("1", "true", "yes")
+        if _ug_style:
+            instrumental_only = [s for s in raw_sections if not s.has_lyrics]
+            if instrumental_only:
+                try:
+                    _rebuild_sections_as_4bar_chunks(instrumental_only, bar_grid, words)
+                except Exception as e:
+                    logger.warning(f"4-bar chunk rebuild (instrumental-only) failed: {e}")
+            logger.info(
+                f"chart_formatter: UG_STYLE_LAYOUT enabled — vocal sections keep "
+                f"UG layout, {len(instrumental_only)} instrumental sections got slash-chunks"
+            )
+        else:
+            try:
+                _rebuild_sections_as_4bar_chunks(raw_sections, bar_grid, words)
+            except Exception as e:
+                logger.warning(f"4-bar chunk rebuild failed, keeping prior layout: {e}")
+        # Rebuild may have changed has_lyrics (e.g. Whisper phantom words land
+        # inside a previously-instrumental window); re-run the relabel so a
+        # section that just gained real lyrics drops its Solo/Drum-Break name.
+        _rename_solo_sections_with_lyrics(raw_sections)
+        # Step 6e: Re-number Verse/Bridge after renaming. A "Bass Solo" that
+        # got relabeled to "Verse" would otherwise produce two un-numbered
+        # "Verse" entries back-to-back; this pass collapses them into
+        # "Verse 1", "Verse 2", etc.
+        _number_repeated_sections(raw_sections)
+        # Step 6f: Merge adjacent sections that now share the same name.
+        # Post-rename, a trailing "[Outro] [Outro]" pair (vocal outro followed
+        # by a 1-bar instrumental tail) should render as a single Outro whose
+        # final chunk is just the tail chord.
+        raw_sections = _merge_adjacent_sections_with_same_name(raw_sections)
+
+    # Step 7: Collect unique chords used.
+    # Pull from bar_grid (post-promotion view) when available so the user-visible
+    # chord vocabulary matches what's rendered per-bar. Falls back to raw chord_events
+    # when bar_grid wasn't built (no grid / no bass stem).
+    # Pre-2026-05-06 this iterated `chords` (raw events) which under-counted by ~18
+    # points vs bar_grid because family-aware promotion in smooth_qualities + maj7
+    # promotion creates chord variants (Bmin7→Bmin9, A→Amaj7) that aren't in the
+    # raw event stream. Sourcing chords_used from bar_grid surfaces those variants.
+    chords_used = []
+    seen = set()
+    if bar_grid:
+        for b in bar_grid:
+            ch = b.get("chord")
+            if ch and ch not in seen:
+                seen.add(ch)
+                chords_used.append(ch)
+    else:
+        for c in chords:
+            ch = c["chord"]
+            if ch not in seen:
+                seen.add(ch)
+                chords_used.append(ch)
+
+    # Step 7b: Strip internal keys now that all chord-placement passes are done.
+    for sec in raw_sections:
+        for line in sec.lines:
+            line.pop("_words", None)
+            line.pop("_start", None)
+            line.pop("_end", None)
+
+    # Step 8: Build output
+    sections_out = []
+    for sec in raw_sections:
+        sections_out.append({
+            "name": sec.name,
+            "lines": sec.lines,
+        })
+
+    # bar_grid was computed up top so it could drive chord placement; include
+    # it in the output for any renderer that wants the per-bar chord list.
+
+    # Capo suggestion: only run if caller didn't pre-set capo. Weight by bar
+    # usage so songs in {F,Bb,C,Fm} (sounds like Tom Petty F) become "Capo 3:
+    # D, G, A, Dm" — way friendlier for the guitar persona.
+    capo_shape_map: Dict[str, str] = {}
+    if capo == 0:
+        usage_weights: Dict[str, int] = {}
+        for b in (bar_grid or []):
+            ch = (b.get("chord") or "").strip()
+            if ch:
+                usage_weights[ch] = usage_weights.get(ch, 0) + 1
+        if not usage_weights:
+            for c in (chords_used or []):
+                usage_weights[c] = usage_weights.get(c, 0) + 1
+        try:
+            suggested_capo, mapping = suggest_capo(usage_weights)
+            if suggested_capo > 0:
+                capo = suggested_capo
+                capo_shape_map = mapping
+                logger.info(f"[capo] suggested capo {capo} → {mapping}")
+        except Exception as e:
+            logger.warning(f"[capo] suggest_capo failed: {e}")
+
+    return {
+        "title": title,
+        "artist": artist,
+        "key": key,
+        "capo": capo,
+        "capo_shape_map": capo_shape_map,
+        "source": "StemScriber AI",
+        "chords_used": chords_used,
+        "sections": sections_out,
+        "bar_grid": bar_grid,
+        "grid": {
+            "tempo_bpm": (grid or {}).get("tempo_bpm"),
+            "time_signature": (grid or {}).get("time_signature"),
+            "bar_count": (grid or {}).get("bar_count"),
+        } if grid else None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Bar quantization — assign one chord per bar based on the tempo grid
+# ---------------------------------------------------------------------------
+
+def _redetect_key_from_bargrid(bar_grid: List[Dict], fallback: Optional[str]) -> str:
+    """Re-run key detection over the post-smoothing bar_grid.
+
+    The bar_grid carries the family-aware quality labels (e.g. 'A9' instead
+    of plain 'maj') that smooth_qualities promotes. Running detect_key_from_chords
+    here lets the static-dominant heuristic see those labels — without this
+    pass, the heuristic only sees raw 'maj' from the detector and never fires
+    on songs like Black Cow (A9 vamp gets called D major).
+    """
+    if not bar_grid:
+        return fallback or 'C'
+    try:
+        from stem_chord_detector import detect_key_from_chords, ChordEvent
+    except Exception:
+        return fallback or 'C'
+    events = []
+    for b in bar_grid:
+        # Prefer bass_root — it's the authoritative root signal from bass-stem
+        # extraction. The legacy 'root' key never existed on bar_grid emissions
+        # (see bass_root_extraction.py:242-252); falling through to detector_root
+        # fed the noisy polyphonic signal into K-K and produced wrong keys
+        # (e.g. Black Cow detected as D instead of A).
+        root = b.get('bass_root') or b.get('root') or b.get('detector_root')
+        chord = b.get('chord') or ''
+        quality = b.get('detector_quality')
+        # Pull quality from the chord label if not explicitly stored.
+        # Guard against accidentals ('#'/'b') being mis-extracted as quality
+        # when chord uses a sharp/flat root the picked root doesn't include.
+        if not quality and root and chord.startswith(root):
+            tail = chord[len(root):]
+            quality = tail if tail and tail[0] not in '#b' else 'maj'
+        if not root or not quality:
+            continue
+        st = b.get('start_time', 0.0)
+        en = b.get('end_time', st + 1.0)
+        dur = max(0.1, en - st)
+        events.append(ChordEvent(
+            time=st, duration=dur, chord=chord, root=root,
+            quality=quality, confidence=b.get('bass_confidence', 0.7) or 0.7,
+        ))
+    if not events:
+        return fallback or 'C'
+    return detect_key_from_chords(events)
+
+
+def _bar_grid_to_chord_events(bar_grid: List[Dict]) -> List[Dict]:
+    """
+    Convert a bar-indexed grid into chord events, collapsing adjacent bars
+    that share a chord. These events are then fed to the normal chord-over-word
+    placement logic — but because their `time` values sit on bar downbeats,
+    chord labels land on the first word of each new bar/phrase, not on whatever
+    word the detector's raw timestamp happened to align with.
+
+    Example:
+        bar_grid = [(1,Cm,0..2), (2,Cm,2..4), (3,Gm,4..6), (4,Gm,6..8), (5,Dm,8..10)]
+        returns  = [{time:0,dur:4,chord:Cm}, {time:4,dur:4,chord:Gm}, {time:8,dur:2,chord:Dm}]
+    """
+    if not bar_grid:
+        return []
+    events: List[Dict] = []
+    first = bar_grid[0]
+    current = {
+        "time": first["start_time"],
+        "duration": first["end_time"] - first["start_time"],
+        "chord": first["chord"],
+    }
+    for bar in bar_grid[1:]:
+        bar_dur = bar["end_time"] - bar["start_time"]
+        if bar["chord"] == current["chord"]:
+            current["duration"] += bar_dur
+        else:
+            events.append(current)
+            current = {
+                "time": bar["start_time"],
+                "duration": bar_dur,
+                "chord": bar["chord"],
+            }
+    events.append(current)
+    return events
+
+
+def _quantize_chords_to_bars(
+    chords: List[Dict],
+    grid: Dict,
+) -> List[Dict]:
+    """
+    Map consolidated chord events onto the bar grid.
+
+    For each bar, pick the chord whose total duration overlapping that bar is
+    largest. Bars with no chord overlap inherit the previous bar's chord
+    (chord is held). Output:
+      [{"bar": 1, "chord": "Cm", "start_time": 38.73, "end_time": 40.99},
+       {"bar": 2, "chord": "Gm", "start_time": 40.99, "end_time": 43.25},
+       ...]
+
+    When this grid is available downstream, the pickup-anacrusis problem
+    disappears: a short pickup chord lives in its pickup bar and the next
+    downbeat is the natural section start.
+    """
+    if not chords or not grid:
+        return []
+    downbeats = grid.get("downbeat_times") or []
+    if len(downbeats) < 2:
+        return []
+
+    bars: List[Dict] = []
+    song_end = grid.get("song_duration_sec") or (
+        downbeats[-1] + (downbeats[-1] - downbeats[-2])
+    )
+
+    # Backward extrapolation: librosa's beat tracker often loses the beat in
+    # soft acoustic intros/verses (Free Fallin's first 30s, etc.) and only
+    # locks on once the full band enters. If we have chord events before the
+    # first detected downbeat, synthesize phantom downbeats backward at the
+    # song's tempo period so verse-1 chords aren't dropped silently.
+    first_chord_time = min((c["time"] for c in chords), default=downbeats[0])
+    if first_chord_time + 0.5 < downbeats[0]:
+        period = downbeats[1] - downbeats[0]
+        if period > 0.1:
+            t = downbeats[0] - period
+            extra: List[float] = []
+            while t >= max(0.0, first_chord_time - 0.5):
+                extra.append(t)
+                t -= period
+            if extra:
+                downbeats = sorted(extra) + list(downbeats)
+                logger.info(
+                    f"_quantize_chords_to_bars: extrapolated {len(extra)} bars backward "
+                    f"({downbeats[0]:.2f}s..{extra[-1] + period:.2f}s) to cover prelude chords "
+                    f"(first chord at {first_chord_time:.2f}s, original first downbeat at {downbeats[len(extra)]:.2f}s)"
+                )
+
+    # Top-K aggregation config (mirrors chord_detector_librosa). When chord
+    # events carry a `candidates` list (librosa path only), we sum each
+    # candidate's score across all beats overlapping the bar — weighted by
+    # overlap duration — and re-sort/re-clip per bar. Output is stashed under
+    # source_meta.top_k for the re-ranker corrector. Detectors that don't
+    # emit `candidates` leave source_meta absent and downstream is unchanged.
+    import os as _os_topk
+    topk_k = max(1, int(_os_topk.environ.get("ANTHROPIC_CORRECTION_RERANKER_K") or "4"))
+
+    for i, start in enumerate(downbeats):
+        end = downbeats[i + 1] if i + 1 < len(downbeats) else song_end
+        # Accumulate overlap per chord within this bar
+        overlaps: Dict[str, float] = {}
+        # Accumulate weighted top-K candidate scores within this bar.
+        # cand_acc maps chord_name -> {"score": float, "root": str, "quality": str}.
+        cand_acc: Dict[str, Dict] = {}
+        for c in chords:
+            c_start = c["time"]
+            c_end = c_start + c.get("duration", 1.0)
+            overlap = max(0.0, min(end, c_end) - max(start, c_start))
+            if overlap > 0:
+                overlaps[c["chord"]] = overlaps.get(c["chord"], 0.0) + overlap
+                # Aggregate candidates from this beat, weighted by overlap.
+                cands = c.get("candidates") or []
+                for cd in cands:
+                    name = cd.get("chord")
+                    if not name:
+                        continue
+                    s = float(cd.get("score", 0.0)) * overlap
+                    if name in cand_acc:
+                        cand_acc[name]["score"] += s
+                    else:
+                        cand_acc[name] = {
+                            "score": s,
+                            "root": cd.get("root", ""),
+                            "quality": cd.get("quality", ""),
+                        }
+        if overlaps:
+            chord = max(overlaps.items(), key=lambda kv: kv[1])[0]
+        elif bars:
+            # No chord overlap — hold the previous bar's chord
+            chord = bars[-1]["chord"]
+        else:
+            continue  # nothing yet, skip
+        bar_entry = {
+            "bar": i + 1,
+            "chord": chord,
+            "start_time": round(start, 3),
+            "end_time": round(end, 3),
+        }
+        if cand_acc:
+            # Sort by accumulated weighted score, keep top-K, normalize the
+            # scores into 0..1-ish range (divide by bar duration so scores are
+            # comparable to the original per-beat cosine values).
+            bar_duration = max(0.001, end - start)
+            ranked = sorted(
+                cand_acc.items(),
+                key=lambda kv: kv[1]["score"],
+                reverse=True,
+            )[:topk_k]
+            top_k_out = [
+                {
+                    "chord": name,
+                    "score": round(info["score"] / bar_duration, 4),
+                    "root": info["root"],
+                    "quality": info["quality"],
+                }
+                for name, info in ranked
+            ]
+            bar_entry["source_meta"] = {"top_k": top_k_out}
+        bars.append(bar_entry)
+    return bars
+
+
+# ---------------------------------------------------------------------------
+# Render-layer bar-grid anchoring — rebuild section chord lines from bar_grid
+# so the chart follows the bass-anchored downbeat order instead of the
+# vocal-onset order. Fixes the "Alright by Jamiroquai" verse starting on the
+# pickup Am instead of the true Cm downbeat: the detector + bass pipeline
+# already produced bar_grid = [Cm, Gm, Dm, Am, ...], we just have to render
+# in that order rather than in word-timestamp order.
+# ---------------------------------------------------------------------------
+
+def _rebuild_section_chords_from_bar_grid(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+) -> None:
+    """
+    Rewrite each section's lines[].chords to reflect bar-grid chord order.
+
+    For vocal sections: keep each line's lyrics intact, but rebuild the
+    `chords` string in Ultimate-Guitar style — each chord character-aligned
+    directly above the lyric word whose timestamp matches the chord's start.
+    Consecutive duplicate chords are collapsed. The `segments` array (used by
+    the lead-sheet renderer) is also rebuilt so the chord ORDER matches the
+    bass-anchored downbeat sequence rather than the vocal-onset sequence.
+
+    For instrumental sections: rebuild `lines` as 4-bar groups of bar-grid
+    chord labels (matching the existing `_assign_chords_to_section` format).
+
+    Mutates sections in place. No-op when bar_grid is empty.
+    """
+    if not bar_grid:
+        return
+
+    for sec in sections:
+        sec_bars = [
+            b for b in bar_grid
+            if b["end_time"] > sec.start_time - 0.5
+            and b["start_time"] < sec.end_time + 0.5
+        ]
+        if not sec_bars:
+            continue
+
+        if not sec.has_lyrics:
+            # Instrumental: collapse consecutive duplicates, then group by 4
+            chord_names: List[str] = []
+            for b in sec_bars:
+                if not chord_names or chord_names[-1] != b["chord"]:
+                    chord_names.append(b["chord"])
+            lines = []
+            for i in range(0, len(chord_names), 4):
+                batch = chord_names[i:i + 4]
+                lines.append({"chords": "  ".join(batch), "lyrics": None})
+            if lines:
+                sec.lines = lines
+            continue
+
+        # Vocal: pair bars to existing lyric lines by time overlap.
+        for line in sec.lines:
+            l_start = line.get("_start")
+            l_end = line.get("_end")
+            if l_start is None or l_end is None:
+                # Lyric-only line without timing (shouldn't normally happen
+                # post-_assign_chords_to_section which strips _start/_end);
+                # leave the line alone.
+                continue
+
+            # Bars whose midpoint falls inside this lyric line's window.
+            line_bars = []
+            for b in sec_bars:
+                mid = 0.5 * (b["start_time"] + b["end_time"])
+                if l_start - 0.3 <= mid <= l_end + 0.3:
+                    line_bars.append(b)
+
+            # If no bar midpoint lands inside the line, fall back to any bar
+            # that overlaps the line window at all.
+            if not line_bars:
+                for b in sec_bars:
+                    if b["end_time"] > l_start and b["start_time"] < l_end:
+                        line_bars.append(b)
+
+            if not line_bars:
+                continue
+
+            # Collapse consecutive duplicates into (chord, start_time) pairs,
+            # preserving each chord's downbeat time so we can character-align
+            # it over the correct lyric word.
+            chord_events_line: List[Dict] = []
+            for b in line_bars:
+                if not chord_events_line or chord_events_line[-1]["chord"] != b["chord"]:
+                    chord_events_line.append({
+                        "chord": b["chord"],
+                        "time": b["start_time"],
+                        "duration": b["end_time"] - b["start_time"],
+                    })
+                else:
+                    # Extend duration of the held chord
+                    prev = chord_events_line[-1]
+                    prev["duration"] = (b["end_time"] - prev["time"])
+
+            words_data = line.get("_words", [])
+            lyrics_text = line.get("lyrics", "") or ""
+
+            # Ultimate-Guitar style alignment: each chord sits directly above
+            # the word/syllable whose onset matches the chord's downbeat.
+            positions = _place_chords_on_words(chord_events_line, words_data, lyrics_text)
+            line["chords"] = _build_chord_line(positions, len(lyrics_text))
+
+            # Rebuild segments so the lead-sheet renderer (practice.html
+            # preferred path) walks chords in bar-grid/downbeat order with
+            # the words spoken under each chord's time window.
+            if words_data:
+                durations = [max(0.1, c["duration"]) for c in chord_events_line]
+                unit_bar = min(durations) if durations else 1.0
+                new_segments = []
+                for c in chord_events_line:
+                    c_start = c["time"]
+                    c_end = c_start + max(0.1, c["duration"])
+                    seg_words = [
+                        {"w": w["word"], "t": round(w["start"], 3)}
+                        for w in words_data
+                        if c_start - 0.1 <= w["start"] < c_end
+                    ]
+                    bars = max(1, min(8, round(c["duration"] / unit_bar)))
+                    new_segments.append({
+                        "chord": c["chord"],
+                        "start": round(c_start, 3),
+                        "end":   round(c_end, 3),
+                        "duration": round(c["duration"], 3),
+                        "bars":    bars,
+                        "words":   seg_words,
+                    })
+                line["segments"] = new_segments
+
+
+# ---------------------------------------------------------------------------
+# 4-bar slash-notation chunk layout
+#
+# Collapses each section's lines into one or more 4-bar chord-sheet lines.
+# Each bar renders as the chord name followed by four slashes (one slash per
+# beat of a 4/4 measure). All Whisper words whose start_time falls in that
+# 4-bar time window flow underneath as the lyric line. This is the standard
+# Nashville / lead-sheet idiom that reading musicians already know.
+#
+# Example for Alright's verse (Cm Gm Dm Am):
+#
+#     Cm  ////  Gm  ////  Dm  ////  Am  ////
+#     I've been seeing angels turn into devils in my mind
+#
+# Section boundaries are honored: a chunk never spans two sections, so the
+# final chunk of a section may be shorter than 4 bars (partial chunks at
+# boundaries emit only the bars that are present — no rest-padding).
+# ---------------------------------------------------------------------------
+
+# Bars per rendered chord line.
+_CHORDS_PER_LINE = 4
+
+# Chord-name field width inside a slot. Fits "Cm", "F#m", "Am" cleanly;
+# longer names like "Cm7b5" overflow but still render legibly (we always
+# keep at least one space before the slashes).
+_CHORD_NAME_WIDTH = 4
+
+# Separator between bar-slots ("////" of one bar + "  " + next chord name).
+_SLOT_SEPARATOR = "  "
+
+
+def _format_slash_bar(chord: str) -> str:
+    """Render one bar as '<chord-name-padded> ////' (chord + 4 beat slashes).
+
+    Chord name is left-justified to `_CHORD_NAME_WIDTH` so typical 2-3 char
+    chord names line up in even columns. Longer chord names overflow into
+    their padding but always keep at least one space before the slashes so
+    the bar stays unambiguous.
+
+    Example:
+        "Cm"    -> "Cm  ////"
+        "F#m"   -> "F#m ////"
+        "Cm7b5" -> "Cm7b5 ////"   (overflow, keeps one space)
+    """
+    name = (chord or "").strip()
+    if len(name) < _CHORD_NAME_WIDTH:
+        name = name.ljust(_CHORD_NAME_WIDTH)
+    else:
+        # Overflow: keep one space before the slashes
+        name = name + " "
+    return f"{name}////"
+
+
+def _build_slash_chord_line(chord_names: List[str]) -> str:
+    """Render up to `_CHORDS_PER_LINE` chord names as a 4-bar slash line.
+
+    Example:
+        ["Cm", "Gm", "Dm", "Am"] -> "Cm  ////  Gm  ////  Dm  ////  Am  ////"
+
+    Empty input -> empty string. Partial chunks (1-3 chords at a section
+    boundary) render with only the bars that are present; no padding to 4.
+    """
+    if not chord_names:
+        return ""
+    return _SLOT_SEPARATOR.join(_format_slash_bar(c) for c in chord_names)
+
+
+def _snap_sections_to_phrase_boundaries(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+    phrase_bars: int = _CHORDS_PER_LINE,
+) -> None:
+    """Snap non-first section starts forward to the nearest phrase downbeat.
+
+    Pop songs with a 4-bar vamp (Cm-Gm-Dm-Am repeating every 4 bars) can have
+    their vocal sections enter on a pickup bar mid-phrase. The stem-RMS
+    section labeler uses vocal onset as the section boundary, which produces
+    "Verse 1 starts on Dm" when musically the verse progression is still
+    Cm-Gm-Dm-Am. This pass re-aligns each non-first section's start time
+    to the bar_grid phrase grid so the chunker emits full 4-bar phrases
+    starting on the vamp's downbeat chord.
+
+    Algorithm:
+      1. Treat bar_grid[0] as phrase beat 1. Phrase downbeats are at bar
+         indices 0, phrase_bars, 2*phrase_bars, ...
+      2. For each section after the first, find the bar index whose midpoint
+         is closest to the section's start_time.
+      3. If that index is NOT on a phrase downbeat (index % phrase_bars != 0),
+         snap forward to the next phrase downbeat.
+      4. Update the section's start_time to that bar's start_time; push the
+         preceding section's end_time to match. Bars absorbed into the
+         preceding section keep their chords AND any pickup lyrics that fell
+         in those bars (chunker reads those via word timestamps).
+
+    Runs in-place. No-op when bar_grid is empty or there are fewer than 2
+    sections. Safe: if a snapped index would exceed len(bar_grid), leave the
+    section boundary alone rather than push it off the end.
+    """
+    if not bar_grid or len(sections) < 2 or phrase_bars <= 1:
+        return
+
+    def _bar_index_for_time(t: float) -> int:
+        """Index in bar_grid of the bar whose midpoint is closest to t."""
+        best_i = 0
+        best_d = float("inf")
+        for i, b in enumerate(bar_grid):
+            mid = 0.5 * (b["start_time"] + b["end_time"])
+            d = abs(mid - t)
+            if d < best_d:
+                best_d = d
+                best_i = i
+        return best_i
+
+    for i in range(1, len(sections)):
+        sec = sections[i]
+        first_idx = _bar_index_for_time(sec.start_time)
+        offset = first_idx % phrase_bars
+        if offset == 0:
+            continue  # already on a phrase downbeat
+        snap_forward_by = phrase_bars - offset
+        new_idx = first_idx + snap_forward_by
+        if new_idx >= len(bar_grid):
+            # Would push off the end; leave this boundary alone. The
+            # remaining short tail stays with the preceding section.
+            continue
+        new_start = bar_grid[new_idx]["start_time"]
+        if new_start >= sec.end_time:
+            # Whole section would vanish — skip the snap.
+            continue
+        # Extend previous section to absorb the pickup bars.
+        sections[i - 1].end_time = new_start
+        sec.start_time = new_start
+
+
+def _relabel_hook_dominated_sections(
+    sections: List[_Section],
+    words: List[Dict],
+    hook_min_len: int = 3,
+    hook_max_len: int = 5,
+    dominance_threshold: float = 0.70,
+    min_repeats: int = 4,
+) -> None:
+    """Relabel sections that are >=70% a single repeated hook phrase.
+
+    When a section's lyrics are overwhelmingly one repeated short phrase
+    (e.g. the "I need your love" 20+-times opening of Alright) but the split
+    function couldn't find a transition to split on (because the hook runs
+    the whole section), the labeler leaves it as "Verse 1" / "Verse 2" —
+    which reads as if the song has two verses that happen to repeat the
+    same line, instead of what it actually is: a long pre-chorus / hook.
+
+    This pass scans each Verse/Chorus-labeled section. If its dominant
+    n-gram covers >= dominance_threshold of the section's words AND repeats
+    at least min_repeats times, rename the section to "Pre-Verse". In-place.
+    Numbering (Pre-Verse 1, Pre-Verse 2) is handled downstream by
+    _number_repeated_sections.
+    """
+    if not sections or not words:
+        return
+
+    words_sorted = sorted(words, key=lambda w: w.get("start", 0.0))
+
+    def _normalize(w: str) -> str:
+        return (w or "").strip().strip(",.!?;:\"'()").lower()
+
+    relabel_targets = ("Verse", "Chorus", "Bridge")
+
+    for sec in sections:
+        name_base = (sec.name or "").split(" ")[0]
+        if name_base not in relabel_targets:
+            continue
+
+        sec_words = [
+            w for w in words_sorted
+            if sec.start_time - 0.1 <= w.get("start", 0.0) < sec.end_time + 0.1
+        ]
+        if len(sec_words) < hook_min_len * min_repeats:
+            continue
+
+        norm = [_normalize(w.get("word", "")) for w in sec_words]
+
+        best = None  # (coverage, freq, length)
+        for L in range(hook_min_len, hook_max_len + 1):
+            if len(norm) < L:
+                continue
+            counts: Dict[tuple, int] = {}
+            for i in range(len(norm) - L + 1):
+                if all(norm[i + k] for k in range(L)):
+                    ngram = tuple(norm[i + k] for k in range(L))
+                    counts[ngram] = counts.get(ngram, 0) + 1
+            if not counts:
+                continue
+            _phrase, freq = max(counts.items(), key=lambda kv: kv[1])
+            coverage = (freq * L) / max(1, len(norm))
+            if best is None or coverage > best[0]:
+                best = (coverage, freq, L)
+
+        if best is None:
+            continue
+        coverage, freq, _L = best
+        if coverage >= dominance_threshold and freq >= min_repeats:
+            sec.name = "Pre-Verse"
+
+
+def _rename_post_preverse_to_verse(sections: List[_Section]) -> None:
+    """Rename the section that immediately follows the final Pre-Verse → Verse.
+
+    Musical structure: after a pre-verse/hook (repeated phrase) the song
+    typically enters its FIRST VERSE — the storytelling content. The
+    stem-RMS labeler often calls that section "Chorus" because it's a
+    distinct lyric block on the same chord progression, but that's wrong:
+    a chorus is usually the refrain that returns after each verse. The
+    first unique content after the Pre-Verse is the Verse.
+
+    This pass finds the last consecutive run of Pre-Verse sections and,
+    if the next section is currently labeled Chorus/Verse/Bridge with real
+    lyrics, renames it to "Verse". _number_repeated_sections downstream
+    adds "Verse 1", "Verse 2", etc. to any duplicate names.
+    """
+    if not sections:
+        return
+
+    # Find the last Pre-Verse section index.
+    last_preverse_idx = -1
+    for i, sec in enumerate(sections):
+        if (sec.name or "").split(" ")[0] == "Pre-Verse":
+            last_preverse_idx = i
+    if last_preverse_idx < 0:
+        return  # no Pre-Verse anywhere
+
+    target_idx = last_preverse_idx + 1
+    if target_idx >= len(sections):
+        return  # Pre-Verse is the last section
+
+    target = sections[target_idx]
+    name_base = (target.name or "").split(" ")[0]
+    if name_base not in ("Chorus", "Verse", "Bridge"):
+        return  # don't rename Intro / Outro / Solo / etc.
+
+    # Only rename if the target has real lyric content (not an instrumental
+    # passage that got a vocal label by mistake).
+    has_lyrics = any(
+        (ln.get("lyrics") or "").strip()
+        for ln in (target.lines or [])
+        if isinstance(ln, dict)
+    )
+    if not has_lyrics:
+        return
+
+    target.name = "Verse"
+
+
+def _split_sections_by_lyric_hook(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+    words: List[Dict],
+    hook_min_len: int = 3,
+    hook_max_len: int = 5,
+    hook_dominance: float = 0.45,
+    min_hook_repeats: int = 3,
+) -> List[_Section]:
+    """Split sections whose opening is dominated by a repeated lyric hook.
+
+    Typical pattern (Jamiroquai "Alright"): the song opens with "I need your
+    love" sung ~30 times over a Cm-Gm-Dm-Am vamp, then transitions into
+    unique verse content ("We don't touch for the rest..."). The section
+    labeler sees one continuous Cm-Gm-Dm-Am block with vocals, labels it
+    all "Verse 1", and splits at an arbitrary midpoint.
+
+    This pass detects when a section's first portion is dominated by a
+    single repeated short phrase (the "hook") and splits that portion off
+    into a separate "Pre-Verse" section, leaving the unique-content remainder
+    under the original label.
+
+    Detection:
+      1. For each section, collect the Whisper words whose start falls in
+         the section's time window.
+      2. Build n-grams of lengths [hook_min_len .. hook_max_len]. Find the
+         most-frequent n-gram. Let f = its count and L = its length.
+      3. Coverage = (f * L) / total_words. If coverage >= hook_dominance
+         AND f >= min_hook_repeats, the section has a hook.
+      4. Find the LAST occurrence of the hook in the word stream — that's
+         where the hook stops dominating. Split the section at the word
+         immediately after that last occurrence.
+
+    Returns a NEW list of sections. Sections without a dominant hook pass
+    through unchanged.
+    """
+    if not sections or not words:
+        return sections
+
+    words_sorted = sorted(words, key=lambda w: w.get("start", 0.0))
+
+    def _normalize(w: str) -> str:
+        return (w or "").strip().strip(",.!?;:\"'()").lower()
+
+    out: List[_Section] = []
+    for sec in sections:
+        sec_words = [
+            w for w in words_sorted
+            if sec.start_time - 0.1 <= w.get("start", 0.0) < sec.end_time + 0.1
+        ]
+        if len(sec_words) < hook_min_len * (min_hook_repeats + 1):
+            out.append(sec)
+            continue
+
+        norm = [_normalize(w.get("word", "")) for w in sec_words]
+
+        # Find most-frequent n-gram across the range of lengths. Pick the one
+        # with the highest coverage (freq * length).
+        best = None  # (coverage, freq, length, phrase_tuple)
+        for L in range(hook_min_len, hook_max_len + 1):
+            if len(norm) < L:
+                continue
+            counts: Dict[tuple, int] = {}
+            for i in range(len(norm) - L + 1):
+                if all(norm[i + k] for k in range(L)):
+                    ngram = tuple(norm[i + k] for k in range(L))
+                    counts[ngram] = counts.get(ngram, 0) + 1
+            if not counts:
+                continue
+            phrase, freq = max(counts.items(), key=lambda kv: kv[1])
+            coverage = (freq * L) / max(1, len(norm))
+            if best is None or coverage > best[0]:
+                best = (coverage, freq, L, phrase)
+
+        if best is None:
+            out.append(sec)
+            continue
+
+        coverage, freq, L, phrase = best
+        if coverage < hook_dominance or freq < min_hook_repeats:
+            out.append(sec)
+            continue
+
+        # Find the LAST occurrence of the phrase in the word stream.
+        last_occ_end = -1  # index AFTER the last word of the last occurrence
+        for i in range(len(norm) - L, -1, -1):
+            if all(norm[i + k] == phrase[k] for k in range(L)):
+                last_occ_end = i + L
+                break
+        if last_occ_end <= 0 or last_occ_end >= len(sec_words):
+            # Hook runs to the end of the section — no unique content to split off.
+            out.append(sec)
+            continue
+
+        # Split time: start of the first word AFTER the last hook occurrence.
+        split_word = sec_words[last_occ_end]
+        split_time = float(split_word.get("start", sec.end_time))
+
+        # Snap split_time to the nearest bar_grid bar boundary so the split
+        # falls cleanly on a chord change.
+        if bar_grid:
+            best_bar_t = split_time
+            best_d = float("inf")
+            for b in bar_grid:
+                d = abs(b["start_time"] - split_time)
+                if d < best_d:
+                    best_d = d
+                    best_bar_t = b["start_time"]
+            split_time = best_bar_t
+
+        if split_time <= sec.start_time + 0.5 or split_time >= sec.end_time - 0.5:
+            out.append(sec)
+            continue
+
+        # Create Pre-Verse (hook portion) + continuation (original label).
+        pre = _Section(
+            name="Pre-Verse",
+            start_time=sec.start_time,
+            end_time=split_time,
+            has_lyrics=True,
+            lines=[],
+        )
+        post = _Section(
+            name=sec.name,
+            start_time=split_time,
+            end_time=sec.end_time,
+            has_lyrics=True,
+            lines=[],
+        )
+        out.append(pre)
+        out.append(post)
+
+    return out
+
+
+def _rebuild_sections_as_4bar_chunks(
+    sections: List[_Section],
+    bar_grid: List[Dict],
+    words: List[Dict],
+) -> None:
+    """Rewrite `sections[].lines` in-place as 4-bar slash-notation chunks.
+
+    For each section, finds the bars from `bar_grid` whose midpoint falls
+    inside the section's time window, chunks them in groups of up to 4, and
+    for each chunk emits ONE `{chords, lyrics, segments}` line where:
+      - chords: "<Chord1>  ////  <Chord2>  ////  <Chord3>  ////  <Chord4>  ////"
+        (partial chunks at section boundaries emit fewer slots). ONE chord
+        per bar — no consecutive-duplicate collapsing, so the musician sees
+        each bar's label even when a chord is held for multiple bars.
+      - lyrics: concatenation of all `words` whose `start` falls inside the
+        chunk's time window, joined by single spaces. `None` when the chunk
+        is fully instrumental.
+      - segments: per-bar word groups for the lead-sheet renderer
+        (practice.html's preferred path), one segment per bar in the chunk.
+
+    Section boundaries are honored: a chunk never spans two sections, so the
+    final chunk of a section may be shorter than 4 bars (e.g. a 3-bar Intro
+    emits one 3-bar chunk). No-op when `bar_grid` is empty. Sections with no
+    bars overlapping their time window are left unchanged (rare).
+
+    The prior UG-style per-syllable chord-over-word alignment (via
+    `_place_chords_on_words` + `_build_chord_line`) is bypassed here: the
+    slash-notation idiom communicates bar and beat position without needing
+    character-column alignment with the lyric text below.
+    """
+    if not bar_grid:
+        return
+
+    words_sorted = sorted(words or [], key=lambda w: w.get("start", 0.0))
+
+    for sec in sections:
+        sec_start = sec.start_time
+        sec_end = sec.end_time if sec.end_time > sec_start else sec_start + 0.001
+
+        # Bars whose midpoint lies inside the section window. The 0.3s slop
+        # tolerates rounding noise at section boundaries.
+        sec_bars: List[Dict] = []
+        for b in bar_grid:
+            mid = 0.5 * (b["start_time"] + b["end_time"])
+            if sec_start - 0.3 <= mid <= sec_end + 0.3:
+                sec_bars.append(b)
+
+        if not sec_bars:
+            # Keep whatever the earlier passes produced for this section
+            # (usually empty / an instrumental placeholder).
+            continue
+
+        new_lines: List[dict] = []
+        for i in range(0, len(sec_bars), _CHORDS_PER_LINE):
+            chunk = sec_bars[i:i + _CHORDS_PER_LINE]
+            chunk_start = chunk[0]["start_time"]
+            chunk_end = chunk[-1]["end_time"]
+
+            # Slash notation: one chord per bar, four slashes per bar.
+            chord_names = [b["chord"] for b in chunk]
+            chords_line = _build_slash_chord_line(chord_names)
+
+            # Words whose onset lies inside the chunk's time window. A small
+            # leading tolerance (0.1s) catches words that begin on the bar
+            # downbeat but whose Whisper timestamp rounds slightly low.
+            chunk_word_objs = [
+                w for w in words_sorted
+                if chunk_start - 0.1 <= w.get("start", 0.0) < chunk_end
+            ]
+            lyrics_line = " ".join(
+                (w.get("word") or "") for w in chunk_word_objs
+                if (w.get("word") or "").strip()
+            ).strip()
+
+            # Per-bar word segments, one per bar in the chunk, for the
+            # lead-sheet renderer that walks segments in bar-grid order.
+            segments: List[dict] = []
+            for b in chunk:
+                b_start = b["start_time"]
+                b_end = b["end_time"]
+                seg_words = [
+                    {"w": w.get("word", ""), "t": round(w.get("start", 0.0), 3)}
+                    for w in chunk_word_objs
+                    if b_start - 0.1 <= w.get("start", 0.0) < b_end
+                ]
+                segments.append({
+                    "chord": b["chord"],
+                    "start": round(b_start, 3),
+                    "end":   round(b_end, 3),
+                    "duration": round(b_end - b_start, 3),
+                    "bars":    1,
+                    "words":   seg_words,
+                })
+
+            new_lines.append({
+                "chords": chords_line,
+                "lyrics": lyrics_line if lyrics_line else None,
+                "segments": segments,
+            })
+
+        # Shift pickup words across chunk boundaries: a word sung near the
+        # end of line N that begins a phrase completed on line N+1 should
+        # start line N+1, not end line N. Musically this is the intra-section
+        # analogue of the phrase-boundary snap (which handles Section→Section
+        # pickups). Without it, verses read "... love. You," | "give me light"
+        # when the phrase is actually "You give me light" starting on the Cm
+        # downbeat of the next line.
+        _shift_pickup_words_across_lines(new_lines)
+
+        sec.lines = new_lines
+        # Reflect whether the section actually carries lyric text post-chunk.
+        sec.has_lyrics = any(ln.get("lyrics") for ln in new_lines)
+
+
+def _shift_pickup_words_across_lines(
+    lines: List[dict],
+    tail_window_sec: float = 0.5,
+    gap_window_sec: float = 1.0,
+) -> None:
+    """Move last word of line N to line N+1 when it's a musical pickup.
+
+    Heuristic: if line N's final segment ends with a word sung near the bar
+    end (start within ``tail_window_sec`` of the segment's end) AND line N+1's
+    first segment begins with a word sung close in time (gap within
+    ``gap_window_sec``), treat the word as a pickup anacrusis for line N+1's
+    phrase and shift it forward. Runs in-place, updates both the per-segment
+    ``words`` arrays and each line's ``lyrics`` string.
+
+    Only shifts ONE word per boundary per pass — avoids cascading shifts that
+    could re-order entire phrases. If the heuristic's thresholds don't fire,
+    the line boundary stays where it was (safe default).
+    """
+    if not lines or len(lines) < 2:
+        return
+
+    for i in range(len(lines) - 1):
+        cur = lines[i]
+        nxt = lines[i + 1]
+        cur_segs = cur.get("segments") or []
+        nxt_segs = nxt.get("segments") or []
+        if not cur_segs or not nxt_segs:
+            continue
+        cur_last_seg = cur_segs[-1]
+        nxt_first_seg = nxt_segs[0]
+        cur_last_words = cur_last_seg.get("words") or []
+        nxt_first_words = nxt_first_seg.get("words") or []
+        if not cur_last_words or not nxt_first_words:
+            continue
+
+        last_w = cur_last_words[-1]
+        first_w_next = nxt_first_words[0]
+        try:
+            last_t = float(last_w.get("t", 0.0))
+            first_t_next = float(first_w_next.get("t", 0.0))
+            seg_end = float(cur_last_seg.get("end", 0.0))
+        except (TypeError, ValueError):
+            continue
+
+        # Gap to first word of next line must be short (tight phrase cluster).
+        tight_cluster = (first_t_next - last_t) <= gap_window_sec
+
+        # Heuristic A (time-based): word sung near the end of its segment AND
+        # tight cluster with next line. Catches straight pickup anacrusis.
+        near_segment_end = last_t >= seg_end - tail_window_sec
+
+        # Heuristic B (phrase-based): the word BEFORE the last word ends in a
+        # sentence-terminating punctuation (. ! ? ;), meaning the last word
+        # starts a new lyric phrase. Lyric-phrase starts belong on the next
+        # chord line's downbeat regardless of how the Whisper timestamps
+        # happened to land. This is the "oh that sounds like the start of
+        # the next verse — put it there" rule.
+        starts_new_phrase = False
+        if len(cur_last_words) >= 2:
+            prev_w_text = (cur_last_words[-2].get("w") or "").strip()
+            if prev_w_text.endswith((".", "!", "?", ";")):
+                starts_new_phrase = True
+
+        # Only shift when at least one trigger fires AND the cluster is tight.
+        if not tight_cluster:
+            continue
+        if not (near_segment_end or starts_new_phrase):
+            continue
+        # Shift.
+        cur_last_words.pop()
+        nxt_first_words.insert(0, last_w)
+
+    # Rebuild each line's lyrics string from the updated per-segment words.
+    for ln in lines:
+        all_words = []
+        for seg in ln.get("segments") or []:
+            for w in seg.get("words") or []:
+                txt = (w.get("w") or "").strip()
+                if txt:
+                    all_words.append(txt)
+        joined = " ".join(all_words).strip()
+        ln["lyrics"] = joined if joined else None
+
+
+def _rename_solo_sections_with_lyrics(sections: List[_Section]) -> None:
+    """Relabel sections that still read as a "solo" but contain lyric text.
+
+    Whisper sometimes transcribes lyrics over instrumental passages (bleed
+    from previous phrase, ad-libs, or phantom words under a solo), and the
+    stem-RMS solo-labeler can then tag a section as "Drum Break" / "Bass
+    Solo" while lyric text remains in the line dicts. A chord chart that
+    shows "Drum Break" above real lyrics is the wrong affordance — the
+    musician needs to see it as a normal vocal section.
+
+    Fix: if any line in such a section has non-empty lyric text, rename it
+    to Verse/Chorus/Bridge based on nearby sections' labels. Solo-style
+    names (Drum Break, Bass Solo, Guitar Solo, Piano Solo, Keys Solo,
+    Interlude, Outro) are reserved for sections with zero lyric lines.
+    """
+    solo_names = {
+        "Drum Break", "Drums Solo", "Drum Solo",
+        "Bass Solo", "Guitar Solo", "Piano Solo", "Keys Solo",
+        "Solo", "Interlude",
+        # Outro is also an instrumental label in this context — a tail
+        # section that unexpectedly carries lyrics is a vocal outro, which
+        # we'd rather call Verse (or Chorus if the chord pattern matches)
+        # than Outro.
+        "Outro",
+    }
+
+    def _nearest_vocal_label(idx: int) -> str:
+        """Borrow a vocal label from an adjacent section if one is available."""
+        # Prefer the preceding vocal section — avoids labeling a tail as
+        # Chorus when the song just left a Chorus into a (phantom-) solo.
+        for j in range(idx - 1, -1, -1):
+            nm = sections[j].name or ""
+            base = nm.split(" ")[0]
+            if base in ("Verse", "Chorus", "Bridge", "Pre-Chorus"):
+                return base
+        for j in range(idx + 1, len(sections)):
+            nm = sections[j].name or ""
+            base = nm.split(" ")[0]
+            if base in ("Verse", "Chorus", "Bridge", "Pre-Chorus"):
+                return base
+        return "Verse"
+
+    # Identify the last section that still carries lyric text so a tail solo
+    # section with residual Whisper lyrics becomes "Outro" (not "Bridge" or
+    # "Verse"). This matches the directive's expectation that the final
+    # chunk of a song ends under an Outro label.
+    last_lyric_idx = -1
+    for i, sec in enumerate(sections):
+        if any((ln.get("lyrics") or "").strip()
+               for ln in (sec.lines or []) if isinstance(ln, dict)):
+            last_lyric_idx = i
+
+    for i, sec in enumerate(sections):
+        if not sec.name:
+            continue
+        base = sec.name.split(" (")[0]
+        # Strip trailing numbering like "Bass Solo 2"
+        base_stripped = base.rsplit(" ", 1)[0] if base.rsplit(" ", 1)[-1].isdigit() else base
+        if base not in solo_names and base_stripped not in solo_names:
+            continue
+        has_lyric_text = any(
+            (ln.get("lyrics") or "").strip()
+            for ln in (sec.lines or []) if isinstance(ln, dict)
+        )
+        if not has_lyric_text:
+            continue
+        sec.has_lyrics = True
+        # Tail-of-song vocal section → Outro. Interior → borrow nearest
+        # vocal label from a neighbouring section.
+        if i == last_lyric_idx:
+            sec.name = "Outro"
+        else:
+            sec.name = _nearest_vocal_label(i)
+
+
+def _merge_adjacent_sections_with_same_name(
+    sections: List[_Section],
+) -> List[_Section]:
+    """Merge consecutive sections that share the same display name.
+
+    After solo-rename + re-numbering, it's common to see a trailing vocal
+    section and a 1-bar instrumental tail both labeled "Outro". The chart
+    reads cleaner when they render as a single Outro section whose last
+    chunk is the instrumental tail, so we concatenate line lists whenever two
+    adjacent sections carry identical names. Returns a new list; the
+    original sections are not mutated.
+    """
+    if not sections:
+        return sections
+    merged: List[_Section] = [sections[0]]
+    for sec in sections[1:]:
+        prev = merged[-1]
+        if prev.name == sec.name:
+            prev.lines = list(prev.lines) + list(sec.lines)
+            prev.end_time = sec.end_time
+            prev.has_lyrics = prev.has_lyrics or sec.has_lyrics
+        else:
+            merged.append(sec)
+    return merged
+
+
+# ---------------------------------------------------------------------------
+# Post-rebuild consolidation (unused — 4-bar-chunk rebuild handles
+# fragmentation and held-chord rendering directly). Kept here as reference
+# if a future layout needs to pre-process sections before chunking.
+# ---------------------------------------------------------------------------
+
+
+def _consolidate_short_lyric_lines(
+    sections: List[_Section],
+    max_lines_before_consolidation: int = 8,
+    max_avg_chars: int = 30,
+    target_line_chars: int = 60,
+) -> None:
+    """Merge adjacent short lyric lines so a verse doesn't render as 14 stubs.
+
+    Whisper's word timestamps plus the short LINE_GAP_THRESHOLD can split a
+    single sung phrase ("I need your love, I need your love, I need your love,")
+    across multiple lines. Post-chord-placement, collapse those stubs so a
+    section reads as 4-8 lines of ~60 chars instead of 14 lines of ~15 chars.
+
+    Rules:
+      - Skip instrumental sections (has_lyrics=False or no lyric text).
+      - Only act when a section has > `max_lines_before_consolidation` lines
+        AND the average lyric length is < `max_avg_chars`.
+      - Greedily merge adjacent lines while the merged lyric stays under
+        `target_line_chars`; break when adding the next line would overflow.
+      - Concatenate chord strings with two spaces as the separator and
+        collapse consecutive identical chord names (e.g. "Cm  Cm  Gm" -> "Cm  Gm").
+      - Segments (if present) concatenate as-is. `notes` is preserved from the
+        first line of each merged group.
+    """
+    for sec in sections:
+        lines = sec.lines or []
+        if not lines or len(lines) <= max_lines_before_consolidation:
+            continue
+        # Only consolidate lyric-bearing sections
+        lyric_lines = [ln for ln in lines if isinstance(ln, dict) and (ln.get("lyrics") or "").strip()]
+        if not lyric_lines:
+            continue
+        avg_chars = sum(len(ln.get("lyrics") or "") for ln in lyric_lines) / max(1, len(lyric_lines))
+        if avg_chars >= max_avg_chars:
+            continue
+
+        merged: List[dict] = []
+        for ln in lines:
+            if not isinstance(ln, dict):
+                merged.append(ln)
+                continue
+            ly = (ln.get("lyrics") or "").strip()
+            if not merged or not ly:
+                merged.append(dict(ln))
+                continue
+            prev = merged[-1]
+            prev_ly = (prev.get("lyrics") or "").strip()
+            # Only merge when the previous line also has lyrics and together
+            # we stay under the target width (add +1 for the joining space).
+            if not prev_ly or len(prev_ly) + 1 + len(ly) > target_line_chars:
+                merged.append(dict(ln))
+                continue
+            # Merge ly -> prev
+            new_lyrics = prev_ly + " " + ly
+            prev_chords = (prev.get("chords") or "").strip()
+            this_chords = (ln.get("chords") or "").strip()
+            if prev_chords and this_chords:
+                combined = prev_chords + "  " + this_chords
+            else:
+                combined = prev_chords or this_chords
+            # Collapse consecutive identical chord tokens ("Cm  Cm  Gm" -> "Cm  Gm")
+            tokens = [t for t in combined.split() if t]
+            deduped: List[str] = []
+            for t in tokens:
+                if not deduped or deduped[-1] != t:
+                    deduped.append(t)
+            prev["chords"] = "  ".join(deduped)
+            prev["lyrics"] = new_lyrics
+            # Merge segments if both sides have them
+            prev_segs = prev.get("segments") or []
+            this_segs = ln.get("segments") or []
+            if prev_segs or this_segs:
+                prev["segments"] = list(prev_segs) + list(this_segs)
+
+        sec.lines = merged
+
+
+def _compact_held_chord_lines(sections: List[_Section]) -> None:
+    """Collapse "Gm  Gm  Gm  Gm" style repetition into "Gm (x4)".
+
+    Legacy helper from earlier layouts that emitted bare chord names per
+    bar. Under the current 4-bar slash-notation layout each bar renders as
+    "<chord> ////" (tokens are [chord, "////", chord, "////", ...]), so this
+    pass is effectively a no-op because `////` always interrupts the run of
+    identical chord tokens. Retained in case a future layout reverts to a
+    bare-chord chord line that would benefit from held-chord compaction.
+
+    For each chord line, collapse runs of 3+ identical consecutive chord
+    tokens into "{name} (x{count})". Shorter runs (1-2 repeats) are left
+    alone so a straight Cm-Gm-Dm-Am verse vamp still reads as the full
+    progression.
+    """
+    for sec in sections:
+        for line in sec.lines or []:
+            if not isinstance(line, dict):
+                continue
+            chords = (line.get("chords") or "").strip()
+            if not chords:
+                continue
+            tokens = [t for t in chords.split() if t]
+            if len(tokens) < 3:
+                continue
+            compact: List[str] = []
+            i = 0
+            n = len(tokens)
+            while i < n:
+                run_end = i + 1
+                while run_end < n and tokens[run_end] == tokens[i]:
+                    run_end += 1
+                run_len = run_end - i
+                if run_len >= 3:
+                    compact.append(f"{tokens[i]} (x{run_len})")
+                else:
+                    compact.extend(tokens[i:run_end])
+                i = run_end
+            line["chords"] = "  ".join(compact)
+
+
+# ---------------------------------------------------------------------------
+# Step 1a: Consolidate chord events (drop outliers + merge adjacent duplicates)
+# ---------------------------------------------------------------------------
+
+_SUS_AUG_STRIP_RE = re.compile(r'(sus[24]?|aug\d*|\+|add\d+|#5|b5)', re.IGNORECASE)
+
+
+def _simplify_uncommon_quality(chord: str) -> str:
+    """
+    Strip chord-quality decorations that are almost always detector noise:
+    sus2/sus4, aug/+, add9/add11, altered fifths. Leaves major/minor/7/maj7/m7
+    and dim alone (those are real jazz chord qualities).
+
+    Examples:
+      "Csus2"  -> "C"
+      "Gaug"   -> "G"
+      "Dsus4"  -> "D"
+      "Baug"   -> "B"
+      "Cm7"    -> "Cm7"  (unchanged)
+      "Fdim"   -> "Fdim" (unchanged)
+    """
+    if not chord or chord == "N":
+        return chord
+    simplified = _SUS_AUG_STRIP_RE.sub('', chord)
+    # If stripping left just a root (e.g. "Cm" -> "Cm", "C" -> "C"), keep it.
+    return simplified or chord
+
+
+def _consolidate_chord_events(
+    chords: List[Dict],
+    min_count: int = 4,
+    min_duration: float = 1.0,
+    min_vocab_fraction: float = 0.03,
+) -> List[Dict]:
+    """
+    Pre-pass cleanup of raw chord-detector output before section assignment.
+
+    Four passes:
+      0. Simplify uncommon qualities — strip sus/aug/add/altered-5 decorations
+         that are almost always detector noise on real pop/rock audio.
+      1. Drop transient outliers — chords whose label appears fewer than `min_count`
+         times AND whose duration is shorter than `min_duration` seconds. Dropped
+         duration folds into the preceding chord so the timeline stays continuous.
+      2. Merge adjacent identical chords into a single longer event.
+      3. Vocabulary pareto — drop any chord whose TOTAL duration is less than
+         `min_vocab_fraction` of the song. A 4-minute song (240s) with a 3% floor
+         means any chord summing to less than 7.2s gets dropped.
+    """
+    if not chords:
+        return chords
+    from collections import Counter
+
+    # Pass 0: simplify qualities
+    normalized: List[Dict] = []
+    for c in chords:
+        nc = dict(c)
+        nc["chord"] = _simplify_uncommon_quality(c["chord"])
+        normalized.append(nc)
+    chords = normalized
+
+    chord_counts = Counter(c["chord"] for c in chords)
+
+    # Pass 1: drop rare+short outliers
+    kept: List[Dict] = []
+    for c in chords:
+        dur = c.get("duration", 1.0)
+        count = chord_counts[c["chord"]]
+        if count < min_count and dur < min_duration and kept:
+            prev = dict(kept[-1])
+            prev["duration"] = prev.get("duration", 1.0) + dur
+            kept[-1] = prev
+        else:
+            kept.append(c)
+
+    # Pass 2: merge adjacent duplicates
+    if not kept:
+        return kept
+    merged: List[Dict] = [dict(kept[0])]
+    for c in kept[1:]:
+        if c["chord"] == merged[-1]["chord"]:
+            merged[-1]["duration"] = merged[-1].get("duration", 1.0) + c.get("duration", 1.0)
+        else:
+            merged.append(dict(c))
+
+    # Pass 3: vocabulary pareto — drop chords with tiny total duration share
+    if merged:
+        total_dur = sum(c.get("duration", 1.0) for c in merged)
+        if total_dur > 0:
+            by_chord_dur: Dict[str, float] = {}
+            for c in merged:
+                by_chord_dur[c["chord"]] = by_chord_dur.get(c["chord"], 0.0) + c.get("duration", 1.0)
+            keepable = {ch for ch, d in by_chord_dur.items() if d / total_dur >= min_vocab_fraction}
+            pared: List[Dict] = []
+            for c in merged:
+                if c["chord"] in keepable:
+                    pared.append(c)
+                elif pared:
+                    pared[-1] = dict(pared[-1])
+                    pared[-1]["duration"] = pared[-1].get("duration", 1.0) + c.get("duration", 1.0)
+                # else: drop (can't fold into anything)
+            # Re-merge adjacents after drops
+            if pared:
+                final: List[Dict] = [dict(pared[0])]
+                for c in pared[1:]:
+                    if c["chord"] == final[-1]["chord"]:
+                        final[-1]["duration"] = final[-1].get("duration", 1.0) + c.get("duration", 1.0)
+                    else:
+                        final.append(dict(c))
+                return final
+    return merged
+
+
+# ---------------------------------------------------------------------------
+# Step 1: Split words into lyric lines
+# ---------------------------------------------------------------------------
+
+def _split_into_lines(words: List[Dict]) -> List[_LyricLine]:
+    """Split word timestamps into natural lyric lines based on timing gaps."""
+    if not words:
+        return []
+
+    lines = []
+    current_words = [words[0]]
+
+    for i in range(1, len(words)):
+        gap = words[i]["start"] - words[i - 1]["end"]
+        word_count = len(current_words)
+
+        # Split on timing gap or max word count
+        should_split = (
+            gap >= LINE_GAP_THRESHOLD
+            or word_count >= MAX_WORDS_PER_LINE
+        )
+
+        # Hard break at max words regardless of MIN_WORDS_PER_LINE
+        force_split = word_count >= MAX_WORDS_PER_LINE
+
+        if force_split or (should_split and word_count >= MIN_WORDS_PER_LINE):
+            lines.append(_LyricLine(words=current_words))
+            current_words = [words[i]]
+        else:
+            current_words.append(words[i])
+
+    # Don't lose the last line
+    if current_words:
+        lines.append(_LyricLine(words=current_words))
+
+    return lines
+
+
+# ---------------------------------------------------------------------------
+# Step 3: Build raw sections from lyric lines and chord events
+# ---------------------------------------------------------------------------
+
+def _build_raw_sections(
+    lyric_lines: List[_LyricLine],
+    chords: List[Dict],
+    song_end: float,
+) -> List[_Section]:
+    """
+    Group lyric lines into sections based on timing gaps.
+    Also creates instrumental sections for chord-only regions.
+    """
+    if not lyric_lines:
+        # No lyrics at all — one big instrumental section
+        sec = _Section(name="Instrumental", has_lyrics=False, start_time=0.0, end_time=song_end)
+        return [sec]
+
+    sections = []
+
+    # Check for intro (chords before first lyrics)
+    first_lyric_time = lyric_lines[0].start_time
+    intro_chords = [c for c in chords if c["time"] + c.get("duration", 0) < first_lyric_time - 0.5]
+    if intro_chords and first_lyric_time > 3.0:
+        sec = _Section(
+            name="Intro",
+            has_lyrics=False,
+            start_time=intro_chords[0]["time"],
+            end_time=first_lyric_time,
+        )
+        sections.append(sec)
+
+    # Group lyric lines into sections based on gaps
+    current_lines = [lyric_lines[0]]
+    current_start = lyric_lines[0].start_time
+
+    for i in range(1, len(lyric_lines)):
+        gap = lyric_lines[i].start_time - lyric_lines[i - 1].end_time
+
+        if gap >= SECTION_GAP_THRESHOLD:
+            # Close current section
+            sec = _Section(
+                name="Section",
+                has_lyrics=True,
+                start_time=current_start,
+                end_time=lyric_lines[i - 1].end_time,
+            )
+            sec.lines = _lines_to_output(current_lines)
+            sections.append(sec)
+
+            # Check for instrumental bridge in the gap
+            gap_chords = [
+                c for c in chords
+                if c["time"] >= lyric_lines[i - 1].end_time + 0.5
+                and c["time"] + c.get("duration", 0) < lyric_lines[i].start_time - 0.5
+            ]
+            if gap_chords and gap > 6.0:
+                inst_sec = _Section(
+                    name="Instrumental",
+                    has_lyrics=False,
+                    start_time=lyric_lines[i - 1].end_time,
+                    end_time=lyric_lines[i].start_time,
+                )
+                sections.append(inst_sec)
+
+            current_lines = [lyric_lines[i]]
+            current_start = lyric_lines[i].start_time
+        else:
+            current_lines.append(lyric_lines[i])
+
+    # Close last section
+    if current_lines:
+        sec = _Section(
+            name="Section",
+            has_lyrics=True,
+            start_time=current_start,
+            end_time=current_lines[-1].end_time,
+        )
+        sec.lines = _lines_to_output(current_lines)
+        sections.append(sec)
+
+    # Check for outro (chords after last lyrics)
+    last_lyric_time = lyric_lines[-1].end_time
+    outro_chords = [c for c in chords if c["time"] > last_lyric_time + 1.0]
+    if outro_chords and (song_end - last_lyric_time) > 3.0:
+        sec = _Section(
+            name="Outro",
+            has_lyrics=False,
+            start_time=last_lyric_time,
+            end_time=song_end,
+        )
+        sections.append(sec)
+
+    return sections
+
+
+def _lines_to_output(lyric_lines: List[_LyricLine]) -> List[dict]:
+    """Convert _LyricLine objects to output dicts (chords assigned later)."""
+    return [
+        {"chords": "", "lyrics": ll.text, "_words": ll.words, "_start": ll.start_time, "_end": ll.end_time}
+        for ll in lyric_lines
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Step 3b: Pickup anacrusis correction
+# ---------------------------------------------------------------------------
+
+def _align_sections_to_loop_downbeat(
+    sections: List[_Section],
+    chords: List[Dict],
+    max_shift_seconds: float = 3.0,
+    min_section_chords: int = 6,
+    pickup_ratio: float = 0.75,
+) -> None:
+    """
+    Shift vocal sections that start on a pickup chord forward to the loop downbeat.
+
+    Pickup signal: the first chord of the section has significantly shorter
+    duration than later occurrences of the SAME chord within the section. In a
+    Cm-Gm-Dm-Am vamp where the vocal enters on the last Am of the intro loop,
+    that pickup Am is typically a fraction of a bar while later Am's in the verse
+    are a full bar — so the pickup duration is visibly shorter.
+
+    If pickup detected:
+      1. Shift section.start_time to the second chord (the loop downbeat).
+      2. Move any lyric lines whose _start is before the new boundary back to
+         the preceding section (flip prev to has_lyrics=True if instrumental).
+
+    Mutates sections in place. No-ops when the first chord looks like a normal
+    downbeat, when the section is too short, when the shift would strip the
+    section, or when no preceding section exists.
+    """
+    for i, sec in enumerate(sections):
+        if not sec.has_lyrics or not sec.lines:
+            continue
+        sec_chords = [c for c in chords if sec.start_time - 0.3 <= c["time"] < sec.end_time]
+        if len(sec_chords) < min_section_chords:
+            continue
+
+        first = sec_chords[0]
+        first_name = first["chord"]
+        first_dur = first.get("duration", 1.0)
+
+        # If next chord is the same, that's not a pickup situation
+        if sec_chords[1]["chord"] == first_name:
+            continue
+
+        # Compare duration to later instances of the same chord
+        later_same = [c.get("duration", 1.0) for c in sec_chords[1:] if c["chord"] == first_name]
+        if not later_same:
+            continue  # first chord never reappears — can't judge
+        later_same.sort()
+        median_later = later_same[len(later_same) // 2]
+        if first_dur >= pickup_ratio * median_later:
+            continue  # first chord is long enough to be the downbeat
+
+        shift_time = sec_chords[1]["time"]
+        if shift_time - sec.start_time > max_shift_seconds:
+            continue
+
+        kept_lines = []
+        moved_lines = []
+        for line in sec.lines:
+            if line.get("_start", 0) < shift_time:
+                moved_lines.append(line)
+            else:
+                kept_lines.append(line)
+
+        if not moved_lines or not kept_lines:
+            continue  # would strip the section entirely — leave alone
+
+        prev_sec = sections[i - 1] if i > 0 else None
+        sec.lines = kept_lines
+        sec.start_time = shift_time
+        if prev_sec is not None:
+            prev_sec.lines = list(prev_sec.lines) + moved_lines
+            prev_sec.end_time = shift_time
+            if moved_lines:
+                prev_sec.has_lyrics = True
+        logger.info(
+            f"Pickup alignment: section '{sec.name}' shifted "
+            f"({first_name} pickup {first_dur:.2f}s -> downbeat {sec_chords[1]['chord']} at {shift_time:.2f}s); "
+            f"{len(moved_lines)} pickup line(s) moved to prev section"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Step 4: Assign chords to lines
+# ---------------------------------------------------------------------------
+
+def _assign_chords_to_section(section: _Section, all_chords: List[Dict]):
+    """Place chords above the correct words in each line of a section."""
+
+    if not section.has_lyrics:
+        # Instrumental section: just list chord names
+        sec_chords = [
+            c for c in all_chords
+            if section.start_time - 0.5 <= c["time"] <= section.end_time + 0.5
+        ]
+        if not sec_chords:
+            return
+
+        # Group into lines of ~4 chords each (like UG instrumental lines)
+        chord_names = [c["chord"] for c in sec_chords]
+        lines = []
+        for i in range(0, len(chord_names), 4):
+            batch = chord_names[i:i + 4]
+            lines.append({"chords": "  ".join(batch), "lyrics": None})
+        section.lines = lines
+
+        # Build fingerprint for section matching
+        section.chord_pattern = _chord_fingerprint(sec_chords)
+        return
+
+    # Vocal section: place chords above words
+    for line in section.lines:
+        words_data = line.get("_words", [])
+        lyrics_text = line.get("lyrics", "")
+        line_start = line.get("_start", 0)
+        line_end = line.get("_end", 0)
+
+        if not lyrics_text:
+            continue
+
+        # Find chords that fall within this line's time range
+        # Include chord active at the start of the line
+        line_chords = []
+        active_at_start = None
+
+        for c in all_chords:
+            chord_end = c["time"] + c.get("duration", 1.0)
+            # Chord starts within this line
+            if line_start - 0.3 <= c["time"] <= line_end + 0.3:
+                line_chords.append(c)
+            # Chord was playing when this line started (carry-over)
+            elif c["time"] < line_start and chord_end > line_start:
+                active_at_start = c
+
+        if not line_chords and active_at_start:
+            # Only show carry-over chord if it's different from the previous line's last chord
+            line_chords = [active_at_start]
+
+        if not line_chords:
+            line["chords"] = ""
+            continue
+
+        # Deduplicate consecutive same chords
+        deduped = [line_chords[0]]
+        for lc in line_chords[1:]:
+            if lc["chord"] != deduped[-1]["chord"]:
+                deduped.append(lc)
+        line_chords = deduped
+
+        # Place chords above words using timing alignment
+        chord_positions = _place_chords_on_words(line_chords, words_data, lyrics_text)
+        line["chords"] = _build_chord_line(chord_positions, len(lyrics_text))
+
+        # Build timed segments: one per chord in the line, each with the words
+        # spoken during that chord's time window + bar count computed from
+        # relative chord durations (shortest chord = 1 bar reference).
+        durations = [max(0.1, c.get("duration", 1.0)) for c in line_chords]
+        unit_bar = min(durations) if durations else 1.0
+        segments = []
+        for idx, c in enumerate(line_chords):
+            c_start = c["time"]
+            c_dur = max(0.1, c.get("duration", 1.0))
+            c_end = c_start + c_dur
+            seg_words = [
+                {"w": w["word"], "t": round(w["start"], 3)}
+                for w in words_data
+                if c_start - 0.1 <= w["start"] < c_end
+            ]
+            # Bars = round(this_duration / shortest_in_line), min 1, max 8
+            bars = max(1, min(8, round(c_dur / unit_bar)))
+            segments.append({
+                "chord": c["chord"],
+                "start": round(c_start, 3),
+                "end":   round(c_end, 3),
+                "duration": round(c_dur, 3),
+                "bars":    bars,
+                "words":   seg_words,
+            })
+        line["segments"] = segments
+
+    # Build fingerprint
+    sec_chords = [
+        c for c in all_chords
+        if section.start_time - 0.5 <= c["time"] <= section.end_time + 0.5
+    ]
+    section.chord_pattern = _chord_fingerprint(sec_chords)
+
+    # NOTE: Internal keys (_words, _start, _end) are intentionally NOT stripped
+    # here — downstream steps (bar-grid section rebuild) still need _start/_end
+    # to pair bars to lyric lines. Stripping happens once at the end of
+    # format_chart, just before the JSON output is built.
+
+
+def _place_chords_on_words(
+    line_chords: List[Dict],
+    words_data: List[Dict],
+    lyrics_text: str,
+) -> List[Tuple[int, str]]:
+    """
+    Return list of (char_position, chord_name) for placing chords above lyrics.
+    Uses word-level timestamps for accurate placement.
+    """
+    if not words_data or not line_chords:
+        # Fallback: evenly space chords
+        positions = []
+        spacing = max(1, len(lyrics_text) // max(len(line_chords), 1))
+        for i, c in enumerate(line_chords):
+            positions.append((i * spacing, c["chord"]))
+        return positions
+
+    # Build character position map for each word
+    char_positions = []
+    pos = 0
+    for w in words_data:
+        char_positions.append({"word": w["word"], "start": w["start"], "char_pos": pos})
+        pos += len(w["word"]) + 1  # +1 for space
+
+    positions = []
+    for chord in line_chords:
+        ct = chord["time"]
+
+        # Find the word closest in time to this chord
+        best_idx = 0
+        best_dist = float("inf")
+        for j, wp in enumerate(char_positions):
+            dist = abs(wp["start"] - ct)
+            if dist < best_dist:
+                best_dist = dist
+                best_idx = j
+
+        char_pos = char_positions[best_idx]["char_pos"]
+
+        # Avoid placing two chords at the exact same position
+        while any(p == char_pos for p, _ in positions):
+            char_pos += 1
+
+        positions.append((char_pos, chord["chord"]))
+
+    # Sort by position
+    positions.sort(key=lambda x: x[0])
+    return positions
+
+
+def _build_chord_line(positions: List[Tuple[int, str]], lyrics_len: int) -> str:
+    """
+    Build the chord string that sits above a lyrics line.
+    Chords are spaced to align with the character positions in the lyrics below.
+
+    Returns a string like: "Am                C"
+    which sits above:      "Hello darkness my old friend"
+    """
+    if not positions:
+        return ""
+
+    # Build the chord line character by character. Enforce a minimum two-space
+    # gap between adjacent chord labels so "Cm" + "Gm" never render fused as
+    # "CmGm" (which happens when two chord onsets crowd into a single short
+    # word). Readable gig-chart convention: chord labels must be visually
+    # separated even when the underlying time grid is dense.
+    MIN_GAP = 2
+    result = []
+    cursor = 0
+
+    for char_pos, chord_name in positions:
+        required_pos = char_pos
+        if cursor > 0 and required_pos < cursor + MIN_GAP:
+            required_pos = cursor + MIN_GAP
+        # Pad to reach this position
+        if required_pos > cursor:
+            result.append(" " * (required_pos - cursor))
+            cursor = required_pos
+
+        # Place the chord
+        result.append(chord_name)
+        cursor += len(chord_name)
+
+    return "".join(result).rstrip()
+
+
+# ---------------------------------------------------------------------------
+# Step 5: Section type detection
+# ---------------------------------------------------------------------------
+
+def _chord_fingerprint(chords: List[Dict]) -> str:
+    """
+    Create a fingerprint of a chord progression for pattern matching.
+    Uses relative intervals (semitones between consecutive roots) rather than
+    absolute chord names, so transposed songs still match.
+    """
+    if not chords:
+        return ""
+
+    NOTE_MAP = {
+        'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
+        'E': 4, 'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8,
+        'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11,
+    }
+
+    roots = []
+    for c in chords:
+        name = c.get("chord", "N")
+        if name == "N":
+            continue
+        root = name[0]
+        if len(name) > 1 and name[1] in ('#', 'b'):
+            root = name[:2]
+        pc = NOTE_MAP.get(root, -1)
+        if pc >= 0:
+            roots.append(pc)
+
+    if len(roots) < 2:
+        return ",".join(str(r) for r in roots)
+
+    # Convert to intervals
+    intervals = []
+    for i in range(1, len(roots)):
+        interval = (roots[i] - roots[i - 1]) % 12
+        intervals.append(str(interval))
+
+    return ",".join(intervals)
+
+
+def _label_sections(sections: List[_Section]):
+    """
+    Label sections as Verse, Chorus, Bridge, etc. based on heuristics:
+
+    1. Instrumental sections without lyrics keep their name (Intro/Outro/Instrumental)
+    2. The most-repeated chord pattern with lyrics = Verse
+    3. Second most-repeated = Chorus (or if higher energy / different pattern)
+    4. Unique patterns that appear once = Bridge
+    5. Short sections with few chords near choruses = Pre-Chorus
+    """
+    vocal_sections = [s for s in sections if s.has_lyrics and s.chord_pattern]
+
+    if not vocal_sections:
+        return
+
+    # Count pattern occurrences
+    pattern_counts = Counter(s.chord_pattern for s in vocal_sections)
+
+    # Rank patterns by frequency
+    ranked = pattern_counts.most_common()
+
+    if not ranked:
+        for s in vocal_sections:
+            s.name = "Verse"
+        return
+
+    # Through-composed / jazz songs (Aja, Black Cow, etc.) have no repeating
+    # chord patterns — every vocal section has a unique progression. The
+    # default Bridge-labeling heuristic mislabels these as "Bridge 1, Bridge 2,
+    # Bridge 3..." when they're really just "Verse 1, Verse 2, Verse 3..."
+    # If the most-common pattern only appears ONCE (no real repetition), label
+    # every vocal section as Verse and let downstream numbering sort them out.
+    if ranked[0][1] == 1:
+        for s in vocal_sections:
+            s.name = "Verse"
+        return
+
+    # Most common pattern = Verse
+    verse_pattern = ranked[0][0]
+
+    # Second most common = Chorus (if exists and appears 2+ times)
+    chorus_pattern = None
+    if len(ranked) > 1 and ranked[1][1] >= 2:
+        chorus_pattern = ranked[1][0]
+    elif len(ranked) > 1:
+        # Even if it appears once, if it's distinct enough, call it a chorus
+        chorus_pattern = ranked[1][0]
+
+    # Patterns that appear exactly once and aren't verse/chorus = Bridge
+    bridge_patterns = set()
+    for pattern, count in ranked[2:]:
+        if count == 1:
+            bridge_patterns.add(pattern)
+
+    # Apply labels
+    verse_num = 0
+    chorus_num = 0
+    bridge_num = 0
+
+    for s in sections:
+        if not s.has_lyrics:
+            continue  # Already labeled (Intro/Outro/Instrumental)
+
+        if s.chord_pattern == verse_pattern:
+            s.name = "Verse"
+        elif chorus_pattern and s.chord_pattern == chorus_pattern:
+            s.name = "Chorus"
+        elif s.chord_pattern in bridge_patterns:
+            s.name = "Bridge"
+        else:
+            # Could be pre-chorus (short section between verse and chorus)
+            line_count = len(s.lines)
+            if line_count <= 2:
+                s.name = "Pre-Chorus"
+            else:
+                s.name = "Verse"
+
+    # Heuristic: if a short section always appears between Verse and Chorus, it's Pre-Chorus
+    for i, s in enumerate(sections):
+        if not s.has_lyrics:
+            continue
+        if s.name in ("Verse", "Chorus", "Bridge"):
+            continue
+        # Check if it's sandwiched between Verse and Chorus
+        prev_vocal = _prev_vocal_section(sections, i)
+        next_vocal = _next_vocal_section(sections, i)
+        if prev_vocal and next_vocal:
+            if prev_vocal.name == "Verse" and next_vocal.name == "Chorus":
+                s.name = "Pre-Chorus"
+
+
+def _prev_vocal_section(sections, idx):
+    for i in range(idx - 1, -1, -1):
+        if sections[i].has_lyrics:
+            return sections[i]
+    return None
+
+
+def _next_vocal_section(sections, idx):
+    for i in range(idx + 1, len(sections)):
+        if sections[i].has_lyrics:
+            return sections[i]
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Step 6: Number repeated sections
+# ---------------------------------------------------------------------------
+
+def _number_repeated_sections(sections: List[_Section]):
+    """
+    Add numbers to repeated section types: Verse 1, Verse 2, Chorus, Chorus, etc.
+    Only numbers verses (Verse 1, Verse 2...). Choruses stay as "Chorus" unless
+    their lyrics differ.
+    """
+    # Count how many of each type
+    type_counts = Counter(s.name for s in sections)
+
+    # Number verses
+    verse_idx = 0
+    for s in sections:
+        if s.name == "Verse":
+            if type_counts["Verse"] > 1:
+                verse_idx += 1
+                s.name = f"Verse {verse_idx}"
+
+    # Number bridges if multiple
+    bridge_idx = 0
+    for s in sections:
+        if s.name == "Bridge":
+            if type_counts["Bridge"] > 1:
+                bridge_idx += 1
+                s.name = f"Bridge {bridge_idx}"
+
+    # Rename instrumental sections in the middle to "Interlude" or "Solo"
+    for s in sections:
+        if s.name == "Instrumental":
+            # If it's not the first or last section, call it Interlude
+            idx = sections.index(s)
+            if idx > 0 and idx < len(sections) - 1:
+                s.name = "Interlude"
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _split_vocal_tail_into_solo(sections: List[_Section], stem_paths: Dict[str, str]) -> List[_Section]:
+    """
+    If the TAIL of a vocal section (last 2+ lines) has:
+      - vocals stem RMS < 0.7 × dominant instrument stem RMS, AND
+      - a chord pattern that differs from the section's opening
+    …split the tail off into its own section labeled "{Instrument} Solo".
+    Returns the new list of sections (may be same length or longer).
+
+    Silent on any failure; returns input unchanged if stems can't be loaded.
+    """
+    try:
+        import librosa
+        import numpy as np
+    except ImportError:
+        return sections
+
+    INSTRUMENT_STEMS = {"guitar", "bass", "piano", "drums", "other"}
+    INSTRUMENT_LABEL = {
+        "guitar": "Guitar Solo",
+        "bass":   "Bass Solo",
+        "piano":  "Keys Solo",
+        "drums":  "Drum Break",
+        "other":  "Instrumental",
+    }
+
+    # Pre-load stems
+    stem_audio: Dict[str, tuple] = {}
+    vocals_audio = None
+    for name, path in (stem_paths or {}).items():
+        base = name.lower().split("_")[0]
+        try:
+            y, sr = librosa.load(path, sr=22050, mono=True)
+        except Exception:
+            continue
+        if base == "vocals":
+            vocals_audio = (y, sr)
+        elif base in INSTRUMENT_STEMS:
+            stem_audio[base] = (y, sr)
+
+    if not stem_audio or vocals_audio is None:
+        return sections
+
+    def _rms_in(y, sr, t0, t1):
+        i0 = max(0, int(t0 * sr)); i1 = min(len(y), int(t1 * sr))
+        if i1 <= i0:
+            return 0.0
+        seg = y[i0:i1]
+        return float(np.sqrt(np.mean(seg ** 2) + 1e-12)) if len(seg) else 0.0
+
+    result: List[_Section] = []
+    for sec in sections:
+        # Only consider sections with enough lyric lines to have a tail
+        lines = sec.lines or []
+        if not sec.has_lyrics or len(lines) < 4:
+            result.append(sec); continue
+
+        # Find the midpoint line, try a clean split
+        split_idx = len(lines) // 2
+        tail_lines = lines[split_idx:]
+        head_lines = lines[:split_idx]
+        if not tail_lines or not head_lines:
+            result.append(sec); continue
+
+        # Tail time window
+        def _line_bounds(ll):
+            # Lines carry _start/_end when built by _build_raw_sections
+            s = ll.get('_start') if isinstance(ll, dict) else None
+            e = ll.get('_end')   if isinstance(ll, dict) else None
+            return (s, e)
+        tail_s, _ = _line_bounds(tail_lines[0])
+        _, tail_e = _line_bounds(tail_lines[-1])
+        if tail_s is None or tail_e is None or tail_e <= tail_s:
+            result.append(sec); continue
+
+        # Compare chord signatures head vs. tail
+        def _sig(ls):
+            chs = []
+            for ln in ls:
+                segs = ln.get('segments') if isinstance(ln, dict) else None
+                if segs:
+                    chs.extend([s.get('chord', '') for s in segs])
+            return '|'.join(chs)
+        head_sig = _sig(head_lines)
+        tail_sig = _sig(tail_lines)
+        if not tail_sig or head_sig == tail_sig:
+            result.append(sec); continue
+
+        # Stem evidence: vocals must be clearly quieter than a dominant instrument
+        v_rms = _rms_in(vocals_audio[0], vocals_audio[1], tail_s, tail_e)
+        inst_rms = {k: _rms_in(y, sr, tail_s, tail_e) for k, (y, sr) in stem_audio.items()}
+        if not inst_rms:
+            result.append(sec); continue
+        top_inst = max(inst_rms, key=inst_rms.get)
+        top_rms = inst_rms[top_inst]
+        if top_rms <= 0 or v_rms / (top_rms + 1e-9) >= 0.7:
+            result.append(sec); continue  # vocals still present → it's the chorus
+
+        # Split: keep head as-is, emit a new solo section for the tail.
+        head_sec = _Section(
+            name=sec.name, has_lyrics=True,
+            start_time=sec.start_time, end_time=tail_s,
+        )
+        head_sec.lines = head_lines
+        head_sec.chord_pattern = sec.chord_pattern
+
+        # Tail still contains Whisper-labeled lyric text, even if the vocal
+        # stem RMS dropped. has_lyrics tracks whether the output should be
+        # rendered as vocal-with-chords or instrumental-only, so mirror the
+        # actual line content: a tail whose lines carry non-empty lyric
+        # strings stays a vocal section, and keeps a generic name
+        # (Section / Outro) rather than being falsely renamed "Bass Solo".
+        tail_has_lyrics = any(
+            (ln.get('lyrics') or '').strip()
+            for ln in tail_lines if isinstance(ln, dict)
+        )
+        solo_name = INSTRUMENT_LABEL.get(top_inst, "Solo") if not tail_has_lyrics else sec.name
+
+        solo_sec = _Section(
+            name=solo_name,
+            has_lyrics=tail_has_lyrics,
+            start_time=tail_s, end_time=tail_e,
+        )
+        solo_sec.lines = tail_lines
+        solo_sec.chord_pattern = tail_sig
+
+        result.extend([head_sec, solo_sec])
+
+    return result
+
+
+def _label_solo_instruments(sections: List[_Section], stem_paths: Dict[str, str]) -> None:
+    """
+    For any section whose current name is generic (Solo/Interlude/Instrumental/Intro/Outro),
+    compute RMS of each non-vocal stem over the section's time window and relabel with the
+    loudest instrument: "Piano Solo", "Guitar Solo", "Bass Solo", "Drums Solo".
+
+    If the loudest stem is vocals (unusual during labeled Solo/Interlude), leave name unchanged.
+    If the section has lyrics (has_lyrics=True), skip — those are vocal sections.
+
+    Silent on any stem load/decode failure — individual stems are best-effort.
+    """
+    try:
+        import librosa
+        import numpy as np
+    except ImportError:
+        logger.info("librosa/numpy unavailable, skipping solo-instrument labeling")
+        return
+
+    INSTRUMENT_STEMS = {"guitar", "bass", "piano", "drums", "other"}
+    INSTRUMENT_LABEL = {
+        "guitar": "Guitar Solo",
+        "bass":   "Bass Solo",
+        "piano":  "Piano Solo",
+        "drums":  "Drum Break",
+        "other":  "Instrumental",
+    }
+    RENAMEABLE = {"Solo", "Interlude", "Instrumental", "Intro", "Outro"}
+
+    # Pre-load each stem once (at 22050 mono for speed)
+    stem_audio: Dict[str, tuple] = {}
+    for name, path in (stem_paths or {}).items():
+        base = name.lower().split("_")[0]  # handle "guitar_lead" → "guitar"
+        if base not in INSTRUMENT_STEMS:
+            continue
+        try:
+            y, sr = librosa.load(path, sr=22050, mono=True)
+            stem_audio[base] = (y, sr)
+        except Exception as e:
+            logger.debug(f"Could not load stem {name}: {e}")
+
+    if not stem_audio:
+        logger.info("No instrument stems loaded; skipping solo labeling")
+        return
+
+    for sec in sections:
+        if sec.has_lyrics:
+            continue
+        # Safety guard: if the section's line dicts carry any non-empty lyric
+        # text, treat it as a vocal section regardless of the has_lyrics flag.
+        # Prevents "Bass Solo" / "Drum Break" labels landing on a section with
+        # actual lyrics (a Whisper phantom-lyric inside a quiet solo).
+        if any((ln.get('lyrics') or '').strip() for ln in (sec.lines or []) if isinstance(ln, dict)):
+            continue
+        # Strip possible numbering like "Solo 2" before comparing
+        base_name = sec.name.split()[0] if sec.name else ""
+        if base_name not in RENAMEABLE and sec.name not in RENAMEABLE:
+            continue
+
+        # Compute RMS of each stem in the section window
+        rms_by_instrument: Dict[str, float] = {}
+        for base, (y, sr) in stem_audio.items():
+            i0 = max(0, int(sec.start_time * sr))
+            i1 = min(len(y), int(sec.end_time * sr))
+            if i1 <= i0:
+                continue
+            segment = y[i0:i1]
+            if len(segment) == 0:
+                continue
+            rms_by_instrument[base] = float(np.sqrt(np.mean(segment ** 2) + 1e-12))
+
+        if not rms_by_instrument:
+            continue
+        top = max(rms_by_instrument, key=rms_by_instrument.get)
+        top_rms = rms_by_instrument[top]
+        # Only relabel if the top stem is clearly dominant (≥ 1.3× the second-loudest);
+        # otherwise keep the generic name.
+        others = [v for k, v in rms_by_instrument.items() if k != top]
+        second = max(others) if others else 0.0
+        if second > 0 and top_rms / (second + 1e-9) < 1.3:
+            continue
+        # For Intro/Outro we usually DON'T rename (they're named for their position in the song).
+        if sec.name in ("Intro", "Outro"):
+            continue
+        sec.name = INSTRUMENT_LABEL.get(top, sec.name)
+
+
+def _empty_chart(title, artist, key, capo):
+    """Return a minimal empty chart."""
+    return {
+        "title": title,
+        "artist": artist,
+        "key": key,
+        "capo": capo,
+        "source": "StemScriber AI",
+        "chords_used": [],
+        "sections": [],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Convenience: format from raw files
+# ---------------------------------------------------------------------------
+
+def format_chart_from_files(
+    chords_json_path: str,
+    words_json_path: str,
+    title: str = "Unknown",
+    artist: str = "Unknown",
+    key: str = "Unknown",
+) -> Dict:
+    """Load chord events and word timestamps from JSON files and format a chart."""
+    with open(chords_json_path) as f:
+        chord_events = json.load(f)
+    with open(words_json_path) as f:
+        word_timestamps = json.load(f)
+    return format_chart(chord_events, word_timestamps, title=title, artist=artist, key=key)
+
+
+# ---------------------------------------------------------------------------
+# Plain text rendering (for preview / debugging)
+# ---------------------------------------------------------------------------
+
+def render_plain_text(chart: Dict) -> str:
+    """
+    Render a chord chart dict as plain text in Ultimate Guitar style.
+
+    Example output:
+        [Verse 1]
+        Am                C
+        Hello darkness my old friend
+        G                 Am
+        I've come to talk with you again
+    """
+    lines = []
+
+    if chart.get("title") or chart.get("artist"):
+        lines.append(f"{chart.get('title', '')} - {chart.get('artist', '')}")
+
+    if chart.get("key"):
+        meta = f"Key: {chart['key']}"
+        if chart.get("capo"):
+            meta += f"  Capo: {chart['capo']}"
+        lines.append(meta)
+
+    lines.append("")
+
+    for section in chart.get("sections", []):
+        lines.append(f"[{section['name']}]")
+        for line in section.get("lines", []):
+            chords = line.get("chords", "")
+            lyrics = line.get("lyrics")
+
+            if chords:
+                lines.append(chords)
+            if lyrics:
+                lines.append(lyrics)
+
+        lines.append("")  # blank line between sections
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Test / demo
+# ---------------------------------------------------------------------------
+
+def _run_test():
+    """
+    Test the formatter with sample data resembling "Sound of Silence" by Simon & Garfunkel.
+    Demonstrates chord-over-word alignment and section detection.
+    """
+    # Simulated chord detection output (like chord_detector_v10.detect_chords)
+    chord_events = [
+        # Intro
+        {"time": 0.0, "duration": 2.5, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.9},
+        # Verse 1
+        {"time": 2.5, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.92},
+        {"time": 5.5, "duration": 2.5, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.88},
+        {"time": 8.0, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.91},
+        {"time": 11.0, "duration": 2.5, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.87},
+        {"time": 13.5, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.90},
+        {"time": 16.5, "duration": 2.5, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.86},
+        {"time": 19.0, "duration": 2.0, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.84},
+        {"time": 21.0, "duration": 2.0, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.89},
+        # Chorus
+        {"time": 27.0, "duration": 2.5, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.88},
+        {"time": 29.5, "duration": 2.5, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.90},
+        {"time": 32.0, "duration": 2.5, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.87},
+        {"time": 34.5, "duration": 2.5, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.89},
+        # Instrumental break
+        {"time": 40.0, "duration": 2.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.85},
+        {"time": 42.0, "duration": 2.0, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.84},
+        {"time": 44.0, "duration": 2.0, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.83},
+        {"time": 46.0, "duration": 2.0, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.82},
+        # Verse 2
+        {"time": 52.0, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.91},
+        {"time": 55.0, "duration": 2.5, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.87},
+        {"time": 57.5, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.90},
+        {"time": 60.5, "duration": 2.5, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.86},
+        {"time": 63.0, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.89},
+        {"time": 66.0, "duration": 2.5, "chord": "G", "root": "G", "quality": "maj", "confidence": 0.85},
+        {"time": 68.5, "duration": 2.0, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.83},
+        {"time": 70.5, "duration": 2.0, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.88},
+        # Chorus 2
+        {"time": 76.0, "duration": 2.5, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.87},
+        {"time": 78.5, "duration": 2.5, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.89},
+        {"time": 81.0, "duration": 2.5, "chord": "F", "root": "F", "quality": "maj", "confidence": 0.86},
+        {"time": 83.5, "duration": 2.5, "chord": "C", "root": "C", "quality": "maj", "confidence": 0.88},
+        # Outro
+        {"time": 90.0, "duration": 3.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.80},
+        {"time": 93.0, "duration": 4.0, "chord": "Am", "root": "A", "quality": "m", "confidence": 0.75},
+    ]
+
+    # Simulated Whisper word timestamps (like word_timestamps.get_word_timestamps)
+    word_timestamps = [
+        # Verse 1 line 1
+        {"word": "Hello", "start": 2.8, "end": 3.3},
+        {"word": "darkness", "start": 3.4, "end": 4.0},
+        {"word": "my", "start": 4.1, "end": 4.3},
+        {"word": "old", "start": 4.4, "end": 4.6},
+        {"word": "friend", "start": 4.7, "end": 5.2},
+        # Verse 1 line 2
+        {"word": "I've", "start": 5.8, "end": 6.1},
+        {"word": "come", "start": 6.2, "end": 6.5},
+        {"word": "to", "start": 6.6, "end": 6.7},
+        {"word": "talk", "start": 6.8, "end": 7.1},
+        {"word": "with", "start": 7.2, "end": 7.4},
+        {"word": "you", "start": 7.5, "end": 7.7},
+        {"word": "again", "start": 7.8, "end": 8.3},
+        # Verse 1 line 3
+        {"word": "Because", "start": 8.8, "end": 9.3},
+        {"word": "a", "start": 9.4, "end": 9.5},
+        {"word": "vision", "start": 9.6, "end": 10.1},
+        {"word": "softly", "start": 10.2, "end": 10.7},
+        {"word": "creeping", "start": 10.8, "end": 11.3},
+        # Verse 1 line 4
+        {"word": "Left", "start": 11.8, "end": 12.1},
+        {"word": "its", "start": 12.2, "end": 12.4},
+        {"word": "seeds", "start": 12.5, "end": 12.9},
+        {"word": "while", "start": 13.0, "end": 13.2},
+        {"word": "I", "start": 13.3, "end": 13.4},
+        {"word": "was", "start": 13.5, "end": 13.7},
+        {"word": "sleeping", "start": 13.8, "end": 14.3},
+        # Verse 1 line 5
+        {"word": "And", "start": 14.8, "end": 15.0},
+        {"word": "the", "start": 15.1, "end": 15.2},
+        {"word": "vision", "start": 15.3, "end": 15.8},
+        {"word": "that", "start": 15.9, "end": 16.1},
+        {"word": "was", "start": 16.2, "end": 16.3},
+        {"word": "planted", "start": 16.4, "end": 16.9},
+        {"word": "in", "start": 17.0, "end": 17.1},
+        {"word": "my", "start": 17.2, "end": 17.3},
+        {"word": "brain", "start": 17.4, "end": 17.9},
+        # Verse 1 line 6
+        {"word": "Still", "start": 18.8, "end": 19.1},
+        {"word": "remains", "start": 19.2, "end": 19.8},
+        {"word": "within", "start": 20.0, "end": 20.4},
+        {"word": "the", "start": 20.5, "end": 20.6},
+        {"word": "sound", "start": 20.7, "end": 21.2},
+        {"word": "of", "start": 21.3, "end": 21.4},
+        {"word": "silence", "start": 21.5, "end": 22.2},
+
+        # Chorus line 1 (after gap)
+        {"word": "In", "start": 27.2, "end": 27.4},
+        {"word": "restless", "start": 27.5, "end": 28.0},
+        {"word": "dreams", "start": 28.1, "end": 28.5},
+        {"word": "I", "start": 28.6, "end": 28.7},
+        {"word": "walked", "start": 28.8, "end": 29.2},
+        {"word": "alone", "start": 29.3, "end": 29.8},
+        # Chorus line 2
+        {"word": "Narrow", "start": 30.2, "end": 30.7},
+        {"word": "streets", "start": 30.8, "end": 31.2},
+        {"word": "of", "start": 31.3, "end": 31.4},
+        {"word": "cobblestone", "start": 31.5, "end": 32.2},
+        # Chorus line 3
+        {"word": "Beneath", "start": 32.5, "end": 33.0},
+        {"word": "the", "start": 33.1, "end": 33.2},
+        {"word": "halo", "start": 33.3, "end": 33.8},
+        {"word": "of", "start": 33.9, "end": 34.0},
+        {"word": "a", "start": 34.1, "end": 34.2},
+        {"word": "street", "start": 34.3, "end": 34.7},
+        {"word": "lamp", "start": 34.8, "end": 35.3},
+
+        # Verse 2 line 1 (after instrumental gap)
+        {"word": "And", "start": 52.3, "end": 52.5},
+        {"word": "in", "start": 52.6, "end": 52.7},
+        {"word": "the", "start": 52.8, "end": 52.9},
+        {"word": "naked", "start": 53.0, "end": 53.5},
+        {"word": "light", "start": 53.6, "end": 54.0},
+        {"word": "I", "start": 54.1, "end": 54.2},
+        {"word": "saw", "start": 54.3, "end": 54.7},
+        # Verse 2 line 2
+        {"word": "Ten", "start": 55.3, "end": 55.6},
+        {"word": "thousand", "start": 55.7, "end": 56.2},
+        {"word": "people", "start": 56.3, "end": 56.8},
+        {"word": "maybe", "start": 56.9, "end": 57.4},
+        {"word": "more", "start": 57.5, "end": 57.9},
+        # Verse 2 line 3
+        {"word": "People", "start": 58.3, "end": 58.8},
+        {"word": "talking", "start": 58.9, "end": 59.4},
+        {"word": "without", "start": 59.5, "end": 60.0},
+        {"word": "speaking", "start": 60.1, "end": 60.7},
+        # Verse 2 line 4
+        {"word": "People", "start": 61.2, "end": 61.7},
+        {"word": "hearing", "start": 61.8, "end": 62.3},
+        {"word": "without", "start": 62.4, "end": 62.9},
+        {"word": "listening", "start": 63.0, "end": 63.7},
+        # Verse 2 line 5
+        {"word": "People", "start": 64.2, "end": 64.7},
+        {"word": "writing", "start": 64.8, "end": 65.3},
+        {"word": "songs", "start": 65.4, "end": 65.8},
+        {"word": "that", "start": 65.9, "end": 66.1},
+        {"word": "voices", "start": 66.2, "end": 66.7},
+        {"word": "never", "start": 66.8, "end": 67.2},
+        {"word": "shared", "start": 67.3, "end": 67.8},
+        # Verse 2 line 6
+        {"word": "And", "start": 68.3, "end": 68.5},
+        {"word": "no", "start": 68.6, "end": 68.8},
+        {"word": "one", "start": 68.9, "end": 69.1},
+        {"word": "dared", "start": 69.2, "end": 69.7},
+        {"word": "disturb", "start": 70.0, "end": 70.5},
+        {"word": "the", "start": 70.6, "end": 70.7},
+        {"word": "sound", "start": 70.8, "end": 71.3},
+        {"word": "of", "start": 71.4, "end": 71.5},
+        {"word": "silence", "start": 71.6, "end": 72.3},
+
+        # Chorus 2 line 1 (after gap)
+        {"word": "Fools", "start": 76.3, "end": 76.8},
+        {"word": "said", "start": 76.9, "end": 77.2},
+        {"word": "I", "start": 77.3, "end": 77.4},
+        {"word": "you", "start": 77.5, "end": 77.7},
+        {"word": "do", "start": 77.8, "end": 78.0},
+        {"word": "not", "start": 78.1, "end": 78.3},
+        {"word": "know", "start": 78.4, "end": 78.9},
+        # Chorus 2 line 2
+        {"word": "Silence", "start": 79.3, "end": 79.8},
+        {"word": "like", "start": 79.9, "end": 80.2},
+        {"word": "a", "start": 80.3, "end": 80.4},
+        {"word": "cancer", "start": 80.5, "end": 81.0},
+        {"word": "grows", "start": 81.1, "end": 81.6},
+        # Chorus 2 line 3
+        {"word": "Hear", "start": 82.0, "end": 82.3},
+        {"word": "my", "start": 82.4, "end": 82.6},
+        {"word": "words", "start": 82.7, "end": 83.1},
+        {"word": "that", "start": 83.2, "end": 83.4},
+        {"word": "I", "start": 83.5, "end": 83.6},
+        {"word": "might", "start": 83.7, "end": 84.0},
+        {"word": "teach", "start": 84.1, "end": 84.5},
+        {"word": "you", "start": 84.6, "end": 84.9},
+    ]
+
+    print("=" * 60)
+    print("CHART FORMATTER TEST")
+    print("=" * 60)
+    print()
+
+    chart = format_chart(
+        chord_events=chord_events,
+        word_timestamps=word_timestamps,
+        title="The Sound of Silence",
+        artist="Simon & Garfunkel",
+        key="Am",
+    )
+
+    # Print as plain text
+    print(render_plain_text(chart))
+
+    # Print as JSON
+    print("=" * 60)
+    print("JSON OUTPUT:")
+    print("=" * 60)
+    print(json.dumps(chart, indent=2))
+
+    return chart
+
+
+if __name__ == "__main__":
+    _run_test()
