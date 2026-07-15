@@ -12,6 +12,7 @@ import zipfile
 import subprocess
 import threading
 import logging
+import hashlib
 from pathlib import Path
 from flask import Blueprint, request, jsonify, send_file, g, make_response
 
@@ -25,7 +26,8 @@ from services.url_resolver import (
     validate_url_no_ssrf as _validate_url_no_ssrf,
 )
 
-from auth.middleware import auth_required
+from auth.middleware import auth_required, authorize_job_access, forbidden_response
+from middleware.rate_limit import enforce_plan_limits, record_usage_event
 from middleware.validation import (
     validate_job_id as _validate_job_id_v2,
     validate_file_upload,
@@ -121,6 +123,7 @@ def list_skills():
 
 @api_bp.route('/api/upload', methods=['POST'])
 @auth_required(optional=True)
+@enforce_plan_limits
 def upload_audio():
     """Upload an audio file for processing"""
     if 'file' not in request.files:
@@ -155,6 +158,21 @@ def upload_audio():
     job_id = str(uuid.uuid4())
     job = ProcessingJob(job_id, file.filename, skills=skills)
     job.metadata['plan'] = plan
+
+    # Persist user-rights attestation. Per the v1.1 legal posture (2026-04-30),
+    # attestation is recorded on EVERY upload (file or URL), not session-scoped.
+    # The frontend modal sends attestation_at + attestation_type + the user's
+    # explicit confirmation that they have rights to the audio. Stored on the
+    # job for audit trail. See docs/legal-faq.md.
+    attestation_at = request.form.get('attestation_at')
+    if attestation_at:
+        job.metadata['attestation_at'] = attestation_at
+        job.metadata['attestation_type'] = request.form.get('attestation_type', 'file_upload_user_rights_confirmation')
+        job.metadata['attestation_user_agent'] = request.headers.get('User-Agent', '')
+        job.metadata['attestation_ip_hash'] = hashlib.sha256(
+            (request.remote_addr or '').encode()
+        ).hexdigest()[:16] if request.remote_addr else None
+        logger.info(f"Job {job_id}: file-upload attestation recorded ({job.metadata['attestation_type']})")
 
     # Tag job with owner
     job.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
@@ -211,10 +229,24 @@ def upload_audio():
     mode_str = 'ENSEMBLE' if ensemble_mode else ('MDX' if mdx_model else 'standard')
     logger.info(f"Created job {job_id} for file {file.filename} - title: {job.metadata.get('title')}, artist: {job.metadata.get('artist')}, mode: {mode_str}, plan: {plan}")
 
-    # Start processing in background thread
-    thread = threading.Thread(target=process_audio, args=(job, audio_path, enhance_stems, stereo_split, gp_tabs, chord_detection, mdx_model, ensemble_mode))
+    # Start processing in background thread.
+    # Wrapped via job_tracker.tracked so the gunicorn worker_exit hook
+    # can drain in-flight jobs before a SIGTERM-driven restart, preventing
+    # the orphan-at-60% bug we hit 4x on 2026-05-26.
+    from processing.job_tracker import tracked as _tracked
+    thread = threading.Thread(
+        target=_tracked,
+        args=(job.job_id, process_audio, job, audio_path, enhance_stems, stereo_split, gp_tabs, chord_detection, mdx_model, ensemble_mode),
+    )
     thread.daemon = True
     thread.start()
+
+    record_usage_event(
+        user=getattr(g, 'current_user', None),
+        ip_hash=getattr(g, 'ip_hash', None),
+        job_id=None,  # in-memory job not in DB jobs table; FK violates otherwise
+        action='separation',
+    )
 
     resp = make_response(jsonify({
         'job_id': job_id,
@@ -231,6 +263,7 @@ def upload_audio():
 
 @api_bp.route('/api/url', methods=['POST'])
 @auth_required(optional=True)
+@enforce_plan_limits
 def process_url_endpoint():
     """Process audio from a URL (YouTube, Spotify, Apple Music, etc.)"""
     data = request.get_json()
@@ -238,6 +271,12 @@ def process_url_endpoint():
         return jsonify({'error': 'No URL provided'}), 400
 
     url = data['url'].strip()
+    # `original_url` is referenced later for cache cloning + job creation. It used
+    # to be set inside the streaming-service resolver (Spotify→YouTube), which is
+    # now disabled. For all currently-supported URL sources the original IS the
+    # final URL, so default it here.
+    original_url = url
+    track_info = None
 
     # Validate URL format and block SSRF targets
     if not url.startswith(('http://', 'https://')):
@@ -262,9 +301,22 @@ def process_url_endpoint():
             'error': f'{streaming_service.replace("_", " ").title()} URLs are not supported. Upload an audio file you own, or paste a Bandcamp, SoundCloud, or Archive.org URL.'
         }), 400
 
+    # YouTube / Dailymotion / Mixcloud — deliberately excluded per the v1.1
+    # legal posture review (2026-04-30). These platforms have a major-label-mixed
+    # UGC profile that fits the MP3.com / Napster / ReDigi plaintiff theory
+    # too closely. Users who want to use audio from these sources can capture
+    # it themselves and upload the resulting file via the regular file-upload
+    # flow (where the rights warranty in ToS §4.3 applies).
+    from services.url_resolver import is_excluded_url
+    excluded = is_excluded_url(url)
+    if excluded:
+        return jsonify({
+            'error': f'{excluded.title()} links aren\'t supported here. If you have the right to use this audio, capture it on your own device and upload the file. See /audio-capture-help.html for instructions.'
+        }), 400
+
     if not is_supported_url(url):
         return jsonify({
-            'error': 'Unsupported URL. Supported: SoundCloud, Bandcamp, Vimeo, Archive.org'
+            'error': 'Unsupported URL. Supported: Bandcamp, ReverbNation, SoundCloud, Audiomack, Internet Archive, Vimeo. For other sources, capture the audio yourself and upload the file.'
         }), 400
 
     # Check URL cache before doing any processing
@@ -315,6 +367,21 @@ def process_url_endpoint():
     job = ProcessingJob(job_id, 'Downloading...', source_url=original_url, skills=skills)
     job.metadata['plan'] = plan
 
+    # Persist user-rights attestation when the user pasted a URL via the
+    # YouTube fallback flow. The frontend modal sends attestation_at +
+    # attestation_type before processing. Stored on the job for audit trail
+    # and to support good-faith DMCA / §230 user-directed-content posture.
+    # See docs/legal-faq.md ("YouTube URL acceptance").
+    attestation_at = data.get('attestation_at')
+    if attestation_at:
+        job.metadata['attestation_at'] = attestation_at
+        job.metadata['attestation_type'] = data.get('attestation_type', 'user_rights_confirmation')
+        job.metadata['attestation_user_agent'] = request.headers.get('User-Agent', '')
+        job.metadata['attestation_ip_hash'] = hashlib.sha256(
+            (request.remote_addr or '').encode()
+        ).hexdigest()[:16] if request.remote_addr else None
+        logger.info(f"Job {job_id}: user-rights attestation recorded ({job.metadata['attestation_type']})")
+
     # Tag job with owner
     job.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
     session_id = request.cookies.get('session_id') or str(uuid.uuid4())
@@ -327,16 +394,42 @@ def process_url_endpoint():
         job.metadata['original_service'] = streaming_service
         job.metadata['original_url'] = original_url
         job.metadata['search_query'] = track_info['search_query']
-        if track_info.get('thumbnail'):
-            job.metadata['thumbnail'] = track_info['thumbnail']
+        # Use ONLY the real album cover (cover_art_url from MusicBrainz/CoverArtArchive).
+        # The Wikipedia thumbnail fallback was dropped 2026-05-23 because it returns
+        # garbage on ambiguous artist names (e.g. "Animals" matched a wildlife
+        # biology article PNG). Better to show no cover (letter-tile placeholder)
+        # than a wildlife photo. Frontends read metadata['thumbnail'].
+        _thumb = track_info.get('cover_art_url')
+        if _thumb:
+            job.metadata['thumbnail'] = _thumb
+
+    if not job.metadata.get('thumbnail'):
+        import re as _re
+        _arch = _re.search(r'archive\.org/(?:details|download|stream)/([^/?#]+)', url)
+        if _arch:
+            job.metadata['thumbnail'] = f'https://archive.org/services/img/{_arch.group(1)}'
+            job.metadata['cover_source'] = 'archive.org'
 
     mode_str = 'ENSEMBLE' if ensemble_mode else ('MDX' if mdx_model else 'standard')
     logger.info(f"Created job {job_id} for URL {url} - mode: {mode_str}, gp_tabs: {gp_tabs}, chord_detection: {chord_detection}")
 
-    # Start processing in background thread
-    thread = threading.Thread(target=process_url, args=(job, url, enhance_stems, stereo_split, gp_tabs, chord_detection, mdx_model, ensemble_mode))
+    # Start processing in background thread.
+    # Wrapped via job_tracker.tracked for the same reason as the file-upload
+    # path — drain in-flight URL imports before SIGTERM kills the worker.
+    from processing.job_tracker import tracked as _tracked
+    thread = threading.Thread(
+        target=_tracked,
+        args=(job.job_id, process_url, job, url, enhance_stems, stereo_split, gp_tabs, chord_detection, mdx_model, ensemble_mode),
+    )
     thread.daemon = True
     thread.start()
+
+    record_usage_event(
+        user=getattr(g, 'current_user', None),
+        ip_hash=getattr(g, 'ip_hash', None),
+        job_id=None,  # in-memory job not in DB jobs table; FK violates otherwise
+        action='separation',
+    )
 
     resp = make_response(jsonify({
         'job_id': job_id,
@@ -353,6 +446,7 @@ def process_url_endpoint():
 # ============ STATUS ============
 
 @api_bp.route('/api/status/<job_id>', methods=['GET'])
+@auth_required(optional=True)
 def get_status(job_id):
     """Get the status of a processing job.
 
@@ -366,6 +460,15 @@ def get_status(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+
+    # chord_chart.json is written ~halfway through the pipeline. After Phase 3
+    # (2026-05-11) the post-sep slot releases at that point and MIDI/MusicXML/
+    # GP continues in a daemon outside the slot — so the chart is viewable in
+    # practice mode well before status flips to 'completed'. Expose this via
+    # a `chord_chart_ready` flag the frontend can use to show "View chart now".
+    chord_chart_ready = (OUTPUT_DIR / job_id / 'chord_chart.json').exists()
 
     # Slim mode: return only the fields that change during processing
     if request.args.get('slim') == '1':
@@ -374,8 +477,11 @@ def get_status(job_id):
             'progress': job.progress,
             'stage': job.stage,
             'error': job.error,
+            'chord_chart_ready': chord_chart_ready,
         }
-        etag = f'"{job.status}-{job.progress}-{hash(job.stage or "")}"'
+        # ETag includes chord_chart_ready so the polling client sees the
+        # transition from False→True even when status/progress/stage don't change.
+        etag = f'"{job.status}-{job.progress}-{hash(job.stage or "")}-{int(chord_chart_ready)}"'
         if request.headers.get('If-None-Match') == etag:
             return '', 304
         resp = jsonify(slim_data)
@@ -386,6 +492,7 @@ def get_status(job_id):
     # Full status (used when job completes or for initial load)
     logger.debug(f"Full status request for {job_id}: stems={list(job.stems.keys()) if job.stems else 'NONE'}")
     data = job.to_dict()
+    data['chord_chart_ready'] = chord_chart_ready
     # Proxy YouTube thumbnails to avoid hotlink-protection 403s
     meta = data.get("metadata", {})
     if meta.get("thumbnail") and "ytimg.com" in meta["thumbnail"]:
@@ -476,6 +583,7 @@ def get_available_models():
 # ============ QUALITY ============
 
 @api_bp.route('/api/quality/<job_id>', methods=['GET'])
+@auth_required(optional=True)
 def get_transcription_quality(job_id):
     """Get transcription quality metrics for a job."""
     if not _validate_job_id(job_id):
@@ -485,6 +593,8 @@ def get_transcription_quality(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     return jsonify({
         'job_id': job_id,
@@ -499,20 +609,29 @@ def get_transcription_quality(job_id):
 # ============ DOWNLOAD ============
 
 @api_bp.route('/api/download/<job_id>/thumbnail', methods=['GET'])
+@auth_required(optional=True)
 def download_thumbnail(job_id):
     """Serve a job's thumbnail image."""
     if not _validate_job_id(job_id):
         return jsonify({'error': 'Invalid job ID'}), 400
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
     thumb_path = OUTPUT_DIR / job_id / 'thumbnail.jpg'
+    mimetype = 'image/jpeg'
     if not thumb_path.exists():
         thumb_path = OUTPUT_DIR / job_id / 'thumbnail.png'
+        mimetype = 'image/png'
     if not thumb_path.exists():
         return jsonify({'error': 'No thumbnail'}), 404
     from flask import send_file
-    return send_file(str(thumb_path), mimetype='image/jpeg')
+    return send_file(str(thumb_path), mimetype=mimetype)
 
 
 @api_bp.route('/api/download/<job_id>/<file_type>/<filename>', methods=['GET'])
+@auth_required(optional=True)
 def download_file(job_id, file_type, filename):
     """Download a stem or MIDI file"""
     if not _validate_job_id(job_id):
@@ -528,6 +647,8 @@ def download_file(job_id, file_type, filename):
         job = get_job(job_id)
         if not job:
             return jsonify({'error': 'Job not found'}), 404
+        if not authorize_job_access(job):
+            return forbidden_response()
         logger.info(f"  Job loaded: {job.filename}")
 
         if file_type == 'stem':
@@ -537,7 +658,58 @@ def download_file(job_id, file_type, filename):
             file_path = job.stems[filename]
             if not Path(file_path).exists():
                 return jsonify({'error': f'Stem file missing from disk: {file_path}'}), 404
-            return send_file(file_path, mimetype='audio/wav', conditional=True)
+
+            # Mobile-quality variant (?q=mobile): downsample to 22kHz mono ONLY
+            # for LONG songs. The iOS Web Audio crash is driven by DECODED PCM
+            # memory = duration × samplerate × channels — it's a function of song
+            # LENGTH, not MP3 file size (a 5MB/12min song crashes; a 35MB/2min
+            # song is fine). So we gate on the stem's true DURATION via ffprobe,
+            # which is bitrate-independent. Downsampling to 22kHz mono cuts
+            # decoded memory ~75%. Short songs are served full-quality on mobile
+            # too. Threshold tunable via MOBILE_DOWNSAMPLE_SEC env (default 240s
+            # = 4 min). Mobile variant generated on first request, cached on disk.
+            if request.args.get('q') == 'mobile':
+                src = Path(file_path)
+                threshold_sec = float(os.environ.get('MOBILE_DOWNSAMPLE_SEC', '240'))
+                dur = 0.0
+                if shutil.which('ffprobe'):
+                    try:
+                        pr = subprocess.run(
+                            ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
+                             '-of', 'default=noprint_wrappers=1:nokey=1', str(src)],
+                            capture_output=True, timeout=20,
+                        )
+                        dur = float((pr.stdout or b'0').decode(errors='replace').strip() or 0)
+                    except Exception:
+                        dur = 0.0
+                if dur > threshold_sec and shutil.which('ffmpeg'):
+                    mobile_path = src.parent / (src.stem + '.m22.mp3')
+                    if not mobile_path.exists():
+                        try:
+                            r = subprocess.run(
+                                ['ffmpeg', '-y', '-i', str(src),
+                                 '-ar', '22050', '-ac', '1', '-b:a', '96k',
+                                 str(mobile_path)],
+                                capture_output=True, timeout=120,
+                            )
+                            if r.returncode != 0:
+                                logger.warning(f"mobile stem gen failed for {filename}: {r.stderr.decode(errors='replace')[:300]}")
+                                mobile_path = src  # fall back to full quality
+                        except subprocess.TimeoutExpired:
+                            logger.warning(f"mobile stem gen timed out for {filename}")
+                            mobile_path = src
+                    logger.info(f"Serving mobile stem {filename} (dur {dur:.0f}s > {threshold_sec:.0f}s threshold)")
+                    resp = send_file(str(mobile_path), mimetype='audio/mpeg', conditional=True)
+                    resp.headers['Cache-Control'] = 'private, max-age=2592000, immutable'
+                    return resp
+                # Under threshold (or no ffprobe/ffmpeg) — full quality on mobile too.
+
+            resp = send_file(file_path, mimetype='audio/wav', conditional=True)
+            # Stems are immutable per-job — bake aggressive client-side caching
+            # so iOS Safari doesn't re-download all 8 stems every page open.
+            # 'immutable' tells the browser the file never changes (no revalidation).
+            resp.headers['Cache-Control'] = 'private, max-age=2592000, immutable'
+            return resp
 
         elif file_type == 'enhanced':
             if filename not in job.enhanced_stems:
@@ -546,7 +718,9 @@ def download_file(job_id, file_type, filename):
             file_path = job.enhanced_stems[filename]
             if not Path(file_path).exists():
                 return jsonify({'error': f'Enhanced stem file missing from disk: {file_path}'}), 404
-            return send_file(file_path, mimetype='audio/wav', conditional=True)
+            resp = send_file(file_path, mimetype='audio/wav', conditional=True)
+            resp.headers['Cache-Control'] = 'private, max-age=2592000, immutable'
+            return resp
 
         elif file_type == 'midi':
             if filename not in job.midi_files:
@@ -592,6 +766,7 @@ def download_file(job_id, file_type, filename):
 
 
 @api_bp.route('/api/download/<job_id>/substem/<skill_id>/<filename>', methods=['GET'])
+@auth_required(optional=True)
 def download_substem(job_id, skill_id, filename):
     """Download a skill-generated sub-stem"""
     if not _validate_job_id(job_id):
@@ -602,6 +777,8 @@ def download_substem(job_id, skill_id, filename):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     if skill_id not in job.sub_stems:
         return jsonify({'error': f'Skill {skill_id} not found in job'}), 404
@@ -630,6 +807,8 @@ def download_zip(job_id):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
     if job.status != 'completed':
         return jsonify({'error': 'Job is not completed yet'}), 400
 
@@ -716,6 +895,8 @@ def download_stem_mp3(job_id, stem_name):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     # Check enhanced stems first, then regular
     wav_path = None
@@ -767,9 +948,72 @@ def download_stem_mp3(job_id, stem_name):
     )
 
 
+@api_bp.route('/api/master/<job_id>', methods=['GET'])
+@auth_required(optional=True)
+def download_master_mix(job_id):
+    """Serve a single pre-mixed master MP3 (sum of the 6 PRIMARY stems) for
+    mobile playback.
+
+    Why: iOS Safari cannot decode 8 separate stems into Web Audio without
+    crashing the tab (each ~85MB PCM decoded × 8 ≈ 680MB, past the iOS
+    memory ceiling — confirmed 2026-05-28 on iOS 26.4 with a long Stones
+    track). Mobile plays THIS one native file via a plain <audio> element
+    instead. Generated on first request from the on-disk stems, then cached.
+
+    The 6 primaries (vocals, drums, bass, guitar, piano, other) sum to the
+    original mix. vocals_lead / vocals_backing are sub-splits of `vocals`
+    and are EXCLUDED — including them would double-count the vocal.
+    """
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+
+    job_dir = OUTPUT_DIR / job_id
+    master_path = job_dir / 'master.mp3'
+
+    if not master_path.exists():
+        stems_dir = job_dir / 'stems'
+        if not stems_dir.exists():
+            return jsonify({'error': 'Stems not found for this job'}), 404
+        primary = ['vocals', 'drums', 'bass', 'guitar', 'piano', 'other']
+        inputs = [str(stems_dir / f'{n}.mp3') for n in primary if (stems_dir / f'{n}.mp3').exists()]
+        if not inputs:
+            return jsonify({'error': 'No stems available to build master mix'}), 404
+        if not shutil.which('ffmpeg'):
+            return jsonify({'error': 'ffmpeg not available on server'}), 500
+        cmd = ['ffmpeg', '-y']
+        for inp in inputs:
+            cmd += ['-i', inp]
+        cmd += [
+            '-filter_complex',
+            f'amix=inputs={len(inputs)}:normalize=0,alimiter=level_in=1:level_out=0.95:limit=0.95',
+            '-c:a', 'libmp3lame', '-b:a', '192k',
+            str(master_path),
+        ]
+        try:
+            result = subprocess.run(cmd, capture_output=True, timeout=180)
+            if result.returncode != 0:
+                logger.error(f"master mix ffmpeg failed for {job_id}: {result.stderr.decode(errors='replace')[:500]}")
+                return jsonify({'error': 'Master mix generation failed'}), 500
+        except subprocess.TimeoutExpired:
+            logger.error(f"master mix generation timed out for {job_id}")
+            return jsonify({'error': 'Master mix generation timed out'}), 500
+        logger.info(f"Generated master.mp3 for {job_id} from {len(inputs)} stems")
+
+    resp = send_file(str(master_path), mimetype='audio/mpeg', as_attachment=False, conditional=True)
+    resp.headers['Cache-Control'] = 'private, max-age=2592000, immutable'
+    return resp
+
+
 # ============ JOBS LIST ============
 
 @api_bp.route('/api/peaks/<job_id>/<stem_name>', methods=['GET'])
+@auth_required(optional=True)
 def get_peaks(job_id, stem_name):
     """Return waveform peaks for a stem (used for visual rendering without loading audio)."""
     if not _validate_job_id(job_id):
@@ -778,6 +1022,8 @@ def get_peaks(job_id, stem_name):
     job = get_job(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
 
     # Find the stem file
     file_path = None
@@ -846,10 +1092,23 @@ def chord_recall():
 # ============ MANUAL CHORD CHART ============
 
 @api_bp.route('/api/chord-chart/<job_id>', methods=['GET', 'PUT'])
+@auth_required(optional=True)
 def get_chord_chart(job_id):
     """Serve or update manual chord chart JSON for a job."""
     if not _validate_job_id(job_id):
         return jsonify({'error': 'Invalid job ID'}), 400
+    # Authorize on the job — GET respects demo flag (anonymous users view demos),
+    # PUT NEVER allows demo-anonymous edits (only owner/admin/session can mutate).
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if request.method == 'PUT':
+        # Mutation requires real ownership — demo bypass is read-only.
+        if not authorize_job_access(job, allow_demo=False):
+            return forbidden_response()
+    else:
+        if not authorize_job_access(job):
+            return forbidden_response()
     import json
     chart_path = OUTPUT_DIR / job_id / 'chord_chart.json'
     if request.method == 'PUT':
@@ -920,3 +1179,438 @@ def cache_stats():
     """Return URL cache statistics — cached songs, hit counts, estimated savings."""
     from url_cache import get_cache_stats
     return jsonify(get_cache_stats())
+
+
+_BAND_IMAGE_CACHE_PATH = '/opt/stemscribe/band_images.json'
+_band_image_lock = threading.Lock()
+
+
+@api_bp.route('/api/band-image', methods=['GET'])
+def band_image():
+    """Album-art image URL for a band name, via the public iTunes Search API.
+
+    Proxied server-side because the site's connect-src CSP doesn't (and
+    shouldn't) allow arbitrary client fetches; *.mzstatic.com is already in
+    img-src so the returned URL renders directly. Disk-cached per name.
+    """
+    import json as _json
+    import requests as _requests
+
+    name = (request.args.get('name') or '').strip()[:80]
+    if not name:
+        return jsonify({'url': None})
+    key = name.lower()
+
+    with _band_image_lock:
+        try:
+            with open(_BAND_IMAGE_CACHE_PATH) as f:
+                cache = _json.load(f)
+        except Exception:
+            cache = {}
+    if key in cache:
+        return jsonify({'url': cache[key]})
+
+    url = None
+    # Deezer first — real artist/band PHOTOS (Jeff: not album artwork).
+    try:
+        r = _requests.get(
+            'https://api.deezer.com/search/artist',
+            params={'q': name, 'limit': 1},
+            timeout=6,
+        )
+        data = (r.json() or {}).get('data') or []
+        if data:
+            pic = data[0].get('picture_big') or data[0].get('picture_medium') or ''
+            # Deezer returns a gray placeholder for unknown artists — its URL
+            # has an empty md5 segment ("/images/artist//"), skip those.
+            if pic and '/artist//' not in pic:
+                url = pic
+    except Exception as e:
+        logger.warning(f"band-image Deezer lookup failed for {name!r}: {e}")
+    # Fallback: iTunes album art (better than initials).
+    if not url:
+        try:
+            r = _requests.get(
+                'https://itunes.apple.com/search',
+                params={'term': name, 'entity': 'album', 'limit': 1, 'media': 'music'},
+                timeout=6,
+            )
+            results = (r.json() or {}).get('results') or []
+            if results:
+                art = results[0].get('artworkUrl100') or ''
+                if art:
+                    url = art.replace('100x100', '400x400')
+        except Exception as e:
+            logger.warning(f"band-image iTunes lookup failed for {name!r}: {e}")
+
+    with _band_image_lock:
+        try:
+            with open(_BAND_IMAGE_CACHE_PATH) as f:
+                cache = _json.load(f)
+        except Exception:
+            cache = {}
+        cache[key] = url
+        try:
+            with open(_BAND_IMAGE_CACHE_PATH + '.new', 'w') as f:
+                _json.dump(cache, f)
+            os.replace(_BAND_IMAGE_CACHE_PATH + '.new', _BAND_IMAGE_CACHE_PATH)
+        except Exception:
+            pass
+    return jsonify({'url': url})
+
+
+_USER_TAB_EXTS = {'.gp', '.gp3', '.gp4', '.gp5', '.gpx', '.txt', '.pdf', '.xml', '.musicxml'}
+_USER_TAB_MIMES = {
+    '.pdf': 'application/pdf', '.txt': 'text/plain; charset=utf-8',
+    '.xml': 'application/xml', '.musicxml': 'application/xml',
+}
+
+
+@api_bp.route('/api/user-tab/<job_id>', methods=['POST'])
+@auth_required
+def upload_user_tab(job_id):
+    """Attach the user's own guitar tab (UG download, GP file, text) to a job.
+
+    One tab per job — re-upload replaces. Private to the owner, stored as the
+    raw file plus a JSON sidecar; job metadata is untouched (no in-memory
+    jobs-dict interaction, works on completed jobs without a restart).
+    """
+    import json as _json
+    from werkzeug.utils import secure_filename
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    if job.user_id is not None and job.user_id != str(user.id):
+        return jsonify({'error': 'Forbidden'}), 403
+
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    f = request.files['file']
+    if not f or not f.filename:
+        return jsonify({'error': 'Empty filename'}), 400
+    name = secure_filename(f.filename)
+    ext = os.path.splitext(name)[1].lower()
+    if ext not in _USER_TAB_EXTS:
+        return jsonify({'error': f'Unsupported file type: {ext or "(none)"}'}), 415
+    blob = f.read(10 * 1048576 + 1)
+    if len(blob) > 10 * 1048576:
+        return jsonify({'error': 'File too large (max 10 MB)'}), 413
+
+    tab_dir = OUTPUT_DIR / job_id
+    tab_dir.mkdir(parents=True, exist_ok=True)
+    # clear any prior tab (different extension included)
+    for old in tab_dir.glob('user_tab.*'):
+        try: old.unlink()
+        except OSError: pass
+    (tab_dir / ('user_tab' + ext)).write_bytes(blob)
+    sidecar = {'original_name': name, 'ext': ext, 'size': len(blob)}
+    (tab_dir / 'user_tab.json').write_text(_json.dumps(sidecar))
+    return jsonify({'ok': True, 'tab': sidecar})
+
+
+@api_bp.route('/api/user-tab/<job_id>', methods=['GET'])
+@auth_required(optional=True)
+def get_user_tab(job_id):
+    """Serve the attached tab. ?meta=1 returns the sidecar JSON instead.
+    Owner-scoped; supports ?token= like stem downloads (PDF <embed> can't
+    send headers)."""
+    import json as _json
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+
+    tab_dir = OUTPUT_DIR / job_id
+    side = tab_dir / 'user_tab.json'
+    if not side.exists():
+        return jsonify({'error': 'No tab attached'}), 404
+    meta = _json.loads(side.read_text())
+    if request.args.get('meta'):
+        return jsonify({'tab': meta})
+    path = tab_dir / ('user_tab' + meta['ext'])
+    if not path.exists():
+        return jsonify({'error': 'No tab attached'}), 404
+    mime = _USER_TAB_MIMES.get(meta['ext'], 'application/octet-stream')
+    resp = make_response(send_file(str(path), mimetype=mime))
+    resp.headers['Content-Disposition'] = 'inline; filename="' + meta['original_name'] + '"'
+    return resp
+
+
+@api_bp.route('/api/user-take/<job_id>', methods=['POST'])
+@auth_required
+def upload_user_take(job_id):
+    """Persist the MY TRACK recorded take (WAV) + its placement so it
+    survives leaving the console. One take per job; re-record replaces."""
+    import json as _json
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    if job.user_id is not None and job.user_id != str(user.id):
+        return jsonify({'error': 'Forbidden'}), 403
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    blob = request.files['file'].read(60 * 1048576 + 1)
+    if len(blob) > 60 * 1048576:
+        return jsonify({'error': 'Take too large (max 60 MB)'}), 413
+    try:
+        start_offset = float(request.form.get('start_offset', '0'))
+    except ValueError:
+        start_offset = 0.0
+
+    take_dir = OUTPUT_DIR / job_id
+    take_dir.mkdir(parents=True, exist_ok=True)
+    (take_dir / 'user_take.wav').write_bytes(blob)
+    (take_dir / 'user_take.json').write_text(_json.dumps({
+        'start_offset': start_offset, 'size': len(blob),
+    }))
+    # The take lands AFTER the song's pipeline backup already ran — re-sync
+    try:
+        from backup.stem_backup import backup_job
+        backup_job(job_id, async_thread=True)
+    except Exception:
+        pass
+    return jsonify({'ok': True})
+
+
+@api_bp.route('/api/user-take/<job_id>', methods=['GET'])
+@auth_required(optional=True)
+def get_user_take(job_id):
+    """Serve the saved take. ?meta=1 -> sidecar JSON. Owner-scoped."""
+    import json as _json
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+    side = OUTPUT_DIR / job_id / 'user_take.json'
+    wav = OUTPUT_DIR / job_id / 'user_take.wav'
+    if not side.exists() or not wav.exists():
+        return jsonify({'error': 'No take saved'}), 404
+    if request.args.get('meta'):
+        return jsonify({'take': _json.loads(side.read_text())})
+    return send_file(str(wav), mimetype='audio/wav')
+
+
+@api_bp.route('/api/user-take/<job_id>', methods=['DELETE'])
+@auth_required
+def delete_user_take(job_id):
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    user = getattr(g, 'current_user', None)
+    if not user or (job.user_id is not None and job.user_id != str(user.id)):
+        return jsonify({'error': 'Forbidden'}), 403
+    for n in ('user_take.wav', 'user_take.json'):
+        try: (OUTPUT_DIR / job_id / n).unlink()
+        except OSError: pass
+    return jsonify({'ok': True})
+
+
+# ============ FROM-SCRATCH SESSIONS (#30) ============
+# A session is a lightweight job (metadata.kind == 'session') with NO stems:
+# an empty console the user records into track by track. Tracks are user
+# recordings stored as outputs/<job_id>/track_<n>.wav + track_<n>.json
+# sidecars {start_offset, name, gain, size} — same pattern as user-take.
+
+_SESSION_TRACK_MAX = 8
+_SESSION_TRACK_BYTES = 60 * 1048576
+
+
+def _session_owner_or_error(job_id):
+    """(job, error_response) — load the job + enforce ownership for writes."""
+    job = get_job(job_id)
+    if not job:
+        return None, (jsonify({'error': 'Job not found'}), 404)
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return None, (jsonify({'error': 'Authentication required'}), 401)
+    if job.user_id is not None and job.user_id != str(user.id):
+        return None, (jsonify({'error': 'Forbidden'}), 403)
+    return job, None
+
+
+def _session_track_num(n):
+    try:
+        n = int(n)
+    except (TypeError, ValueError):
+        return None
+    return n if 1 <= n <= _SESSION_TRACK_MAX else None
+
+
+@api_bp.route('/api/session', methods=['POST'])
+@auth_required
+def create_session():
+    """Create an empty From-Scratch Session: a completed job with no stems."""
+    from models.job import save_job_checkpoint
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    body = request.get_json(silent=True) or {}
+    name = sanitize_text(str(body.get('name') or 'Untitled Session')).strip()[:120] or 'Untitled Session'
+    try:
+        bpm = int(body.get('bpm') or 90)
+    except (TypeError, ValueError):
+        bpm = 90
+    bpm = max(30, min(300, bpm))
+    # NOTE: plain uuid4 — a 'sess-' prefix fails validate_job_id (hex+dash,
+    # <=36 chars) everywhere. metadata.kind is the discriminator.
+    job_id = str(uuid.uuid4())
+    job = ProcessingJob(job_id, name)
+    job.status = 'completed'
+    job.progress = 100
+    job.stage = 'Session'
+    job.user_id = str(user.id)
+    job.metadata = {'kind': 'session', 'bpm': bpm, 'title': name,
+                    'artist': 'From-Scratch Session'}
+    jobs[job_id] = job
+    save_job_checkpoint(job)
+    logger.info(f"Created from-scratch session {job_id} for user {job.user_id}")
+    return jsonify({'ok': True, 'job_id': job_id})
+
+
+@api_bp.route('/api/session/<job_id>', methods=['PATCH'])
+@auth_required
+def update_session(job_id):
+    """Update session settings (bpm, name). Owner only."""
+    from models.job import save_job_checkpoint
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    job, err = _session_owner_or_error(job_id)
+    if err:
+        return err
+    if (job.metadata or {}).get('kind') != 'session':
+        return jsonify({'error': 'Not a session'}), 400
+    body = request.get_json(silent=True) or {}
+    if 'bpm' in body:
+        try:
+            job.metadata['bpm'] = max(30, min(300, int(body['bpm'])))
+        except (TypeError, ValueError):
+            pass
+    if body.get('name'):
+        nm = sanitize_text(str(body['name'])).strip()[:120]
+        if nm:
+            job.filename = nm
+            job.metadata['title'] = nm
+    save_job_checkpoint(job)
+    return jsonify({'ok': True, 'metadata': job.metadata})
+
+
+@api_bp.route('/api/session-track/<job_id>/<n>', methods=['POST'])
+@auth_required
+def upload_session_track(job_id, n):
+    """Save one session track (WAV) + its placement sidecar. Re-upload replaces."""
+    import json as _json
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    n = _session_track_num(n)
+    if n is None:
+        return jsonify({'error': f'Track number must be 1-{_SESSION_TRACK_MAX}'}), 400
+    job, err = _session_owner_or_error(job_id)
+    if err:
+        return err
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    blob = request.files['file'].read(_SESSION_TRACK_BYTES + 1)
+    if len(blob) > _SESSION_TRACK_BYTES:
+        return jsonify({'error': 'Track too large (max 60 MB)'}), 413
+    try:
+        start_offset = float(request.form.get('start_offset', '0'))
+    except ValueError:
+        start_offset = 0.0
+    try:
+        gain = float(request.form.get('gain', '0.8'))
+    except ValueError:
+        gain = 0.8
+    name = sanitize_text(str(request.form.get('name') or f'TRACK {n}')).strip()[:60] or f'TRACK {n}'
+    tdir = OUTPUT_DIR / job_id
+    tdir.mkdir(parents=True, exist_ok=True)
+    (tdir / f'track_{n}.wav').write_bytes(blob)
+    sidecar = {'n': n, 'start_offset': start_offset, 'name': name,
+               'gain': gain, 'size': len(blob)}
+    (tdir / f'track_{n}.json').write_text(_json.dumps(sidecar))
+    # Sessions never run the pipeline, so its post-run R2 backup never fires —
+    # protect recordings off-site on every upload (async, rglob catches all).
+    try:
+        from backup.stem_backup import backup_job
+        backup_job(job_id, async_thread=True)
+    except Exception:
+        pass
+    return jsonify({'ok': True, 'track': sidecar})
+
+
+@api_bp.route('/api/session-track/<job_id>/<n>', methods=['GET'])
+@auth_required(optional=True)
+def get_session_track(job_id, n):
+    """Serve one track's WAV; ?meta=1 -> sidecar JSON. Owner-scoped."""
+    import json as _json
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    n = _session_track_num(n)
+    if n is None:
+        return jsonify({'error': 'Invalid track number'}), 400
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+    side = OUTPUT_DIR / job_id / f'track_{n}.json'
+    wav = OUTPUT_DIR / job_id / f'track_{n}.wav'
+    if not side.exists() or not wav.exists():
+        return jsonify({'error': 'No such track'}), 404
+    if request.args.get('meta'):
+        return jsonify({'track': _json.loads(side.read_text())})
+    return send_file(str(wav), mimetype='audio/wav')
+
+
+@api_bp.route('/api/session-track/<job_id>/<n>', methods=['DELETE'])
+@auth_required
+def delete_session_track(job_id, n):
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    n = _session_track_num(n)
+    if n is None:
+        return jsonify({'error': 'Invalid track number'}), 400
+    job, err = _session_owner_or_error(job_id)
+    if err:
+        return err
+    for fn in (f'track_{n}.wav', f'track_{n}.json'):
+        try:
+            (OUTPUT_DIR / job_id / fn).unlink()
+        except OSError:
+            pass
+    return jsonify({'ok': True})
+
+
+@api_bp.route('/api/session-tracks/<job_id>', methods=['GET'])
+@auth_required(optional=True)
+def list_session_tracks(job_id):
+    """All saved tracks' sidecars, ascending by n. Owner-scoped."""
+    import json as _json
+    if not _validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+    if not authorize_job_access(job):
+        return forbidden_response()
+    out = []
+    for i in range(1, _SESSION_TRACK_MAX + 1):
+        side = OUTPUT_DIR / job_id / f'track_{i}.json'
+        wav = OUTPUT_DIR / job_id / f'track_{i}.wav'
+        if side.exists() and wav.exists():
+            try:
+                out.append(_json.loads(side.read_text()))
+            except Exception:
+                pass
+    return jsonify({'tracks': out})

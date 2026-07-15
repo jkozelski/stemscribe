@@ -195,7 +195,7 @@ def transcribe_to_midi(job: ProcessingJob, quantize: bool = True, grid_size: flo
     import traceback
 
     job.stage = 'Transcribing to MIDI (enhanced)'
-    job.progress = 60
+    job.progress = max(job.progress or 0, 60)   # never move the bar backward
     logger.info("Starting enhanced MIDI transcription")
 
     midi_output_dir = OUTPUT_DIR / job.job_id / 'midi'

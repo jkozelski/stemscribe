@@ -327,7 +327,7 @@ def separate_stems_roformer(job: ProcessingJob, audio_path: Path):
         try:
             subprocess.run([
                 'ffmpeg', '-y', '-i', vocals_path,
-                '-codec:a', 'libmp3lame', '-b:a', '320k',
+                '-codec:a', 'libmp3lame', '-b:a', '160k',
                 str(vocals_mp3)
             ], capture_output=True, timeout=180)
         except subprocess.TimeoutExpired:

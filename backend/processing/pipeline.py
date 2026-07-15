@@ -291,7 +291,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                         try:
                             subprocess.run([
                                 'ffmpeg', '-y', '-i', str(src),
-                                '-codec:a', 'libmp3lame', '-b:a', '320k',
+                                '-codec:a', 'libmp3lame', '-b:a', '160k',
                                 str(dst)
                             ], capture_output=True, timeout=120)
                         except Exception:
@@ -458,6 +458,23 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 artist = job.metadata.get('artist', '') if job.metadata else ''
                 key = job.detected_key or 'Unknown'
 
+                # Chart-library correction: if the job owner has this song in
+                # their chart library, snap detected chords to their chart's
+                # vocabulary, transposed to the recording (live tapes often
+                # run a half-step off the studio key).
+                library_info = None
+                try:
+                    from chart_library_matcher import apply_library_chart
+                    library_info = apply_library_chart(job, title, artist)
+                    if library_info:
+                        key = library_info.get('display_key') or key
+                        logger.info(
+                            f"\u2713 Chart library match: '{library_info['title']}' "
+                            f"(id {library_info['chart_id']}, {library_info['semitones']:+d} st, "
+                            f"{library_info['snapped']} snapped / {library_info['respelled']} respelled)")
+                except Exception as lib_err:
+                    logger.warning(f"Chart library correction failed (non-fatal): {lib_err}")
+
                 # Get word-level timestamps from vocal stem via Whisper.
                 # This is the longest sub-step of chord-chart generation
                 # (faster-whisper medium @ int8, CPU on the VPS, ~2-5 min
@@ -526,7 +543,57 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                     bass_roots=job.metadata.get('bass_roots') if job.metadata else None,
                 )
 
+                # PUBLIC path (no library chart matched): still anchor the
+                # key to the independent measurement — detector key calls were
+                # wrong three times in two days, and public users deserve the
+                # right key + right spellings too (Jeff: "this has to be for
+                # the public, coming out that way every time").
+                if library_info is None:
+                    try:
+                        from chart_library_matcher import apply_measured_key_no_library
+                        _mk = apply_measured_key_no_library(job)
+                        if _mk:
+                            if _mk != key:
+                                logger.info(f"\u2713 Measured key override (no library): {key} -> {_mk}")
+                            key = _mk
+                    except Exception as mk_err:
+                        logger.warning(f"Measured-key correction failed (non-fatal): {mk_err}")
+
+                # Degenerate detection + a real library chart: render the
+                # owner's chart outright instead of a one-chord grid (Jack
+                # Straw audience-tape case, 7/4).
+                if library_info and library_info.get('degenerate'):
+                    try:
+                        from chart_library_matcher import render_override_for
+                        _override = render_override_for(library_info, job.detected_key)
+                        if _override and _override.get('sections'):
+                            if not _override.get('artist'):
+                                _override['artist'] = artist
+                            chart = _override
+                            logger.info("\u2713 Detection degenerate \u2014 rendered the owner's library chart instead")
+                    except Exception as ovr_err:
+                        logger.warning(f"Library chart render fallback failed (non-fatal): {ovr_err}")
+
+                # Section alignment (#36): when a library chart matched, align
+                # ITS section structure to the recording via chart-lyric <->
+                # Whisper-word matching — labels land where sections actually
+                # start, and no chart section (a Chorus) goes missing. Runs on
+                # both paths: RENDER (chart replaced above) gets section starts
+                # + line timing; SNAP (format_chart) gets its sections rebuilt
+                # from the chart structure. Strictly best-effort/non-fatal.
+                if library_info and chart and chart.get('sections') and word_ts:
+                    try:
+                        from section_alignment import align_chart_with_library
+                        align_chart_with_library(
+                            chart, library_info, word_ts,
+                            grid=job.metadata.get('grid') if job.metadata else None,
+                        )
+                    except Exception as align_err:
+                        logger.warning(f"Section alignment failed (non-fatal): {align_err}")
+
                 if chart and chart.get('sections'):
+                    if library_info:
+                        chart['library_match'] = library_info
                     # Save to job output directory as chord_chart.json
                     chart_dir = OUTPUT_DIR / job.job_id
                     chart_dir.mkdir(parents=True, exist_ok=True)
@@ -558,6 +625,8 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                     job.progress = 70
                     save_job_checkpoint(job)
                     lead_sheet_path = generate_lead_sheet_for_job(job, str(audio_path))
+                    job.progress = max(job.progress or 0, 76)
+                    save_job_checkpoint(job)
                     if lead_sheet_path:
                         logger.info(f"✓ Lead sheet generated: {lead_sheet_path}")
                     else:
@@ -568,9 +637,43 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 logger.warning(f"Lead sheet generation failed (non-fatal): {e}")
 
         # Step 3: Transcribe to MIDI
-        job.progress = 60
+        # Progress is MONOTONIC from here: it used to jump 70 → 60 and then sit
+        # (the 97/98 climb only ran when transcription was ON) — users watched a
+        # frozen bar for minutes, then a leap to 100 (Jeff's "stuck at 80%").
+        job.progress = max(job.progress or 0, 80)
         save_job_checkpoint(job)
         midi_success = transcribe_to_midi(job)
+        job.progress = max(job.progress or 0, 92)
+        # 7/4 (#40): auto album art — file uploads and archive tracks arrive
+        # artless; look the cover up by artist+title (iTunes catalog, same
+        # source as /api/band-image). Non-fatal, skipped when art exists.
+        try:
+            _md = job.metadata or {}
+            if not _md.get('thumbnail'):
+                import requests as _rq
+                _artist = (_md.get('artist') or '').strip()
+                _title = (_md.get('title') or job.filename or '').strip()
+                if _artist.lower() in ('', 'unknown'):
+                    _term = _title
+                else:
+                    _term = _artist + ' ' + _title
+                if _term:
+                    _r = _rq.get('https://itunes.apple.com/search',
+                                 params={'term': _term, 'entity': 'song', 'limit': 1, 'media': 'music'},
+                                 timeout=6)
+                    _results = (_r.json() or {}).get('results') or []
+                    if _results:
+                        _art = _results[0].get('artworkUrl100') or ''
+                        if _art:
+                            job.metadata['thumbnail'] = _art.replace('100x100', '600x600')
+                            if not _md.get('album') and _results[0].get('collectionName'):
+                                job.metadata['album'] = _results[0]['collectionName']
+                            logger.info(f"\u2713 auto album art: {_results[0].get('collectionName')!r}")
+        except Exception as _art_err:
+            logger.info(f"auto album art lookup skipped: {_art_err}")
+
+        job.stage = 'Finalizing'
+        save_job_checkpoint(job)
         if midi_success:
             logger.info(f"✓ MIDI transcription succeeded for {len(job.midi_files)} stems")
 

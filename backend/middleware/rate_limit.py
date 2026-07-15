@@ -11,8 +11,8 @@ Two layers of rate limiting:
 2. **Plan-level** (song count + duration):
    - Enforced per-request via decorators applied to processing routes.
    - Free: 3 songs/month, 5 min max duration
-   - Premium: 50 songs/month, 15 min max
-   - Pro: unlimited, 30 min max
+   - Pro: 30 songs/month, 15 min max
+   - Lifetime: 50 songs/month, 30 min max
    - Anonymous users tracked by IP hash.
 
 Usage:

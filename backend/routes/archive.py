@@ -6,7 +6,7 @@ import re
 import uuid
 import threading
 import logging
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 
 from models.job import ProcessingJob, jobs
 from processing.pipeline import process_url
@@ -28,6 +28,23 @@ try:
     ARCHIVE_PIPELINE_AVAILABLE = True
 except ImportError:
     ARCHIVE_PIPELINE_AVAILABLE = False
+
+
+def _clean_archive_title(raw_name):
+    """Taper filenames -> human titles: gd73-07-28s1t06BoxOfRain -> Box Of Rain."""
+    name = re.sub(r'\.(mp3|flac|ogg|wav|shn|m4a)$', '', raw_name or '', flags=re.IGNORECASE)
+    # Date/track prefixes: "gd69-05-23 t03 ", "gd1972-08-21s1t08", "gd73-07-28s1t06BoxOfRain"
+    name = re.sub(r'^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s*([sd]\d+)?t?\d*\s*', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'^t\d+\s+', '', name, flags=re.IGNORECASE)
+    name = re.sub(r'^d\d+t\d+\s*', '', name, flags=re.IGNORECASE)
+    # Split CamelCase: BoxOfRain -> Box Of Rain
+    name = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', name)
+    name = name.replace('_', ' ')
+    name = re.sub(r'\s+', ' ', name).strip()
+    if name and name.islower():
+        name = name.title()
+    return name or raw_name
+
 
 archive_bp = Blueprint("archive", __name__)
 
@@ -140,6 +157,7 @@ def archive_show_details(identifier):
 
 
 @archive_bp.route('/api/archive/process', methods=['POST'])
+@auth_required(optional=True)
 def archive_process_track():
     """
     Process an Archive.org track through StemScriber's full pipeline.
@@ -199,15 +217,15 @@ def archive_process_track():
 
     # Create job — clean up archive filenames for display
     job_id = str(uuid.uuid4())
-    raw_name = filename or identifier or 'Archive.org track'
-    # Strip file extension
-    display_name = re.sub(r'\.(mp3|flac|ogg|wav|shn|m4a)$', '', raw_name, flags=re.IGNORECASE)
-    # Strip date/track prefixes like "gd69-05-23 t03 " or "gd1972-08-21s1t08"
-    display_name = re.sub(r'^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s*[st]\d+[st]?\d*\s*', '', display_name, flags=re.IGNORECASE)
-    display_name = re.sub(r'^[a-z]{2,4}\d{2,4}[-_]\d{2}[-_]\d{2}\s+', '', display_name, flags=re.IGNORECASE)
-    display_name = re.sub(r'^t\d+\s+', '', display_name, flags=re.IGNORECASE)
-    display_name = display_name.strip() or raw_name
+    # Newer clients send the already-cleaned display title; fall back to filename
+    raw_name = (data.get('title') or '').strip() or filename or identifier or 'Archive.org track'
+    display_name = _clean_archive_title(raw_name)
     job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
+    # Stamp the logged-in owner so the job SAVES to their library (archive/URL
+    # downloads were orphaned with user_id=None → processed fine but never showed
+    # up in the user's library — Jeff's "it worked but never saved" bug).
+    job.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
+    job.session_id = request.cookies.get('session_id') or str(uuid.uuid4())
     jobs[job_id] = job
 
     # Store archive metadata
@@ -215,6 +233,11 @@ def archive_process_track():
     job.metadata['archive_identifier'] = identifier
     if filename:
         job.metadata['archive_filename'] = filename
+    artist = (data.get('artist') or '').strip()
+    if artist:
+        job.metadata['artist'] = artist
+    # Keep the cleaned title — the downloader must not stomp it with the raw filename
+    job.metadata['display_name_locked'] = True
 
     # Process in background thread (same pipeline as /api/url)
     thread = threading.Thread(
@@ -232,7 +255,7 @@ def archive_process_track():
     thread.daemon = True
     thread.start()
 
-    return jsonify({
+    resp = jsonify({
         'job_id': job_id,
         'message': 'Processing Archive.org track',
         'filename': display_name,
@@ -240,6 +263,10 @@ def archive_process_track():
         'identifier': identifier,
         'skills': skills,
     })
+    if not request.cookies.get('session_id'):
+        # hand the anonymous session back so status polls can authorize
+        resp.set_cookie('session_id', job.session_id, httponly=True, max_age=86400, samesite='Lax')
+    return resp
 
 
 @archive_bp.route('/api/archive/batch', methods=['POST'])
@@ -290,13 +317,19 @@ def archive_batch_process():
         for track in all_tracks:
             url = track.download_url
             job_id = str(uuid.uuid4())
-            display_name = track.title or track.filename
+            display_name = _clean_archive_title(track.title or track.filename)
             job = ProcessingJob(job_id, display_name, source_url=url, skills=skills)
+            job.user_id = str(g.current_user.id) if getattr(g, 'current_user', None) else None
+            job.session_id = request.cookies.get('session_id') or str(uuid.uuid4())
             jobs[job_id] = job
             job.metadata['source'] = 'archive.org'
             job.metadata['archive_identifier'] = identifier
             job.metadata['archive_filename'] = track.filename
             job.metadata['archive_track_number'] = track.track_number
+            _batch_artist = (data.get('artist') or '').strip()
+            if _batch_artist:
+                job.metadata['artist'] = _batch_artist
+            job.metadata['display_name_locked'] = True
 
             def _batch_worker(j, u, kw):
                 _batch_semaphore.acquire()

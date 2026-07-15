@@ -1483,6 +1483,10 @@ def _compact_held_chord_lines(sections: List[_Section]) -> None:
 
 _SUS_AUG_STRIP_RE = re.compile(r'(sus[24]?|aug\d*|\+|add\d+|#5|b5)', re.IGNORECASE)
 
+# Used to detect whether a chord carries a sus quality — for the structural-sus
+# preservation guard in _consolidate_chord_events Pass 0.
+_SUS_RE = re.compile(r'sus[24]?', re.IGNORECASE)
+
 
 def _simplify_uncommon_quality(chord: str) -> str:
     """
@@ -1529,11 +1533,29 @@ def _consolidate_chord_events(
         return chords
     from collections import Counter
 
-    # Pass 0: simplify qualities
+    # Pass 0: simplify qualities.
+    # Sus2/sus4 are usually detector noise on real pop/rock audio — EXCEPT when a
+    # specific sus chord recurs. Free Fallin' is built on sus chords: the sus IS
+    # the song, and flattening it to a plain triad is the wrong call. So we count
+    # raw occurrences first — a sus chord seen >= min_count times is treated as
+    # structural and preserved; one-off sus chords are still flattened to the
+    # triad. This is the per-song regression guard: songs with no recurring sus
+    # (e.g. House of Rising Sun) are unaffected.
+    raw_counts = Counter(c["chord"] for c in chords)
+    structural_sus = {
+        ch for ch, n in raw_counts.items()
+        if n >= min_count and _SUS_RE.search(ch)
+    }
+    if structural_sus:
+        logger.info(f"_consolidate: preserving structural sus chords {sorted(structural_sus)}")
+
     normalized: List[Dict] = []
     for c in chords:
         nc = dict(c)
-        nc["chord"] = _simplify_uncommon_quality(c["chord"])
+        if c["chord"] in structural_sus:
+            nc["chord"] = c["chord"]  # structural sus — preserve the quality
+        else:
+            nc["chord"] = _simplify_uncommon_quality(c["chord"])
         normalized.append(nc)
     chords = normalized
 
@@ -1946,21 +1968,41 @@ def _place_chords_on_words(
     char_positions = []
     pos = 0
     for w in words_data:
-        char_positions.append({"word": w["word"], "start": w["start"], "char_pos": pos})
+        char_positions.append({
+            "word": w["word"],
+            "start": w["start"],
+            "end": w.get("end", w["start"]),
+            "char_pos": pos,
+        })
         pos += len(w["word"]) + 1  # +1 for space
 
     positions = []
     for chord in line_chords:
         ct = chord["time"]
 
-        # Find the word closest in time to this chord
-        best_idx = 0
-        best_dist = float("inf")
+        # Pick the word this chord sits above. A chord change lands ON the word
+        # being sung at that moment, or the next word sung after it — never a
+        # word that already finished. The old code picked min abs(start - ct),
+        # which had no left/right bias and would attach a chord to a word that
+        # had ended before the change (the "chord over the wrong word" bug).
+        # Priority:
+        #   1. a word whose [start, end] span contains the chord time
+        #      (chord changes mid-word — sits over the word being held)
+        #   2. the first word that starts at or after the chord time
+        #      (chord changes in a gap — sits over the next word sung)
+        #   3. the last word (chord lands after every lyric in the line)
+        best_idx = None
         for j, wp in enumerate(char_positions):
-            dist = abs(wp["start"] - ct)
-            if dist < best_dist:
-                best_dist = dist
+            if wp["start"] <= ct <= wp["end"]:
                 best_idx = j
+                break
+        if best_idx is None:
+            for j, wp in enumerate(char_positions):
+                if wp["start"] >= ct:
+                    best_idx = j
+                    break
+        if best_idx is None:
+            best_idx = len(char_positions) - 1
 
         char_pos = char_positions[best_idx]["char_pos"]
 

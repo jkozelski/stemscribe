@@ -68,6 +68,11 @@ def download_from_url(job, url: str, output_dir: Path):
             if not best_artist:
                 best_artist = metadata.get('uploader', 'Unknown')
 
+            # MERGE, don't replace: the archive route pre-stamps source,
+            # archive_identifier, artist and display_name_locked — a wholesale
+            # replace here erased the lock and then the filename stomp below
+            # fired anyway (Jeff's raw-taper-title bug, 7/4).
+            preserved = dict(job.metadata or {})
             job.metadata = {
                 'title': best_title,
                 'artist': best_artist,
@@ -75,6 +80,10 @@ def download_from_url(job, url: str, output_dir: Path):
                 'thumbnail': metadata.get('thumbnail', ''),
                 'webpage_url': metadata.get('webpage_url', url)
             }
+            job.metadata.update(preserved)
+            if preserved.get('display_name_locked') and job.filename:
+                # The route's cleaned display name is authoritative
+                job.metadata['title'] = job.filename
             logger.info(f"Metadata: {job.metadata['title']} by {job.metadata['artist']}")
 
         # Sanitize filename
@@ -107,7 +116,8 @@ def download_from_url(job, url: str, output_dir: Path):
         for ext in ['wav', 'mp3', 'webm', 'm4a', 'opus']:
             audio_file = output_dir / f"{safe_title}.{ext}"
             if audio_file.exists():
-                job.filename = audio_file.name
+                if not job.metadata.get('display_name_locked'):
+                    job.filename = audio_file.name
                 job.progress = 10
                 logger.info(f"Downloaded: {audio_file}")
                 return audio_file
@@ -115,7 +125,8 @@ def download_from_url(job, url: str, output_dir: Path):
         # Try to find any audio file in the directory
         for f in output_dir.glob('*.*'):
             if f.suffix.lower() in ['.wav', '.mp3', '.webm', '.m4a', '.opus', '.ogg']:
-                job.filename = f.name
+                if not job.metadata.get('display_name_locked'):
+                    job.filename = f.name
                 job.progress = 10
                 logger.info(f"Found downloaded file: {f}")
                 return f

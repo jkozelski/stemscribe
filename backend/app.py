@@ -12,7 +12,7 @@ import signal
 import atexit
 from pathlib import Path
 from dotenv import load_dotenv
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, request, send_from_directory, jsonify
 from flask_cors import CORS
 
 # Load .env from project root, then backend directory
@@ -54,28 +54,45 @@ def create_app():
     @app.after_request
     def add_security_headers(response):
         response.headers['X-Content-Type-Options'] = 'nosniff'
-        response.headers['X-Frame-Options'] = 'DENY'
+        # User-tab files (PDF tabs) render inside a same-origin <embed> on the
+        # practice page — SAMEORIGIN there, DENY everywhere else.
+        from flask import request as _req
+        if _req.path.startswith('/api/user-tab/'):
+            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        else:
+            response.headers['X-Frame-Options'] = 'DENY'
         response.headers['X-XSS-Protection'] = '1; mode=block'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response.headers['Permissions-Policy'] = 'camera=(), microphone=(self), geolocation=()'
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com accounts.google.com plausible.io; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com gleitz.github.io accounts.google.com plausible.io appleid.cdn-apple.com appleid.apple.com static.cloudflareinsights.com; "
             "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com cdnjs.cloudflare.com accounts.google.com; "
             "font-src 'self' fonts.gstatic.com cdn.jsdelivr.net cdnjs.cloudflare.com; "
-            "img-src 'self' data: blob: *.googleusercontent.com *.ytimg.com i.scdn.co *.mzstatic.com; "
-            "media-src 'self' blob:; "
-            "connect-src 'self' accounts.google.com plausible.io; "
-            "frame-src 'self' accounts.google.com; "
+            "img-src 'self' data: blob: *.googleusercontent.com *.ytimg.com i.scdn.co *.mzstatic.com *.dzcdn.net *.archive.org archive.org coverartarchive.org *.coverartarchive.org upload.wikimedia.org; "
+            "media-src 'self' blob: data:; "
+            "connect-src 'self' accounts.google.com plausible.io gleitz.github.io appleid.apple.com cloudflareinsights.com; "
+            "frame-src 'self' accounts.google.com appleid.apple.com; form-action 'self' appleid.apple.com; "
             "worker-src 'self' blob: cdn.jsdelivr.net; "
         )
         return response
 
-    # ---- No-cache headers for API responses only (not file downloads) ----
+    # ---- Cache headers: no-store for HTML/API, edge-cacheable for static assets ----
+    _STATIC_ASSET_EXTS = ('.css', '.js', '.mjs', '.png', '.jpg', '.jpeg', '.gif',
+                          '.svg', '.ico', '.webp', '.woff', '.woff2', '.ttf')
+
     @app.after_request
     def add_no_cache_headers(response):
         content_type = response.content_type or ''
-        if 'application/json' in content_type or 'text/html' in content_type or 'javascript' in content_type or 'text/css' in content_type:
+        path = (request.path or '').lower()
+        if not path.startswith('/api') and path.endswith(_STATIC_ASSET_EXTS):
+            # Static assets: let browsers + Cloudflare edge cache for an hour,
+            # serve stale while revalidating. HTML stays no-store so deploys
+            # land instantly; purge the CF cache after asset deploys.
+            response.headers['Cache-Control'] = 'public, max-age=3600, stale-while-revalidate=86400'
+            response.headers.pop('Pragma', None)
+            response.headers.pop('Expires', None)
+        elif 'application/json' in content_type or 'text/html' in content_type or 'javascript' in content_type or 'text/css' in content_type:
             response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
             response.headers['Pragma'] = 'no-cache'
             response.headers['Expires'] = '0'
@@ -94,7 +111,6 @@ def create_app():
             '<?xml version="1.0" encoding="UTF-8"?>\n'
             '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             '  <sitemap><loc>https://stemscriber.com/sitemap-static.xml</loc></sitemap>\n'
-            '  <sitemap><loc>https://stemscriber.com/sitemap-chords.xml</loc></sitemap>\n'
             '</sitemapindex>'
         )
         return Response(xml, mimetype="application/xml")
@@ -164,6 +180,7 @@ def create_app():
     from routes.songsterr import songsterr_bp
     from routes.ug import ug_bp
     from routes.chord_sheet import chord_sheet_bp
+    from routes.charts import charts_bp
     from routes.lyrics import lyrics_bp
     from routes.beta import beta_bp
     from routes.sms import sms_bp
@@ -189,6 +206,7 @@ def create_app():
     app.register_blueprint(songsterr_bp)
     app.register_blueprint(ug_bp)
     app.register_blueprint(chord_sheet_bp)
+    app.register_blueprint(charts_bp)
     app.register_blueprint(lyrics_bp)
     app.register_blueprint(beta_bp)
     app.register_blueprint(sms_bp)
@@ -221,9 +239,11 @@ def create_app():
     try:
         from billing.routes import billing_bp
         from billing.webhooks import webhooks_bp
+        from billing.revenuecat_webhooks import rc_webhooks_bp
         app.register_blueprint(billing_bp)
         app.register_blueprint(webhooks_bp)
-        logger.info("Billing blueprints registered (/billing/*, /webhooks/*)")
+        app.register_blueprint(rc_webhooks_bp)
+        logger.info("Billing blueprints registered (/billing/*, /webhooks/* incl. RevenueCat)")
     except Exception as e:
         logger.warning(f"Billing blueprints not available: {e}")
 

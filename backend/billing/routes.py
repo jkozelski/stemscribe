@@ -67,7 +67,7 @@ def create_checkout_session():
     """Create a Stripe Checkout Session for upgrading to a paid plan.
 
     Request JSON:
-        plan:     'premium' or 'pro'
+        plan:     'pro'   (only paid subscription tier; Lifetime is a separate one-time checkout)
         interval: 'monthly' or 'annual'
 
     Returns:
@@ -87,9 +87,9 @@ def create_checkout_session():
     plan = data.get('plan', '').lower()
     interval = data.get('interval', 'monthly').lower()
 
-    # Validate plan
-    if plan not in ('premium', 'pro'):
-        return jsonify({'error': 'Invalid plan. Choose "premium" or "pro"'}), 400
+    # Validate plan (subscription tiers only; Lifetime is a separate one-time checkout)
+    if plan not in ('pro',):
+        return jsonify({'error': 'Invalid plan. Choose "pro"'}), 400
 
     if interval not in ('monthly', 'annual'):
         return jsonify({'error': 'Invalid interval. Choose "monthly" or "annual"'}), 400

@@ -14,9 +14,10 @@ import logging
 import os
 import re
 import glob
-from flask import Blueprint, request, jsonify, Response
-from models.job import get_job
+from flask import Blueprint, request, jsonify, Response, g
+from models.job import get_job, OUTPUT_DIR
 from middleware.validation import validate_job_id
+from auth.middleware import auth_required
 
 logger = logging.getLogger(__name__)
 
@@ -1029,3 +1030,125 @@ def export_text(job_id):
             "Content-Type": "text/plain; charset=utf-8",
         },
     )
+
+
+# ============================================================================
+# IMPORT CHART — accept user-uploaded PDF/TXT/ChordPro, parse to chord_chart.json
+# ============================================================================
+
+ALLOWED_IMPORT_EXTS = {".pdf", ".txt", ".cho", ".chordpro", ".pro", ".crd"}
+MAX_IMPORT_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
+@chord_sheet_bp.route("/api/import-chart/<job_id>", methods=["POST"])
+@auth_required
+def import_chart(job_id):
+    """Parse a user-uploaded chord chart file and save it as the job's chord_chart.json.
+
+    Per-job scope only: the file is attached to the requesting user's job. No
+    cross-user library, per lawyer call 2026-04-10.
+    """
+    import json
+    import os as _os
+    import tempfile
+    from werkzeug.utils import secure_filename
+
+    if not validate_job_id(job_id):
+        return jsonify({"error": "Invalid job ID"}), 400
+
+    job = get_job(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+
+    user = getattr(g, "current_user", None)
+    if not user:
+        return jsonify({"error": "Authentication required"}), 401
+    uid = str(user.id)
+    if job.user_id is not None and job.user_id != uid:
+        return jsonify({"error": "Forbidden"}), 403
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    f = request.files["file"]
+    if not f or not f.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    name = secure_filename(f.filename)
+    ext = _os.path.splitext(name)[1].lower()
+    if ext not in ALLOWED_IMPORT_EXTS:
+        return jsonify({"error": f"Unsupported file type: {ext or '(none)'}"}), 415
+
+    blob = f.read(MAX_IMPORT_BYTES + 1)
+    if len(blob) > MAX_IMPORT_BYTES:
+        return jsonify({"error": "File too large (max 5 MB)"}), 413
+
+    from processing.chord_chart_import import (
+        parse_chord_chart_text,
+        extract_text_from_pdf,
+    )
+
+    if ext == ".pdf":
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".pdf")
+        try:
+            with _os.fdopen(tmp_fd, "wb") as out:
+                out.write(blob)
+            try:
+                text = extract_text_from_pdf(tmp_path)
+            except Exception as e:
+                logger.exception(f"PDF extract failed for {job_id}: {e}")
+                return jsonify({"error": "Could not read this PDF"}), 422
+        finally:
+            try:
+                _os.unlink(tmp_path)
+            except OSError:
+                pass
+        if not text.strip():
+            return jsonify({
+                "error": (
+                    "Couldn't read enough text from this PDF — even with OCR. "
+                    "Try a clearer scan or paste the chart text directly."
+                )
+            }), 422
+    else:
+        try:
+            text = blob.decode("utf-8")
+        except UnicodeDecodeError:
+            text = blob.decode("utf-8", errors="replace")
+        if not text.strip():
+            return jsonify({"error": "File is empty"}), 422
+
+    chart = parse_chord_chart_text(text, source=ext.lstrip("."))
+    if not chart.get("sections"):
+        return jsonify({
+            "error": (
+                "Could not find any chord/lyric lines in that file. Make sure "
+                "chord lines look like 'Am C D F' or '[Am]when the [C]sun'."
+            )
+        }), 422
+
+    # Fill identity from job metadata when the file didn't carry it
+    meta = getattr(job, "metadata", None) or {}
+    if not chart.get("title"):
+        chart["title"] = meta.get("title") or getattr(job, "filename", "") or ""
+    if not chart.get("artist"):
+        chart["artist"] = meta.get("artist") or ""
+
+    out_dir = OUTPUT_DIR / job_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    chart_path = out_dir / "chord_chart.json"
+
+    # Preserve the auto-detected chart on first import so we can fall back later.
+    auto_path = out_dir / "chord_chart_auto.json"
+    if chart_path.exists() and not auto_path.exists():
+        try:
+            auto_path.write_text(chart_path.read_text())
+        except OSError as e:
+            logger.warning(f"Could not snapshot auto chart for {job_id}: {e}")
+
+    chart_path.write_text(json.dumps(chart, indent=2))
+    logger.info(
+        f"Imported chord chart for {job_id} from {ext} "
+        f"({len(chart['sections'])} sections, {len(chart['chords_used'])} unique chords)"
+    )
+
+    return jsonify({"status": "ok", "chart": chart})

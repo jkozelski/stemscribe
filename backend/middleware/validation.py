@@ -231,13 +231,16 @@ _BETA_CODE_RE = re.compile(r'^[A-Z0-9\-]+$')
 
 def validate_beta_code(code: str) -> tuple:
     """Validate beta code format: alphanumeric + dashes, max 50 chars.
+    All whitespace (including internal) is stripped so "Tom Eden" and
+    "tomeden" both validate as "TOMEDEN".
 
     Returns (sanitized_code: str or None, error_message: str or None).
     """
     if not code or not isinstance(code, str):
         return None, 'Invite code is required'
 
-    code = strip_html_tags(code).strip().upper()
+    # Strip all whitespace (leading, trailing, AND internal) + uppercase
+    code = re.sub(r'\s+', '', strip_html_tags(code)).upper()
 
     if len(code) > 50:
         return None, 'Invalid invite code (too long)'

@@ -4,7 +4,7 @@ Auth decorators for route protection and plan enforcement.
 Usage:
     @api_bp.route('/some-endpoint')
     @jwt_required()            # built-in from flask_jwt_extended
-    @require_plan('premium')   # custom: ensures user is on premium or pro
+    @require_plan('pro')       # custom: ensures user is on pro or higher
     def some_endpoint():
         user = get_current_user()
         ...
@@ -22,8 +22,9 @@ from auth.models import get_user_by_id, get_monthly_usage, get_anonymous_monthly
 logger = logging.getLogger(__name__)
 
 # Plan hierarchy: higher index = more permissions
-PLAN_HIERARCHY = {'free': 0, 'beta': 1, 'premium': 1, 'pro': 2}
+PLAN_HIERARCHY = {'free': 0, 'beta': 2, 'pro': 2, 'lifetime': 3}
 
+# Canonical limits — must match billing/plans.py (single source of truth).
 PLAN_LIMITS = {
     'free': {
         'songs_per_month': 3,
@@ -35,18 +36,18 @@ PLAN_LIMITS = {
         'priority_queue': False,
         'output_quality': '128kbps',
     },
-    'premium': {
-        'songs_per_month': 50,
+    'pro': {
+        'songs_per_month': 30,
         'max_duration_sec': 900,     # 15 minutes
-        'stems': 6,                  # + guitar, piano
+        'stems': 6,
         'chord_analysis': True,
         'midi_export': True,
-        'tab_export': False,
-        'priority_queue': False,
-        'output_quality': '320kbps',
+        'tab_export': True,
+        'priority_queue': True,
+        'output_quality': 'wav',
     },
-    'pro': {
-        'songs_per_month': -1,       # unlimited
+    'lifetime': {
+        'songs_per_month': 50,
         'max_duration_sec': 1800,    # 30 minutes
         'stems': 6,
         'chord_analysis': True,
@@ -55,9 +56,11 @@ PLAN_LIMITS = {
         'priority_queue': True,
         'output_quality': 'wav',
     },
+    # Transition-only: beta-code redeemers get Pro-equivalent access until the
+    # invite gate is fully removed.
     'beta': {
-        'songs_per_month': -1,       # unlimited (same as pro)
-        'max_duration_sec': 1800,    # 30 minutes
+        'songs_per_month': 30,
+        'max_duration_sec': 900,
         'stems': 6,
         'chord_analysis': True,
         'midi_export': True,
@@ -101,8 +104,8 @@ def require_plan(minimum_plan):
     """Decorator: require user to be on at least the given plan.
 
     Usage:
-        @require_plan('premium')
-        def premium_endpoint():
+        @require_plan('pro')
+        def pro_endpoint():
             ...
     """
     def decorator(fn):

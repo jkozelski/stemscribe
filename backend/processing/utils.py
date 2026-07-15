@@ -54,7 +54,7 @@ def convert_wavs_to_mp3(directory: Path) -> dict:
         try:
             _result = subprocess.run([
                 'ffmpeg', '-y', '-i', str(wav_file),
-                '-codec:a', 'libmp3lame', '-b:a', '320k',
+                '-codec:a', 'libmp3lame', '-b:a', '160k',
                 str(mp3_file)
             ], capture_output=True, text=True, timeout=FFMPEG_TIMEOUT)
 

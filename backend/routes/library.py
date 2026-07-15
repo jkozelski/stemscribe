@@ -45,13 +45,24 @@ def _job_belongs_to_user(job, user, session_id):
 
 
 def _thumb_url(raw):
-    """Rewrite a raw thumbnail URL to go through the proxy endpoint.
-    Local paths (starting with /) are returned as-is."""
+    """Rewrite a raw thumbnail URL.
+    - Local paths (starting with /) are returned as-is.
+    - YouTube hosts go through our proxy (hotlink-protection 403 dodge).
+    - Everything else (iTunes / archive.org / CoverArtArchive / Wikimedia) is
+      returned direct — those CDNs serve cross-origin fine and CSP img-src
+      already whitelists them.
+    """
     if not raw:
         return None
     if raw.startswith('/'):
-        return raw  # Local image, serve directly
-    return '/api/thumbnail?url=' + quote(raw, safe='')
+        # Absolute URL: the mobile app loads the library from the app shell,
+        # so a bare local path resolves against the wrong origin (blank art).
+        return 'https://stemscriber.com' + raw
+    from urllib.parse import urlparse
+    host = (urlparse(raw).hostname or '').lower()
+    if host in _ALLOWED_THUMB_HOSTS:
+        return 'https://stemscriber.com/api/thumbnail?url=' + quote(raw, safe='')
+    return raw
 
 
 @library_bp.route('/api/thumbnail', methods=['GET'])
@@ -122,23 +133,28 @@ def get_library():
             pass
 
     show_all = request.args.get('all', '').lower() == 'true' and is_admin
+    hidden_view = request.args.get('hidden', '').lower() == 'true'
+    sort_mode = (request.args.get('sort') or 'recent').lower()
+    if sort_mode not in ('recent', 'az'):
+        sort_mode = 'recent'
 
     library = []
 
     for job_id, job in jobs.items():
-        if job.status != 'completed' or not job.stems:
+        # From-Scratch Sessions (#30) are stem-less by design — keep them.
+        is_session = bool(job.metadata.get('kind') == 'session') if job.metadata else False
+        if job.status != 'completed' or (not job.stems and not is_session):
             continue
 
         # Demo songs are visible to everyone
         is_demo = job.metadata.get('demo', False) if job.metadata else False
 
-        # Determine visibility
+        # Determine visibility. Admin sees only their own library by default;
+        # use ?all=true to see everything across users.
         if is_demo:
             pass  # Demo songs always shown
-        elif is_admin:
-            pass  # Admin always sees everything
         elif show_all:
-            pass  # Explicit all flag
+            pass  # Explicit all flag (admin only)
         elif user:
             # Logged-in user: show only their own jobs
             if not _job_belongs_to_user(job, user, session_id):
@@ -150,7 +166,13 @@ def get_library():
             if job.session_id != session_id:
                 continue
 
+        # Hidden songs live in the Hidden tab only (and vice versa)
+        is_hidden = bool(job.metadata.get('hidden')) if job.metadata else False
+        if hidden_view != is_hidden:
+            continue
+
         library.append({
+            'hidden': is_hidden,
             'job_id': job.job_id,
             'title': job.metadata.get('title', job.filename),
             'artist': job.metadata.get('artist', 'Unknown Artist'),
@@ -161,15 +183,23 @@ def get_library():
             'has_gp': len(job.gp_files) > 0,
             'thumbnail': _thumb_url(job.metadata.get('thumbnail')),
             'demo': is_demo,
+            'kind': job.metadata.get('kind') if job.metadata else None,
             'source_url': job.source_url
         })
 
-    # Sort by created_at descending (newest first)
-    library.sort(key=lambda x: x['created_at'], reverse=True)
+    # Sort: 'recent' = newest first with demos pinned to top.
+    #       'az' = pure alphabetical; demos sort naturally (no pinning — per Jeff,
+    #              he doesn't want his demo "U2 Apple Music" forced to the top).
+    if sort_mode == 'az':
+        library.sort(key=lambda x: (x['title'] or '').lower())
+    else:
+        # Pin demos first, then newest-first for the rest
+        library.sort(key=lambda x: (0 if x['demo'] else 1, -float(x['created_at'] or 0)))
 
     return jsonify({
         'library': library,
-        'total': len(library)
+        'total': len(library),
+        'sort': sort_mode
     })
 
 
@@ -213,6 +243,83 @@ def claim_jobs():
 
     logger.info(f"User {uid} claimed {len(claimed)} jobs")
     return jsonify({'claimed': claimed, 'errors': errors})
+
+
+@library_bp.route('/api/library/<job_id>', methods=['PATCH', 'POST'])
+@auth_required
+def update_library_item(job_id):
+    """Update a library item: hide/unhide, or rename (title/artist).
+
+    Body: any of {"hidden": bool, "title": str, "artist": str}.
+    Renaming clears the cached track_info so the About panel + album art
+    refetch against the corrected name.
+    """
+    if not validate_job_id(job_id):
+        return jsonify({'error': 'Invalid job ID'}), 400
+    job = get_job(job_id)
+    if not job:
+        return jsonify({'error': 'Job not found'}), 404
+
+    user = getattr(g, 'current_user', None)
+    if not _is_admin():
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        session_id = request.cookies.get('session_id')
+        if not _job_belongs_to_user(job, user, session_id) and job.user_id is not None:
+            return jsonify({'error': 'You do not own this song'}), 403
+
+    body = request.get_json(silent=True) or {}
+    if job.metadata is None:
+        job.metadata = {}
+    changed = []
+
+    if 'hidden' in body:
+        job.metadata['hidden'] = bool(body['hidden'])
+        changed.append('hidden')
+
+    renamed = False
+    if isinstance(body.get('title'), str) and body['title'].strip():
+        job.metadata['title'] = body['title'].strip()[:200]
+        changed.append('title')
+        renamed = True
+    if isinstance(body.get('artist'), str) and body['artist'].strip():
+        job.metadata['artist'] = body['artist'].strip()[:120]
+        changed.append('artist')
+        renamed = True
+
+    if renamed:
+        # Stale bio/art belongs to the old (often junk-filename) identity.
+        job.metadata.pop('track_info', None)
+        # Refresh album art against the corrected name (cheap, best-effort).
+        try:
+            import json as _json, urllib.parse as _up, urllib.request as _ur
+            _q = _up.quote(f"{job.metadata.get('artist','')} {job.metadata.get('title','')}".strip())
+            _req = _ur.Request(f"https://itunes.apple.com/search?term={_q}&entity=song&limit=1",
+                               headers={'User-Agent': 'StemScriber/1.0'})
+            with _ur.urlopen(_req, timeout=6) as _r:
+                _d = _json.loads(_r.read().decode())
+            if _d.get('results'):
+                _art = (_d['results'][0].get('artworkUrl100') or '').replace('100x100', '300x300')
+                if _art:
+                    job.metadata['thumbnail'] = _art
+                    changed.append('thumbnail')
+        except Exception as e:
+            logger.debug(f"thumbnail refresh on rename failed: {e}")
+
+    if not changed:
+        return jsonify({'error': 'Nothing to update'}), 400
+
+    try:
+        save_job_to_disk(job)
+    except Exception as e:
+        logger.warning(f"save after library update failed for {job_id}: {e}")
+
+    logger.info(f"Library update {job_id}: {changed} (user {getattr(user, 'id', 'admin')})")
+    return jsonify({'status': 'ok', 'updated': changed,
+                    'title': job.metadata.get('title'),
+                    'artist': job.metadata.get('artist'),
+                    'hidden': bool(job.metadata.get('hidden')),
+                    'thumbnail': _thumb_url(job.metadata.get('thumbnail'))})
 
 
 @library_bp.route('/api/library/<job_id>', methods=['DELETE'])

@@ -5,6 +5,8 @@ Single source of truth for job state, persistence to disk, and the global jobs r
 """
 
 import json
+import os
+import tempfile
 import time
 import logging
 from pathlib import Path
@@ -108,16 +110,45 @@ class ProcessingJob:
 
 # ============ JOB PERSISTENCE ============
 
-def save_job_to_disk(job):
-    """Save job metadata to disk for persistence across server restarts"""
+def _atomic_write_json(target_path: Path, data: dict) -> None:
+    """Write JSON to target_path atomically: write to same-dir tmp file, fsync,
+    then os.replace(). Prevents concurrent readers from seeing a truncated file
+    and prevents corruption on SIGTERM mid-write. target_path's parent dir must
+    exist. Raises on any failure (caller decides to log/swallow)."""
+    tmp_path = None
     try:
-        job_file = OUTPUT_DIR / job.job_id / 'job_metadata.json'
+        with tempfile.NamedTemporaryFile(
+            mode='w',
+            dir=str(target_path.parent),
+            prefix=f'.{target_path.name}.',
+            suffix='.tmp',
+            delete=False,
+        ) as tmpf:
+            json.dump(data, tmpf, indent=2, default=str)
+            tmpf.flush()
+            os.fsync(tmpf.fileno())
+            tmp_path = tmpf.name
+        os.replace(tmp_path, target_path)
+        tmp_path = None  # rename consumed it
+    finally:
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+
+def save_job_to_disk(job):
+    """Save job metadata to disk for persistence across server restarts.
+    Atomic: tmp file + os.replace() so concurrent readers + SIGTERM mid-write
+    can never see a partial file."""
+    try:
+        job_dir = OUTPUT_DIR / job.job_id
+        job_dir.mkdir(parents=True, exist_ok=True)
+        job_file = job_dir / 'job_metadata.json'
         job_data = job.to_dict()
         job_data['saved_at'] = time.time()
-
-        with open(job_file, 'w') as f:
-            json.dump(job_data, f, indent=2, default=str)
-
+        _atomic_write_json(job_file, job_data)
         logger.info(f"Saved job metadata: {job.job_id}")
         return True
     except Exception as e:
@@ -127,15 +158,14 @@ def save_job_to_disk(job):
 
 def save_job_checkpoint(job):
     """Save job state at each stage transition to prevent data loss on crash.
-    Cheaper than save_job_to_disk -- skips log line, tolerates missing output dir."""
+    Cheaper than save_job_to_disk -- skips log line. Atomic via tmp+rename."""
     try:
         job_dir = OUTPUT_DIR / job.job_id
         job_dir.mkdir(parents=True, exist_ok=True)
         job_file = job_dir / 'job_metadata.json'
         job_data = job.to_dict()
         job_data['saved_at'] = time.time()
-        with open(job_file, 'w') as f:
-            json.dump(job_data, f, indent=2, default=str)
+        _atomic_write_json(job_file, job_data)
     except Exception:
         pass  # Non-fatal: best-effort checkpoint
 
@@ -169,7 +199,18 @@ def load_job_from_disk(job_dir: Path):
         job.sub_stems = data.get('sub_stems', {})
         job.selected_skills = data.get('selected_skills', [])
         job.error = data.get('error')
-        job.created_at = data.get('created_at', time.time())
+        # If the saved metadata doesn't carry an explicit created_at, fall back
+        # to the metadata file's mtime rather than time.time(). Defaulting to
+        # NOW makes every server restart reset every old job's timestamp to
+        # the SAME moment — which scrambles the Recent sort (the "Billy Joel
+        # song buried at position 17" bug, 2026-05-30).
+        ca = data.get('created_at')
+        if not ca:
+            try:
+                ca = os.path.getmtime(job_dir / 'job_metadata.json')
+            except Exception:
+                ca = time.time()
+        job.created_at = ca
         job.metadata = data.get('metadata', {})
         job.chord_progression = data.get('chord_progression', [])
         job.detected_key = data.get('detected_key')
@@ -204,6 +245,11 @@ def load_job_from_disk(job_dir: Path):
 def load_all_jobs_from_disk():
     """Load all saved jobs from disk on startup"""
     loaded_count = 0
+    orphaned_count = 0
+    now = time.time()
+    # If a job was 'processing' more than this long ago, the worker thread is
+    # gone (we just rebooted) — mark it failed so it doesn't orphan forever.
+    ORPHAN_THRESHOLD_SECONDS = 30 * 60  # 30 min
 
     if not OUTPUT_DIR.exists():
         return loaded_count
@@ -211,12 +257,41 @@ def load_all_jobs_from_disk():
     for job_dir in OUTPUT_DIR.iterdir():
         if job_dir.is_dir():
             job = load_job_from_disk(job_dir)
-            if job and job.stems:  # Only load jobs with valid stems
+            if not job:
+                continue
+            # Orphan reaper FIRST (before the `if job.stems` filter below).
+            # Jobs that failed during separation have NO stems on disk but
+            # still have status='processing' checkpointed — they would
+            # otherwise sit forever uncaught (queue-monitor would count
+            # them indefinitely). See 2026-05-11 cleanup of 13 such ghosts.
+            if job.status == 'processing':
+                saved_at = getattr(job, 'created_at', now) or now
+                try:
+                    with open(job_dir / 'job_metadata.json') as f:
+                        data = json.load(f)
+                    saved_at = data.get('saved_at', saved_at)
+                except Exception:
+                    pass
+                if now - saved_at > ORPHAN_THRESHOLD_SECONDS:
+                    job.status = 'failed'
+                    job.error = (
+                        'Orphaned: server restarted while this job was processing. '
+                        'Resubmit if you still need this output.'
+                    )
+                    save_job_checkpoint(job)  # atomic write, picks up failed status
+                    orphaned_count += 1
+            is_session = bool((job.metadata or {}).get('kind') == 'session')
+            if job.stems or is_session:  # sessions (#30) have no stems by design
                 jobs[job.job_id] = job
                 loaded_count += 1
 
     if loaded_count > 0:
         logger.info(f"Loaded {loaded_count} jobs from library")
+    if orphaned_count > 0:
+        logger.warning(
+            f"Orphan reaper marked {orphaned_count} stale-processing jobs as failed "
+            f"(threshold {ORPHAN_THRESHOLD_SECONDS}s)"
+        )
 
     return loaded_count
 

@@ -28,6 +28,12 @@ from functools import wraps
 
 from flask import Blueprint, request, jsonify, redirect
 
+# Google returns extra already-granted scopes (openid/email/profile) on top of
+# the requested drive.file when the user is also signed in — oauthlib treats that
+# scope expansion as a fatal error unless we relax it. Must be set before the
+# token exchange runs.
+os.environ.setdefault('OAUTHLIB_RELAX_TOKEN_SCOPE', '1')
+
 try:
     from google_auth_oauthlib.flow import Flow
     from google.oauth2.credentials import Credentials
@@ -56,9 +62,14 @@ def _redirect_uri():
 
 
 def _client_config():
-    """Build the OAuth client_config dict from env vars (no JSON file needed)."""
-    client_id = os.environ.get('GOOGLE_CLIENT_ID')
-    client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+    """Build the OAuth client_config dict from env vars (no JSON file needed).
+
+    Prefers DRIVE_CLIENT_ID/SECRET (dedicated web OAuth client for the Drive
+    flow). Falls back to GOOGLE_CLIENT_ID/SECRET for older deployments where
+    the sign-in client also has the Drive redirect URI registered.
+    """
+    client_id = os.environ.get('DRIVE_CLIENT_ID') or os.environ.get('GOOGLE_CLIENT_ID')
+    client_secret = os.environ.get('DRIVE_CLIENT_SECRET') or os.environ.get('GOOGLE_CLIENT_SECRET')
     if not client_id or not client_secret:
         return None
     return {
@@ -82,7 +93,7 @@ def _env_ok(fn):
             }), 503
         if not _client_config():
             return jsonify({
-                'error': 'Google Drive integration not configured. GOOGLE_CLIENT_SECRET missing.',
+                'error': 'Google Drive integration not configured. DRIVE_CLIENT_ID / DRIVE_CLIENT_SECRET missing.',
             }), 503
         return fn(*a, **kw)
     return wrapper
@@ -164,7 +175,7 @@ def drive_auth():
     if not user:
         return jsonify({'error': 'Authentication required'}), 401
 
-    flow = Flow.from_client_config(_client_config(), scopes=SCOPES, redirect_uri=_redirect_uri())
+    flow = Flow.from_client_config(_client_config(), scopes=SCOPES, redirect_uri=_redirect_uri(), autogenerate_code_verifier=False)
 
     nonce = secrets.token_urlsafe(24)
     state = f"{user.id}:{nonce}"
@@ -212,7 +223,7 @@ def drive_callback():
         return redirect('/app?drive=error&reason=state_mismatch')
 
     try:
-        flow = Flow.from_client_config(_client_config(), scopes=SCOPES, redirect_uri=_redirect_uri())
+        flow = Flow.from_client_config(_client_config(), scopes=SCOPES, redirect_uri=_redirect_uri(), autogenerate_code_verifier=False)
         flow.fetch_token(code=code)
         creds = flow.credentials
 

@@ -403,7 +403,8 @@ def get_tuning_for_instrument(instrument: str) -> Tuple[List[int], int]:
 
 def convert_midi_to_gp(midi_path: str, output_path: str,
                        instrument_type: str = 'guitar',
-                       title: str = None, artist: str = None) -> bool:
+                       title: str = None, artist: str = None,
+                       tempo_override: Optional[int] = None) -> bool:
     """
     Convert a MIDI file to Guitar Pro 5 format.
 
@@ -413,6 +414,10 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
         instrument_type: Type of instrument (guitar, bass, drums, piano, vocals)
         title: Song title (optional)
         artist: Artist name (optional)
+        tempo_override: If provided, overrides the tempo in the MIDI file.
+            Used by convert_job_midis_to_gp to keep all stems on the same tempo
+            (task #43 — per-stem transcribers each ran independent tempo detection,
+            producing .gp files with conflicting tempos for the same song).
 
     Returns:
         True if successful, False otherwise
@@ -435,16 +440,23 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
         song.title = title or Path(midi_path).stem
         song.artist = artist or ''
 
-        # Get tempo from MIDI
-        tempo = 120  # Default
-        for track in midi.tracks:
-            for msg in track:
-                if msg.type == 'set_tempo':
-                    tempo = int(mido.tempo2bpm(msg.tempo))
-                    break
+        # Get tempo — prefer caller's canonical override (task #43) so all stems
+        # for a song agree. Falls back to the per-MIDI set_tempo if no override.
+        if tempo_override is not None and 40 <= tempo_override <= 220:
+            tempo = int(tempo_override)
+            tempo_source = "canonical override"
+        else:
+            tempo = 120  # Default
+            tempo_source = "default"
+            for track in midi.tracks:
+                for msg in track:
+                    if msg.type == 'set_tempo':
+                        tempo = int(mido.tempo2bpm(msg.tempo))
+                        tempo_source = "MIDI set_tempo"
+                        break
 
         song.tempo = tempo
-        logger.info(f"Tempo: {tempo} BPM")
+        logger.info(f"Tempo: {tempo} BPM ({tempo_source})")
 
         # Get tuning for instrument
         tuning_notes, num_strings = get_tuning_for_instrument(instrument_type)
@@ -455,15 +467,26 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
         gp_track.channel.instrument = get_gp_instrument(instrument_type)
         gp_track.isPercussionTrack = 'drum' in instrument_type.lower()
 
+        # Task #42 fix — GP renders drums as guitar tab unless the channel is
+        # explicitly the GM percussion channel (channel 10, zero-indexed as 9).
+        # Without this, isPercussionTrack=True is just a flag with no effect on
+        # rendering — GP falls back to drawing the track as guitar tab.
+        if gp_track.isPercussionTrack:
+            gp_track.channel.channel = 9
+            gp_track.channel.effectChannel = 9
+
         # Clear default measureHeaders and measures - we'll create our own
         song.measureHeaders.clear()
         gp_track.measures.clear()
 
-        # Set up strings/tuning (newer pyguitarpro requires number and value args)
+        # Set up strings/tuning (newer pyguitarpro requires number and value args).
+        # Skip for percussion tracks — drums don't have strings/frets, GP renders
+        # them on a drum staff using the MIDI note number as the kit piece.
         gp_track.strings = []
-        for i, note in enumerate(reversed(tuning_notes)):  # GP uses high-to-low
-            string = guitarpro.models.GuitarString(number=i+1, value=note)
-            gp_track.strings.append(string)
+        if not gp_track.isPercussionTrack:
+            for i, note in enumerate(reversed(tuning_notes)):  # GP uses high-to-low
+                string = guitarpro.models.GuitarString(number=i+1, value=note)
+                gp_track.strings.append(string)
 
         # Collect all notes from MIDI
         notes = []
@@ -589,8 +612,13 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
 
             # Convert MIDI note to fret position
             if is_drum:
-                # Drums: use voice for different drums
-                fret_pos = (1, note_data['midi_note'] % 6)  # Simplified drum mapping
+                # Task #42 fix — proper GM percussion mapping. Track is on channel 9
+                # (GM percussion) so GP uses note.value to identify the drum-kit
+                # piece directly. We pass the MIDI percussion number through.
+                # Falls back to snare (38) for any unmapped piece so they don't drop.
+                drum_midi = note_data['midi_note']
+                mapped = _map_gm_drum(drum_midi)
+                fret_pos = mapped if mapped is not None else (1, 38)
             else:
                 # Use A*-Guitar pre-computed assignment
                 fret_pos = fret_positions[note_idx] if note_idx < len(fret_positions) else None
@@ -702,6 +730,71 @@ def convert_midi_to_gp(midi_path: str, output_path: str,
         return False
 
 
+# Task #42 — GM percussion (MIDI 35-81) to Guitar Pro drum staff position.
+# Returns (string, fret) tuple for use in note.string + note.value. GP renders
+# the drum staff based on the percussion track flag + channel=9, and uses
+# these positions to place the hit on the correct staff line.
+#
+# Pattern: pyguitarpro accepts note.value > 24 on percussion tracks because the
+# string max-fret validation doesn't apply when isPercussionTrack=True.
+# We use string=6 (bottom of staff) as a convention; GP picks the drum-line
+# from note.value alone. Unmapped pieces fall back to snare (38).
+_GM_DRUM_MAP = {
+    # Kick drums
+    35: (6, 35),  # Acoustic Bass Drum
+    36: (6, 36),  # Bass Drum 1
+    # Snares
+    37: (6, 37),  # Side Stick / Rim Shot
+    38: (6, 38),  # Acoustic Snare
+    39: (6, 39),  # Hand Clap
+    40: (6, 40),  # Electric Snare
+    # Toms
+    41: (6, 41),  # Low Floor Tom
+    43: (6, 43),  # High Floor Tom
+    45: (6, 45),  # Low Tom
+    47: (6, 47),  # Low-Mid Tom
+    48: (6, 48),  # Hi-Mid Tom
+    50: (6, 50),  # High Tom
+    # Hi-hats
+    42: (6, 42),  # Closed Hi-Hat
+    44: (6, 44),  # Pedal Hi-Hat
+    46: (6, 46),  # Open Hi-Hat
+    # Cymbals
+    49: (6, 49),  # Crash Cymbal 1
+    51: (6, 51),  # Ride Cymbal 1
+    52: (6, 52),  # Chinese Cymbal
+    53: (6, 53),  # Ride Bell
+    55: (6, 55),  # Splash Cymbal
+    57: (6, 57),  # Crash Cymbal 2
+    59: (6, 59),  # Ride Cymbal 2
+    # Latin / aux percussion (less common but worth supporting)
+    54: (6, 54),  # Tambourine
+    56: (6, 56),  # Cowbell
+    58: (6, 58),  # Vibraslap
+    60: (6, 60),  # High Bongo
+    61: (6, 61),  # Low Bongo
+    62: (6, 62),  # Mute High Conga
+    63: (6, 63),  # Open High Conga
+    64: (6, 64),  # Low Conga
+    65: (6, 65),  # High Timbale
+    66: (6, 66),  # Low Timbale
+    67: (6, 67),  # High Agogo
+    68: (6, 68),  # Low Agogo
+    69: (6, 69),  # Cabasa
+    70: (6, 70),  # Maracas
+    75: (6, 75),  # Claves
+    76: (6, 76),  # High Wood Block
+    77: (6, 77),  # Low Wood Block
+    80: (6, 80),  # Mute Triangle
+    81: (6, 81),  # Open Triangle
+}
+
+
+def _map_gm_drum(midi_note: int):
+    """Map a General MIDI percussion note (35-81) to a GP (string, fret) tuple."""
+    return _GM_DRUM_MAP.get(midi_note)
+
+
 def get_gp_instrument(instrument_type: str) -> int:
     """Get Guitar Pro instrument number for instrument type"""
     instrument_type = instrument_type.lower()
@@ -738,6 +831,21 @@ def convert_job_midis_to_gp(job, output_dir: Path) -> Dict[str, str]:
     title = job.metadata.get('title', 'Untitled')
     artist = job.metadata.get('artist', '')
 
+    # Task #43 — pull the canonical tempo computed by processing/tempo_beats.py
+    # once for the whole song, then pass to every per-stem .gp5 write. Without
+    # this, each stem's MIDI carries the tempo its transcriber detected and the
+    # four .gp files for one song end up disagreeing (75 / 120 / 151 / 161 BPM
+    # for the same track was the user-reported symptom).
+    canonical_tempo = None
+    grid = job.metadata.get('grid') or {}
+    if isinstance(grid, dict):
+        bpm = grid.get('tempo_bpm')
+        if isinstance(bpm, (int, float)) and 40 <= bpm <= 220:
+            canonical_tempo = int(round(bpm))
+            logger.info(f"convert_job_midis_to_gp: using canonical tempo {canonical_tempo} BPM for all stems")
+    if canonical_tempo is None:
+        logger.warning("convert_job_midis_to_gp: no canonical tempo in job metadata, each stem will use its own MIDI tempo")
+
     for stem_name, midi_path in job.midi_files.items():
         # Determine instrument type from stem name
         instrument_type = stem_name.lower().split('_')[0]  # guitar_left -> guitar
@@ -754,7 +862,8 @@ def convert_job_midis_to_gp(job, output_dir: Path) -> Dict[str, str]:
             output_path=str(gp_path),
             instrument_type=instrument_type,
             title=f"{title} - {stem_name.replace('_', ' ').title()}",
-            artist=artist
+            artist=artist,
+            tempo_override=canonical_tempo
         ):
             gp_files[stem_name] = str(gp_path)
         else:

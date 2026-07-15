@@ -258,6 +258,20 @@ ALBUM_DATABASE = {
 # ============================================================================
 
 LOCAL_KNOWLEDGE = {
+    'kozelski': {
+        'bio': 'Kozelski is the solo project of Jeff Kozelski, a Charleston, SC songwriter, guitarist, and singer the Charleston City Paper called a "music scene stalwart." After years in the jam-rock band King Hippo and the indie outfit The Outervention, he stepped out solo with the 2018 debut LP "Systematic Static" — funky guitar riffage, weary vocals, and lush, occasionally lysergic arrangements blurring blissed-out pop-rock with guitar-driven Americana. His latest LP, "Collector," was recorded at Fairweather Studios in Charleston with Wes Powers, Alan Brisendine, and Jon Moore. He is part of the Charleston collective Tidepool Artists.',
+        'wikipedia_url': None,
+        'website_url': 'https://www.kozelski.com/kozelski/',
+        'members': {
+            'jeff kozelski': 'Guitar, vocals, songwriting — wrote, sang, and played most of the records himself.',
+            'wes powers': 'Drums (Sol Driven Train).',
+            'alan brisendine': 'Keyboards (The Outervention).',
+            'jon moore': 'Bass.',
+        },
+        'learning_tips': 'Guitar-forward indie/Americana — start with the rhythm guitar and vocal, then layer in the lead lines. Lush arrangements built on simple, singable chord changes.',
+        'style': 'Indie rock / guitar-driven Americana',
+        'common_keys': ['G', 'D', 'A', 'C', 'E'],
+    },
     'grateful dead': {
         'bio': "The Grateful Dead were an American rock band formed in 1965 in Palo Alto, California. Known for their unique blend of rock, folk, country, jazz, bluegrass, blues, and psychedelic music, they became icons of the counterculture movement.",
         'wikipedia_url': 'https://en.wikipedia.org/wiki/Grateful_Dead',
@@ -661,6 +675,57 @@ def get_grateful_dead_era(year: int) -> Optional[Dict[str, Any]]:
     return None
 
 
+def _mb_recording_score(title: str, artist: str) -> int:
+    """Top MusicBrainz recording-match score (0-100) for `title` performed by
+    `artist`. Used to disambiguate 'A - B' filenames. Returns 0 on any failure."""
+    if not title or not artist:
+        return 0
+    try:
+        query = f'recording:"{title}" AND artist:"{artist}"'
+        url = f"{MUSICBRAINZ_API}recording/?query={urllib.parse.quote(query)}&fmt=json&limit=1"
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'StemScriber/1.0 (jkozelski@gmail.com)'
+        })
+        with urllib.request.urlopen(req, timeout=4) as response:
+            data = json.loads(response.read().decode('utf-8'))
+        recs = data.get('recordings', [])
+        return int(recs[0].get('score', 0)) if recs else 0
+    except Exception as e:
+        logger.debug(f"MB recording score failed for '{title}'/'{artist}': {e}")
+        return 0
+
+
+def _resolve_dash_order(a: str, b: str) -> Optional[str]:
+    """
+    'A - B' is ambiguous — could be 'Artist - Song' OR 'Song - Artist' (e.g.
+    'Stage Fright - The Band'). Blindly taking the first half as the artist was
+    showing wildly wrong bios (it looked up the SONG title as a band name). Ask
+    MusicBrainz which arrangement is a real recording and treat that half as the
+    artist. If neither is a confident match, return None so we show a neutral
+    message rather than a confidently-wrong artist.
+    """
+    a, b = (a or '').strip(), (b or '').strip()
+    if not a or not b:
+        return a or b or None
+    # Fast path: a known artist on either side wins with no network call.
+    for known in LOCAL_KNOWLEDGE:
+        if a.lower() == known or (len(known) >= 6 and known in a.lower()):
+            return a
+        if b.lower() == known or (len(known) >= 6 and known in b.lower()):
+            return b
+    import time
+    s_a_is_artist = _mb_recording_score(title=b, artist=a)   # a=artist, b=song
+    time.sleep(1.0)                                           # MusicBrainz rate limit (~1 req/s)
+    s_b_is_artist = _mb_recording_score(title=a, artist=b)   # b=artist, a=song
+    logger.info(f"  dash-order '{a}' - '{b}': a-as-artist={s_a_is_artist} b-as-artist={s_b_is_artist}")
+    if s_b_is_artist >= 90 and s_b_is_artist > s_a_is_artist:
+        return b
+    if s_a_is_artist >= 90 and s_a_is_artist >= s_b_is_artist:
+        return a
+    # Neither arrangement confidently matches a real recording → don't fabricate.
+    return None
+
+
 def extract_artist_from_title(title: str) -> Optional[str]:
     """
     Try to extract artist name from a track title.
@@ -670,15 +735,13 @@ def extract_artist_from_title(title: str) -> Optional[str]:
 
     title = title.strip()
 
-    # Pattern: "Artist - Song"
+    # Pattern: "A - B" / "A – B" — ambiguous order, resolve via MusicBrainz.
     if ' - ' in title:
-        parts = title.split(' - ', 1)
-        return parts[0].strip()
-
-    # Pattern: "Artist – Song" (en-dash)
+        a, b = title.split(' - ', 1)
+        return _resolve_dash_order(a, b)
     if ' – ' in title:
-        parts = title.split(' – ', 1)
-        return parts[0].strip()
+        a, b = title.split(' – ', 1)
+        return _resolve_dash_order(a, b)
 
     # Pattern: "Song by Artist"
     if ' by ' in title.lower():

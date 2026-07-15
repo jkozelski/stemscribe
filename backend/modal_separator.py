@@ -144,12 +144,12 @@ def separate_stems_gpu(audio_bytes: bytes, filename: str = "input.mp3", split_vo
         if stem_name == "vocals":
             vocals_wav_path = p
 
-        # Convert WAV to MP3 320kbps for transfer efficiency
+        # Convert WAV to MP3 160kbps for transfer efficiency
         mp3_path = p.with_suffix(".mp3")
         subprocess.run(
             [
                 "ffmpeg", "-y", "-i", str(p),
-                "-codec:a", "libmp3lame", "-b:a", "320k",
+                "-codec:a", "libmp3lame", "-b:a", "160k",
                 str(mp3_path),
             ],
             capture_output=True,
@@ -239,7 +239,7 @@ def separate_stems_gpu(audio_bytes: bytes, filename: str = "input.mp3", split_vo
                     subprocess.run(
                         [
                             "ffmpeg", "-y", "-i", str(wav_path),
-                            "-codec:a", "libmp3lame", "-b:a", "320k",
+                            "-codec:a", "libmp3lame", "-b:a", "160k",
                             str(mp3_out),
                         ],
                         capture_output=True,

@@ -15,7 +15,7 @@ from flask import Blueprint, request, jsonify, g
 
 from auth.middleware import auth_required
 from auth.models import update_user_plan
-from middleware.validation import validate_beta_code, sanitize_text
+from middleware.validation import validate_beta_code as _validate_beta_code, sanitize_text
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ def redeem_beta_code():
     """
     data = request.get_json(silent=True) or {}
 
-    code, code_error = validate_beta_code(data.get('code', ''))
+    code, code_error = _validate_beta_code(data.get('code', ''))
     if code_error:
         return jsonify({'error': code_error}), 400
 
@@ -116,17 +116,34 @@ def redeem_beta_code():
 
     code_data = codes[code]
 
+    # Named codes (assigned_to set) grant LIFETIME plan — these are Jeff's friend comps.
+    # Generic codes (musician-friends, universal-demo) grant the beta plan.
+    granted_plan = 'lifetime' if code_data.get('assigned_to') else 'beta'
+
     if code_data['redeemed']:
-        # Allow re-use — beta codes are for friends, not strangers
-        # Still update user plan if authenticated
+        # One-time use enforcement: only the original redeemer can "re-redeem"
+        # (e.g., re-click the button on the same account). Anyone else gets rejected.
+        # Exception: the universal-demo code TEARITAPART stays shareable.
+        is_original_redeemer = (
+            g.current_user
+            and code_data.get('user_id') == str(g.current_user.id)
+        )
+        is_universal_demo = code_data.get('label') == 'universal-demo'
+        if not (is_original_redeemer or is_universal_demo):
+            logger.info(f"Code {code} re-use REJECTED — already claimed by {code_data.get('user_id', '?')}")
+            return jsonify({
+                'error': 'This code has already been claimed.',
+                'already_redeemed': True,
+            }), 410
+        # Original redeemer re-visiting — idempotently re-apply their plan
         if g.current_user:
-            update_user_plan(str(g.current_user.id), 'beta')
-            logger.info(f"Beta plan applied to user {g.current_user.id} (re-redeemed code {code})")
+            update_user_plan(str(g.current_user.id), granted_plan)
+            logger.info(f"{granted_plan} plan re-applied to original redeemer {g.current_user.id} (code {code})")
         return jsonify({
             'valid': True,
             'already_redeemed': True,
-            'message': 'Welcome back! This code was already activated.',
-            'plan': 'beta',
+            'message': "You're already in — enjoy!",
+            'plan': granted_plan,
             'features': _beta_features(),
             'plan_updated': g.current_user is not None,
         })
@@ -139,17 +156,17 @@ def redeem_beta_code():
     # Link to user account if authenticated
     if g.current_user:
         code_data['user_id'] = str(g.current_user.id)
-        update_user_plan(str(g.current_user.id), 'beta')
-        logger.info(f"Beta code redeemed: {code} by user {g.current_user.id}")
+        update_user_plan(str(g.current_user.id), granted_plan)
+        logger.info(f"Code redeemed: {code} → {granted_plan} plan for user {g.current_user.id}")
     else:
-        logger.info(f"Beta code redeemed: {code} by {code_data['redeemed_by']} (anonymous)")
+        logger.info(f"Code redeemed: {code} by {code_data['redeemed_by']} (anonymous, plan would be {granted_plan})")
 
     _save_codes(codes)
 
     return jsonify({
         'valid': True,
-        'message': 'Welcome to StemScriber Beta!',
-        'plan': 'beta',
+        'message': "You're in — enjoy!" if granted_plan == 'lifetime' else 'Welcome to StemScriber Beta!',
+        'plan': granted_plan,
         'features': _beta_features(),
         'plan_updated': g.current_user is not None,
     })
@@ -162,7 +179,7 @@ def validate_beta_code():
 
     Query param: code
     """
-    code, code_error = validate_beta_code(request.args.get('code', ''))
+    code, code_error = _validate_beta_code(request.args.get('code', ''))
     if code_error:
         return jsonify({'valid': False}), 400
 

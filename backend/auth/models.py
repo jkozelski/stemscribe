@@ -23,7 +23,8 @@ class User:
         'id', 'email', 'password_hash', 'display_name', 'plan',
         'stripe_customer_id', 'stripe_subscription_id',
         'payment_failed_at', 'created_at', 'updated_at',
-        'google_id', 'avatar_url',
+        'google_id', 'apple_id', 'avatar_url',
+        'extras_balance', 'extras_last_purchase_at',
     )
 
     def __init__(self, row: dict):
@@ -39,6 +40,7 @@ class User:
             'plan': self.plan,
             'stripe_customer_id': self.stripe_customer_id,
             'avatar_url': self.avatar_url,
+            'extras_balance': int(self.extras_balance or 0),
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
@@ -104,6 +106,51 @@ def update_user_plan(user_id: str, plan: str, stripe_customer_id: str = None,
         (plan, stripe_customer_id, stripe_subscription_id, user_id),
     )
     logger.info(f"Updated user {user_id} to plan={plan}")
+
+
+def set_user_plan(user_id: str, plan: str):
+    """Set ONLY the plan column, leaving stripe_* IDs untouched.
+
+    Used by the RevenueCat (Apple IAP) webhook: Apple purchases have no Stripe
+    customer/subscription IDs, so we must not null out a user's existing Stripe
+    linkage when their plan is set via Apple. Plan is unified across both stores.
+    """
+    execute(
+        "UPDATE users SET plan = %s, updated_at = NOW() WHERE id = %s",
+        (plan, user_id),
+    )
+    logger.info(f"Set user {user_id} plan={plan} (plan-only, RevenueCat)")
+
+
+def update_user_extras_balance(user_id: str, new_balance: int):
+    """Set the user's extras_balance to an absolute value (used by the
+    rate-limit decrement path when a song consumes one extra credit)."""
+    execute(
+        "UPDATE users SET extras_balance = %s, updated_at = NOW() WHERE id = %s",
+        (max(0, int(new_balance)), user_id),
+    )
+
+
+def increment_user_extras_balance(user_id: str, delta: int) -> int:
+    """Atomically add `delta` to extras_balance (called by the Stripe
+    overage-pack webhook). Returns the new balance.
+
+    Using SQL +%s rather than read-modify-write so concurrent webhook
+    retries can't double-credit OR drop credits."""
+    row = execute_returning(
+        """
+        UPDATE users
+        SET extras_balance = COALESCE(extras_balance, 0) + %s,
+            extras_last_purchase_at = NOW(),
+            updated_at = NOW()
+        WHERE id = %s
+        RETURNING extras_balance
+        """,
+        (int(delta), user_id),
+    )
+    new_balance = int(row['extras_balance']) if row else 0
+    logger.info(f"User {user_id} extras_balance += {delta} → {new_balance}")
+    return new_balance
 
 
 def update_user_password(user_id: str, new_password: str):
@@ -210,3 +257,58 @@ def link_google_account(user_id: str, google_id: str, avatar_url: str = None):
         (google_id, avatar_url, user_id),
     )
     logger.info(f"Linked Google account to user {user_id}")
+
+
+def create_email_user(email: str, display_name: str = None) -> User:
+    """Create a new passwordless user (magic-link sign-in). No password_hash,
+    no google_id — the only auth handle is the email + magic-link token in
+    their inbox. password_hash is nullable since migration 002."""
+    existing = get_user_by_email(email)
+    if existing:
+        raise ValueError("An account with this email already exists")
+
+    row = execute_returning(
+        """
+        INSERT INTO users (email, display_name)
+        VALUES (%s, %s)
+        RETURNING *
+        """,
+        (email.lower().strip(), display_name),
+    )
+    logger.info(f"Created passwordless user {row['id']} ({email})")
+    return User(row)
+
+
+# ---- Sign in with Apple helpers (added 2026-06-06 pre-launch sprint) -------
+
+def get_user_by_apple_id(apple_id: str) -> User | None:
+    """Look up a user by their Apple `sub` identifier (stable across sign-ins)."""
+    row = query_one("SELECT * FROM users WHERE apple_id = %s", (apple_id,))
+    return User(row) if row else None
+
+
+def link_apple_account(user_id: str, apple_id: str):
+    """Attach an Apple identity to an existing user account."""
+    execute(
+        "UPDATE users SET apple_id = %s, updated_at = NOW() WHERE id = %s",
+        (apple_id, user_id),
+    )
+    logger.info(f"Linked Apple {apple_id[:8]}... to user {user_id}")
+
+
+def create_apple_user(email: str, apple_id: str, display_name: str = None) -> User:
+    """Create a new passwordless user from Apple. `password_hash` stays null."""
+    existing = get_user_by_email(email)
+    if existing:
+        link_apple_account(str(existing.id), apple_id)
+        return get_user_by_id(str(existing.id))
+    row = execute_returning(
+        """
+        INSERT INTO users (email, display_name, apple_id)
+        VALUES (%s, %s, %s)
+        RETURNING *
+        """,
+        (email.lower().strip(), display_name, apple_id),
+    )
+    logger.info(f"Created Apple user {row['id']} ({email})")
+    return User(row)

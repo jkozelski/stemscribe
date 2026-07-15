@@ -235,3 +235,54 @@ def test_merge_leaves_different_names_alone():
     merged = _merge_adjacent_sections_with_same_name(sections)
     assert len(merged) == 3
     assert [s.name for s in merged] == ["Verse 1", "Chorus", "Verse 2"]
+
+
+# -- Fix 4 (2026-05-22): lyric-chord alignment — chord sits over the word being
+# sung at the chord change, or the next word, never a word that already ended.
+
+from backend.chart_formatter import _place_chords_on_words
+
+
+def test_chord_aligns_to_next_word_not_finished_word():
+    """The 'chord over the wrong word' bug: a chord change in the gap after a
+    word ends must land on the NEXT word sung, not the temporally-closer word
+    that already finished."""
+    words = [
+        {"word": "I",     "start": 8.0,  "end": 8.3},
+        {"word": "still", "start": 8.5,  "end": 9.0},
+        {"word": "love",  "start": 9.7,  "end": 9.95},
+        {"word": "you",   "start": 10.5, "end": 11.0},
+    ]
+    # G changes at 10.0 — "love" ended at 9.95, "you" starts at 10.5.
+    chords = [{"chord": "C", "time": 8.0, "duration": 2.0},
+              {"chord": "G", "time": 10.0, "duration": 2.0}]
+    positions = _place_chords_on_words(chords, words, "I still love you")
+    g_pos = [p for p, ch in positions if ch == "G"][0]
+    # char positions: I=0, still=2, love=8, you=13
+    assert g_pos >= 13, f"G should sit over 'you' (char 13+), landed at {g_pos}"
+
+
+def test_chord_aligns_to_word_being_held():
+    """A chord change mid-word sits over the word being held."""
+    words = [{"word": "hold", "start": 5.0, "end": 7.0},
+             {"word": "on",   "start": 7.5, "end": 8.0}]
+    chords = [{"chord": "Am", "time": 6.0, "duration": 2.0}]  # inside 'hold'
+    positions = _place_chords_on_words(chords, words, "hold on")
+    assert positions[0][0] == 0, "chord should sit over 'hold'"
+
+
+def test_chord_after_all_words_pins_to_last():
+    """A chord landing after every lyric pins to the last word, not index 0."""
+    words = [{"word": "hold", "start": 5.0, "end": 7.0},
+             {"word": "on",   "start": 7.5, "end": 8.0}]
+    chords = [{"chord": "F", "time": 99.0, "duration": 2.0}]
+    positions = _place_chords_on_words(chords, words, "hold on")
+    assert positions[0][0] >= 5, "chord should pin to last word 'on'"
+
+
+def test_missing_word_end_falls_back_to_start():
+    """Word dicts without an 'end' key (older timestamp format) still work."""
+    words = [{"word": "test", "start": 3.0}]  # no 'end'
+    chords = [{"chord": "D", "time": 3.0, "duration": 1.0}]
+    positions = _place_chords_on_words(chords, words, "test")
+    assert positions[0][1] == "D"
