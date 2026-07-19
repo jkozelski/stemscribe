@@ -100,6 +100,7 @@ SONGSTERR_LIMIT = "30 per minute"     # /api/songsterr/*
 LIBRARY_LIMIT = "60 per minute"       # /api/library
 BETA_LIMIT = "10 per minute"          # /api/beta/*
 SMS_LIMIT = "10 per minute"           # /api/sms/*
+FEEDBACK_LIMIT = "20 per minute"      # /api/feedback/* — public correction writes
 
 def init_limiter(app):
     """Attach Flask-Limiter to the Flask app.

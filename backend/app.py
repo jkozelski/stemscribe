@@ -172,6 +172,7 @@ def create_app():
         from middleware.rate_limit import (
             init_limiter, limiter,
             UPLOAD_LIMIT, SONGSTERR_LIMIT, LIBRARY_LIMIT, BETA_LIMIT, SMS_LIMIT,
+            FEEDBACK_LIMIT,
         )
         init_limiter(app)
         _rate_limiter_ready = True
@@ -296,6 +297,11 @@ def create_app():
             for ep_name, fn in app.view_functions.items():
                 if ep_name.startswith('sms.'):
                     limiter.limit(SMS_LIMIT)(fn)
+
+            # Feedback (chord/lyrics corrections): 20/min — public writes, bound abuse
+            for ep_name, fn in app.view_functions.items():
+                if ep_name.startswith('feedback.'):
+                    limiter.limit(FEEDBACK_LIMIT)(fn)
 
             logger.info("Endpoint-specific rate limits applied (upload=5/min, songsterr=30/min, library=60/min, beta=10/min, sms=10/min)")
         except Exception as e:

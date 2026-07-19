@@ -11,9 +11,10 @@ import time
 import logging
 import threading
 from pathlib import Path
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 
 from middleware.validation import validate_job_id, sanitize_text
+from auth.middleware import auth_required, _ADMIN_EMAILS
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,38 @@ feedback_bp = Blueprint("feedback", __name__)
 
 FEEDBACK_FILE = Path(__file__).parent.parent / 'feedback_data.json'
 _lock = threading.Lock()
+MAX_CORRECTIONS = 5000  # per category — bound the store so writes can't grow the file without limit
+
+# ---- Per-IP write throttle (self-contained; the app-wide limiter is inert here) ----
+from collections import deque
+_RATE_MAX = 20          # writes allowed per IP...
+_RATE_WINDOW = 60.0     # ...per this many seconds
+_rate_hits = {}         # ip -> deque[timestamps]
+_rate_lock = threading.Lock()
+
+
+def _client_ip():
+    return (request.headers.get('CF-Connecting-IP', '').strip()
+            or request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+            or request.remote_addr or 'unknown')
+
+
+def _rate_ok():
+    """True if this IP is under the write limit; records the hit if so."""
+    ip = _client_ip()
+    now = time.time()
+    with _rate_lock:
+        dq = _rate_hits.setdefault(ip, deque())
+        while dq and now - dq[0] > _RATE_WINDOW:
+            dq.popleft()
+        if len(dq) >= _RATE_MAX:
+            return False
+        dq.append(now)
+        if len(_rate_hits) > 10000:  # bound memory: drop idle IPs
+            for k in [k for k, v in list(_rate_hits.items())
+                      if not v or now - v[-1] > _RATE_WINDOW]:
+                _rate_hits.pop(k, None)
+        return True
 
 
 def _load_feedback():
@@ -46,7 +79,10 @@ def _append_correction(category, entry):
     """Thread-safe append of a correction entry."""
     with _lock:
         data = _load_feedback()
-        data.setdefault(category, []).append(entry)
+        bucket = data.setdefault(category, [])
+        bucket.append(entry)
+        if len(bucket) > MAX_CORRECTIONS:
+            del bucket[:len(bucket) - MAX_CORRECTIONS]  # drop oldest first
         _save_feedback(data)
 
 
@@ -63,6 +99,8 @@ def chord_correction():
         position        — time position in seconds
         context         — optional surrounding context (e.g. nearby chords)
     """
+    if not _rate_ok():
+        return jsonify({'error': 'Too many corrections — slow down and try again shortly.'}), 429
     body = request.get_json(silent=True)
     if not body:
         return jsonify({'error': 'JSON body required'}), 400
@@ -119,6 +157,8 @@ def lyrics_correction():
         corrected_line — user's fix
         line_index     — line number in the lyrics
     """
+    if not _rate_ok():
+        return jsonify({'error': 'Too many corrections — slow down and try again shortly.'}), 429
     body = request.get_json(silent=True)
     if not body:
         return jsonify({'error': 'JSON body required'}), 400
@@ -159,13 +199,18 @@ def lyrics_correction():
 # ---- List corrections ----
 
 @feedback_bp.route('/api/feedback/corrections', methods=['GET'])
+@auth_required(optional=True)
 def list_corrections():
-    """Return all collected corrections.
+    """Return all collected corrections. ADMIN ONLY — the raw store exposes
+    every user's song titles and job ids, so anonymous access is forbidden.
 
     Query params:
         type — 'chord', 'lyrics', or omit for all
         job_id — filter by job
     """
+    user = getattr(g, 'current_user', None)
+    if not (user and getattr(user, 'email', None) in _ADMIN_EMAILS):
+        return jsonify({'error': 'Forbidden'}), 403
     data = _load_feedback()
     correction_type = request.args.get('type')
     job_id = request.args.get('job_id')
