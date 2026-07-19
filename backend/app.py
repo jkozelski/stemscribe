@@ -239,9 +239,11 @@ def create_app():
         # Apply rate limiting to auth endpoints (brute-force protection)
         try:
             from middleware.rate_limit import limiter, AUTH_LIMIT
-            limiter.limit(AUTH_LIMIT)(app.view_functions.get('auth.login', lambda: None))
-            limiter.limit(AUTH_LIMIT)(app.view_functions.get('auth.register', lambda: None))
-            limiter.limit(AUTH_LIMIT)(app.view_functions.get('auth.forgot_password', lambda: None))
+            # limiter-fix: reassign wrapped view fn so the limit actually enforces
+            for _ep in ('auth.login', 'auth.register', 'auth.forgot_password'):
+                _fn = app.view_functions.get(_ep)
+                if _fn:
+                    app.view_functions[_ep] = limiter.limit(AUTH_LIMIT)(_fn)
             logger.info("Auth blueprint registered with rate limiting (/auth/*)")
         except Exception:
             logger.info("Auth blueprint registered (/auth/*)")
@@ -276,34 +278,30 @@ def create_app():
             for ep in ('api.upload_audio', 'api.process_url_endpoint'):
                 fn = app.view_functions.get(ep)
                 if fn:
-                    limiter.limit(UPLOAD_LIMIT)(fn)
+                    app.view_functions[ep] = limiter.limit(UPLOAD_LIMIT)(fn)
 
             # Songsterr: 30/min
-            for ep_name, fn in app.view_functions.items():
-                if ep_name.startswith('songsterr.'):
-                    limiter.limit(SONGSTERR_LIMIT)(fn)
+            for ep_name in [n for n in list(app.view_functions) if n.startswith('songsterr.')]:
+                app.view_functions[ep_name] = limiter.limit(SONGSTERR_LIMIT)(app.view_functions[ep_name])
 
             # Library: 60/min
             fn = app.view_functions.get('library.get_library')
             if fn:
-                limiter.limit(LIBRARY_LIMIT)(fn)
+                app.view_functions['library.get_library'] = limiter.limit(LIBRARY_LIMIT)(fn)
 
             # Beta endpoints: 10/min
-            for ep_name, fn in app.view_functions.items():
-                if ep_name.startswith('beta.'):
-                    limiter.limit(BETA_LIMIT)(fn)
+            for ep_name in [n for n in list(app.view_functions) if n.startswith('beta.')]:
+                app.view_functions[ep_name] = limiter.limit(BETA_LIMIT)(app.view_functions[ep_name])
 
             # SMS endpoints: 10/min
-            for ep_name, fn in app.view_functions.items():
-                if ep_name.startswith('sms.'):
-                    limiter.limit(SMS_LIMIT)(fn)
+            for ep_name in [n for n in list(app.view_functions) if n.startswith('sms.')]:
+                app.view_functions[ep_name] = limiter.limit(SMS_LIMIT)(app.view_functions[ep_name])
 
             # Feedback (chord/lyrics corrections): 20/min — public writes, bound abuse
-            for ep_name, fn in app.view_functions.items():
-                if ep_name.startswith('feedback.'):
-                    limiter.limit(FEEDBACK_LIMIT)(fn)
+            for ep_name in [n for n in list(app.view_functions) if n.startswith('feedback.')]:
+                app.view_functions[ep_name] = limiter.limit(FEEDBACK_LIMIT)(app.view_functions[ep_name])
 
-            logger.info("Endpoint-specific rate limits applied (upload=5/min, songsterr=30/min, library=60/min, beta=10/min, sms=10/min)")
+            logger.info("Endpoint-specific rate limits applied + ENFORCING (auth=5, upload=5, songsterr=30, library=60, beta=10, sms=10, feedback=20 /min)")
         except Exception as e:
             logger.warning(f"Failed to apply endpoint rate limits: {e}")
 
