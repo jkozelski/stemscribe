@@ -339,3 +339,19 @@ def billing_status():
         result['subscription'] = None
 
     return jsonify(result)
+
+
+@billing_bp.route('/lifetime-seats', methods=['GET'])
+def lifetime_seats():
+    """Public seat availability for the Lifetime Founder cap. Added 2026-07-19 so
+    the in-app (StoreKit) paywall can refuse seat #101+ — the web checkout already
+    enforces this server-side, but StoreKit purchases had no gate (RISK-18)."""
+    from billing.plans import LIFETIME_FOUNDER_CAP
+    from db import query_one
+    try:
+        row = query_one("SELECT COUNT(*) AS n FROM users WHERE plan = 'lifetime'")
+        taken = (row or {}).get('n', 0) if isinstance(row, dict) else (row[0] if row else 0)
+    except Exception as e:
+        logger.warning(f"lifetime-seats count failed: {e}")
+        taken = 0
+    return jsonify({'cap': LIFETIME_FOUNDER_CAP, 'taken': int(taken), 'available': int(taken) < LIFETIME_FOUNDER_CAP})
