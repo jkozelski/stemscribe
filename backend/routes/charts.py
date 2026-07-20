@@ -90,6 +90,73 @@ def get_chart(chart_id):
     return jsonify(out)
 
 
+@charts_bp.route('/api/charts', methods=['POST'])
+@auth_required
+def create_chart():
+    """Owner adds a chart to their own library (binder Import button).
+
+    Same privacy rule as everything here: the chart is visible only to its
+    owner. Accepts {title, artist?, song_key?, body}.
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    data = request.get_json(silent=True) or {}
+    title = (data.get('title') or '').strip()
+    body = data.get('body')
+    if not title or len(title) > 200:
+        return jsonify({'error': 'title required (max 200 chars)'}), 400
+    if not isinstance(body, str) or not body.strip():
+        return jsonify({'error': 'body required'}), 400
+    if len(body) > 100_000:
+        return jsonify({'error': 'body too large'}), 413
+    artist = (data.get('artist') or '').strip()[:200]
+    song_key = (data.get('song_key') or '').strip()[:20]
+
+    from db import get_db
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO chart_library (user_id, title, artist, song_key, body, source, source_file) "
+                "VALUES (%s, %s, %s, %s, %s, 'binder-import', %s) RETURNING id",
+                (str(user.id), title, artist, song_key, body,
+                 (data.get('source_file') or 'binder-import')[:255]),
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+    logger.info('binder-import: user %s added chart %s (%s)', user.id, new_id, title[:60])
+    return jsonify({'id': new_id, 'title': title, 'artist': artist, 'song_key': song_key}), 201
+
+
+@charts_bp.route('/api/charts/<int:chart_id>/delete', methods=['POST'])
+@charts_bp.route('/api/charts/<int:chart_id>', methods=['DELETE'])
+@auth_required
+def delete_chart(chart_id):
+    """Owner removes a chart from their own library (binder cleanup).
+
+    Hard delete, owner-scoped. Edit history rows keep their chart_id for the
+    community data bank trail; originals live in the OnSong export archives.
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    from db import get_db
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM chart_library WHERE id = %s AND user_id = %s RETURNING id",
+                (chart_id, str(user.id)),
+            )
+            gone = cur.fetchone()
+            conn.commit()
+    if not gone:
+        return jsonify({'error': 'Chart not found'}), 404
+    logger.info('binder-delete: user %s removed chart %s', user.id, chart_id)
+    return jsonify({'deleted': chart_id})
+
+
 @charts_bp.route('/api/charts/<int:chart_id>', methods=['PATCH'])
 @auth_required
 def update_chart(chart_id):
