@@ -113,6 +113,11 @@ def create_chart():
         return jsonify({'error': 'body too large'}), 413
     artist = (data.get('artist') or '').strip()[:200]
     song_key = (data.get('song_key') or '').strip()[:20]
+    if data.get('guess_meta') and not artist:
+        guess = _guess_chart_meta(data.get('source_file') or title, body)
+        if guess:
+            title = guess['title'] or title
+            artist = guess['artist'] or artist
 
     from db import get_db
     with get_db() as conn:
@@ -127,6 +132,58 @@ def create_chart():
             conn.commit()
     logger.info('binder-import: user %s added chart %s (%s)', user.id, new_id, title[:60])
     return jsonify({'id': new_id, 'title': title, 'artist': artist, 'song_key': song_key}), 201
+
+
+JUNK_WORDS = ('official', 'audio', 'video', 'lyrics', 'chords', 'chart',
+              'tab', 'tabs', 'sheet', 'live', 'hd', 'hq', 'copy', 'final')
+
+
+def _tidy_title(raw):
+    """Filename -> presentable title: strip junk words, title-case."""
+    import re as _re
+    t = _re.sub(r'[_]+', ' ', (raw or '').strip())
+    words = [w for w in t.split() if w.lower().strip('()[]') not in JUNK_WORDS]
+    t = ' '.join(words) or t
+    # Title-case words that are all-lower; leave existing caps (AC/DC) alone
+    t = ' '.join(w.capitalize() if w.islower() else w for w in t.split())
+    return t[:200]
+
+
+def _guess_chart_meta(filename, body_head):
+    """Ask a small Claude model for proper title/artist. Returns dict or None.
+
+    Same infra as the section labeler; fails soft to filename heuristics.
+    Kept cheap: haiku, ~100 output tokens, first 25 lines only.
+    """
+    import os, json as _json
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    if not api_key:
+        return None
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+        resp = client.messages.create(
+            model='claude-haiku-4-5-20251001',
+            max_tokens=120,
+            system='You identify songs from chord-chart files. Reply with ONLY a JSON object '
+                   '{"title": str, "artist": str}. Proper capitalization. Strip junk words like '
+                   '"official"/"chords"/"lyrics" from titles. If you recognize the song, fill in the '
+                   'artist (e.g. "aja" is by Steely Dan). If you are NOT confident of the artist, '
+                   'use "" — never guess wildly.',
+            messages=[{'role': 'user', 'content':
+                'Filename: ' + filename + chr(10) + 'First lines of the chart:' + chr(10) + body_head[:1500]}],
+        )
+        txt = ''.join(b.text for b in resp.content if getattr(b, 'type', '') == 'text').strip()
+        start, end = txt.find('{'), txt.rfind('}')
+        if start >= 0 and end > start:
+            data = _json.loads(txt[start:end + 1])
+            title = (data.get('title') or '').strip()[:200]
+            artist = (data.get('artist') or '').strip()[:200]
+            if title:
+                return {'title': title, 'artist': artist}
+    except Exception as e:
+        logger.warning('chart meta guess failed for %s: %s', filename, e)
+    return None
 
 
 @charts_bp.route('/api/charts/import-pdf', methods=['POST'])
@@ -178,10 +235,15 @@ def import_chart_pdf():
             return jsonify({'error': 'No text found — even with OCR. Is the scan legible?'}), 422
 
     base = f.filename.rsplit('.', 1)[0]
-    title, artist = base.strip(), ''
+    title, artist = _tidy_title(base), ''
     if ' - ' in base:
-        artist, title = base.split(' - ', 1)
-        artist, title = artist.strip(), title.strip()
+        a, t = base.split(' - ', 1)
+        artist, title = _tidy_title(a), _tidy_title(t)
+    else:
+        guess = _guess_chart_meta(f.filename, body)
+        if guess:
+            title = guess['title']
+            artist = guess['artist'] or artist
     title = (request.form.get('title') or title or 'Imported chart')[:200]
     artist = (request.form.get('artist') or artist)[:200]
 
