@@ -160,7 +160,22 @@ def import_chart_pdf():
         logger.warning('binder pdf import failed for %s: %s', f.filename, e)
         return jsonify({'error': 'Could not read that PDF'}), 422
     if not body:
-        return jsonify({'error': 'No text found in that PDF (is it a scan? Scans need OCR)'}), 422
+        # Scanned PDF (no text layer): OCR it with Tesseract. Free, local,
+        # nothing leaves the box. preserve_interline_spaces keeps the
+        # chords-over-lyrics column alignment as close as OCR can manage.
+        try:
+            from pdf2image import convert_from_bytes
+            import pytesseract
+            images = convert_from_bytes(blob, dpi=250, first_page=1, last_page=5)
+            ocr_pages = []
+            for img in images:
+                txt = pytesseract.image_to_string(img, config='--psm 6 -c preserve_interword_spaces=1')
+                ocr_pages.append(txt or '')
+            body = chr(10).join(ocr_pages).strip()
+        except Exception as e:
+            logger.warning('binder pdf OCR failed for %s: %s', f.filename, e)
+        if not body:
+            return jsonify({'error': 'No text found — even with OCR. Is the scan legible?'}), 422
 
     base = f.filename.rsplit('.', 1)[0]
     title, artist = base.strip(), ''
@@ -182,6 +197,62 @@ def import_chart_pdf():
             conn.commit()
     logger.info('binder-pdf-import: user %s added chart %s (%s)', user.id, new_id, title[:60])
     return jsonify({'id': new_id, 'title': title, 'artist': artist}), 201
+
+
+@charts_bp.route('/api/charts/<int:chart_id>/rename', methods=['POST'])
+@auth_required
+def rename_chart(chart_id):
+    """Owner renames a chart (title/artist). Binder right-click > Rename."""
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    data = request.get_json(silent=True) or {}
+    title = (data.get('title') or '').strip()[:200]
+    artist = (data.get('artist') if data.get('artist') is not None else None)
+    if not title:
+        return jsonify({'error': 'title required'}), 400
+    from db import get_db
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            if artist is None:
+                cur.execute(
+                    "UPDATE chart_library SET title = %s, updated_at = NOW() "
+                    "WHERE id = %s AND user_id = %s RETURNING id",
+                    (title, chart_id, str(user.id)))
+            else:
+                cur.execute(
+                    "UPDATE chart_library SET title = %s, artist = %s, updated_at = NOW() "
+                    "WHERE id = %s AND user_id = %s RETURNING id",
+                    (title, str(artist).strip()[:200], chart_id, str(user.id)))
+            hit = cur.fetchone()
+            conn.commit()
+    if not hit:
+        return jsonify({'error': 'Chart not found'}), 404
+    return jsonify({'renamed': chart_id})
+
+
+@charts_bp.route('/api/charts/rename-artist', methods=['POST'])
+@auth_required
+def rename_artist():
+    """Owner renames a band across all their charts. Binder right-click on a band."""
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+    data = request.get_json(silent=True) or {}
+    src = (data.get('from') or '').strip()
+    dst = (data.get('to') or '').strip()[:200]
+    if not src or not dst:
+        return jsonify({'error': 'from and to required'}), 400
+    from db import get_db
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE chart_library SET artist = %s, updated_at = NOW() "
+                "WHERE user_id = %s AND artist = %s",
+                (dst, str(user.id), src))
+            n = cur.rowcount
+            conn.commit()
+    return jsonify({'renamed': n})
 
 
 @charts_bp.route('/api/charts/<int:chart_id>/delete', methods=['POST'])
