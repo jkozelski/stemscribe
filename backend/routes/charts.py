@@ -129,6 +129,61 @@ def create_chart():
     return jsonify({'id': new_id, 'title': title, 'artist': artist, 'song_key': song_key}), 201
 
 
+@charts_bp.route('/api/charts/import-pdf', methods=['POST'])
+@auth_required
+def import_chart_pdf():
+    """Binder PDF import: extract layout-preserving text, save as a chart.
+
+    pdfplumber layout mode keeps horizontal spacing, so chords stay roughly
+    aligned over their lyrics. Owner-scoped like everything in this file.
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    f = request.files.get('file')
+    if not f or not f.filename:
+        return jsonify({'error': 'file required'}), 400
+    blob = f.read()
+    if len(blob) > 8_000_000:
+        return jsonify({'error': 'PDF too large (8 MB max)'}), 413
+
+    import io
+    try:
+        import pdfplumber
+        pages = []
+        with pdfplumber.open(io.BytesIO(blob)) as pdf:
+            for page in pdf.pages[:20]:
+                pages.append(page.extract_text(layout=True) or '')
+        body = chr(10).join(pages).strip()
+    except Exception as e:
+        logger.warning('binder pdf import failed for %s: %s', f.filename, e)
+        return jsonify({'error': 'Could not read that PDF'}), 422
+    if not body:
+        return jsonify({'error': 'No text found in that PDF (is it a scan? Scans need OCR)'}), 422
+
+    base = f.filename.rsplit('.', 1)[0]
+    title, artist = base.strip(), ''
+    if ' - ' in base:
+        artist, title = base.split(' - ', 1)
+        artist, title = artist.strip(), title.strip()
+    title = (request.form.get('title') or title or 'Imported chart')[:200]
+    artist = (request.form.get('artist') or artist)[:200]
+
+    from db import get_db
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO chart_library (user_id, title, artist, song_key, body, source, source_file) "
+                "VALUES (%s, %s, %s, %s, %s, 'binder-import-pdf', %s) RETURNING id",
+                (str(user.id), title, artist, '', body[:100_000], f.filename[:255]),
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+    logger.info('binder-pdf-import: user %s added chart %s (%s)', user.id, new_id, title[:60])
+    return jsonify({'id': new_id, 'title': title, 'artist': artist}), 201
+
+
 @charts_bp.route('/api/charts/<int:chart_id>/delete', methods=['POST'])
 @charts_bp.route('/api/charts/<int:chart_id>', methods=['DELETE'])
 @auth_required
