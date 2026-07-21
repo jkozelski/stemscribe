@@ -261,6 +261,57 @@ def import_chart_pdf():
     return jsonify({'id': new_id, 'title': title, 'artist': artist}), 201
 
 
+@charts_bp.route('/api/charts/<int:chart_id>/share-to-user', methods=['POST'])
+@auth_required
+def share_chart_to_user(chart_id):
+    """Share one of my charts with another StemScriber user, in-app.
+
+    Copies the chart body into the recipient's own chart_library so it shows up
+    in their binder. Stays inside the app (no public link) — consistent with the
+    lyrics/copyright wall. Charts are unlimited/free to share (chords are facts);
+    the recipient just gets their own editable copy.
+    """
+    user = getattr(g, 'current_user', None)
+    if not user:
+        return jsonify({'error': 'Authentication required'}), 401
+
+    data = request.get_json(silent=True) or {}
+    to_email = (data.get('to') or data.get('email') or '').strip().lower()
+    if not to_email or '@' not in to_email:
+        return jsonify({'error': 'recipient email required'}), 400
+
+    from auth.models import get_user_by_email
+    recipient = get_user_by_email(to_email)
+    if not recipient:
+        return jsonify({'error': 'No StemScriber user with that email. They need an account first.'}), 404
+    if str(recipient.id) == str(user.id):
+        return jsonify({'error': "That's your own account."}), 400
+
+    row = query_one(
+        "SELECT title, artist, song_key, body FROM chart_library WHERE id = %s AND user_id = %s",
+        (chart_id, str(user.id)),
+    )
+    if not row:
+        return jsonify({'error': 'Chart not found'}), 404
+
+    sharer_name = (getattr(user, 'display_name', None) or user.email or 'a StemScriber user')
+    from db import get_db
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO chart_library (user_id, title, artist, song_key, body, source, source_file) "
+                "VALUES (%s, %s, %s, %s, %s, 'shared-in-app', %s) RETURNING id",
+                (str(recipient.id), row['title'], row['artist'], row['song_key'], row['body'],
+                 ('shared by ' + sharer_name)[:255]),
+            )
+            new_id = cur.fetchone()[0]
+            conn.commit()
+    logger.info('chart-share: user %s shared chart %s -> user %s (new %s)',
+                user.id, chart_id, recipient.id, new_id)
+    return jsonify({'shared': True, 'to': to_email,
+                    'recipient_name': getattr(recipient, 'display_name', None) or to_email})
+
+
 @charts_bp.route('/api/charts/<int:chart_id>/rename', methods=['POST'])
 @auth_required
 def rename_chart(chart_id):
