@@ -13,6 +13,7 @@ Key improvements:
 import os
 import re
 import subprocess
+import sys
 import threading
 import logging
 import time
@@ -154,6 +155,7 @@ class DemucsRunner:
         """Extract meaningful error message from stderr, ignoring progress output."""
         lines = stderr_text.split('\n')
         error_lines = []
+        real_lines = []
 
         for line in lines:
             line = line.strip()
@@ -168,12 +170,20 @@ class DemucsRunner:
             if 'seconds/s' in line or 'it/s' in line:
                 continue
 
+            real_lines.append(line)
+
             # Collect actual error content
             if self._is_actual_error(line) or (error_lines and line):
                 error_lines.append(line)
 
         if error_lines:
             return '\n'.join(error_lines[:10])  # Limit to first 10 lines
+
+        # Nothing matched ERROR_PATTERNS but the process still failed. Return the
+        # tail of real output so the cause isn't lost. An interpreter-level failure
+        # like "No module named demucs" matches none of the patterns.
+        if real_lines:
+            return '\n'.join(real_lines[-5:])
         return None
 
     def separate(self,
@@ -195,8 +205,10 @@ class DemucsRunner:
         self._cancelled = False
 
         # Build command
+        # Use sys.executable, not 'python3'. On the server the venv isn't on PATH,
+        # so a bare 'python3' finds the system interpreter, which has no demucs.
         cmd = [
-            'python3', '-m', 'demucs',
+            sys.executable, '-m', 'demucs',
             '--out', str(output_dir),
             '-n', self.model,
         ]
