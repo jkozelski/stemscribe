@@ -39,7 +39,7 @@ from auth.models import (
 from auth.email import send_reset_email, verify_reset_token
 from auth.magic_link import send_magic_link, consume_magic_link, consume_magic_code
 from auth.decorators import get_plan_limits
-from db import execute, query_one
+from db import execute, query_one, query_all
 
 import os
 
@@ -51,11 +51,75 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # ---- Helper ----
 
+# Max concurrently signed-in devices per account (2026-07-24 sharing
+# deterrent: phone app + three others). <=0 disables enforcement.
+DEVICE_SESSION_CAP = int(os.environ.get('DEVICE_SESSION_CAP', 4))
+
+
+def _enforce_device_cap(user_id):
+    """Evict least-recently-used sessions beyond the cap by blacklisting
+    their tokens. The existing per-request blocklist check does the rest:
+    evicted devices get 401 within one access-token lifetime (15 min)."""
+    stale = query_all(
+        """SELECT id, refresh_jti, access_jti FROM user_sessions
+           WHERE user_id = %s ORDER BY last_seen_at DESC OFFSET %s""",
+        (user_id, DEVICE_SESSION_CAP),
+    )
+    for s in stale:
+        execute(
+            "INSERT INTO token_blacklist (jti, expires_at) VALUES (%s, NOW() + INTERVAL '31 days') "
+            "ON CONFLICT DO NOTHING",
+            (s['refresh_jti'],),
+        )
+        if s.get('access_jti'):
+            execute(
+                "INSERT INTO token_blacklist (jti, expires_at) VALUES (%s, NOW() + INTERVAL '1 hour') "
+                "ON CONFLICT DO NOTHING",
+                (s['access_jti'],),
+            )
+        execute("DELETE FROM user_sessions WHERE id = %s", (s['id'],))
+    if stale:
+        logger.info('device-cap: user %s over %d sessions; evicted %d LRU device(s)',
+                    user_id, DEVICE_SESSION_CAP, len(stale))
+
+
+def _register_device_session(user_id, access_token, refresh_token):
+    """Record this sign-in as a device session, then enforce the cap.
+    device_id comes from the client when provided (localStorage UUID);
+    falls back to a user-agent hash. Never raises — sign-in must succeed
+    even if session bookkeeping fails."""
+    if DEVICE_SESSION_CAP <= 0:
+        return
+    try:
+        from flask_jwt_extended import decode_token
+        import hashlib
+        ua = (request.headers.get('User-Agent') or 'unknown')[:400]
+        body = request.get_json(silent=True) or {}
+        device_id = (str(body.get('device_id') or '').strip()[:64]
+                     or 'ua-' + hashlib.sha256(ua.encode()).hexdigest()[:16])
+        access_jti = decode_token(access_token)['jti']
+        refresh_jti = decode_token(refresh_token)['jti']
+        execute(
+            """INSERT INTO user_sessions (user_id, device_id, refresh_jti, access_jti, user_agent)
+               VALUES (%s, %s, %s, %s, %s)
+               ON CONFLICT (user_id, device_id)
+               DO UPDATE SET refresh_jti = EXCLUDED.refresh_jti,
+                             access_jti = EXCLUDED.access_jti,
+                             user_agent = EXCLUDED.user_agent,
+                             last_seen_at = NOW()""",
+            (user_id, device_id, refresh_jti, access_jti, ua),
+        )
+        _enforce_device_cap(user_id)
+    except Exception:
+        logger.exception('device-session bookkeeping failed (auth unaffected)')
+
+
 def _issue_tokens(user):
     """Create access + refresh tokens for a user, return response dict."""
     identity = str(user.id)
     access_token = create_access_token(identity=identity)
     refresh_token = create_refresh_token(identity=identity)
+    _register_device_session(identity, access_token, refresh_token)
     return {
         'access_token': access_token,
         'refresh_token': refresh_token,
@@ -80,6 +144,34 @@ def refresh():
         return jsonify({'error': 'User not found'}), 404
 
     access_token = create_access_token(identity=identity)
+    # Keep the device-session row current so LRU eviction targets truly idle
+    # devices. Grandfathers pre-feature sign-ins by creating their row here.
+    try:
+        from flask_jwt_extended import decode_token
+        import hashlib
+        _rjti = get_jwt()['jti']
+        _najti = decode_token(access_token)['jti']
+        _hit = query_one("SELECT id FROM user_sessions WHERE refresh_jti = %s", (_rjti,))
+        if _hit:
+            execute(
+                "UPDATE user_sessions SET access_jti = %s, last_seen_at = NOW() WHERE refresh_jti = %s",
+                (_najti, _rjti),
+            )
+        elif DEVICE_SESSION_CAP > 0:
+            _ua = (request.headers.get('User-Agent') or 'unknown')[:400]
+            _dev = 'ua-' + hashlib.sha256(_ua.encode()).hexdigest()[:16]
+            execute(
+                """INSERT INTO user_sessions (user_id, device_id, refresh_jti, access_jti, user_agent)
+                   VALUES (%s, %s, %s, %s, %s)
+                   ON CONFLICT (user_id, device_id)
+                   DO UPDATE SET refresh_jti = EXCLUDED.refresh_jti,
+                                 access_jti = EXCLUDED.access_jti,
+                                 last_seen_at = NOW()""",
+                (identity, _dev, _rjti, _najti, _ua),
+            )
+            _enforce_device_cap(identity)
+    except Exception:
+        logger.exception('device-session refresh bookkeeping failed (auth unaffected)')
     return jsonify({
         'access_token': access_token,
         'user': user.to_dict(),

@@ -37,7 +37,12 @@ logger = logging.getLogger(__name__)
 # Cap of 4 leaves CPX41 with ~2 vCPU per active job — enough headroom that
 # basic_pitch and music21 finish inside watchdog timeouts. Slot 5+ shows
 # "Queued for processing" and waits without burning compute or stalling.
-_POST_SEPARATION_MAX_CONCURRENT = 4
+#
+# 2026-07-21: prod is now ccx13 (7.6 GB RAM, NOT CPX41's 16 GB). Cap 4 let ~4
+# memory-heavy jobs (~4 GB each) run at once -> OOM-killer crashed the worker
+# mid-job (7 kills in 2 days), orphaning jobs at ~80%. Lowered to 2 so peak
+# stays ~8 GB, covered by RAM + the new 8 GB swap. Minor throughput trade.
+_POST_SEPARATION_MAX_CONCURRENT = 4  # 7/23: raised 2->4 on ccx23 (16GB/4vCPU). MIDI step is single-threaded (~1 core/job), so 4 jobs on 4 cores run full-speed in parallel; ~12GB peak fits 16GB+swap. Doubles throughput ~15->30 songs/hr.
 _post_separation_semaphore = threading.Semaphore(_POST_SEPARATION_MAX_CONCURRENT)
 
 # ============ CONDITIONAL IMPORTS (single source of truth: dependencies.py) ============
@@ -643,7 +648,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
         # frozen bar for minutes, then a leap to 100 (Jeff's "stuck at 80%").
         job.progress = max(job.progress or 0, 80)
         save_job_checkpoint(job)
-        midi_success = transcribe_to_midi(job)
+        midi_success = transcribe_to_midi(job) if gp_tabs else False  # 2026-07-23: MIDI/tabs opt-in (off by default); skips the slow ~4min step. Core=stems+chart.
         job.progress = max(job.progress or 0, 92)
         # 7/4 (#40): auto album art — file uploads and archive tracks arrive
         # artless; look the cover up by artist+title (iTunes catalog, same
@@ -684,7 +689,7 @@ def process_audio(job: ProcessingJob, audio_path: Path, enhance_stems: bool = Fa
                 logger.info(f"✓ MusicXML conversion succeeded for {len(job.musicxml_files)} stems")
 
             # Step 4: Convert MIDI to Guitar Pro for tablature (optional)
-            if gp_tabs and GP_CONVERTER_AVAILABLE:
+            if False and GP_CONVERTER_AVAILABLE:  # 2026-07-23: Guitar Pro tab generation removed (quality poor). MIDI still generated when toggled on.
                 job.stage = 'Creating Guitar Pro tabs'
                 job.progress = 97
                 try:

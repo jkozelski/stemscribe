@@ -146,7 +146,7 @@ def upload_audio():
     # Check for processing options
     enhance_stems = request.form.get('enhance_stems', 'false').lower() == 'true'
     stereo_split = request.form.get('stereo_split', 'false').lower() == 'true'
-    gp_tabs = request.form.get('gp_tabs', 'true').lower() == 'true'
+    gp_tabs = request.form.get('gp_tabs', 'false').lower() == 'true'  # 2026-07-23: MIDI/tabs OFF by default (opt-in)
     chord_detection = request.form.get('chord_detection', 'true').lower() == 'true'
     mdx_model = request.form.get('mdx_model', 'false').lower() == 'true'
     ensemble_mode = request.form.get('ensemble', 'false').lower() == 'true'
@@ -203,6 +203,41 @@ def upload_audio():
             job.metadata['duration'] = int(tag.duration)
     except Exception:
         pass  # ID3 tags not available
+
+    # ── Embedded cover art wins over the pipeline's iTunes title-match lookup,
+    # which returns wrong art for indie tracks. Setting metadata['thumbnail']
+    # here makes pipeline.py skip its auto-lookup (guarded by `if not thumbnail`). ──
+    try:
+        from mutagen import File as _MFile
+        import base64 as _b64, io as _io
+        _mf = _MFile(str(audio_path))
+        _img = None
+        if _mf is not None:
+            _tags = getattr(_mf, 'tags', None)
+            if _tags:
+                for _k in list(_tags.keys()):
+                    if _k.startswith('APIC'):
+                        _img = _tags[_k].data
+                        break
+                if _img is None and 'covr' in _tags:
+                    _img = bytes(_tags['covr'][0])
+            if _img is None and getattr(_mf, 'pictures', None):
+                _img = _mf.pictures[0].data
+        if _img:
+            try:
+                from PIL import Image as _Img
+                _im = _Img.open(_io.BytesIO(_img)).convert('RGB')
+                _im.thumbnail((400, 400))
+                _b = _io.BytesIO()
+                _im.save(_b, 'JPEG', quality=82)
+                _img = _b.getvalue()
+            except Exception:
+                pass  # fall back to raw embedded bytes if PIL fails
+            job.metadata['thumbnail'] = 'data:image/jpeg;base64,' + _b64.b64encode(_img).decode('ascii')
+            job.metadata['cover_source'] = 'embedded'
+            logger.info('✓ using embedded cover art from upload')
+    except Exception as _e:
+        logger.info(f'embedded cover art extraction skipped: {_e}')
 
     # Fallback: parse filename if no ID3 title found
     if not job.metadata.get('title'):

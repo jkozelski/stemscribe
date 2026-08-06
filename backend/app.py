@@ -66,13 +66,13 @@ def create_app():
         response.headers['Permissions-Policy'] = 'camera=(), microphone=(self), geolocation=()'
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com gleitz.github.io accounts.google.com plausible.io appleid.cdn-apple.com appleid.apple.com static.cloudflareinsights.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com unpkg.com gleitz.github.io accounts.google.com plausible.io appleid.cdn-apple.com appleid.apple.com static.cloudflareinsights.com connect.facebook.net; "
             "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com cdnjs.cloudflare.com accounts.google.com; "
             "font-src 'self' fonts.gstatic.com cdn.jsdelivr.net cdnjs.cloudflare.com; "
-            "img-src 'self' data: blob: *.googleusercontent.com *.ytimg.com i.scdn.co *.mzstatic.com *.dzcdn.net *.archive.org archive.org coverartarchive.org *.coverartarchive.org upload.wikimedia.org; "
+            "img-src 'self' data: blob: *.googleusercontent.com *.ytimg.com i.scdn.co *.mzstatic.com *.dzcdn.net *.archive.org archive.org coverartarchive.org *.coverartarchive.org upload.wikimedia.org www.facebook.com connect.facebook.net; "
             "media-src 'self' blob: data:; "
-            "connect-src 'self' accounts.google.com plausible.io gleitz.github.io appleid.apple.com cloudflareinsights.com; "
-            "frame-src 'self' accounts.google.com appleid.apple.com; form-action 'self' appleid.apple.com; "
+            "connect-src 'self' accounts.google.com plausible.io gleitz.github.io appleid.apple.com cloudflareinsights.com www.facebook.com connect.facebook.net; "
+            "frame-src 'self' accounts.google.com appleid.apple.com; form-action 'self' appleid.apple.com https://stemscriber.beehiiv.com; "
             "worker-src 'self' blob: cdn.jsdelivr.net; "
         )
         return response
@@ -200,6 +200,8 @@ def create_app():
     from routes.support import support_bp
     from routes.feedback import feedback_bp
     from routes.accuracy import accuracy_bp
+    from routes.share import share_bp
+    from routes.binder import binder_bp
     from routes.jazz_chords import jazz_bp
     from chord_lookup import chord_library_bp
     from routes.waitlist import waitlist_bp
@@ -226,6 +228,8 @@ def create_app():
     app.register_blueprint(support_bp)
     app.register_blueprint(feedback_bp)
     app.register_blueprint(accuracy_bp)
+    app.register_blueprint(share_bp)
+    app.register_blueprint(binder_bp)
     app.register_blueprint(jazz_bp)
     app.register_blueprint(chord_library_bp)
     app.register_blueprint(waitlist_bp)

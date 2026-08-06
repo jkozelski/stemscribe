@@ -55,7 +55,7 @@ SECTION_GAP_THRESHOLD = 4.0
 # this only fires for run-ons with no clear pause, and even then we split at the
 # widest internal gap — never at an arbitrary word count (which chopped phrases
 # mid-sentence, e.g. "...real | close").
-MAX_WORDS_PER_LINE = 24
+MAX_WORDS_PER_LINE = 24  # restored 7/23: reverted a hasty 24->10 that fought conventions §4 (break at sung PAUSE, not an arbitrary word cap). Cap is a rare safety net only.
 
 # Minimum words per lyric line (prevents tiny fragments — but set low to respect natural phrasing)
 MIN_WORDS_PER_LINE = 2
